@@ -259,6 +259,17 @@ export const markMessageRead = async (id) => {
   return supabase.from('messages').update({ read: true }).eq('id', id)
 }
 
+// ── CHAT REALTIME ──────────────────────────────────────────────
+export const subscribeChatSessions = (onUpdate) => {
+  if (!supabase) return () => {}
+  const channel = supabase
+    .channel('chat-realtime')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_sessions' },
+      payload => onUpdate(payload))
+    .subscribe()
+  return () => supabase.removeChannel(channel)
+}
+
 // ── CHAT SESSIONS ─────────────────────────────────────────────
 export const fetchChatSessions = async () => {
   if (!supabase) return { data: null, error: 'offline' }

@@ -48,8 +48,6 @@ export default function App() {
 
   const [compareList, setCompareList] = useState([]);
   const [chatOpen, setChatOpen] = useState(false);
-  const [chatVisitor, setChatVisitor] = useState(null);
-  const [visitorMessages, setVisitorMessages] = useState([]);
 
   const t = (obj) => (obj && (obj[lang] || obj['th'])) || '';
 
@@ -162,12 +160,7 @@ export default function App() {
 
       <Footer lang={lang} t={t} navigate={navigate} settings={settings} />
       <SocialBar settings={settings} />
-      <ChatWidget
-        lang={lang} t={t}
-        open={chatOpen} setOpen={setChatOpen}
-        visitor={chatVisitor} setVisitor={setChatVisitor}
-        messages={visitorMessages} setMessages={setVisitorMessages}
-      />
+      <ChatWidget lang={lang} open={chatOpen} setOpen={setChatOpen} />
       {compareList.length >= 2 && (
         <CompareBar compareList={compareList} setCompareList={setCompareList} tours={tours} t={t} navigate={navigate} />
       )}
