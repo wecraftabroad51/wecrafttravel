@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { LogOut, LayoutDashboard, Globe, Tag, Star, FileText, HelpCircle,
-  MessageSquare, Mail, Settings, Plane, Check, X, Eye, Trash2, Plus, Edit2 } from 'lucide-react';
+  MessageSquare, Mail, Settings, Plane, Check, X, Eye, Trash2, Plus, Edit2, Upload } from 'lucide-react';
 import {
   upsertTour, deleteTour, toggleTourFeatured, toggleTourActive,
   upsertArticle, deleteArticle,
@@ -11,6 +11,9 @@ import {
   markMessageRead,
   updateSettings,
 } from '../../lib/db.js';
+import {
+  TOURS_DATA, ARTICLES_DATA, PROMOTIONS_DATA, FAQS_DATA, REVIEWS_DATA
+} from '../../data.js';
 
 const MENU = [
   { key: 'dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
@@ -151,7 +154,7 @@ export default function AdminPanel(props) {
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">
-          {section === 'dashboard'  && <DashboardSection tours={tours} articles={articles} bookings={bookings} messages={messages} reviews={reviews} chatSessions={chatSessions} />}
+          {section === 'dashboard'  && <DashboardSection tours={tours} articles={articles} bookings={bookings} messages={messages} reviews={reviews} chatSessions={chatSessions} setTours={setTours} setArticles={setArticles} setPromotions={setPromotions} setFaqs={setFaqs} setReviews={setReviews} />}
           {section === 'tours'      && <ToursSection tours={tours} setTours={setTours} t={t} />}
           {section === 'promotions' && <PromotionsSection promotions={promotions} setPromotions={setPromotions} t={t} />}
           {section === 'reviews'    && <ReviewsSection reviews={reviews} setReviews={setReviews} tours={tours} t={t} />}
@@ -168,18 +171,71 @@ export default function AdminPanel(props) {
 }
 
 // ===== DASHBOARD =====
-function DashboardSection({ tours, articles, bookings, messages, reviews, chatSessions }) {
+function DashboardSection({ tours, articles, bookings, messages, reviews, chatSessions, setTours, setArticles, setPromotions, setFaqs, setReviews }) {
+  const [seeding, setSeeding] = useState(false);
+  const [seedDone, setSeedDone] = useState(false);
+
+  const handleSeed = async () => {
+    if (!confirm('นำเข้าข้อมูลตัวอย่างทั้งหมด (ทัวร์, บทความ, FAQ, โปรโมชั่น) เข้า Supabase?\n\nข้อมูลเดิมที่มีอยู่จะไม่ถูกลบครับ')) return;
+    setSeeding(true);
+    try {
+      // Seed tours
+      const tourResults = await Promise.all(
+        TOURS_DATA.map(tour => upsertTour({ ...tour, id: undefined }))
+      );
+      const newTours = tourResults.map(r => r.data).filter(Boolean);
+      if (newTours.length) setTours(newTours);
+
+      // Seed articles
+      const articleResults = await Promise.all(
+        ARTICLES_DATA.map(a => upsertArticle({ ...a, id: undefined }))
+      );
+      const newArticles = articleResults.map(r => r.data).filter(Boolean);
+      if (newArticles.length) setArticles(newArticles);
+
+      // Seed faqs
+      const faqResults = await Promise.all(
+        FAQS_DATA.map(f => upsertFaq({ ...f, id: undefined }))
+      );
+      const newFaqs = faqResults.map(r => r.data).filter(Boolean);
+      if (newFaqs.length) setFaqs(newFaqs);
+
+      setSeedDone(true);
+      alert(`✅ นำเข้าสำเร็จ!\n- ทัวร์: ${newTours.length} รายการ\n- บทความ: ${newArticles.length} รายการ\n- FAQ: ${newFaqs.length} รายการ`);
+    } catch (e) {
+      alert('เกิดข้อผิดพลาด: ' + e.message);
+    }
+    setSeeding(false);
+  };
+
   const stats = [
-    { label: 'ทัวร์ทั้งหมด',  value: tours.length,                                    color: 'bg-teal-500' },
-    { label: 'การจอง',         value: bookings.length,                                 color: 'bg-blue-500' },
-    { label: 'บทความ',         value: articles.length,                                 color: 'bg-purple-500' },
-    { label: 'รีวิวรอ',        value: reviews.filter(r => !r.approved).length,         color: 'bg-amber-500' },
-    { label: 'ข้อความใหม่',    value: messages.filter(m => !m.read).length,            color: 'bg-red-500' },
+    { label: 'ทัวร์ทั้งหมด',  value: tours.length,                                        color: 'bg-teal-500' },
+    { label: 'การจอง',         value: bookings.length,                                     color: 'bg-blue-500' },
+    { label: 'บทความ',         value: articles.length,                                     color: 'bg-purple-500' },
+    { label: 'รีวิวรอ',        value: reviews.filter(r => !r.approved).length,             color: 'bg-amber-500' },
+    { label: 'ข้อความใหม่',    value: messages.filter(m => !m.read).length,                color: 'bg-red-500' },
     { label: 'แชทแอคทีฟ',     value: chatSessions.filter(s => s.status === 'open').length, color: 'bg-green-500' },
   ];
+
   return (
     <div>
-      <h2 className="text-2xl font-bold text-slate-800 mb-6">Dashboard</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-slate-800">Dashboard</h2>
+        {!seedDone && (
+          <button onClick={handleSeed} disabled={seeding}
+            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors">
+            <Upload className="w-4 h-4" />
+            {seeding ? 'กำลังนำเข้า...' : 'นำเข้าข้อมูลตัวอย่าง → Supabase'}
+          </button>
+        )}
+      </div>
+
+      {!seedDone && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-sm text-amber-800">
+          ⚠️ ข้อมูลปัจจุบันเป็น mock data — กด <strong>"นำเข้าข้อมูลตัวอย่าง"</strong> เพื่อบันทึกทัวร์ทั้งหมดลง Supabase จริง (ทำครั้งเดียวพอครับ)
+        </div>
+      )}
+
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         {stats.map(s => (
           <div key={s.label} className="bg-white rounded-2xl p-4 shadow-sm text-center">
