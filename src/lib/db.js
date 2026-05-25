@@ -20,6 +20,9 @@ const toCamel = (obj) => {
 
 const mapRows = (rows) => (rows || []).map(toCamel)
 
+// UUID v4 pattern check — mock data uses "1","2" etc. which are NOT valid UUIDs
+const isUUID = (id) => id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+
 // ── TOURS ─────────────────────────────────────────────────────
 export const fetchTours = async () => {
   if (!supabase) return { data: null, error: 'offline' }
@@ -43,8 +46,9 @@ export const fetchPublicTours = async () => {
 export const upsertTour = async (tour) => {
   if (!supabase) return { data: null, error: 'offline' }
   // Only send columns that exist in the Supabase schema
+  // Skip id if it's not a valid UUID (mock data uses "1","2" etc.)
   const row = {
-    ...(tour.id ? { id: tour.id } : {}),
+    ...(isUUID(tour.id) ? { id: tour.id } : {}),
     name:        tour.name        || { th: '', en: '' },
     destination: tour.destination || { th: '', en: '' },
     description: tour.description || { th: '', en: '' },
@@ -100,7 +104,7 @@ export const fetchArticles = async () => {
 export const upsertArticle = async (article) => {
   if (!supabase) return { data: null, error: 'offline' }
   const { id, createdAt, updatedAt, readTime, ...rest } = article
-  const row = { ...rest, read_time: readTime, ...(id ? { id } : {}) }
+  const row = { ...rest, read_time: readTime, ...(isUUID(id) ? { id } : {}) }
   const { data, error } = await supabase
     .from('articles')
     .upsert(row, { onConflict: 'id' })
@@ -127,7 +131,7 @@ export const fetchPromotions = async () => {
 export const upsertPromotion = async (promo) => {
   if (!supabase) return { data: null, error: 'offline' }
   const { id, createdAt, updatedAt, expiresAt, ...rest } = promo
-  const row = { ...rest, expires_at: expiresAt, ...(id ? { id } : {}) }
+  const row = { ...rest, expires_at: expiresAt, ...(isUUID(id) ? { id } : {}) }
   const { data, error } = await supabase
     .from('promotions')
     .upsert(row, { onConflict: 'id' })
@@ -159,7 +163,7 @@ export const fetchFaqs = async () => {
 export const upsertFaq = async (faq) => {
   if (!supabase) return { data: null, error: 'offline' }
   const { id, createdAt, sortOrder, ...rest } = faq
-  const row = { ...rest, sort_order: sortOrder, ...(id ? { id } : {}) }
+  const row = { ...rest, sort_order: sortOrder, ...(isUUID(id) ? { id } : {}) }
   const { data, error } = await supabase
     .from('faqs')
     .upsert(row, { onConflict: 'id' })
