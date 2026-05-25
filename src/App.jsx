@@ -26,12 +26,15 @@ import FAQPage from './components/pages/FAQPage.jsx';
 import ContactPage from './components/pages/ContactPage.jsx';
 import AdminPanel from './components/admin/AdminPanel.jsx';
 
+// ── Detect /admin path → show admin panel directly ───────────
+const IS_ADMIN_PATH = window.location.pathname.startsWith('/admin');
+
 export default function App() {
   const [lang, setLang] = useState('th');
   const [page, setPage] = useState('home');
   const [selectedTourId, setSelectedTourId] = useState(null);
   const [selectedArticleId, setSelectedArticleId] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(IS_ADMIN_PATH);
   const [loading, setLoading] = useState(true);
 
   const [tours, setTours] = useState(TOURS_DATA);
@@ -139,7 +142,7 @@ export default function App() {
         messages={messages} setMessages={setMessages}
         chatSessions={chatSessions} setChatSessions={setChatSessions}
         settings={settings} setSettings={setSettings}
-        onLogout={() => setIsAdmin(false)}
+        onLogout={() => window.location.href = '/'}
       />
     );
   }
@@ -161,7 +164,7 @@ export default function App() {
         </div>
       )}
 
-      <Navbar lang={lang} setLang={setLang} page={page} navigate={navigate} t={t} onAdminClick={() => setIsAdmin(true)} />
+      <Navbar lang={lang} setLang={setLang} page={page} navigate={navigate} t={t} onAdminClick={() => window.location.href = '/admin'} />
 
       <main>
         {page === 'home'           && <HomePage {...pageProps} />}
