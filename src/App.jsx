@@ -1,14 +1,10 @@
 import { useState, useEffect } from 'react';
 import {
-  TOURS_DATA, ARTICLES_DATA, PROMOTIONS_DATA, FAQS_DATA,
-  REVIEWS_DATA, SITE_SETTINGS_DEFAULT, BOOKINGS_DATA,
-  MESSAGES_DATA, CHAT_SESSIONS_DEFAULT
-} from './data.js';
-import {
   fetchTours, fetchArticles, fetchPromotions, fetchFaqs,
   fetchReviews, fetchBookings, fetchMessages, fetchChatSessions,
   fetchSettings
 } from './lib/db.js';
+import { supabase } from './lib/supabase.js';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
 import ChatWidget from './components/ChatWidget.jsx';
@@ -25,34 +21,49 @@ import FAQPage from './components/pages/FAQPage.jsx';
 import ContactPage from './components/pages/ContactPage.jsx';
 import AdminPanel from './components/admin/AdminPanel.jsx';
 
-// ── Detect /admin path → show admin panel directly ───────────
 const IS_ADMIN_PATH = window.location.pathname.startsWith('/admin');
 
+const SETTINGS_DEFAULT = {
+  contact: { address: { th: '', en: '' }, phone: '', email: '', line: '' },
+  social: [],
+  popup: { enabled: false },
+};
+
 export default function App() {
-  const [lang, setLang] = useState('th');
-  const [page, setPage] = useState('home');
-  const [selectedTourId, setSelectedTourId] = useState(null);
+  const [lang, setLang]   = useState('th');
+  const [page, setPage]   = useState('home');
+  const [selectedTourId, setSelectedTourId]       = useState(null);
   const [selectedArticleId, setSelectedArticleId] = useState(null);
   const [isAdmin, setIsAdmin] = useState(IS_ADMIN_PATH);
-  const [loading, setLoading] = useState(true);
 
-  const [tours, setTours] = useState(TOURS_DATA);
-  const [articles, setArticles] = useState(ARTICLES_DATA);
-  const [promotions, setPromotions] = useState(PROMOTIONS_DATA);
-  const [faqs, setFaqs] = useState(FAQS_DATA);
-  const [reviews, setReviews] = useState(REVIEWS_DATA);
-  const [bookings, setBookings] = useState(BOOKINGS_DATA);
-  const [messages, setMessages] = useState(MESSAGES_DATA);
-  const [chatSessions, setChatSessions] = useState(CHAT_SESSIONS_DEFAULT);
-  const [settings, setSettings] = useState(SITE_SETTINGS_DEFAULT);
+  // ── All state starts EMPTY — filled from Supabase only ───────
+  const [tours,        setTours]        = useState([]);
+  const [articles,     setArticles]     = useState([]);
+  const [promotions,   setPromotions]   = useState([]);
+  const [faqs,         setFaqs]         = useState([]);
+  const [reviews,      setReviews]      = useState([]);
+  const [bookings,     setBookings]     = useState([]);
+  const [messages,     setMessages]     = useState([]);
+  const [chatSessions, setChatSessions] = useState([]);
+  const [settings,     setSettings]     = useState(SETTINGS_DEFAULT);
 
   const [compareList, setCompareList] = useState([]);
-  const [chatOpen, setChatOpen] = useState(false);
+  const [chatOpen,    setChatOpen]    = useState(false);
+
+  // ── Loading / error state ─────────────────────────────────────
+  const [loading, setLoading] = useState(true);
+  const [dbError, setDbError] = useState(null); // null | string
 
   const t = (obj) => (obj && (obj[lang] || obj['th'])) || '';
 
-  // ── Load data from Supabase (falls back to mock if offline) ──
+  // ── Load from Supabase — no mock fallback ─────────────────────
   useEffect(() => {
+    if (!supabase) {
+      setDbError('ไม่พบการตั้งค่า Supabase (VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY)\nกรุณาตั้งค่า Environment Variables ใน Vercel แล้ว Redeploy');
+      setLoading(false);
+      return;
+    }
+
     const load = async () => {
       try {
         const [
@@ -64,14 +75,24 @@ export default function App() {
           fetchSettings()
         ]);
 
-        if (toursRes.data?.length)     setTours(toursRes.data);
-        if (articlesRes.data?.length)  setArticles(articlesRes.data);
-        if (promosRes.data?.length)    setPromotions(promosRes.data);
-        if (faqsRes.data?.length)      setFaqs(faqsRes.data);
-        if (reviewsRes.data?.length)   setReviews(reviewsRes.data);
-        if (bookingsRes.data?.length)  setBookings(bookingsRes.data);
-        if (messagesRes.data?.length)  setMessages(messagesRes.data);
-        if (chatRes.data?.length)      setChatSessions(chatRes.data);
+        // Check for any error
+        const firstError = [toursRes, articlesRes, promosRes, faqsRes, reviewsRes].find(r => r.error);
+        if (firstError?.error && firstError.error !== 'offline') {
+          setDbError('เชื่อมต่อฐานข้อมูลไม่สำเร็จ: ' + JSON.stringify(firstError.error));
+          setLoading(false);
+          return;
+        }
+
+        // Set data (empty array = table is empty, that's fine)
+        setTours(toursRes.data       ?? []);
+        setArticles(articlesRes.data ?? []);
+        setPromotions(promosRes.data ?? []);
+        setFaqs(faqsRes.data         ?? []);
+        setReviews(reviewsRes.data   ?? []);
+        setBookings(bookingsRes.data ?? []);
+        setMessages(messagesRes.data ?? []);
+        setChatSessions(chatRes.data ?? []);
+
         if (settingsRes.data) {
           setSettings(prev => ({
             ...prev,
@@ -81,7 +102,7 @@ export default function App() {
           }));
         }
       } catch (err) {
-        console.warn('Supabase load failed, using mock data:', err);
+        setDbError('เชื่อมต่อฐานข้อมูลไม่สำเร็จ: ' + (err.message || String(err)));
       } finally {
         setLoading(false);
       }
@@ -91,7 +112,7 @@ export default function App() {
 
   const navigate = (p, id = null) => {
     setPage(p);
-    if (p === 'tour-detail') setSelectedTourId(id);
+    if (p === 'tour-detail')    setSelectedTourId(id);
     if (p === 'article-detail') setSelectedArticleId(id);
     window.scrollTo(0, 0);
   };
@@ -112,25 +133,47 @@ export default function App() {
           <div className="w-14 h-14 bg-amber-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg animate-pulse">
             <span className="text-2xl">✈</span>
           </div>
-          <p className="text-slate-500 text-sm font-medium">กำลังโหลด...</p>
+          <p className="text-slate-500 text-sm font-medium">กำลังเชื่อมต่อฐานข้อมูล...</p>
         </div>
       </div>
     );
   }
 
+  // ── DB Error screen ───────────────────────────────────────────
+  if (dbError) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <span className="text-3xl">⚠️</span>
+          </div>
+          <h2 className="text-xl font-bold text-slate-800 mb-3">เชื่อมต่อฐานข้อมูลไม่ได้</h2>
+          <p className="text-sm text-slate-500 whitespace-pre-line mb-6">{dbError}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-teal-700 hover:bg-teal-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-colors"
+          >
+            ลองใหม่
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Admin panel ───────────────────────────────────────────────
   if (isAdmin) {
     return (
       <AdminPanel
         lang={lang} t={t} setLang={setLang}
-        tours={tours} setTours={setTours}
-        articles={articles} setArticles={setArticles}
+        tours={tours}           setTours={setTours}
+        articles={articles}     setArticles={setArticles}
         promotions={promotions} setPromotions={setPromotions}
-        faqs={faqs} setFaqs={setFaqs}
-        reviews={reviews} setReviews={setReviews}
-        bookings={bookings} setBookings={setBookings}
-        messages={messages} setMessages={setMessages}
+        faqs={faqs}             setFaqs={setFaqs}
+        reviews={reviews}       setReviews={setReviews}
+        bookings={bookings}     setBookings={setBookings}
+        messages={messages}     setMessages={setMessages}
         chatSessions={chatSessions} setChatSessions={setChatSessions}
-        settings={settings} setSettings={setSettings}
+        settings={settings}     setSettings={setSettings}
         onLogout={() => window.location.href = '/'}
       />
     );
@@ -144,7 +187,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Navbar lang={lang} setLang={setLang} page={page} navigate={navigate} t={t} onAdminClick={() => window.location.href = '/admin'} />
+      <Navbar lang={lang} setLang={setLang} page={page} navigate={navigate} t={t}
+        onAdminClick={() => window.location.href = '/admin'} />
 
       <main>
         {page === 'home'           && <HomePage {...pageProps} />}
@@ -162,7 +206,8 @@ export default function App() {
       <SocialBar settings={settings} />
       <ChatWidget lang={lang} open={chatOpen} setOpen={setChatOpen} />
       {compareList.length >= 2 && (
-        <CompareBar compareList={compareList} setCompareList={setCompareList} tours={tours} t={t} navigate={navigate} />
+        <CompareBar compareList={compareList} setCompareList={setCompareList}
+          tours={tours} t={t} navigate={navigate} />
       )}
     </div>
   );

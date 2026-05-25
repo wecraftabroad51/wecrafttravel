@@ -179,32 +179,40 @@ function DashboardSection({ tours, articles, bookings, messages, reviews, chatSe
   const [seedDone, setSeedDone] = useState(false);
 
   const handleSeed = async () => {
-    if (!confirm('นำเข้าข้อมูลตัวอย่างทั้งหมด (ทัวร์, บทความ, FAQ, โปรโมชั่น) เข้า Supabase?\n\nข้อมูลเดิมที่มีอยู่จะไม่ถูกลบครับ')) return;
+    if (!confirm('นำเข้าข้อมูลตัวอย่างทั้งหมด (ทัวร์, บทความ, FAQ) เข้า Supabase?\n\nข้อมูลเดิมที่มีอยู่จะไม่ถูกลบครับ')) return;
     setSeeding(true);
     try {
       // Seed tours
       const tourResults = await Promise.all(
         TOURS_DATA.map(tour => upsertTour({ ...tour, id: undefined }))
       );
+      const tourErrors = tourResults.filter(r => r.error);
       const newTours = tourResults.map(r => r.data).filter(Boolean);
-      if (newTours.length) setTours(newTours);
+      if (newTours.length) setTours(prev => [...newTours, ...prev]);
 
       // Seed articles
       const articleResults = await Promise.all(
         ARTICLES_DATA.map(a => upsertArticle({ ...a, id: undefined }))
       );
+      const articleErrors = articleResults.filter(r => r.error);
       const newArticles = articleResults.map(r => r.data).filter(Boolean);
-      if (newArticles.length) setArticles(newArticles);
+      if (newArticles.length) setArticles(prev => [...newArticles, ...prev]);
 
       // Seed faqs
       const faqResults = await Promise.all(
         FAQS_DATA.map(f => upsertFaq({ ...f, id: undefined }))
       );
+      const faqErrors = faqResults.filter(r => r.error);
       const newFaqs = faqResults.map(r => r.data).filter(Boolean);
-      if (newFaqs.length) setFaqs(newFaqs);
+      if (newFaqs.length) setFaqs(prev => [...prev, ...newFaqs]);
 
-      setSeedDone(true);
-      alert(`✅ นำเข้าสำเร็จ!\n- ทัวร์: ${newTours.length} รายการ\n- บทความ: ${newArticles.length} รายการ\n- FAQ: ${newFaqs.length} รายการ`);
+      const totalErrors = tourErrors.length + articleErrors.length + faqErrors.length;
+      if (totalErrors > 0) {
+        alert(`⚠️ นำเข้าบางส่วนสำเร็จ!\n- ทัวร์: ${newTours.length}/${TOURS_DATA.length}\n- บทความ: ${newArticles.length}/${ARTICLES_DATA.length}\n- FAQ: ${newFaqs.length}/${FAQS_DATA.length}\n\nมี ${totalErrors} รายการที่ล้มเหลว`);
+      } else {
+        setSeedDone(true);
+        alert(`✅ นำเข้าสำเร็จ!\n- ทัวร์: ${newTours.length} รายการ\n- บทความ: ${newArticles.length} รายการ\n- FAQ: ${newFaqs.length} รายการ`);
+      }
     } catch (e) {
       alert('เกิดข้อผิดพลาด: ' + e.message);
     }
@@ -235,7 +243,7 @@ function DashboardSection({ tours, articles, bookings, messages, reviews, chatSe
 
       {!seedDone && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-sm text-amber-800">
-          ⚠️ ข้อมูลปัจจุบันเป็น mock data — กด <strong>"นำเข้าข้อมูลตัวอย่าง"</strong> เพื่อบันทึกทัวร์ทั้งหมดลง Supabase จริง (ทำครั้งเดียวพอครับ)
+          💡 กด <strong>"นำเข้าข้อมูลตัวอย่าง"</strong> เพื่อเพิ่มทัวร์ บทความ และ FAQ ตัวอย่างลง Supabase (ทำครั้งเดียวพอครับ)
         </div>
       )}
 
@@ -279,30 +287,32 @@ function ToursSection({ tours, setTours, t }) {
     setSaving(true);
     const { data, error } = await upsertTour(form);
     setSaving(false);
-    if (error && error !== 'offline') { alert('บันทึกไม่สำเร็จ: ' + JSON.stringify(error)); return; }
-    const saved = data || { ...form, id: form.id || String(Date.now()) };
+    if (error) { alert('บันทึกไม่สำเร็จ: ' + JSON.stringify(error)); return; }
     setTours(prev => modal.mode === 'add'
-      ? [saved, ...prev]
-      : prev.map(tr => tr.id === saved.id ? saved : tr)
+      ? [data, ...prev]
+      : prev.map(tr => tr.id === data.id ? data : tr)
     );
     closeModal();
   };
 
   const handleDelete = async (tour) => {
     if (!confirm(`ลบทัวร์ "${t(tour.name)}" ใช่ไหม?`)) return;
-    await deleteTour(tour.id);
+    const { error } = await deleteTour(tour.id);
+    if (error) { alert('ลบไม่สำเร็จ: ' + JSON.stringify(error)); return; }
     setTours(prev => prev.filter(tr => tr.id !== tour.id));
   };
 
   const handleToggleFeatured = async (tour) => {
     const next = !tour.featured;
-    await toggleTourFeatured(tour.id, next);
+    const { error } = await toggleTourFeatured(tour.id, next);
+    if (error) { alert('แก้ไขไม่สำเร็จ'); return; }
     setTours(prev => prev.map(tr => tr.id === tour.id ? { ...tr, featured: next } : tr));
   };
 
   const handleToggleActive = async (tour) => {
     const next = !tour.active;
-    await toggleTourActive(tour.id, next);
+    const { error } = await toggleTourActive(tour.id, next);
+    if (error) { alert('แก้ไขไม่สำเร็จ'); return; }
     setTours(prev => prev.map(tr => tr.id === tour.id ? { ...tr, active: next } : tr));
   };
 
@@ -468,21 +478,22 @@ function PromotionsSection({ promotions, setPromotions, t }) {
     setSaving(true);
     const { data, error } = await upsertPromotion(form);
     setSaving(false);
-    if (error && error !== 'offline') { alert('บันทึกไม่สำเร็จ'); return; }
-    const saved = data || { ...form, id: form.id || String(Date.now()) };
-    setPromotions(prev => modal.mode === 'add' ? [saved, ...prev] : prev.map(p => p.id === saved.id ? saved : p));
+    if (error) { alert('บันทึกไม่สำเร็จ: ' + JSON.stringify(error)); return; }
+    setPromotions(prev => modal.mode === 'add' ? [data, ...prev] : prev.map(p => p.id === data.id ? data : p));
     setModal(null);
   };
 
   const handleDelete = async (id) => {
     if (!confirm('ลบโปรโมชั่นนี้?')) return;
-    await deletePromotion(id);
+    const { error } = await deletePromotion(id);
+    if (error) { alert('ลบไม่สำเร็จ: ' + JSON.stringify(error)); return; }
     setPromotions(prev => prev.filter(p => p.id !== id));
   };
 
   const handleToggle = async (promo) => {
     const next = !promo.active;
-    await togglePromoActive(promo.id, next);
+    const { error } = await togglePromoActive(promo.id, next);
+    if (error) { alert('แก้ไขไม่สำเร็จ'); return; }
     setPromotions(prev => prev.map(p => p.id === promo.id ? { ...p, active: next } : p));
   };
 
@@ -560,12 +571,14 @@ function PromotionsSection({ promotions, setPromotions, t }) {
 // ===== REVIEWS =====
 function ReviewsSection({ reviews, setReviews, tours, t }) {
   const handleApprove = async (id) => {
-    await approveReview(id, true);
+    const { error } = await approveReview(id, true);
+    if (error) { alert('อนุมัติไม่สำเร็จ'); return; }
     setReviews(prev => prev.map(r => r.id === id ? { ...r, approved: true } : r));
   };
   const handleReject = async (id) => {
     if (!confirm('ลบรีวิวนี้?')) return;
-    await deleteReview(id);
+    const { error } = await deleteReview(id);
+    if (error) { alert('ลบไม่สำเร็จ'); return; }
     setReviews(prev => prev.filter(r => r.id !== id));
   };
 
@@ -628,15 +641,15 @@ function ArticlesSection({ articles, setArticles, t }) {
     setSaving(true);
     const { data, error } = await upsertArticle(form);
     setSaving(false);
-    if (error && error !== 'offline') { alert('บันทึกไม่สำเร็จ'); return; }
-    const saved = data || { ...form, id: form.id || String(Date.now()) };
-    setArticles(prev => modal.mode === 'add' ? [saved, ...prev] : prev.map(a => a.id === saved.id ? saved : a));
+    if (error) { alert('บันทึกไม่สำเร็จ: ' + JSON.stringify(error)); return; }
+    setArticles(prev => modal.mode === 'add' ? [data, ...prev] : prev.map(a => a.id === data.id ? data : a));
     setModal(null);
   };
 
   const handleDelete = async (id) => {
     if (!confirm('ลบบทความนี้?')) return;
-    await deleteArticle(id);
+    const { error } = await deleteArticle(id);
+    if (error) { alert('ลบไม่สำเร็จ: ' + JSON.stringify(error)); return; }
     setArticles(prev => prev.filter(a => a.id !== id));
   };
 
@@ -724,21 +737,22 @@ function FaqsSection({ faqs, setFaqs, t }) {
     setSaving(true);
     const { data, error } = await upsertFaq(form);
     setSaving(false);
-    if (error && error !== 'offline') { alert('บันทึกไม่สำเร็จ'); return; }
-    const saved = data || { ...form, id: form.id || String(Date.now()) };
-    setFaqs(prev => modal.mode === 'add' ? [...prev, saved] : prev.map(f => f.id === saved.id ? saved : f));
+    if (error) { alert('บันทึกไม่สำเร็จ: ' + JSON.stringify(error)); return; }
+    setFaqs(prev => modal.mode === 'add' ? [...prev, data] : prev.map(f => f.id === data.id ? data : f));
     setModal(null);
   };
 
   const handleDelete = async (id) => {
     if (!confirm('ลบ FAQ นี้?')) return;
-    await deleteFaq(id);
+    const { error } = await deleteFaq(id);
+    if (error) { alert('ลบไม่สำเร็จ: ' + JSON.stringify(error)); return; }
     setFaqs(prev => prev.filter(f => f.id !== id));
   };
 
   const handleToggle = async (faq) => {
     const next = !faq.active;
-    await upsertFaq({ ...faq, active: next });
+    const { error } = await upsertFaq({ ...faq, active: next });
+    if (error) { alert('แก้ไขไม่สำเร็จ'); return; }
     setFaqs(prev => prev.map(f => f.id === faq.id ? { ...f, active: next } : f));
   };
 
@@ -817,7 +831,8 @@ function BookingsSection({ bookings, setBookings, tours, t }) {
   const statusColor = { confirmed: 'bg-green-100 text-green-700', pending: 'bg-amber-100 text-amber-700', cancelled: 'bg-red-100 text-red-700' };
 
   const handleStatus = async (id, status) => {
-    await updateBookingStatus(id, status);
+    const { error } = await updateBookingStatus(id, status);
+    if (error) { alert('อัปเดตสถานะไม่สำเร็จ'); return; }
     setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
   };
 
@@ -864,7 +879,8 @@ function BookingsSection({ bookings, setBookings, tours, t }) {
 // ===== MESSAGES =====
 function MessagesSection({ messages, setMessages }) {
   const handleRead = async (id) => {
-    await markMessageRead(id);
+    const { error } = await markMessageRead(id);
+    if (error) { alert('อัปเดตไม่สำเร็จ'); return; }
     setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
   };
 
@@ -948,10 +964,17 @@ function ChatSection() {
       timestamp: new Date().toLocaleTimeString('th', { hour: '2-digit', minute: '2-digit' })
     };
     const newMessages = [...(session.messages || []), msg];
+    const prevMessages = session.messages || [];
     // Optimistic update
     setSessions(prev => prev.map(s => s.id === session.id ? { ...s, messages: newMessages } : s));
     setReply('');
-    await upsertChatSession({ id: session.id, visitor: session.visitor, messages: newMessages, status: session.status });
+    const { error } = await upsertChatSession({ id: session.id, visitor: session.visitor, messages: newMessages, status: session.status });
+    if (error) {
+      // Rollback on failure
+      setSessions(prev => prev.map(s => s.id === session.id ? { ...s, messages: prevMessages } : s));
+      setReply(msg.text);
+      alert('ส่งข้อความไม่สำเร็จ');
+    }
   };
 
   const handleSelect = (id) => {
@@ -1056,8 +1079,9 @@ function SettingsSection({ settings, setSettings, t }) {
 
   const handleSave = async () => {
     setSaving(true);
-    await updateSettings({ contact: settings.contact, social: settings.social, popup: settings.popup });
+    const { error } = await updateSettings({ contact: settings.contact, social: settings.social, popup: settings.popup });
     setSaving(false);
+    if (error) { alert('บันทึกไม่สำเร็จ: ' + JSON.stringify(error)); return; }
     alert('บันทึกเรียบร้อย ✅');
   };
 

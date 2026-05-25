@@ -283,7 +283,7 @@ export const fetchChatSessions = async () => {
 export const upsertChatSession = async (session) => {
   if (!supabase) return { data: null, error: 'offline' }
   const { id, createdAt, updatedAt, ...rest } = session
-  const row = { ...rest, ...(id ? { id } : {}) }
+  const row = { ...rest, ...(isUUID(id) ? { id } : {}) }
   const { data, error } = await supabase
     .from('chat_sessions')
     .upsert(row, { onConflict: 'id' })
