@@ -983,7 +983,7 @@ function SettingsSection({ settings, setSettings, t }) {
     <div>
       <h2 className="text-2xl font-bold text-slate-800 mb-6">Site Settings</h2>
       <div className="flex gap-2 mb-6">
-        {['contact','social','popup'].map(tb => (
+        {['contact','social'].map(tb => (
           <button key={tb} onClick={() => setTab(tb)}
             className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${tab === tb ? 'bg-teal-700 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
             {tb}
@@ -1030,18 +1030,6 @@ function SettingsSection({ settings, setSettings, t }) {
                 </button>
               </div>
             ))}
-          </div>
-        )}
-
-        {tab === 'popup' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-semibold text-slate-700">แสดง Popup</label>
-              <button onClick={() => update(['popup', 'enabled'], !settings.popup?.enabled)}
-                className={`px-4 py-1.5 rounded-lg text-sm font-semibold ${settings.popup?.enabled ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
-                {settings.popup?.enabled ? 'เปิด' : 'ปิด'}
-              </button>
-            </div>
           </div>
         )}
 

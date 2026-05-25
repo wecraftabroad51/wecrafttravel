@@ -12,7 +12,6 @@ import {
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
 import ChatWidget from './components/ChatWidget.jsx';
-import PopupModal from './components/PopupModal.jsx';
 import SocialBar from './components/SocialBar.jsx';
 import CompareBar from './components/CompareBar.jsx';
 import HomePage from './components/pages/HomePage.jsx';
@@ -48,7 +47,6 @@ export default function App() {
   const [settings, setSettings] = useState(SITE_SETTINGS_DEFAULT);
 
   const [compareList, setCompareList] = useState([]);
-  const [showPopup, setShowPopup] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatVisitor, setChatVisitor] = useState(null);
   const [visitorMessages, setVisitorMessages] = useState([]);
@@ -92,13 +90,6 @@ export default function App() {
     };
     load();
   }, []);
-
-  useEffect(() => {
-    if (page === 'home' && !loading) {
-      const timer = setTimeout(() => setShowPopup(true), 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [page, loading]);
 
   const navigate = (p, id = null) => {
     setPage(p);
@@ -155,15 +146,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {settings.popup?.showAnnouncementBar && page === 'home' && (
-        <div className="bg-amber-400 text-slate-900 text-sm text-center py-2 px-4 font-medium">
-          {t(settings.popup.announcementText)}
-          <button onClick={() => navigate('promotions')} className="ml-2 underline font-bold">
-            ดูเพิ่มเติม »
-          </button>
-        </div>
-      )}
-
       <Navbar lang={lang} setLang={setLang} page={page} navigate={navigate} t={t} onAdminClick={() => window.location.href = '/admin'} />
 
       <main>
@@ -188,9 +170,6 @@ export default function App() {
       />
       {compareList.length >= 2 && (
         <CompareBar compareList={compareList} setCompareList={setCompareList} tours={tours} t={t} navigate={navigate} />
-      )}
-      {showPopup && settings.popup?.enabled && (
-        <PopupModal settings={settings} t={t} onClose={() => setShowPopup(false)} navigate={navigate} />
       )}
     </div>
   );
