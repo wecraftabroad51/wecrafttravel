@@ -267,19 +267,31 @@ const EMPTY_TOUR = {
   hotels: [], itinerary: [], includes: [], excludes: [], priceTiers: [], departures: [], gallery: [],
 };
 
-function ToursSection({ tours, setTours, t }) {
-  const [modal, setModal]   = useState(null); // null | { mode:'add'|'edit', tour }
-  const [saving, setSaving] = useState(false);
-  const [form, setForm]     = useState(EMPTY_TOUR);
+const TOUR_TABS = ['พื้นฐาน', 'ราคา', 'โปรแกรม', 'ที่พัก', 'รวม/ไม่รวม', 'ภาพ'];
 
-  const openAdd  = () => { setForm(EMPTY_TOUR); setModal({ mode: 'add' }); };
-  const openEdit = (tour) => { setForm(tour); setModal({ mode: 'edit', tour }); };
+function ToursSection({ tours, setTours, t }) {
+  const [modal, setModal]     = useState(null);
+  const [saving, setSaving]   = useState(false);
+  const [form, setForm]       = useState(EMPTY_TOUR);
+  const [tourTab, setTourTab] = useState('พื้นฐาน');
+
+  const openAdd  = () => { setForm(EMPTY_TOUR); setTourTab('พื้นฐาน'); setModal({ mode: 'add' }); };
+  const openEdit = (tour) => { setForm(tour); setTourTab('พื้นฐาน'); setModal({ mode: 'edit', tour }); };
   const closeModal = () => setModal(null);
 
   const setF = (path, val) => setForm(prev => {
     const next = JSON.parse(JSON.stringify(prev));
     path.reduce((o, k, i) => { if (i === path.length - 1) o[k] = val; return o[k]; }, next);
     return next;
+  });
+
+  // Array helpers for priceTiers, departures, itinerary, etc.
+  const addToArr = (field, item) => setForm(prev => ({ ...prev, [field]: [...(prev[field] || []), item] }));
+  const removeFromArr = (field, idx) => setForm(prev => ({ ...prev, [field]: (prev[field] || []).filter((_, i) => i !== idx) }));
+  const updateArr = (field, idx, val) => setForm(prev => {
+    const arr = [...(prev[field] || [])];
+    arr[idx] = val;
+    return { ...prev, [field]: arr };
   });
 
   const handleSave = async () => {
@@ -381,77 +393,320 @@ function ToursSection({ tours, setTours, t }) {
         </table>
       </div>
 
-      {/* Tour Modal */}
+      {/* Tour Modal — Tabbed */}
       {modal && (
         <Modal title={modal.mode === 'add' ? 'เพิ่มทัวร์ใหม่' : 'แก้ไขทัวร์'} onClose={closeModal} wide>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="ชื่อทัวร์ (ไทย) *">
-                <input className={inp} value={form.name.th} onChange={e => setF(['name','th'], e.target.value)} placeholder="ทัวร์ญี่ปุ่น..." />
-              </Field>
-              <Field label="ชื่อทัวร์ (English)">
-                <input className={inp} value={form.name.en} onChange={e => setF(['name','en'], e.target.value)} placeholder="Japan Tour..." />
-              </Field>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="ปลายทาง (ไทย)">
-                <input className={inp} value={form.destination.th} onChange={e => setF(['destination','th'], e.target.value)} placeholder="โตเกียว ญี่ปุ่น" />
-              </Field>
-              <Field label="ปลายทาง (English)">
-                <input className={inp} value={form.destination.en} onChange={e => setF(['destination','en'], e.target.value)} placeholder="Tokyo, Japan" />
-              </Field>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="คำอธิบาย (ไทย)">
-                <textarea className={inp} rows={2} value={form.description.th} onChange={e => setF(['description','th'], e.target.value)} />
-              </Field>
-              <Field label="คำอธิบาย (English)">
-                <textarea className={inp} rows={2} value={form.description.en} onChange={e => setF(['description','en'], e.target.value)} />
-              </Field>
-            </div>
-            <Field label="URL รูปภาพ">
-              <input className={inp} value={form.image} onChange={e => setF(['image'], e.target.value)} placeholder="https://..." />
-            </Field>
-            <div className="grid grid-cols-3 gap-3">
-              <Field label="ทวีป">
-                <select className={inp} value={form.continent} onChange={e => setF(['continent'], e.target.value)}>
-                  {CONTINENTS.map(c => <option key={c}>{c}</option>)}
-                </select>
-              </Field>
-              <Field label="ราคาเริ่มต้น (฿)">
-                <input className={inp} type="number" value={form.price} onChange={e => setF(['price'], Number(e.target.value))} />
-              </Field>
-              <Field label="ระยะเวลา (วัน)">
-                <input className={inp} type="number" value={form.duration} onChange={e => setF(['duration'], Number(e.target.value))} />
-              </Field>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="จำนวนคน (สูงสุด)">
-                <input className={inp} type="number" value={form.groupSize} onChange={e => setF(['groupSize'], Number(e.target.value))} />
-              </Field>
-              <Field label="สายการบิน">
-                <input className={inp} value={form.flight?.outbound?.airline || ''} onChange={e => setF(['flight','outbound','airline'], e.target.value)} placeholder="Thai Airways" />
-              </Field>
-            </div>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={form.featured} onChange={e => setF(['featured'], e.target.checked)} className="w-4 h-4 accent-teal-600" />
-                <span className="text-sm text-slate-700">Featured (แนะนำ)</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={form.active !== false} onChange={e => setF(['active'], e.target.checked)} className="w-4 h-4 accent-teal-600" />
-                <span className="text-sm text-slate-700">Active (แสดงในเว็บ)</span>
-              </label>
-            </div>
-            <div className="flex gap-3 pt-2">
-              <button onClick={handleSave} disabled={saving}
-                className="flex-1 bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white py-2.5 rounded-xl font-semibold text-sm transition-colors">
-                {saving ? 'กำลังบันทึก...' : (modal.mode === 'add' ? 'เพิ่มทัวร์' : 'บันทึก')}
+          {/* Tab bar */}
+          <div className="flex gap-1 mb-5 flex-wrap">
+            {TOUR_TABS.map(tab => (
+              <button key={tab} onClick={() => setTourTab(tab)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${tourTab === tab ? 'bg-teal-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                {tab}
               </button>
-              <button onClick={closeModal} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl font-semibold text-sm transition-colors">
-                ยกเลิก
-              </button>
+            ))}
+          </div>
+
+          {/* ── Tab: พื้นฐาน ── */}
+          {tourTab === 'พื้นฐาน' && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="ชื่อทัวร์ (ไทย) *">
+                  <input className={inp} value={form.name.th} onChange={e => setF(['name','th'], e.target.value)} placeholder="ทัวร์ญี่ปุ่น..." />
+                </Field>
+                <Field label="ชื่อทัวร์ (English)">
+                  <input className={inp} value={form.name.en} onChange={e => setF(['name','en'], e.target.value)} placeholder="Japan Tour..." />
+                </Field>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="ปลายทาง (ไทย)">
+                  <input className={inp} value={form.destination.th} onChange={e => setF(['destination','th'], e.target.value)} placeholder="โตเกียว ญี่ปุ่น" />
+                </Field>
+                <Field label="ปลายทาง (English)">
+                  <input className={inp} value={form.destination.en} onChange={e => setF(['destination','en'], e.target.value)} placeholder="Tokyo, Japan" />
+                </Field>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="คำอธิบาย (ไทย)">
+                  <textarea className={inp} rows={2} value={form.description.th} onChange={e => setF(['description','th'], e.target.value)} />
+                </Field>
+                <Field label="คำอธิบาย (English)">
+                  <textarea className={inp} rows={2} value={form.description.en} onChange={e => setF(['description','en'], e.target.value)} />
+                </Field>
+              </div>
+              <Field label="URL รูปภาพหลัก">
+                <input className={inp} value={form.image} onChange={e => setF(['image'], e.target.value)} placeholder="https://..." />
+              </Field>
+              <div className="grid grid-cols-3 gap-3">
+                <Field label="ทวีป">
+                  <select className={inp} value={form.continent} onChange={e => setF(['continent'], e.target.value)}>
+                    {CONTINENTS.map(c => <option key={c}>{c}</option>)}
+                  </select>
+                </Field>
+                <Field label="ราคาเริ่มต้น (฿)">
+                  <input className={inp} type="number" value={form.price} onChange={e => setF(['price'], Number(e.target.value))} />
+                </Field>
+                <Field label="ระยะเวลา (วัน)">
+                  <input className={inp} type="number" value={form.duration} onChange={e => setF(['duration'], Number(e.target.value))} />
+                </Field>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="จำนวนคน (สูงสุด)">
+                  <input className={inp} type="number" value={form.groupSize} onChange={e => setF(['groupSize'], Number(e.target.value))} />
+                </Field>
+                <Field label="สายการบิน">
+                  <input className={inp} value={form.flight?.outbound?.airline || ''} onChange={e => setF(['flight','outbound','airline'], e.target.value)} placeholder="Thai Airways" />
+                </Field>
+              </div>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={form.featured} onChange={e => setF(['featured'], e.target.checked)} className="w-4 h-4 accent-teal-600" />
+                  <span className="text-sm text-slate-700">Featured (แนะนำ)</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={form.active !== false} onChange={e => setF(['active'], e.target.checked)} className="w-4 h-4 accent-teal-600" />
+                  <span className="text-sm text-slate-700">Active (แสดงในเว็บ)</span>
+                </label>
+              </div>
             </div>
+          )}
+
+          {/* ── Tab: ราคา ── */}
+          {tourTab === 'ราคา' && (
+            <div className="space-y-6">
+              {/* Price Tiers */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-slate-700 text-sm">ระดับราคา (Price Tiers)</h4>
+                  <button onClick={() => addToArr('priceTiers', { name: '', description: '', price: 0 })}
+                    className="flex items-center gap-1 bg-teal-50 hover:bg-teal-100 text-teal-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                    <Plus className="w-3 h-3" /> เพิ่มระดับ
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {(form.priceTiers || []).map((tier, i) => (
+                    <div key={i} className="grid grid-cols-7 gap-2 items-center bg-slate-50 p-2 rounded-xl">
+                      <input className={`${inp} col-span-2`} placeholder="ชื่อ (Standard)" value={tier.name}
+                        onChange={e => updateArr('priceTiers', i, { ...tier, name: e.target.value })} />
+                      <input className={`${inp} col-span-2`} placeholder="รายละเอียด (Water Villa)" value={tier.description}
+                        onChange={e => updateArr('priceTiers', i, { ...tier, description: e.target.value })} />
+                      <input className={`${inp} col-span-2`} type="number" placeholder="ราคา (฿)" value={tier.price}
+                        onChange={e => updateArr('priceTiers', i, { ...tier, price: Number(e.target.value) })} />
+                      <button onClick={() => removeFromArr('priceTiers', i)}
+                        className="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg flex items-center justify-center">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  {!(form.priceTiers || []).length && <p className="text-xs text-slate-400 text-center py-4">ยังไม่มีระดับราคา</p>}
+                </div>
+              </div>
+
+              {/* Departures */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-slate-700 text-sm">วันเดินทาง (Departures)</h4>
+                  <button onClick={() => addToArr('departures', { date: '', available: 10, priceAdjust: 0 })}
+                    className="flex items-center gap-1 bg-teal-50 hover:bg-teal-100 text-teal-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                    <Plus className="w-3 h-3" /> เพิ่มวัน
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {(form.departures || []).map((dep, i) => (
+                    <div key={i} className="grid grid-cols-7 gap-2 items-center bg-slate-50 p-2 rounded-xl">
+                      <input className={`${inp} col-span-3`} type="date" value={dep.date}
+                        onChange={e => updateArr('departures', i, { ...dep, date: e.target.value })} />
+                      <input className={`${inp} col-span-1`} type="number" placeholder="ที่ว่าง" value={dep.available}
+                        onChange={e => updateArr('departures', i, { ...dep, available: Number(e.target.value) })} />
+                      <input className={`${inp} col-span-2`} type="number" placeholder="ปรับราคา ±฿" value={dep.priceAdjust}
+                        onChange={e => updateArr('departures', i, { ...dep, priceAdjust: Number(e.target.value) })} />
+                      <button onClick={() => removeFromArr('departures', i)}
+                        className="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg flex items-center justify-center">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  {!(form.departures || []).length && <p className="text-xs text-slate-400 text-center py-4">ยังไม่มีวันเดินทาง</p>}
+                </div>
+                <p className="text-xs text-slate-400 mt-2">* ปรับราคา: ใส่บวก (+) หรือลบ (-) เพื่อปรับจากราคาเริ่มต้น เช่น +5000 หรือ -3000</p>
+              </div>
+            </div>
+          )}
+
+          {/* ── Tab: โปรแกรม ── */}
+          {tourTab === 'โปรแกรม' && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold text-slate-700 text-sm">โปรแกรมการเดินทาง</h4>
+                <button onClick={() => addToArr('itinerary', { title: '', description: '', meals: [], hotel: '' })}
+                  className="flex items-center gap-1 bg-teal-50 hover:bg-teal-100 text-teal-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                  <Plus className="w-3 h-3" /> เพิ่มวัน
+                </button>
+              </div>
+              <div className="space-y-3">
+                {(form.itinerary || []).map((day, i) => (
+                  <div key={i} className="bg-slate-50 rounded-xl p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="w-7 h-7 bg-teal-700 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                        {i + 1}
+                      </span>
+                      <button onClick={() => removeFromArr('itinerary', i)}
+                        className="w-7 h-7 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg flex items-center justify-center">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <input className={inp} placeholder="หัวข้อวัน (เช่น เดินทางถึงโตเกียว)" value={day.title}
+                      onChange={e => updateArr('itinerary', i, { ...day, title: e.target.value })} />
+                    <textarea className={inp} rows={2} placeholder="คำอธิบายกิจกรรม" value={day.description}
+                      onChange={e => updateArr('itinerary', i, { ...day, description: e.target.value })} />
+                    <div className="flex items-center gap-4 flex-wrap">
+                      <span className="text-xs text-slate-500 shrink-0">มื้ออาหาร:</span>
+                      {['เช้า', 'กลางวัน', 'เย็น'].map(meal => (
+                        <label key={meal} className="flex items-center gap-1 cursor-pointer">
+                          <input type="checkbox"
+                            checked={(day.meals || []).includes(meal)}
+                            onChange={e => updateArr('itinerary', i, {
+                              ...day,
+                              meals: e.target.checked
+                                ? [...(day.meals || []), meal]
+                                : (day.meals || []).filter(m => m !== meal)
+                            })}
+                            className="w-3.5 h-3.5 accent-teal-600" />
+                          <span className="text-xs text-slate-600">{meal}</span>
+                        </label>
+                      ))}
+                    </div>
+                    <input className={inp} placeholder="ที่พัก (ชื่อโรงแรม)" value={day.hotel || ''}
+                      onChange={e => updateArr('itinerary', i, { ...day, hotel: e.target.value })} />
+                  </div>
+                ))}
+                {!(form.itinerary || []).length && (
+                  <p className="text-xs text-slate-400 text-center py-8">ยังไม่มีโปรแกรม — กด "เพิ่มวัน" เพื่อเริ่มต้น</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── Tab: ที่พัก ── */}
+          {tourTab === 'ที่พัก' && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold text-slate-700 text-sm">โรงแรม / ที่พัก</h4>
+                <button onClick={() => addToArr('hotels', { name: '', stars: 4, description: '' })}
+                  className="flex items-center gap-1 bg-teal-50 hover:bg-teal-100 text-teal-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                  <Plus className="w-3 h-3" /> เพิ่มที่พัก
+                </button>
+              </div>
+              <div className="space-y-3">
+                {(form.hotels || []).map((hotel, i) => (
+                  <div key={i} className="bg-slate-50 rounded-xl p-3 space-y-2">
+                    <div className="flex gap-2 items-center">
+                      <input className={`${inp} flex-1`} placeholder="ชื่อโรงแรม" value={hotel.name}
+                        onChange={e => updateArr('hotels', i, { ...hotel, name: e.target.value })} />
+                      <select className="border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 w-24 shrink-0"
+                        value={hotel.stars}
+                        onChange={e => updateArr('hotels', i, { ...hotel, stars: Number(e.target.value) })}>
+                        {[3, 4, 5].map(s => <option key={s} value={s}>{s} ดาว</option>)}
+                      </select>
+                      <button onClick={() => removeFromArr('hotels', i)}
+                        className="w-9 h-9 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg flex items-center justify-center shrink-0">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <textarea className={inp} rows={2} placeholder="คำอธิบายโรงแรม" value={hotel.description || ''}
+                      onChange={e => updateArr('hotels', i, { ...hotel, description: e.target.value })} />
+                  </div>
+                ))}
+                {!(form.hotels || []).length && <p className="text-xs text-slate-400 text-center py-8">ยังไม่มีที่พัก</p>}
+              </div>
+            </div>
+          )}
+
+          {/* ── Tab: รวม/ไม่รวม ── */}
+          {tourTab === 'รวม/ไม่รวม' && (
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-green-700 text-sm">✅ รวมในแพ็กเกจ</h4>
+                  <button onClick={() => addToArr('includes', '')}
+                    className="text-xs bg-green-50 hover:bg-green-100 text-green-700 px-2 py-1 rounded-lg font-semibold">
+                    + เพิ่ม
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {(form.includes || []).map((item, i) => (
+                    <div key={i} className="flex gap-2">
+                      <input className={`${inp} flex-1`} value={item} placeholder="เช่น ตั๋วเครื่องบิน"
+                        onChange={e => updateArr('includes', i, e.target.value)} />
+                      <button onClick={() => removeFromArr('includes', i)}
+                        className="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg flex items-center justify-center shrink-0">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {!(form.includes || []).length && <p className="text-xs text-slate-400 py-4 text-center">ยังไม่มีรายการ</p>}
+                </div>
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold text-red-600 text-sm">❌ ไม่รวมในแพ็กเกจ</h4>
+                  <button onClick={() => addToArr('excludes', '')}
+                    className="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-2 py-1 rounded-lg font-semibold">
+                    + เพิ่ม
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {(form.excludes || []).map((item, i) => (
+                    <div key={i} className="flex gap-2">
+                      <input className={`${inp} flex-1`} value={item} placeholder="เช่น ค่าวีซ่า"
+                        onChange={e => updateArr('excludes', i, e.target.value)} />
+                      <button onClick={() => removeFromArr('excludes', i)}
+                        className="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg flex items-center justify-center shrink-0">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {!(form.excludes || []).length && <p className="text-xs text-slate-400 py-4 text-center">ยังไม่มีรายการ</p>}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Tab: ภาพ ── */}
+          {tourTab === 'ภาพ' && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold text-slate-700 text-sm">แกลเลอรี่รูปภาพ</h4>
+                <button onClick={() => addToArr('gallery', '')}
+                  className="flex items-center gap-1 bg-teal-50 hover:bg-teal-100 text-teal-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                  <Plus className="w-3 h-3" /> เพิ่มรูป
+                </button>
+              </div>
+              <div className="space-y-2">
+                {(form.gallery || []).map((url, i) => (
+                  <div key={i} className="flex gap-2 items-center">
+                    <input className={`${inp} flex-1`} value={url} placeholder="https://..."
+                      onChange={e => updateArr('gallery', i, e.target.value)} />
+                    {url && <img src={url} alt="" className="w-12 h-9 rounded-lg object-cover bg-slate-100 shrink-0" />}
+                    <button onClick={() => removeFromArr('gallery', i)}
+                      className="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg flex items-center justify-center shrink-0">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+                {!(form.gallery || []).length && <p className="text-xs text-slate-400 text-center py-8">ยังไม่มีรูปภาพ</p>}
+              </div>
+            </div>
+          )}
+
+          {/* Save/Cancel always at bottom */}
+          <div className="flex gap-3 pt-4 mt-4 border-t border-slate-100">
+            <button onClick={handleSave} disabled={saving}
+              className="flex-1 bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white py-2.5 rounded-xl font-semibold text-sm transition-colors">
+              {saving ? 'กำลังบันทึก...' : (modal.mode === 'add' ? 'เพิ่มทัวร์' : 'บันทึก')}
+            </button>
+            <button onClick={closeModal} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl font-semibold text-sm transition-colors">
+              ยกเลิก
+            </button>
           </div>
         </Modal>
       )}
