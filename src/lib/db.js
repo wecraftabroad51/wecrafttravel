@@ -1,0 +1,281 @@
+/**
+ * db.js — Supabase CRUD helpers
+ * All functions return { data, error }
+ * snake_case (DB) ↔ camelCase (JS) transform included
+ */
+import { supabase } from './supabase'
+
+// ── Helpers ──────────────────────────────────────────────────
+const toCamel = (obj) => {
+  if (!obj) return obj
+  const map = {
+    tour_id: 'tourId', group_size: 'groupSize', price_tiers: 'priceTiers',
+    created_at: 'createdAt', updated_at: 'updatedAt', expires_at: 'expiresAt',
+    sort_order: 'sortOrder', read_time: 'readTime',
+  }
+  return Object.fromEntries(
+    Object.entries(obj).map(([k, v]) => [map[k] || k, v])
+  )
+}
+
+const mapRows = (rows) => (rows || []).map(toCamel)
+
+// ── TOURS ─────────────────────────────────────────────────────
+export const fetchTours = async () => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { data, error } = await supabase
+    .from('tours')
+    .select('*')
+    .order('created_at', { ascending: false })
+  return { data: mapRows(data), error }
+}
+
+export const fetchPublicTours = async () => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { data, error } = await supabase
+    .from('tours')
+    .select('*')
+    .eq('active', true)
+    .order('created_at', { ascending: false })
+  return { data: mapRows(data), error }
+}
+
+export const upsertTour = async (tour) => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { id, createdAt, updatedAt, groupSize, priceTiers, ...rest } = tour
+  const row = {
+    ...rest,
+    group_size: groupSize,
+    price_tiers: priceTiers,
+    ...(id ? { id } : {}),
+  }
+  const { data, error } = await supabase
+    .from('tours')
+    .upsert(row, { onConflict: 'id' })
+    .select()
+    .single()
+  return { data: toCamel(data), error }
+}
+
+export const deleteTour = async (id) => {
+  if (!supabase) return { error: 'offline' }
+  return supabase.from('tours').delete().eq('id', id)
+}
+
+export const toggleTourFeatured = async (id, featured) => {
+  if (!supabase) return { error: 'offline' }
+  return supabase.from('tours').update({ featured }).eq('id', id)
+}
+
+export const toggleTourActive = async (id, active) => {
+  if (!supabase) return { error: 'offline' }
+  return supabase.from('tours').update({ active }).eq('id', id)
+}
+
+// ── ARTICLES ──────────────────────────────────────────────────
+export const fetchArticles = async () => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { data, error } = await supabase
+    .from('articles')
+    .select('*')
+    .order('created_at', { ascending: false })
+  return { data: mapRows(data), error }
+}
+
+export const upsertArticle = async (article) => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { id, createdAt, updatedAt, readTime, ...rest } = article
+  const row = { ...rest, read_time: readTime, ...(id ? { id } : {}) }
+  const { data, error } = await supabase
+    .from('articles')
+    .upsert(row, { onConflict: 'id' })
+    .select()
+    .single()
+  return { data: toCamel(data), error }
+}
+
+export const deleteArticle = async (id) => {
+  if (!supabase) return { error: 'offline' }
+  return supabase.from('articles').delete().eq('id', id)
+}
+
+// ── PROMOTIONS ────────────────────────────────────────────────
+export const fetchPromotions = async () => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { data, error } = await supabase
+    .from('promotions')
+    .select('*')
+    .order('created_at', { ascending: false })
+  return { data: mapRows(data), error }
+}
+
+export const upsertPromotion = async (promo) => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { id, createdAt, updatedAt, expiresAt, ...rest } = promo
+  const row = { ...rest, expires_at: expiresAt, ...(id ? { id } : {}) }
+  const { data, error } = await supabase
+    .from('promotions')
+    .upsert(row, { onConflict: 'id' })
+    .select()
+    .single()
+  return { data: toCamel(data), error }
+}
+
+export const deletePromotion = async (id) => {
+  if (!supabase) return { error: 'offline' }
+  return supabase.from('promotions').delete().eq('id', id)
+}
+
+export const togglePromoActive = async (id, active) => {
+  if (!supabase) return { error: 'offline' }
+  return supabase.from('promotions').update({ active }).eq('id', id)
+}
+
+// ── FAQS ──────────────────────────────────────────────────────
+export const fetchFaqs = async () => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { data, error } = await supabase
+    .from('faqs')
+    .select('*')
+    .order('sort_order', { ascending: true })
+  return { data: mapRows(data), error }
+}
+
+export const upsertFaq = async (faq) => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { id, createdAt, sortOrder, ...rest } = faq
+  const row = { ...rest, sort_order: sortOrder, ...(id ? { id } : {}) }
+  const { data, error } = await supabase
+    .from('faqs')
+    .upsert(row, { onConflict: 'id' })
+    .select()
+    .single()
+  return { data: toCamel(data), error }
+}
+
+export const deleteFaq = async (id) => {
+  if (!supabase) return { error: 'offline' }
+  return supabase.from('faqs').delete().eq('id', id)
+}
+
+// ── REVIEWS ───────────────────────────────────────────────────
+export const fetchReviews = async () => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('*')
+    .order('created_at', { ascending: false })
+  return { data: mapRows(data), error }
+}
+
+export const insertReview = async (review) => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { tourId, ...rest } = review
+  const { data, error } = await supabase
+    .from('reviews')
+    .insert({ ...rest, tour_id: tourId })
+    .select()
+    .single()
+  return { data: toCamel(data), error }
+}
+
+export const approveReview = async (id, approved) => {
+  if (!supabase) return { error: 'offline' }
+  return supabase.from('reviews').update({ approved }).eq('id', id)
+}
+
+export const deleteReview = async (id) => {
+  if (!supabase) return { error: 'offline' }
+  return supabase.from('reviews').delete().eq('id', id)
+}
+
+// ── BOOKINGS ──────────────────────────────────────────────────
+export const fetchBookings = async () => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { data, error } = await supabase
+    .from('bookings')
+    .select('*')
+    .order('created_at', { ascending: false })
+  return { data: mapRows(data), error }
+}
+
+export const insertBooking = async (booking) => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { tourId, tourName, ...rest } = booking
+  const { data, error } = await supabase
+    .from('bookings')
+    .insert({ ...rest, tour_id: tourId, tour_name: tourName })
+    .select()
+    .single()
+  return { data: toCamel(data), error }
+}
+
+export const updateBookingStatus = async (id, status) => {
+  if (!supabase) return { error: 'offline' }
+  return supabase.from('bookings').update({ status }).eq('id', id)
+}
+
+// ── MESSAGES ──────────────────────────────────────────────────
+export const fetchMessages = async () => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { data, error } = await supabase
+    .from('messages')
+    .select('*')
+    .order('created_at', { ascending: false })
+  return { data: mapRows(data), error }
+}
+
+export const insertMessage = async (msg) => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { data, error } = await supabase
+    .from('messages')
+    .insert(msg)
+    .select()
+    .single()
+  return { data: toCamel(data), error }
+}
+
+export const markMessageRead = async (id) => {
+  if (!supabase) return { error: 'offline' }
+  return supabase.from('messages').update({ read: true }).eq('id', id)
+}
+
+// ── CHAT SESSIONS ─────────────────────────────────────────────
+export const fetchChatSessions = async () => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { data, error } = await supabase
+    .from('chat_sessions')
+    .select('*')
+    .order('updated_at', { ascending: false })
+  return { data: mapRows(data), error }
+}
+
+export const upsertChatSession = async (session) => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { id, createdAt, updatedAt, ...rest } = session
+  const row = { ...rest, ...(id ? { id } : {}) }
+  const { data, error } = await supabase
+    .from('chat_sessions')
+    .upsert(row, { onConflict: 'id' })
+    .select()
+    .single()
+  return { data: toCamel(data), error }
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────
+export const fetchSettings = async () => {
+  if (!supabase) return { data: null, error: 'offline' }
+  const { data, error } = await supabase
+    .from('site_settings')
+    .select('*')
+    .eq('id', 1)
+    .single()
+  return { data, error }
+}
+
+export const updateSettings = async (settings) => {
+  if (!supabase) return { error: 'offline' }
+  return supabase
+    .from('site_settings')
+    .upsert({ id: 1, ...settings }, { onConflict: 'id' })
+}

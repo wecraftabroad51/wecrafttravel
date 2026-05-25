@@ -1,0 +1,360 @@
+export const TOURS_DATA = [
+  {
+    id: 1,
+    name: { th: 'ญี่ปุ่นซากุระบาน', en: 'Japan Cherry Blossom' },
+    destination: { th: 'ญี่ปุ่น', en: 'Japan' },
+    continent: 'Asia',
+    description: { th: 'สัมผัสความงามของดอกซากุระในฤดูใบไม้ผลิ พร้อมเยี่ยมชมวัดโบราณและเมืองสมัยใหม่', en: 'Experience cherry blossoms in spring, ancient temples and modern cities' },
+    season: { th: 'มี.ค. - พ.ค.', en: 'Mar - May' },
+    duration: 7, groupSize: 20, price: 45900, childPrice: 35000, infantPrice: 5000,
+    featured: true, featuredOrder: 1,
+    image: 'https://picsum.photos/seed/japan1/800/500',
+    gallery: ['https://picsum.photos/seed/japan1/800/500','https://picsum.photos/seed/japan2/800/500','https://picsum.photos/seed/japan3/800/500','https://picsum.photos/seed/japan4/800/500','https://picsum.photos/seed/japan5/800/500'],
+    flight: {
+      outbound: { airline: 'Thai Airways', from: 'BKK', to: 'NRT', departure: '08:00', arrival: '16:00', baggage: '30kg' },
+      return: { airline: 'Thai Airways', from: 'NRT', to: 'BKK', departure: '18:00', arrival: '23:30', baggage: '30kg' },
+    },
+    hotels: [
+      { name: 'Shinjuku Park Hotel', stars: 4, nights: 3, amenities: ['WiFi', 'Breakfast', 'Pool'], image: 'https://picsum.photos/seed/hotel1/400/300' },
+      { name: 'Kyoto Ryokan Inn', stars: 4, nights: 3, amenities: ['WiFi', 'Onsen', 'Japanese Breakfast'], image: 'https://picsum.photos/seed/hotel2/400/300' },
+    ],
+    itinerary: [
+      { day: 1, title: { th: 'เดินทางถึงโตเกียว', en: 'Arrive Tokyo' }, description: { th: 'เช็คอิน ชมย่านชินจุกุ', en: 'Check-in, explore Shinjuku' }, meals: ['dinner'], hotel: 'Shinjuku Park Hotel' },
+      { day: 2, title: { th: 'โตเกียว - สวนอุเอโนะ', en: 'Tokyo - Ueno Park' }, description: { th: 'ชมดอกซากุระที่สวนอุเอโนะ วัดเซนโซจิ', en: 'Cherry blossoms at Ueno Park, Senso-ji Temple' }, meals: ['breakfast','lunch','dinner'], hotel: 'Shinjuku Park Hotel' },
+      { day: 3, title: { th: 'นิกโก้ - น้ำตกเคงน', en: 'Nikko - Kegon Falls' }, description: { th: 'เยี่ยมชมศาลเจ้านิกโก้และน้ำตก', en: 'Visit Nikko Shrine and waterfall' }, meals: ['breakfast','dinner'], hotel: 'Shinjuku Park Hotel' },
+      { day: 4, title: { th: 'เดินทางสู่เกียวโต', en: 'Travel to Kyoto' }, description: { th: 'ชินกันเซนสู่เกียวโต ชมวัดคินคะคุจิ', en: 'Shinkansen to Kyoto, Kinkaku-ji' }, meals: ['breakfast','lunch','dinner'], hotel: 'Kyoto Ryokan Inn' },
+      { day: 5, title: { th: 'เกียวโต - อาราชิยาม่า', en: 'Kyoto - Arashiyama' }, description: { th: 'ป่าไผ่อาราชิยาม่า วัดเทนริวจิ', en: 'Bamboo forest, Tenryu-ji Temple' }, meals: ['breakfast','lunch','dinner'], hotel: 'Kyoto Ryokan Inn' },
+      { day: 6, title: { th: 'นาระ - โอซาก้า', en: 'Nara - Osaka' }, description: { th: 'ให้อาหารกวาง วัดโทไดจิ ย่านโดทอมโบริ', en: 'Deer feeding, Todai-ji, Dotonbori' }, meals: ['breakfast','dinner'], hotel: 'Kyoto Ryokan Inn' },
+      { day: 7, title: { th: 'เดินทางกลับ', en: 'Departure' }, description: { th: 'ช้อปปิ้งและเดินทางกลับ', en: 'Shopping and fly home' }, meals: ['breakfast'], hotel: '' },
+    ],
+    includes: [{ th: 'ตั๋วเครื่องบินชั้นประหยัด', en: 'Economy class tickets' },{ th: 'โรงแรม 4 ดาว 6 คืน', en: '4-star hotel 6 nights' },{ th: 'อาหารตามรายการ', en: 'Meals as per itinerary' },{ th: 'มัคคุเทศก์ภาษาไทย', en: 'Thai-speaking guide' },{ th: 'ประกันการเดินทาง', en: 'Travel insurance' }],
+    excludes: [{ th: 'ค่าใช้จ่ายส่วนตัว', en: 'Personal expenses' },{ th: 'ค่าวีซ่า', en: 'Visa fees' },{ th: 'ทิปไกด์และคนขับ', en: 'Tips' }],
+    priceTiers: [
+      { tier: 'Standard', price: 45900, description: { th: 'โรงแรม 4 ดาว', en: '4-star hotel' } },
+      { tier: 'Premium', price: 55900, description: { th: 'โรงแรม 5 ดาว', en: '5-star hotel' } },
+      { tier: 'VIP', price: 75900, description: { th: 'โรงแรม 5 ดาว + อัปเกรดที่นั่ง', en: '5-star + seat upgrade' } },
+    ],
+    departures: [
+      { id: 'd1', date: '2026-03-20', totalSeats: 20, bookedSeats: 15, priceModifier: 0 },
+      { id: 'd2', date: '2026-04-05', totalSeats: 20, bookedSeats: 8, priceModifier: 0 },
+      { id: 'd3', date: '2026-04-20', totalSeats: 20, bookedSeats: 20, priceModifier: 0 },
+    ],
+    pdfUrl: '', pdfLabel: { th: 'ดาวน์โหลดโปรแกรม', en: 'Download Program' }, pdfUpdated: '2026-01-15',
+  },
+  {
+    id: 2,
+    name: { th: 'เมดิเตอร์เรเนียนคลาสสิก', en: 'Mediterranean Classic' },
+    destination: { th: 'กรีซ-อิตาลี', en: 'Greece-Italy' },
+    continent: 'Europe',
+    description: { th: 'ซันโตรินี่ โรม และเวนิส สวรรค์แห่งทะเลเมดิเตอร์เรเนียน', en: 'Santorini, Rome, and Venice - Mediterranean paradise' },
+    season: { th: 'พ.ค. - ต.ค.', en: 'May - Oct' },
+    duration: 10, groupSize: 18, price: 89900, childPrice: 75000, infantPrice: 8000,
+    featured: true, featuredOrder: 2,
+    image: 'https://picsum.photos/seed/med1/800/500',
+    gallery: ['https://picsum.photos/seed/med1/800/500','https://picsum.photos/seed/med2/800/500','https://picsum.photos/seed/med3/800/500','https://picsum.photos/seed/med4/800/500','https://picsum.photos/seed/med5/800/500'],
+    flight: {
+      outbound: { airline: 'Qatar Airways', from: 'BKK', to: 'ATH', departure: '10:00', arrival: '18:30', baggage: '30kg' },
+      return: { airline: 'Qatar Airways', from: 'VCE', to: 'BKK', departure: '14:00', arrival: '06:00+1', baggage: '30kg' },
+    },
+    hotels: [
+      { name: 'Santorini Blue Palace', stars: 5, nights: 3, amenities: ['WiFi','Pool','Sea View'], image: 'https://picsum.photos/seed/hotel3/400/300' },
+      { name: 'Hotel Roma Classic', stars: 4, nights: 3, amenities: ['WiFi','Breakfast'], image: 'https://picsum.photos/seed/hotel4/400/300' },
+      { name: 'Venice Grand Canal Hotel', stars: 4, nights: 3, amenities: ['WiFi','Canal View'], image: 'https://picsum.photos/seed/hotel5/400/300' },
+    ],
+    itinerary: [
+      { day: 1, title: { th: 'เดินทางถึงเอเธนส์', en: 'Arrive Athens' }, description: { th: 'เช็คอิน ชมเมืองเอเธนส์', en: 'Check-in, explore Athens' }, meals: ['dinner'], hotel: 'Santorini Blue Palace' },
+      { day: 2, title: { th: 'อะโครโพลิส', en: 'Acropolis' }, description: { th: 'ชมอะโครโพลิสและพิพิธภัณฑ์', en: 'Visit Acropolis and museum' }, meals: ['breakfast','dinner'], hotel: 'Santorini Blue Palace' },
+      { day: 3, title: { th: 'ซันโตรินี่', en: 'Santorini' }, description: { th: 'เฟอร์รี่สู่ซันโตรินี่ ชมพระอาทิตย์ตก', en: 'Ferry to Santorini, sunset at Oia' }, meals: ['breakfast','lunch','dinner'], hotel: 'Santorini Blue Palace' },
+      { day: 4, title: { th: 'ซันโตรินี่ - Oia', en: 'Santorini - Oia' }, description: { th: 'ชม Oia และ Fira', en: 'Explore Oia and Fira' }, meals: ['breakfast','dinner'], hotel: 'Santorini Blue Palace' },
+      { day: 5, title: { th: 'โรม', en: 'Rome' }, description: { th: 'บินสู่โรม น้ำพุเทรวี', en: 'Fly to Rome, Trevi Fountain' }, meals: ['breakfast','dinner'], hotel: 'Hotel Roma Classic' },
+      { day: 6, title: { th: 'วาติกัน', en: 'Vatican' }, description: { th: 'นครวาติกัน โคลอสเซียม', en: 'Vatican City, Colosseum' }, meals: ['breakfast','lunch','dinner'], hotel: 'Hotel Roma Classic' },
+      { day: 7, title: { th: 'ทัสคานี', en: 'Tuscany' }, description: { th: 'ทัศนียภาพทุ่งทัสคานี', en: 'Tuscany countryside' }, meals: ['breakfast','dinner'], hotel: 'Hotel Roma Classic' },
+      { day: 8, title: { th: 'เวนิส', en: 'Venice' }, description: { th: 'กอนโดลา จัตุรัสซานมาร์โก', en: "Gondola, St. Mark's Square" }, meals: ['breakfast','lunch','dinner'], hotel: 'Venice Grand Canal Hotel' },
+      { day: 9, title: { th: 'เวนิส - ช้อปปิ้ง', en: 'Venice - Shopping' }, description: { th: 'ช้อปปิ้งและชมเมือง', en: 'Shopping and city' }, meals: ['breakfast','dinner'], hotel: 'Venice Grand Canal Hotel' },
+      { day: 10, title: { th: 'เดินทางกลับ', en: 'Departure' }, description: { th: 'เดินทางกลับกรุงเทพฯ', en: 'Return to Bangkok' }, meals: ['breakfast'], hotel: '' },
+    ],
+    includes: [{ th: 'ตั๋วเครื่องบิน', en: 'Airfare' },{ th: 'โรงแรม 4-5 ดาว 9 คืน', en: '4-5 star hotel 9 nights' },{ th: 'เรือเฟอร์รี่', en: 'Ferry tickets' },{ th: 'ไกด์ภาษาไทย', en: 'Thai guide' }],
+    excludes: [{ th: 'ค่าใช้จ่ายส่วนตัว', en: 'Personal expenses' },{ th: 'วีซ่าเชงเก้น', en: 'Schengen visa' },{ th: 'ทิป', en: 'Tips' }],
+    priceTiers: [
+      { tier: 'Standard', price: 89900, description: { th: 'โรงแรม 4-5 ดาว', en: '4-5 star hotels' } },
+      { tier: 'Premium', price: 109900, description: { th: 'โรงแรม 5 ดาวทุกที่', en: 'All 5-star hotels' } },
+      { tier: 'VIP', price: 139900, description: { th: '5 ดาว + ชั้นธุรกิจ', en: '5-star + Business class' } },
+    ],
+    departures: [
+      { id: 'd4', date: '2026-06-01', totalSeats: 18, bookedSeats: 10, priceModifier: 0 },
+      { id: 'd5', date: '2026-07-15', totalSeats: 18, bookedSeats: 16, priceModifier: 5000 },
+      { id: 'd6', date: '2026-09-01', totalSeats: 18, bookedSeats: 3, priceModifier: -3000 },
+    ],
+    pdfUrl: '', pdfLabel: { th: 'ดาวน์โหลดโปรแกรม', en: 'Download Program' }, pdfUpdated: '2026-02-01',
+  },
+  {
+    id: 3,
+    name: { th: 'โมร็อกโกทะเลทรายและเมดินา', en: 'Morocco Desert & Medina' },
+    destination: { th: 'โมร็อกโก', en: 'Morocco' },
+    continent: 'Africa',
+    description: { th: 'ทะเลทรายซาฮาร่า ตลาดเมดินา และสถาปัตยกรรมอิสลาม', en: 'Sahara desert, Medina markets, and Islamic architecture' },
+    season: { th: 'ต.ค. - เม.ย.', en: 'Oct - Apr' },
+    duration: 8, groupSize: 16, price: 52900, childPrice: 42000, infantPrice: 6000,
+    featured: false, featuredOrder: 0,
+    image: 'https://picsum.photos/seed/morocco1/800/500',
+    gallery: ['https://picsum.photos/seed/morocco1/800/500','https://picsum.photos/seed/morocco2/800/500','https://picsum.photos/seed/morocco3/800/500','https://picsum.photos/seed/morocco4/800/500'],
+    flight: {
+      outbound: { airline: 'Emirates', from: 'BKK', to: 'CMN', departure: '23:00', arrival: '09:30+1', baggage: '30kg' },
+      return: { airline: 'Emirates', from: 'CMN', to: 'BKK', departure: '11:00', arrival: '06:00+1', baggage: '30kg' },
+    },
+    hotels: [
+      { name: 'Marrakech Riad Palace', stars: 4, nights: 3, amenities: ['WiFi','Pool','Hammam'], image: 'https://picsum.photos/seed/hotel6/400/300' },
+      { name: 'Sahara Desert Camp', stars: 3, nights: 2, amenities: ['Camel Ride','Stargazing'], image: 'https://picsum.photos/seed/hotel7/400/300' },
+      { name: 'Fes Boutique Hotel', stars: 4, nights: 2, amenities: ['WiFi','Rooftop'], image: 'https://picsum.photos/seed/hotel8/400/300' },
+    ],
+    itinerary: [
+      { day: 1, title: { th: 'เดินทางถึงมาร์ราเกช', en: 'Arrive Marrakech' }, description: { th: 'เช็คอิน พักผ่อน', en: 'Check-in and rest' }, meals: ['dinner'], hotel: 'Marrakech Riad Palace' },
+      { day: 2, title: { th: 'มาร์ราเกช', en: 'Marrakech' }, description: { th: 'จัตุรัสเจมาเอลฟนา ตลาดซุก', en: 'Jemaa el-Fnaa, Souk markets' }, meals: ['breakfast','lunch','dinner'], hotel: 'Marrakech Riad Palace' },
+      { day: 3, title: { th: 'เอสเซาอิรา', en: 'Essaouira' }, description: { th: 'เมืองชายทะเลสีน้ำเงิน', en: 'Blue seaside city' }, meals: ['breakfast','dinner'], hotel: 'Marrakech Riad Palace' },
+      { day: 4, title: { th: 'สู่ทะเลทราย', en: 'Desert Journey' }, description: { th: 'Aït Benhaddou พระอาทิตย์ตกทะเลทราย', en: 'Aït Benhaddou and desert sunset' }, meals: ['breakfast','lunch','dinner'], hotel: 'Sahara Desert Camp' },
+      { day: 5, title: { th: 'ซาฮาร่า Sunrise', en: 'Sahara Sunrise' }, description: { th: 'ขี่อูฐ ชมพระอาทิตย์ขึ้น', en: 'Camel ride and sunrise' }, meals: ['breakfast','lunch','dinner'], hotel: 'Sahara Desert Camp' },
+      { day: 6, title: { th: 'เฟซ', en: 'Fes' }, description: { th: 'เมดินาเก่า โรงฟอกหนัง', en: 'Old Medina and tanneries' }, meals: ['breakfast','dinner'], hotel: 'Fes Boutique Hotel' },
+      { day: 7, title: { th: 'เฟซ - ช้อปปิ้ง', en: 'Fes - Shopping' }, description: { th: 'ช้อปปิ้งของที่ระลึก', en: 'Souvenir shopping' }, meals: ['breakfast','dinner'], hotel: 'Fes Boutique Hotel' },
+      { day: 8, title: { th: 'เดินทางกลับ', en: 'Departure' }, description: { th: 'เดินทางกลับกรุงเทพฯ', en: 'Return to Bangkok' }, meals: ['breakfast'], hotel: '' },
+    ],
+    includes: [{ th: 'ตั๋วเครื่องบิน', en: 'Airfare' },{ th: 'ที่พัก 7 คืน', en: '7 nights stay' },{ th: 'ขี่อูฐ', en: 'Camel ride' },{ th: 'ไกด์ภาษาไทย', en: 'Thai guide' }],
+    excludes: [{ th: 'ค่าใช้จ่ายส่วนตัว', en: 'Personal expenses' },{ th: 'วีซ่า', en: 'Visa' },{ th: 'ทิป', en: 'Tips' }],
+    priceTiers: [
+      { tier: 'Standard', price: 52900, description: { th: 'ที่พักมาตรฐาน', en: 'Standard accommodation' } },
+      { tier: 'Premium', price: 65900, description: { th: 'Riad พรีเมียม', en: 'Premium Riad' } },
+      { tier: 'VIP', price: 85900, description: { th: 'Riad VIP ส่วนตัว', en: 'Private VIP Riad' } },
+    ],
+    departures: [
+      { id: 'd7', date: '2026-11-10', totalSeats: 16, bookedSeats: 5, priceModifier: 0 },
+      { id: 'd8', date: '2026-12-20', totalSeats: 16, bookedSeats: 14, priceModifier: 3000 },
+    ],
+    pdfUrl: '', pdfLabel: { th: 'ดาวน์โหลดโปรแกรม', en: 'Download Program' }, pdfUpdated: '2026-03-01',
+  },
+  {
+    id: 4,
+    name: { th: 'มาชูปิกชูแอดเวนเจอร์', en: 'Machu Picchu Adventure' },
+    destination: { th: 'เปรู', en: 'Peru' },
+    continent: 'Americas',
+    description: { th: 'เมืองโบราณมาชูปิกชู หุบเขาศักดิ์สิทธิ์ ทะเลสาบติติกากา', en: 'Ancient Machu Picchu, Sacred Valley, Lake Titicaca' },
+    season: { th: 'พ.ค. - ต.ค.', en: 'May - Oct' },
+    duration: 9, groupSize: 15, price: 78500, childPrice: 65000, infantPrice: 10000,
+    featured: false, featuredOrder: 0,
+    image: 'https://picsum.photos/seed/peru1/800/500',
+    gallery: ['https://picsum.photos/seed/peru1/800/500','https://picsum.photos/seed/peru2/800/500','https://picsum.photos/seed/peru3/800/500','https://picsum.photos/seed/peru4/800/500'],
+    flight: {
+      outbound: { airline: 'LATAM', from: 'BKK', to: 'LIM', departure: '15:00', arrival: '12:00+1', baggage: '23kg' },
+      return: { airline: 'LATAM', from: 'LIM', to: 'BKK', departure: '20:00', arrival: '08:00+2', baggage: '23kg' },
+    },
+    hotels: [
+      { name: 'Cusco Valley Hotel', stars: 4, nights: 3, amenities: ['WiFi','Altitude Care'], image: 'https://picsum.photos/seed/hotel9/400/300' },
+      { name: 'Aguas Calientes Lodge', stars: 3, nights: 2, amenities: ['WiFi','Hot Springs'], image: 'https://picsum.photos/seed/hotel10/400/300' },
+      { name: 'Lima Ocean View Hotel', stars: 4, nights: 3, amenities: ['WiFi','Pool','Ocean View'], image: 'https://picsum.photos/seed/hotel11/400/300' },
+    ],
+    itinerary: [
+      { day: 1, title: { th: 'เดินทางถึงลิมา', en: 'Arrive Lima' }, description: { th: 'เช็คอิน พักผ่อน', en: 'Check-in and rest' }, meals: ['dinner'], hotel: 'Lima Ocean View Hotel' },
+      { day: 2, title: { th: 'ลิมา - กุสโก', en: 'Lima - Cusco' }, description: { th: 'บินสู่กุสโก ปรับตัวกับความสูง', en: 'Fly to Cusco, altitude acclimatization' }, meals: ['breakfast','dinner'], hotel: 'Cusco Valley Hotel' },
+      { day: 3, title: { th: 'หุบเขาศักดิ์สิทธิ์', en: 'Sacred Valley' }, description: { th: 'ชมสถานที่อินคา', en: 'Visit Inca sites' }, meals: ['breakfast','lunch','dinner'], hotel: 'Cusco Valley Hotel' },
+      { day: 4, title: { th: 'กุสโก', en: 'Cusco' }, description: { th: 'ชมเมืองเก่ากุสโก', en: 'Explore old Cusco' }, meals: ['breakfast','dinner'], hotel: 'Cusco Valley Hotel' },
+      { day: 5, title: { th: 'มาชูปิกชู', en: 'Machu Picchu' }, description: { th: 'รถไฟสู่มาชูปิกชู', en: 'Train to Machu Picchu' }, meals: ['breakfast','lunch','dinner'], hotel: 'Aguas Calientes Lodge' },
+      { day: 6, title: { th: 'สำรวจมาชูปิกชู', en: 'Explore Machu Picchu' }, description: { th: 'สำรวจเมืองโบราณ', en: 'Explore ancient city' }, meals: ['breakfast','lunch','dinner'], hotel: 'Aguas Calientes Lodge' },
+      { day: 7, title: { th: 'ทะเลสาบติติกากา', en: 'Lake Titicaca' }, description: { th: 'ทะเลสาบและเกาะลอยน้ำ', en: 'Lake and floating islands' }, meals: ['breakfast','lunch','dinner'], hotel: 'Lima Ocean View Hotel' },
+      { day: 8, title: { th: 'ลิมา', en: 'Lima' }, description: { th: 'ช้อปปิ้ง', en: 'Shopping' }, meals: ['breakfast','dinner'], hotel: 'Lima Ocean View Hotel' },
+      { day: 9, title: { th: 'เดินทางกลับ', en: 'Departure' }, description: { th: 'เดินทางกลับ', en: 'Return home' }, meals: ['breakfast'], hotel: '' },
+    ],
+    includes: [{ th: 'ตั๋วเครื่องบิน', en: 'Airfare' },{ th: 'ที่พัก 8 คืน', en: '8 nights stay' },{ th: 'ตั๋วรถไฟมาชูปิกชู', en: 'Machu Picchu train' },{ th: 'บัตรเข้าชม', en: 'Entrance fees' }],
+    excludes: [{ th: 'ค่าใช้จ่ายส่วนตัว', en: 'Personal expenses' },{ th: 'วีซ่า', en: 'Visa' },{ th: 'ทิป', en: 'Tips' }],
+    priceTiers: [
+      { tier: 'Standard', price: 78500, description: { th: 'ที่พักมาตรฐาน', en: 'Standard accommodation' } },
+      { tier: 'Premium', price: 95000, description: { th: 'ที่พักพรีเมียม', en: 'Premium accommodation' } },
+      { tier: 'VIP', price: 125000, description: { th: 'VIP + ชั้นธุรกิจ', en: 'VIP + Business class' } },
+    ],
+    departures: [
+      { id: 'd9', date: '2026-06-15', totalSeats: 15, bookedSeats: 7, priceModifier: 0 },
+      { id: 'd10', date: '2026-08-01', totalSeats: 15, bookedSeats: 12, priceModifier: 2000 },
+    ],
+    pdfUrl: '', pdfLabel: { th: 'ดาวน์โหลดโปรแกรม', en: 'Download Program' }, pdfUpdated: '2026-02-15',
+  },
+  {
+    id: 5,
+    name: { th: 'มัลดีฟส์ลักซ์ชัวรี่', en: 'Maldives Luxury' },
+    destination: { th: 'มัลดีฟส์', en: 'Maldives' },
+    continent: 'Asia',
+    description: { th: 'วิลล่าเหนือน้ำ น้ำทะเลใสเป็นประกาย ปะการังสวยงาม', en: 'Overwater villa, crystal clear water, stunning coral reefs' },
+    season: { th: 'ต.ค. - เม.ย.', en: 'Oct - Apr' },
+    duration: 5, groupSize: 10, price: 65000, childPrice: 50000, infantPrice: 8000,
+    featured: true, featuredOrder: 3,
+    image: 'https://picsum.photos/seed/maldives1/800/500',
+    gallery: ['https://picsum.photos/seed/maldives1/800/500','https://picsum.photos/seed/maldives2/800/500','https://picsum.photos/seed/maldives3/800/500','https://picsum.photos/seed/maldives4/800/500'],
+    flight: {
+      outbound: { airline: 'SriLankan', from: 'BKK', to: 'MLE', departure: '06:00', arrival: '09:30', baggage: '30kg' },
+      return: { airline: 'SriLankan', from: 'MLE', to: 'BKK', departure: '11:00', arrival: '16:30', baggage: '30kg' },
+    },
+    hotels: [
+      { name: 'Overwater Paradise Resort', stars: 5, nights: 4, amenities: ['WiFi','Pool','Snorkeling','Spa','All Inclusive'], image: 'https://picsum.photos/seed/hotel12/400/300' },
+    ],
+    itinerary: [
+      { day: 1, title: { th: 'เดินทางถึงมัลดีฟส์', en: 'Arrive Maldives' }, description: { th: 'สปีดโบ๊ทสู่รีสอร์ท', en: 'Speedboat to resort' }, meals: ['lunch','dinner'], hotel: 'Overwater Paradise Resort' },
+      { day: 2, title: { th: 'ดำน้ำและผ่อนคลาย', en: 'Snorkeling & Relax' }, description: { th: 'ดำน้ำดูปะการัง ผ่อนคลาย', en: 'Coral snorkeling, relaxation' }, meals: ['breakfast','lunch','dinner'], hotel: 'Overwater Paradise Resort' },
+      { day: 3, title: { th: 'Island Hopping', en: 'Island Hopping' }, description: { th: 'ท่องเกาะสวรรค์', en: 'Explore islands' }, meals: ['breakfast','lunch','dinner'], hotel: 'Overwater Paradise Resort' },
+      { day: 4, title: { th: 'Sunset Cruise', en: 'Sunset Cruise' }, description: { th: 'ล่องเรือชมโลมา', en: 'Dolphin watching cruise' }, meals: ['breakfast','lunch','dinner'], hotel: 'Overwater Paradise Resort' },
+      { day: 5, title: { th: 'เดินทางกลับ', en: 'Departure' }, description: { th: 'เดินทางกลับกรุงเทพฯ', en: 'Return to Bangkok' }, meals: ['breakfast'], hotel: '' },
+    ],
+    includes: [{ th: 'ตั๋วเครื่องบิน', en: 'Airfare' },{ th: 'สปีดโบ๊ทไปกลับ', en: 'Speedboat transfer' },{ th: 'วิลล่าเหนือน้ำ 4 คืน', en: 'Overwater villa 4 nights' },{ th: 'All Inclusive', en: 'All Inclusive' }],
+    excludes: [{ th: 'ค่าใช้จ่ายส่วนตัว', en: 'Personal expenses' },{ th: 'Spa', en: 'Spa treatments' },{ th: 'ทิป', en: 'Tips' }],
+    priceTiers: [
+      { tier: 'Standard', price: 65000, description: { th: 'Water Villa', en: 'Water Villa' } },
+      { tier: 'Premium', price: 85000, description: { th: 'Deluxe Water Villa', en: 'Deluxe Water Villa' } },
+      { tier: 'VIP', price: 125000, description: { th: 'Presidential Villa', en: 'Presidential Villa' } },
+    ],
+    departures: [
+      { id: 'd11', date: '2026-12-01', totalSeats: 10, bookedSeats: 8, priceModifier: 5000 },
+      { id: 'd12', date: '2027-01-15', totalSeats: 10, bookedSeats: 2, priceModifier: 0 },
+      { id: 'd13', date: '2027-02-10', totalSeats: 10, bookedSeats: 0, priceModifier: -2000 },
+    ],
+    pdfUrl: '', pdfLabel: { th: 'ดาวน์โหลดโปรแกรม', en: 'Download Program' }, pdfUpdated: '2026-01-20',
+  },
+  {
+    id: 6,
+    name: { th: 'เหนือสุดสยามเทรคกิ้ง', en: 'Northern Thailand Trek' },
+    destination: { th: 'เชียงใหม่-เชียงราย', en: 'Chiang Mai-Chiang Rai' },
+    continent: 'Asia',
+    description: { th: 'เดินป่า หมู่บ้านชาวเขา วัดขาว น้ำตกสวยงาม', en: 'Trekking, hill tribes, White Temple, beautiful waterfalls' },
+    season: { th: 'พ.ย. - ก.พ.', en: 'Nov - Feb' },
+    duration: 4, groupSize: 12, price: 12900, childPrice: 9900, infantPrice: 2000,
+    featured: false, featuredOrder: 0,
+    image: 'https://picsum.photos/seed/chiangmai1/800/500',
+    gallery: ['https://picsum.photos/seed/chiangmai1/800/500','https://picsum.photos/seed/chiangmai2/800/500','https://picsum.photos/seed/chiangmai3/800/500'],
+    flight: {
+      outbound: { airline: 'Thai Lion Air', from: 'BKK', to: 'CNX', departure: '07:00', arrival: '08:20', baggage: '20kg' },
+      return: { airline: 'Thai Lion Air', from: 'CNX', to: 'BKK', departure: '19:00', arrival: '20:20', baggage: '20kg' },
+    },
+    hotels: [
+      { name: 'Chiang Mai Boutique', stars: 3, nights: 2, amenities: ['WiFi','Pool','Breakfast'], image: 'https://picsum.photos/seed/hotel13/400/300' },
+      { name: 'Chiang Rai Hill Resort', stars: 3, nights: 1, amenities: ['WiFi','Mountain View'], image: 'https://picsum.photos/seed/hotel14/400/300' },
+    ],
+    itinerary: [
+      { day: 1, title: { th: 'เชียงใหม่', en: 'Chiang Mai' }, description: { th: 'ดอยสุเทพ ตลาดไนท์บาซาร์', en: 'Doi Suthep, Night Bazaar' }, meals: ['lunch','dinner'], hotel: 'Chiang Mai Boutique' },
+      { day: 2, title: { th: 'เดินป่า', en: 'Trekking' }, description: { th: 'เดินป่า หมู่บ้านชาวเขา', en: 'Forest trek, hill tribe village' }, meals: ['breakfast','lunch','dinner'], hotel: 'Chiang Mai Boutique' },
+      { day: 3, title: { th: 'เชียงราย', en: 'Chiang Rai' }, description: { th: 'วัดร่องขุ่น วัดร่องเสือเต้น', en: 'White Temple, Blue Temple' }, meals: ['breakfast','lunch','dinner'], hotel: 'Chiang Rai Hill Resort' },
+      { day: 4, title: { th: 'เดินทางกลับ', en: 'Departure' }, description: { th: 'ช้อปปิ้งและเดินทางกลับ', en: 'Shopping and return' }, meals: ['breakfast'], hotel: '' },
+    ],
+    includes: [{ th: 'ตั๋วเครื่องบิน', en: 'Airfare' },{ th: 'ที่พัก 3 คืน', en: '3 nights stay' },{ th: 'อาหารตามรายการ', en: 'Meals as itinerary' },{ th: 'ไกด์ท้องถิ่น', en: 'Local guide' }],
+    excludes: [{ th: 'ค่าใช้จ่ายส่วนตัว', en: 'Personal expenses' },{ th: 'ทิป', en: 'Tips' }],
+    priceTiers: [
+      { tier: 'Standard', price: 12900, description: { th: 'ที่พัก 3 ดาว', en: '3-star accommodation' } },
+      { tier: 'Premium', price: 18900, description: { th: 'ที่พัก 4 ดาว', en: '4-star accommodation' } },
+      { tier: 'VIP', price: 28900, description: { th: 'Private Tour + 4 ดาว', en: 'Private Tour + 4-star' } },
+    ],
+    departures: [
+      { id: 'd14', date: '2026-11-28', totalSeats: 12, bookedSeats: 4, priceModifier: 0 },
+      { id: 'd15', date: '2026-12-26', totalSeats: 12, bookedSeats: 10, priceModifier: 1500 },
+      { id: 'd16', date: '2027-01-09', totalSeats: 12, bookedSeats: 1, priceModifier: 0 },
+    ],
+    pdfUrl: '', pdfLabel: { th: 'ดาวน์โหลดโปรแกรม', en: 'Download Program' }, pdfUpdated: '2026-03-10',
+  },
+];
+
+export const ARTICLES_DATA = [
+  {
+    id: 1,
+    title: { th: '5 เหตุผลที่ต้องไปญี่ปุ่นสักครั้ง', en: '5 Reasons You Must Visit Japan' },
+    author: 'ทีมงาน Wanderlust',
+    date: '2026-03-01',
+    coverImage: 'https://picsum.photos/seed/article1/800/400',
+    excerpt: { th: 'ญี่ปุ่นเป็นประเทศที่มีเสน่ห์ไม่รู้จบ ทั้งอาหาร วัฒนธรรม และธรรมชาติ', en: 'Japan has endless charm - food, culture and nature' },
+    body: { th: 'ญี่ปุ่นเป็นหนึ่งในจุดหมายยอดนิยมของนักท่องเที่ยวชาวไทย ด้วยเสน่ห์อันโดดเด่น\n\n**1. อาหารที่หลากหลาย** - ราเมน ซูชิ เทมปุระ ยากิโทริ\n\n**2. ซากุระและธรรมชาติ** - ดอกซากุระในฤดูใบไม้ผลิ\n\n**3. วัฒนธรรมเก่าและใหม่** - วัดโบราณและตึกระฟ้าเคียงกัน\n\n**4. ความปลอดภัย** - ขึ้นชื่อเรื่องความปลอดภัยและสะอาด\n\n**5. ช้อปปิ้ง** - Akihabara, Harajuku มีทุกสิ่ง', en: 'Japan is one of the most popular destinations for Thai tourists.\n\n**1. Diverse Food** - Ramen, sushi, tempura, yakitori\n\n**2. Cherry Blossoms** - Spring blossoms are world-famous\n\n**3. Old meets New** - Ancient temples beside modern skyscrapers\n\n**4. Safety** - Renowned for safety and cleanliness\n\n**5. Shopping** - Akihabara, Harajuku have everything' },
+  },
+  {
+    id: 2,
+    title: { th: 'เช็คลิสต์เที่ยวยุโรปครั้งแรก', en: 'First-Time Europe Travel Checklist' },
+    author: 'สาวิตรี ท่องโลก',
+    date: '2026-02-15',
+    coverImage: 'https://picsum.photos/seed/article2/800/400',
+    excerpt: { th: 'วางแผนเที่ยวยุโรปครั้งแรก ต้องเตรียมอะไรบ้าง?', en: 'Planning your first Europe trip? Essential checklist inside.' },
+    body: { th: '**เอกสาร:** วีซ่าเชงเก้น หนังสือเดินทาง ประกันการเดินทาง\n\n**การเงิน:** บัตรเครดิตไม่มีค่าธรรมเนียมต่างประเทศ บัตร Wise\n\n**การจอง:** ที่พัก ตั๋วรถไฟ บัตรเข้าชมสถานที่', en: '**Documents:** Schengen visa, passport, travel insurance\n\n**Finance:** No-fee credit card, Wise card\n\n**Bookings:** Accommodation, train tickets, attraction tickets' },
+  },
+  {
+    id: 3,
+    title: { th: 'ทัวร์กรุ๊ป VS เที่ยวเอง อะไรดีกว่า?', en: 'Group Tour vs Solo Travel: Which is Better?' },
+    author: 'นครินทร์ เดินดิน',
+    date: '2026-01-20',
+    coverImage: 'https://picsum.photos/seed/article3/800/400',
+    excerpt: { th: 'เปรียบเทียบข้อดีข้อเสียระหว่างทัวร์กรุ๊ปกับการเที่ยวเอง', en: 'Comparing the pros and cons of group tours vs solo travel' },
+    body: { th: '**ทัวร์กรุ๊ป:** ไม่ต้องวางแผน ปลอดภัย ราคาคุ้ม มีเพื่อนร่วมทาง\n\n**เที่ยวเอง:** อิสระ ยืดหยุ่น สัมผัสวัฒนธรรมลึก\n\n**สรุป:** มือใหม่หรือประเทศที่ภาษายาก ทัวร์กรุ๊ปคุ้มกว่า', en: '**Group Tour:** No planning needed, safe, cost-effective, meet new friends\n\n**Solo Travel:** Freedom, flexibility, deeper cultural experience\n\n**Conclusion:** For beginners or challenging destinations, group tours are worth it.' },
+  },
+];
+
+export const PROMOTIONS_DATA = [
+  { id: 1, title: { th: 'โปรโมชั่นซากุระเอิร์ลี่เบิร์ด', en: 'Cherry Blossom Early Bird' }, tourId: 1, discount: 15, description: { th: 'จองทัวร์ญี่ปุ่นล่วงหน้า 3 เดือน รับส่วนลด 15%', en: 'Book Japan tour 3 months early, 15% off' }, endDate: '2026-12-31', image: 'https://picsum.photos/seed/promo1/600/400', active: true },
+  { id: 2, title: { th: 'ซัมเมอร์ยุโรป 2026', en: 'Europe Summer 2026' }, tourId: 2, discount: 10, description: { th: 'จองทัวร์ยุโรปฤดูร้อน รับส่วนลด 10% + อัปเกรดห้องพักฟรี', en: 'Book Europe summer, 10% off + free room upgrade' }, endDate: '2026-11-30', image: 'https://picsum.photos/seed/promo2/600/400', active: true },
+  { id: 3, title: { th: 'มัลดีฟส์ Happy New Year', en: 'Maldives Happy New Year' }, tourId: 5, discount: 20, description: { th: 'ฉลองปีใหม่ที่มัลดีฟส์ รับส่วนลดสูงสุด 20%', en: 'New Year at Maldives, up to 20% off' }, endDate: '2026-10-31', image: 'https://picsum.photos/seed/promo3/600/400', active: true },
+];
+
+export const FAQS_DATA = [
+  { id: 1, category: 'general', question: { th: 'Wanderlust Tours น่าเชื่อถือหรือไม่?', en: 'Is Wanderlust Tours reliable?' }, answer: { th: 'ใช่ครับ ได้รับใบอนุญาตอย่างถูกต้อง มีประสบการณ์ 15+ ปี ลูกค้ากว่า 50,000 คน', en: 'Yes, fully licensed with 15+ years experience and 50,000+ satisfied customers.' }, active: true },
+  { id: 2, category: 'booking', question: { th: 'ต้องจ่ายมัดจำเท่าไหร่?', en: 'How much deposit is required?' }, answer: { th: 'มัดจำ 30% ของราคาทัวร์ ส่วนที่เหลือชำระก่อนเดินทาง 30 วัน', en: 'A 30% deposit is required. Balance due 30 days before departure.' }, active: true },
+  { id: 3, category: 'flight', question: { th: 'ตั๋วเครื่องบินรวมในราคาหรือไม่?', en: 'Are flights included in the price?' }, answer: { th: 'ใช่ครับ ราคาทัวร์รวมตั๋วเครื่องบินไปกลับแล้ว', en: 'Yes, round-trip flights are included unless stated otherwise.' }, active: true },
+  { id: 4, category: 'hotel', question: { th: 'ขอห้องเดี่ยวได้ไหม?', en: 'Can I request a single room?' }, answer: { th: 'ได้ครับ มีค่าใช้จ่ายเพิ่มเติม (Single Supplement) โปรดแจ้งตอนจอง', en: 'Yes, with an additional single supplement fee. Please notify when booking.' }, active: true },
+  { id: 5, category: 'payment', question: { th: 'ชำระเงินด้วยวิธีใดได้บ้าง?', en: 'What payment methods are accepted?' }, answer: { th: 'โอนเงินธนาคาร บัตรเครดิต/เดบิต และ QR PromptPay', en: 'Bank transfer, credit/debit card, and QR PromptPay.' }, active: true },
+  { id: 6, category: 'general', question: { th: 'ยกเลิกการจองได้รับเงินคืนไหม?', en: 'What is the cancellation policy?' }, answer: { th: '60+ วัน คืน 100% / 30-59 วัน คืน 50% / น้อยกว่า 30 วัน ไม่คืน', en: '60+ days: 100% refund / 30-59 days: 50% / Under 30 days: no refund.' }, active: true },
+];
+
+export const REVIEWS_DATA = [
+  { id: 1, tourId: 1, name: 'คุณสมศรี วงศ์ดี', rating: 5, text: { th: 'ทริปญี่ปุ่นสวยมาก ไกด์ดูแลดี อาหารอร่อย ที่พักสบาย แนะนำมากๆ', en: 'Wonderful Japan trip! Excellent guide, delicious food, comfortable stay.' }, tier: 'Premium', approved: true, date: '2026-02-20' },
+  { id: 2, tourId: 2, name: 'นายชัยยุทธ แก้วใส', rating: 4, text: { th: 'ยุโรปสวยงามมาก โดยเฉพาะซันโตรินี่ แต่บางวันตารางแน่นไปนิด', en: 'Beautiful Europe, especially Santorini! Schedule was a bit tight some days.' }, tier: 'Standard', approved: true, date: '2026-01-15' },
+  { id: 3, tourId: 5, name: 'คุณนารีรัตน์ สุขสำราญ', rating: 5, text: { th: 'มัลดีฟส์ฝันในชีวิต! วิลล่าเหนือน้ำสวยงามมาก', en: 'Dream Maldives trip! Overwater villa was stunning.' }, tier: 'VIP', approved: false, date: '2026-03-01' },
+  { id: 4, tourId: 1, name: 'คุณวิชาญ ท่องเที่ยว', rating: 5, text: { th: 'ดอกซากุระสวยมาก ขอบคุณทีมงานที่จัดทริปได้ดี', en: 'Amazing cherry blossoms! Great team, wonderful trip.' }, tier: 'Standard', approved: false, date: '2026-03-10' },
+];
+
+export const SITE_SETTINGS_DEFAULT = {
+  contact: {
+    address: { th: '123 ถนนสุขุมวิท แขวงพระโขนง เขตคลองเตย กรุงเทพฯ 10110', en: '123 Sukhumvit Rd, Phra Khanong, Khlong Toei, Bangkok 10110' },
+    phone: '02-123-4567', mobile: '082-345-6789',
+    email: 'info@wanderlust-tours.com', line: '@wanderlust',
+  },
+  social: [
+    { platform: 'facebook', url: 'https://facebook.com', enabled: true, color: '#1877F2' },
+    { platform: 'instagram', url: 'https://instagram.com', enabled: true, color: '#E1306C' },
+    { platform: 'youtube', url: 'https://youtube.com', enabled: true, color: '#FF0000' },
+    { platform: 'line', url: 'https://line.me', enabled: true, color: '#06C755' },
+    { platform: 'tiktok', url: '', enabled: false, color: '#000000' },
+  ],
+  popup: {
+    enabled: true,
+    image: 'https://picsum.photos/seed/popup1/600/350',
+    title: { th: '🎉 โปรโมชั่นพิเศษต้อนรับปีใหม่!', en: '🎉 Special New Year Promotion!' },
+    description: { th: 'จองทัวร์วันนี้รับส่วนลดสูงสุด 20%', en: 'Book today and get up to 20% off' },
+    ctaText: { th: 'ดูโปรโมชั่นทั้งหมด', en: 'View All Promotions' },
+    ctaLink: 'promotions',
+    showAnnouncementBar: true,
+    announcementText: { th: '🔥 โปรพิเศษ! จองทัวร์ญี่ปุ่น/ยุโรป รับส่วนลดสูงสุด 20%', en: '🔥 Special Offer! Japan & Europe tours up to 20% off' },
+  },
+};
+
+export const BOOKINGS_DATA = [
+  { id: 1, name: 'สมศักดิ์ ใจดี', email: 'somsak@email.com', phone: '081-234-5678', tourId: 1, tier: 'Standard', travelers: 2, departureId: 'd2', totalPrice: 91800, status: 'confirmed', date: '2026-03-15' },
+  { id: 2, name: 'มาลี รักดี', email: 'mali@email.com', phone: '089-876-5432', tourId: 2, tier: 'Premium', travelers: 1, departureId: 'd4', totalPrice: 109900, status: 'pending', date: '2026-03-18' },
+];
+
+export const MESSAGES_DATA = [
+  { id: 1, name: 'อนันต์ ชอบเที่ยว', email: 'anant@email.com', phone: '082-111-2222', tourInterest: 'Japan Cherry Blossom', message: 'อยากทราบรายละเอียดทัวร์ญี่ปุ่นครับ', read: false, date: '2026-03-20' },
+  { id: 2, name: 'วิภา รักการท่องเที่ยว', email: 'wipa@email.com', phone: '083-333-4444', tourInterest: 'Mediterranean Classic', message: 'ต้องการทราบเรื่องวีซ่าเชงเก้นค่ะ', read: true, date: '2026-03-19' },
+];
+
+export const CHAT_SESSIONS_DEFAULT = [
+  {
+    id: 's1', visitorName: 'คุณพิมพ์', visitorEmail: 'pim@email.com', status: 'active', unread: 1,
+    messages: [
+      { id: 'm1', sender: 'visitor', text: 'สวัสดีค่ะ สนใจทัวร์ญี่ปุ่นค่ะ', timestamp: '10:30' },
+      { id: 'm2', sender: 'admin', text: 'สวัสดีครับ ยินดีต้อนรับ มีอะไรให้ช่วยเหลือไหมครับ?', timestamp: '10:31' },
+      { id: 'm3', sender: 'visitor', text: 'อยากทราบราคาทัวร์ญี่ปุ่นช่วงซากุระครับ', timestamp: '10:32' },
+    ],
+  },
+  {
+    id: 's2', visitorName: 'คุณธนา', visitorEmail: 'tana@email.com', status: 'resolved', unread: 0,
+    messages: [
+      { id: 'm4', sender: 'visitor', text: 'ทัวร์ยุโรปมีวีซ่าช่วยด้วยไหมครับ', timestamp: '09:00' },
+      { id: 'm5', sender: 'admin', text: 'มีบริการช่วยยื่นวีซ่าเชงเก้นครับ มีค่าบริการเพิ่มเติม', timestamp: '09:05' },
+    ],
+  },
+];
