@@ -42,12 +42,27 @@ export const fetchPublicTours = async () => {
 
 export const upsertTour = async (tour) => {
   if (!supabase) return { data: null, error: 'offline' }
-  const { id, createdAt, updatedAt, groupSize, priceTiers, ...rest } = tour
+  // Only send columns that exist in the Supabase schema
   const row = {
-    ...rest,
-    group_size: groupSize,
-    price_tiers: priceTiers,
-    ...(id ? { id } : {}),
+    ...(tour.id ? { id: tour.id } : {}),
+    name:        tour.name        || { th: '', en: '' },
+    destination: tour.destination || { th: '', en: '' },
+    description: tour.description || { th: '', en: '' },
+    image:       tour.image       || '',
+    continent:   tour.continent   || 'Asia',
+    duration:    tour.duration    || 7,
+    group_size:  tour.groupSize   ?? tour.group_size ?? 20,
+    price:       tour.price       || 0,
+    featured:    tour.featured    ?? false,
+    active:      tour.active      ?? true,
+    flight:      tour.flight      || {},
+    hotels:      tour.hotels      || [],
+    itinerary:   tour.itinerary   || [],
+    includes:    tour.includes    || [],
+    excludes:    tour.excludes    || [],
+    price_tiers: tour.priceTiers  ?? tour.price_tiers ?? [],
+    departures:  tour.departures  || [],
+    gallery:     tour.gallery     || [],
   }
   const { data, error } = await supabase
     .from('tours')
