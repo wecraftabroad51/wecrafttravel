@@ -367,8 +367,6 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
             🎯 กรุ๊ปเหมา
           </button>
 
-          {/* Desktop: push hamburger-area to right */}
-          <div className="nav-desktop" style={{ flex: 1 }} />
 
           {/* Mobile hamburger */}
           <button onClick={() => setMobileOpen(!mobileOpen)}
