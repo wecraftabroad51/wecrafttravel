@@ -60,7 +60,7 @@ const MENU = [
 
 // Quick links in teal top bar
 const QUICK_LINKS = [
-  { label: 'ขอราคากรุ๊ปเหมา', key: 'contact' },
+  { label: 'ขอราคากรุ๊ปเหมา', key: 'group-quote' },
   { label: 'บริการยื่นวีซ่า',  key: 'contact' },
   { label: 'บทความท่องเที่ยว', key: 'articles' },
   { label: 'ผลงานที่ผ่านมา',   key: 'gallery' },
