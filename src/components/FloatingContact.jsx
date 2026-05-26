@@ -178,7 +178,7 @@ export default function FloatingContact({ settings }) {
             {/* Logo */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 10 }}>
             <img src="/logo.png" alt="WeCraft Travel"
-              style={{ width: 56, height: 56, objectFit: 'contain', borderRadius: 12, background: '#fff', padding: 4 }} />
+              style={{ width: 56, height: 56, objectFit: 'contain' }} />
             <div style={{ color: '#fff', fontWeight: 800, fontSize: 13, marginTop: 4, lineHeight: 1.2, textAlign: 'center' }}>WeCraft Travel</div>
             <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 10, textAlign: 'center' }}>WE CRAFT ABROAD</div>
           </div>
