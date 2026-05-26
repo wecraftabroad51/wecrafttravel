@@ -139,10 +139,16 @@ function AppInner() {
         setChatSessions(chatRes.data ?? CHAT_SESSIONS_DEFAULT);
 
         if (settingsRes.data) {
+          // Merge social: เอา platform จาก default เป็นฐาน แล้ว override ด้วยค่าจาก DB
+          const dbSocial = settingsRes.data.social || [];
+          const mergedSocial = SITE_SETTINGS_DEFAULT.social.map(def => {
+            const saved = dbSocial.find(s => s.platform === def.platform);
+            return saved ? { ...def, ...saved } : def;
+          });
           setSettings(prev => ({
             ...prev,
             contact: settingsRes.data.contact || prev.contact,
-            social:  settingsRes.data.social  || prev.social,
+            social:  mergedSocial,
             popup:   settingsRes.data.popup   || prev.popup,
           }));
         } else {

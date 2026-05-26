@@ -332,7 +332,8 @@ export const SITE_SETTINGS_DEFAULT = {
     { platform: 'instagram', url: 'https://instagram.com', enabled: true, color: '#E1306C' },
     { platform: 'youtube', url: 'https://youtube.com', enabled: true, color: '#FF0000' },
     { platform: 'line', url: 'https://line.me', enabled: true, color: '#06C755' },
-    { platform: 'tiktok', url: '', enabled: false, color: '#000000' },
+    { platform: 'tiktok',  url: '', enabled: false, color: '#000000' },
+    { platform: 'lemon8',  url: '', enabled: false, color: '#f5a623' },
   ],
   popup: {
     enabled: true,
