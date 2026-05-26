@@ -319,8 +319,8 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
             </div>
           </button>
 
-          {/* Desktop nav — left-aligned, no logo */}
-          <nav className="nav-desktop" style={{ display: 'flex', alignItems: 'stretch', gap: 0, height: '100%' }}>
+          {/* Desktop nav — centered, no logo */}
+          <nav className="nav-desktop" style={{ display: 'flex', alignItems: 'stretch', gap: 0, height: '100%', flex: 1, justifyContent: 'center' }}>
             {MENU.map((m, i) => (
               <div key={i} style={{ position: 'relative', display: 'flex', alignItems: 'stretch' }}
                 onMouseEnter={() => openMenu(i)}
