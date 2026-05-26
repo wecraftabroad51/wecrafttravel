@@ -320,9 +320,12 @@ export const REVIEWS_DATA = [
 
 export const SITE_SETTINGS_DEFAULT = {
   contact: {
-    address: { th: '123 ถนนสุขุมวิท แขวงพระโขนง เขตคลองเตย กรุงเทพฯ 10110', en: '123 Sukhumvit Rd, Phra Khanong, Khlong Toei, Bangkok 10110' },
-    phone: '02-123-4567', mobile: '082-345-6789',
-    email: 'info@wanderlust-tours.com', line: '@wanderlust',
+    address: {
+      th: 'เลขที่ 99/548 อาคารบี ชั้น 14 ถ.รัชดาภิเษก(ท่าพระ-ตากสิน) แขวงตลาดพลู เขตธนบุรี กทม. 10600',
+      en: 'No. 99/548 Bld.B, Floor 14th, Ratchadaphisek (Thapra-Taksin), Talat Phlu, Thonburi, Bangkok 10600',
+    },
+    phone: '061-868-6889', mobile: '061-868-6889',
+    email: 'info@wecraft-travel.com', line: '@wecrafttravel',
   },
   social: [
     { platform: 'facebook', url: 'https://facebook.com', enabled: true, color: '#1877F2' },

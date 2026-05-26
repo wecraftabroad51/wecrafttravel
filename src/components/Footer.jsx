@@ -78,24 +78,28 @@ export default function Footer({ lang, t, navigate, settings }) {
               </div>
             </div>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,.65)', lineHeight: 1.65, marginBottom: 20 }}>
-              บริษัทนำเที่ยวมืออาชีพ ก่อตั้งปี 2017<br />
+              บจก. วีคราฟท์ อะบรอด<br />
               We craft happiness · We craft travel<br />
-              wecraft-travel.com
+              เลขประจำตัวผู้เสียภาษี: 0105560030634<br />
+              ใบอนุญาต ททท. 11/11550
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20, fontSize: 13 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,.75)' }}>
-                <Icon name="phone" size={14} /> 02-123-4567 | 098-765-4321
+                <Icon name="phone" size={14} /> 061-868-6889
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,.75)' }}>
-                <Icon name="mail" size={14} /> info@sanookholiday.com
+                <Icon name="mail" size={14} /> {contact?.email || 'info@wecraft-travel.com'}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,.75)' }}>
                 <Icon name="clock" size={14} /> จ–ศ 09:00–18:00 น.
               </div>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, color: 'rgba(255,255,255,.75)' }}>
                 <span style={{ flexShrink: 0, marginTop: 2 }}><Icon name="map-pin" size={14} /></span>
-                {contact?.address?.th || '99/9 ถ.สุขุมวิท แขวงพระโขนง เขตคลองเตย กรุงเทพฯ 10110'}
+                <span>
+                  {contact?.address?.th ||
+                    'เลขที่ 99/548 อาคารบี ชั้น 14 ถ.รัชดาภิเษก(ท่าพระ-ตากสิน) แขวงตลาดพลู เขตธนบุรี กทม. 10600'}
+                </span>
               </div>
             </div>
 
@@ -202,7 +206,7 @@ export default function Footer({ lang, t, navigate, settings }) {
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           fontSize: 13, color: 'rgba(255,255,255,.45)', flexWrap: 'wrap', gap: 10,
         }}>
-          <div>© 2026 WeCraft Travel · wecraft-travel.com</div>
+          <div>© 2026 บจก. วีคราฟท์ อะบรอด (We Craft Abroad Co.,Ltd) · wecraft-travel.com</div>
           <div style={{ display: 'flex', gap: 20 }}>
             <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>นโยบายความเป็นส่วนตัว</a>
             <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>เงื่อนไขการใช้บริการ</a>
