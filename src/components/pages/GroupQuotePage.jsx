@@ -7,12 +7,17 @@ import { insertMessage } from '../../lib/db.js';
 //   GMAIL_APP_PASS = (App Password 16 ตัว จาก Google Account → Security → App passwords)
 const sendEmail = async (subject, html) => {
   try {
-    await fetch('/api/send-email', {
+    const res = await fetch('/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ subject, html }),
     });
-  } catch (_) { /* silent fail */ }
+    const data = await res.json();
+    if (!res.ok) console.error('Email API error:', data.error);
+    else console.log('Email sent OK:', data);
+  } catch (err) {
+    console.error('Email fetch error:', err.message);
+  }
 };
 
 const TOUR_TYPES = [
