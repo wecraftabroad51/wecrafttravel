@@ -5,6 +5,10 @@ import {
   fetchSettings
 } from './lib/db.js';
 import { supabase } from './lib/supabase.js';
+import {
+  TOURS_DATA, ARTICLES_DATA, PROMOTIONS_DATA, FAQS_DATA,
+  REVIEWS_DATA, SITE_SETTINGS_DEFAULT, BOOKINGS_DATA, MESSAGES_DATA, CHAT_SESSIONS_DEFAULT,
+} from './data.js';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
 import ChatWidget from './components/ChatWidget.jsx';
@@ -56,10 +60,19 @@ export default function App() {
 
   const t = (obj) => (obj && (obj[lang] || obj['th'])) || '';
 
-  // ── Load from Supabase — no mock fallback ─────────────────────
+  // ── Load from Supabase — fallback to mock data if not configured ──
   useEffect(() => {
     if (!supabase) {
-      setDbError('ไม่พบการตั้งค่า Supabase (VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY)\nกรุณาตั้งค่า Environment Variables ใน Vercel แล้ว Redeploy');
+      // Use mock data so the site works without Supabase
+      setTours(TOURS_DATA);
+      setArticles(ARTICLES_DATA);
+      setPromotions(PROMOTIONS_DATA);
+      setFaqs(FAQS_DATA);
+      setReviews(REVIEWS_DATA);
+      setBookings(BOOKINGS_DATA);
+      setMessages(MESSAGES_DATA);
+      setChatSessions(CHAT_SESSIONS_DEFAULT);
+      setSettings(SITE_SETTINGS_DEFAULT);
       setLoading(false);
       return;
     }
@@ -75,7 +88,6 @@ export default function App() {
           fetchSettings()
         ]);
 
-        // Check for any error
         const firstError = [toursRes, articlesRes, promosRes, faqsRes, reviewsRes].find(r => r.error);
         if (firstError?.error && firstError.error !== 'offline') {
           setDbError('เชื่อมต่อฐานข้อมูลไม่สำเร็จ: ' + JSON.stringify(firstError.error));
@@ -83,15 +95,14 @@ export default function App() {
           return;
         }
 
-        // Set data (empty array = table is empty, that's fine)
-        setTours(toursRes.data       ?? []);
-        setArticles(articlesRes.data ?? []);
-        setPromotions(promosRes.data ?? []);
-        setFaqs(faqsRes.data         ?? []);
-        setReviews(reviewsRes.data   ?? []);
-        setBookings(bookingsRes.data ?? []);
-        setMessages(messagesRes.data ?? []);
-        setChatSessions(chatRes.data ?? []);
+        setTours(toursRes.data       ?? TOURS_DATA);
+        setArticles(articlesRes.data ?? ARTICLES_DATA);
+        setPromotions(promosRes.data ?? PROMOTIONS_DATA);
+        setFaqs(faqsRes.data         ?? FAQS_DATA);
+        setReviews(reviewsRes.data   ?? REVIEWS_DATA);
+        setBookings(bookingsRes.data ?? BOOKINGS_DATA);
+        setMessages(messagesRes.data ?? MESSAGES_DATA);
+        setChatSessions(chatRes.data ?? CHAT_SESSIONS_DEFAULT);
 
         if (settingsRes.data) {
           setSettings(prev => ({
@@ -100,6 +111,8 @@ export default function App() {
             social:  settingsRes.data.social  || prev.social,
             popup:   settingsRes.data.popup   || prev.popup,
           }));
+        } else {
+          setSettings(SITE_SETTINGS_DEFAULT);
         }
       } catch (err) {
         setDbError('เชื่อมต่อฐานข้อมูลไม่สำเร็จ: ' + (err.message || String(err)));
