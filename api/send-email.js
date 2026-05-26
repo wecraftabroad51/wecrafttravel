@@ -32,7 +32,7 @@ async function generateSeqNo(sheets, sheetId) {
 
   const meta = await sheets.spreadsheets.values.get({
     spreadsheetId: sheetId,
-    range: 'Sheet1!A:A',
+    range: 'A:A',
   });
   const allValues = meta.data.values || [];
   const countThisMonth = allValues.filter(r => r[0] && String(r[0]).startsWith(prefix)).length;
@@ -153,7 +153,7 @@ async function appendToSheet(formData, seqNo, sheets, sheetId) {
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: sheetId,
-    range: 'Sheet1!A1',
+    range: 'A1',
     valueInputOption: 'USER_ENTERED',
     insertDataOption: 'INSERT_ROWS',
     requestBody: { values: [row] },
