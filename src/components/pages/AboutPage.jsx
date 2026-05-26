@@ -56,7 +56,7 @@ export default function AboutPage({ navigate }) {
               </h2>
               <div style={{ marginBottom: 16 }}>
                 <p style={{ fontSize: 14, color: '#444', margin: '0 0 6px' }}>
-                  <strong>ชื่อ WeCraft Travel :</strong> วันหยุดที่แสนสนุก
+                  <strong>ชื่อ WeCraft Travel :</strong> ดีไซน์ความสุข ให้สนุกทุกโลเคชั่น
                 </p>
                 <p style={{ fontSize: 14, color: '#444', lineHeight: 1.7 }}>
                   <strong>WeCraft Travel :</strong> ก่อตั้งขึ้นเพื่อให้บริการด้านการท่องเที่ยวอย่างครบวงจร
@@ -119,26 +119,18 @@ export default function AboutPage({ navigate }) {
               ))}
             </div>
 
-            {/* License image placeholder */}
+            {/* License image */}
             <div style={{ flexShrink: 0, textAlign: 'center' }}>
-              <div style={{
-                width: 220, border: '2px solid #ddd', borderRadius: 8,
-                overflow: 'hidden', background: '#fafafa',
-                boxShadow: '0 2px 12px rgba(0,0,0,.08)',
-              }}>
-                <div style={{ background: '#8B4513', color: '#FFD700', textAlign: 'center', padding: '8px', fontSize: 12, fontWeight: 700 }}>
-                  กรมการท่องเที่ยว
-                </div>
-                <div style={{ padding: '16px', textAlign: 'center' }}>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: '#333', marginBottom: 8 }}>ใบอนุญาตประกอบธุรกิจนำเที่ยว</div>
-                  <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--primary)', marginBottom: 4 }}>11/11550</div>
-                  <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>บริษัท วีคราฟท์ อะบรอด จำกัด</div>
-                  <div style={{ fontSize: 11, color: '#888' }}>ประเภท : ทั่วไป</div>
-                  <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #eee', fontSize: 11, color: '#888' }}>
-                    ถูกต้องตามกฎหมาย<br/>พระราชบัญญัติธุรกิจนำเที่ยว<br/>และมัคคุเทศก์ พ.ศ. 2551
-                  </div>
-                </div>
-              </div>
+              <img
+                src="/license.jpg"
+                alt="ใบอนุญาตประกอบธุรกิจนำเที่ยว 11/11550"
+                style={{
+                  width: 240,
+                  borderRadius: 8,
+                  boxShadow: '0 4px 20px rgba(0,0,0,.15)',
+                  border: '1px solid #ddd',
+                }}
+              />
               <div style={{ marginTop: 8, fontSize: 11, color: '#888' }}>ใบอนุญาต ททท. เลขที่ 11/11550</div>
             </div>
           </div>
