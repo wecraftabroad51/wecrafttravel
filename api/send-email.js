@@ -2,118 +2,191 @@ const nodemailer = require('nodemailer');
 
 // ── Build LINE Flex Message ────────────────────────────────────
 function buildFlexMessage(f) {
-  const row = (label, value, color) => ({
+  const tourTypeLabel = (f.tourType === 'อื่นๆ' && f.tourTypeOther)
+    ? `อื่นๆ: ${f.tourTypeOther}` : (f.tourType || '-');
+
+  // colored row helper
+  const row = (icon, label, value, valueColor) => value ? {
     type: 'box', layout: 'horizontal', spacing: 'sm',
-    paddingTop: '6px', paddingBottom: '6px',
+    paddingTop: '5px', paddingBottom: '5px',
     contents: [
-      {
-        type: 'text', text: label, size: 'xs', color: '#888888',
-        flex: 3, wrap: true,
-      },
-      {
-        type: 'text', text: value || '-', size: 'xs',
-        color: color || '#333333', flex: 5, wrap: true, weight: 'bold',
-      },
+      { type: 'text', text: icon, size: 'sm', flex: 0, margin: 'none' },
+      { type: 'text', text: label, size: 'xs', color: '#777777', flex: 3, margin: 'sm', wrap: true },
+      { type: 'text', text: String(value), size: 'xs', color: valueColor || '#222222', flex: 5, wrap: true, weight: 'bold' },
+    ],
+  } : null;
+
+  // section header box
+  const sectionHeader = (emoji, title, bg, textColor) => ({
+    type: 'box', layout: 'horizontal', spacing: 'sm',
+    backgroundColor: bg, cornerRadius: '8px',
+    paddingAll: '10px', margin: 'md',
+    contents: [
+      { type: 'text', text: emoji, size: 'md', flex: 0 },
+      { type: 'text', text: title, size: 'sm', weight: 'bold', color: textColor, margin: 'sm' },
     ],
   });
 
-  const divider = { type: 'separator', margin: 'sm', color: '#f0f0f0' };
-
-  const tourTypeLabel = f.tourType === 'อื่นๆ' && f.tourTypeOther
-    ? `อื่นๆ: ${f.tourTypeOther}` : f.tourType;
+  const now = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'short', timeStyle: 'short' });
 
   return {
     type: 'flex',
-    altText: `🔔 ขอราคากรุ๊ปเหมาใหม่ — ${f.firstName} ${f.lastName} (${f.destination})`,
+    altText: `🎉 มาแล้วๆๆ!! งานเหมา — ${f.firstName} ${f.lastName} ไป ${f.destination}`,
     contents: {
       type: 'bubble',
       size: 'mega',
+
+      // ── HEADER ──────────────────────────────────────────────
       header: {
         type: 'box', layout: 'vertical',
-        backgroundColor: '#e65c00', paddingAll: '18px',
+        paddingAll: '0px',
         contents: [
+          // Top band: yellow excitement
           {
-            type: 'box', layout: 'horizontal', spacing: 'md',
+            type: 'box', layout: 'vertical',
+            backgroundColor: '#FFD700', paddingAll: '14px',
             contents: [
               {
-                type: 'box', layout: 'vertical', justifyContent: 'center',
-                contents: [{
-                  type: 'text', text: '✈',
-                  size: '3xl', color: '#ffffff',
-                }],
+                type: 'text',
+                text: '🎉🎊  มาแล้วๆๆ!!!  🎊🎉',
+                weight: 'bold', size: 'xl', color: '#7B3F00',
+                align: 'center',
               },
               {
-                type: 'box', layout: 'vertical',
+                type: 'text',
+                text: '💼  งานเหมา มาแล้ว!!  ✈️',
+                weight: 'bold', size: 'lg', color: '#c0392b',
+                align: 'center', margin: 'xs',
+              },
+            ],
+          },
+          // Orange info band
+          {
+            type: 'box', layout: 'horizontal',
+            backgroundColor: '#e65c00', paddingAll: '12px', spacing: 'md',
+            contents: [
+              {
+                type: 'box', layout: 'vertical', flex: 1,
                 contents: [
-                  { type: 'text', text: '🔔 ขอราคากรุ๊ปเหมาใหม่', weight: 'bold', size: 'md', color: '#ffffff' },
-                  { type: 'text', text: 'WeCraft Travel', size: 'xs', color: 'rgba(255,255,255,0.75)', margin: 'xs' },
+                  { type: 'text', text: '📍 ปลายทาง', size: 'xxs', color: 'rgba(255,255,255,0.7)' },
+                  { type: 'text', text: f.destination || '-', size: 'sm', weight: 'bold', color: '#ffffff', wrap: true },
+                ],
+              },
+              { type: 'separator', color: 'rgba(255,255,255,0.3)' },
+              {
+                type: 'box', layout: 'vertical', flex: 1, paddingStart: 'md',
+                contents: [
+                  { type: 'text', text: '👥 จำนวน', size: 'xxs', color: 'rgba(255,255,255,0.7)' },
+                  { type: 'text', text: f.pax ? `${f.pax} คน` : '-', size: 'sm', weight: 'bold', color: '#FFD700' },
+                ],
+              },
+              { type: 'separator', color: 'rgba(255,255,255,0.3)' },
+              {
+                type: 'box', layout: 'vertical', flex: 1, paddingStart: 'md',
+                contents: [
+                  { type: 'text', text: '📅 วันเดินทาง', size: 'xxs', color: 'rgba(255,255,255,0.7)' },
+                  { type: 'text', text: f.travelDate || '-', size: 'xs', weight: 'bold', color: '#ffffff', wrap: true },
                 ],
               },
             ],
           },
         ],
       },
-      body: {
-        type: 'box', layout: 'vertical', spacing: 'none', paddingAll: '16px',
-        contents: [
-          // ─ ผู้ติดต่อ ─
-          {
-            type: 'text', text: '👤  ข้อมูลผู้ติดต่อ',
-            size: 'sm', weight: 'bold', color: '#e65c00', margin: 'none',
-          },
-          divider,
-          row('ชื่อ-นามสกุล', `${f.firstName} ${f.lastName}`, '#111111'),
-          f.company   ? row('บริษัท/หน่วยงาน', f.company) : null,
-          row('โทรศัพท์',  f.phone, '#0066cc'),
-          f.lineId    ? row('LINE ID',          f.lineId,   '#06c755') : null,
-          row('อีเมล',     f.email, '#0066cc'),
-          f.emailAlt  ? row('อีเมลสำรอง',       f.emailAlt) : null,
 
-          // ─ รายละเอียดทัวร์ ─
-          { type: 'box', layout: 'vertical', margin: 'lg', contents: [] },
+      // ── BODY ────────────────────────────────────────────────
+      body: {
+        type: 'box', layout: 'vertical', spacing: 'none',
+        paddingAll: '14px', backgroundColor: '#fafafa',
+        contents: [
+
+          // ─ Contact section ─
+          sectionHeader('👤', 'ข้อมูลผู้ติดต่อ', '#fff3e0', '#c0392b'),
           {
-            type: 'text', text: '📋  รายละเอียดทัวร์',
-            size: 'sm', weight: 'bold', color: '#e65c00',
+            type: 'box', layout: 'vertical',
+            backgroundColor: '#ffffff', cornerRadius: '8px',
+            paddingAll: '10px', margin: 'sm',
+            borderWidth: '1px', borderColor: '#ffe0b2',
+            contents: [
+              row('👤', 'ชื่อ-นามสกุล',   `${f.firstName} ${f.lastName}`, '#1a1a2e'),
+              row('🏢', 'บริษัท/หน่วยงาน', f.company,   '#444444'),
+              row('📞', 'โทรศัพท์',        f.phone,     '#0066cc'),
+              row('💚', 'LINE ID',         f.lineId,    '#06c755'),
+              row('✉️', 'อีเมล',           f.email,     '#0066cc'),
+              row('✉️', 'อีเมลสำรอง',      f.emailAlt,  '#0066cc'),
+            ].filter(Boolean),
           },
-          divider,
-          row('ปลายทาง',      f.destination, '#111111'),
-          f.pax       ? row('จำนวนผู้เดินทาง', `${f.pax} คน`) : null,
-          row('วันเดินทาง',   f.travelDate),
-          row('ระยะเวลา',     f.duration),
-          row('รูปแบบทัวร์',  tourTypeLabel),
-          row('โรงแรม',       f.hotel),
-          f.airline   ? row('สายการบิน',       f.airline) : null,
-          f.budget    ? row('งบ/ท่าน',         f.budget)  : null,
-          f.extraInfo ? row('ข้อมูลเพิ่มเติม', f.extraInfo) : null,
+
+          // ─ Tour detail section ─
+          sectionHeader('✈️', 'รายละเอียดทัวร์', '#e8f4fd', '#1a5276'),
+          {
+            type: 'box', layout: 'vertical',
+            backgroundColor: '#ffffff', cornerRadius: '8px',
+            paddingAll: '10px', margin: 'sm',
+            borderWidth: '1px', borderColor: '#aed6f1',
+            contents: [
+              row('📍', 'ปลายทาง',          f.destination,  '#c0392b'),
+              row('👥', 'จำนวนผู้เดินทาง',  f.pax ? `${f.pax} คน` : null, '#7d3c98'),
+              row('📅', 'วันเดินทาง',        f.travelDate,   '#1a5276'),
+              row('⏱️', 'ระยะเวลา',          f.duration,     '#1a5276'),
+              row('🎒', 'รูปแบบทัวร์',       tourTypeLabel,  '#117a65'),
+              row('🏨', 'โรงแรม',            f.hotel,        '#117a65'),
+              row('✈️', 'สายการบิน',         f.airline,      '#444444'),
+              row('💰', 'งบประมาณ/ท่าน',    f.budget,       '#c0392b'),
+            ].filter(Boolean),
+          },
+
+          // ─ Extra info ─
+          f.extraInfo ? {
+            type: 'box', layout: 'vertical',
+            backgroundColor: '#f0fff4', cornerRadius: '8px',
+            paddingAll: '10px', margin: 'md',
+            borderWidth: '1px', borderColor: '#a9dfbf',
+            contents: [
+              { type: 'text', text: '💬  ข้อมูลเพิ่มเติม', size: 'xs', weight: 'bold', color: '#1e8449' },
+              { type: 'text', text: f.extraInfo, size: 'xs', color: '#333333', wrap: true, margin: 'sm' },
+            ],
+          } : null,
+
+          // ─ Timestamp ─
+          {
+            type: 'text', text: `🕐 รับฟอร์มเมื่อ ${now}`,
+            size: 'xxs', color: '#aaaaaa', align: 'center', margin: 'lg',
+          },
         ].filter(Boolean),
       },
+
+      // ── FOOTER ──────────────────────────────────────────────
       footer: {
         type: 'box', layout: 'vertical',
-        backgroundColor: '#fff8f2', paddingAll: '14px',
+        paddingAll: '0px', spacing: 'none',
         contents: [
           {
-            type: 'box', layout: 'horizontal', spacing: 'md',
+            type: 'box', layout: 'horizontal', spacing: 'none',
             contents: [
               {
                 type: 'button',
-                action: { type: 'uri', label: '📞 โทรกลับ', uri: `tel:${(f.phone||'').replace(/-/g,'')}` },
-                style: 'primary', color: '#e65c00', flex: 1, height: 'sm',
+                action: { type: 'uri', label: '📞  โทรกลับเลย!', uri: `tel:${(f.phone||'').replace(/-/g,'')}` },
+                style: 'primary', color: '#e65c00', flex: 1, height: 'md',
               },
               f.lineId ? {
                 type: 'button',
-                action: { type: 'uri', label: '💬 LINE', uri: `https://line.me/R/ti/p/${f.lineId}` },
-                style: 'secondary', flex: 1, height: 'sm',
+                action: { type: 'uri', label: '💬  LINE ลูกค้า', uri: `https://line.me/R/ti/p/${f.lineId}` },
+                style: 'primary', color: '#06c755', flex: 1, height: 'md',
               } : {
                 type: 'button',
-                action: { type: 'uri', label: '✉️ อีเมล', uri: `mailto:${f.email}` },
-                style: 'secondary', flex: 1, height: 'sm',
+                action: { type: 'uri', label: '✉️  ส่งอีเมล', uri: `mailto:${f.email}` },
+                style: 'primary', color: '#2980b9', flex: 1, height: 'md',
               },
             ],
           },
           {
-            type: 'text',
-            text: `รับฟอร์มเมื่อ ${new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' })}`,
-            size: 'xxs', color: '#aaaaaa', align: 'center', margin: 'md',
+            type: 'box', layout: 'vertical',
+            backgroundColor: '#FFD700', paddingAll: '8px',
+            contents: [{
+              type: 'text',
+              text: '⚡  รีบตอบกลับภายใน 24 ชั่วโมง!  ⚡',
+              size: 'xs', weight: 'bold', color: '#7B3F00', align: 'center',
+            }],
           },
         ],
       },
