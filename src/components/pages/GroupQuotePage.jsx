@@ -614,9 +614,19 @@ export default function GroupQuotePage({ lang, setMessages }) {
               <input style={inpStyle('destination')} placeholder="ประเทศ-เมือง-สถานที่ ที่ต้องการไป"
                 value={form.destination} onChange={set('destination')} />
             </Field>
-            <Field label="งบประมาณที่ตั้งไว้ ต่อท่าน" optional="ถ้ามี">
-              <input style={inpStyle()} placeholder="งบประมาณที่ตั้งไว้ ต่อท่าน"
-                value={form.budget} onChange={set('budget')} />
+            <Field label="งบประมาณ/ท่าน" optional="ถ้ามี">
+              <input
+                style={inpStyle()}
+                placeholder="เช่น 50,000"
+                inputMode="numeric"
+                value={form.budget}
+                onChange={e => {
+                  // strip non-digits, then format with commas
+                  const raw = e.target.value.replace(/[^0-9]/g, '');
+                  const formatted = raw ? Number(raw).toLocaleString('th-TH') : '';
+                  setForm(p => ({ ...p, budget: formatted }));
+                }}
+              />
             </Field>
 
             {/* รูปแบบทัวร์ */}
