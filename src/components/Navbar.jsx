@@ -253,19 +253,10 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
           {/* Logo */}
           <button onClick={() => navigate('home')}
             style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
-            <div style={{
-              width: 44, height: 44, borderRadius: 9,
-              background: 'linear-gradient(135deg, var(--primary), #ff8f00)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 2px 8px rgba(230,92,0,.3)',
-            }}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 13.5 21 6l-6 16-3-7-7-2z"/>
-              </svg>
-            </div>
+            <img src="/logo.png" alt="WeCraft Travel" style={{ width: 48, height: 48, objectFit: 'contain' }} />
             <div style={{ lineHeight: 1.2 }}>
-              <div style={{ fontSize: 19, fontWeight: 800, color: 'var(--primary)' }}>สนุก ฮอลิเดย์</div>
-              <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '.04em' }}>SANOOK HOLIDAYS · ใบอนุญาต 11/06310</div>
+              <div style={{ fontSize: 19, fontWeight: 800, color: 'var(--primary)' }}>WeCraft Travel</div>
+              <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '.04em' }}>WE CRAFT TRAVEL · est. 2017</div>
             </div>
           </button>
 

@@ -71,24 +71,16 @@ export default function Footer({ lang, t, navigate, settings }) {
           {/* Brand */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <div style={{
-                width: 48, height: 48, borderRadius: 10,
-                background: 'linear-gradient(135deg, var(--primary), #ff8f00)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 13.5 21 6l-6 16-3-7-7-2z"/>
-                </svg>
-              </div>
+              <img src="/logo.png" alt="WeCraft Travel" style={{ width: 60, height: 60, objectFit: 'contain' }} />
               <div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: '#FFB74D' }}>สนุก ฮอลิเดย์</div>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', marginTop: 2 }}>SANOOK HOLIDAYS</div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: '#FFB74D' }}>WeCraft Travel</div>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,.5)', marginTop: 2 }}>WE CRAFT TRAVEL · est. 2017</div>
               </div>
             </div>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,.65)', lineHeight: 1.65, marginBottom: 20 }}>
-              บริษัทนำเที่ยวมืออาชีพ ประสบการณ์กว่า 15 ปี<br />
-              ใบอนุญาตประกอบธุรกิจนำเที่ยวเลขที่ 11/06310<br />
-              เลขประจำตัวผู้เสียภาษี: 0105553104067
+              บริษัทนำเที่ยวมืออาชีพ ก่อตั้งปี 2017<br />
+              We craft happiness · We craft travel<br />
+              wecraft-travel.com
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20, fontSize: 13 }}>
@@ -198,7 +190,7 @@ export default function Footer({ lang, t, navigate, settings }) {
               border: '1px solid rgba(255,255,255,.1)',
             }}>
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,.5)', marginBottom: 6 }}>ช่องทางติดต่อ LINE</div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: '#4CAF50' }}>@sanookholiday</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: '#4CAF50' }}>@wecrafttravel</div>
             </div>
           </div>
         </div>
@@ -210,7 +202,7 @@ export default function Footer({ lang, t, navigate, settings }) {
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           fontSize: 13, color: 'rgba(255,255,255,.45)', flexWrap: 'wrap', gap: 10,
         }}>
-          <div>© 2026 สนุก ฮอลิเดย์ จำกัด · ใบอนุญาตนำเที่ยวเลขที่ 11/06310</div>
+          <div>© 2026 WeCraft Travel · wecraft-travel.com</div>
           <div style={{ display: 'flex', gap: 20 }}>
             <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>นโยบายความเป็นส่วนตัว</a>
             <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>เงื่อนไขการใช้บริการ</a>
