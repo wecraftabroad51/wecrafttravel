@@ -77,7 +77,7 @@ const LINE_ICON = (
 );
 
 export default function FloatingContact({ settings }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true); // auto-open on load
 
   // Merge social URLs from settings
   const socialMap = {};

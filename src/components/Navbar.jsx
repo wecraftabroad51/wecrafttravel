@@ -309,18 +309,17 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
       }}>
         <div className="wrap" style={{ display: 'flex', alignItems: 'center', height: 50, gap: 0 }}>
 
-          {/* Mobile: logo (only visible on mobile, row 2 is hidden on mobile) */}
-          <button onClick={() => navigate('home')}
-            className="mobile-menu-btn"
-            style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0, marginRight: 8 }}>
+          {/* Mobile-only logo (Row 2 is hidden on mobile) */}
+          <button onClick={() => navigate('home')} className="mobile-menu-btn"
+            style={{ alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0, marginRight: 8 }}>
             <img src="/logo.png" alt="WeCraft Travel" style={{ width: 38, height: 38, objectFit: 'contain' }} />
             <div style={{ lineHeight: 1.2 }}>
               <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--primary)' }}>WeCraft Travel</div>
-              <div style={{ fontSize: 9, color: 'var(--muted)' }}>WE CRAFT ABROAD · ททท. 11/11550</div>
+              <div style={{ fontSize: 9, color: 'var(--muted)' }}>WE CRAFT ABROAD</div>
             </div>
           </button>
 
-          {/* Desktop nav */}
+          {/* Desktop nav — left-aligned, no logo */}
           <nav className="nav-desktop" style={{ display: 'flex', alignItems: 'stretch', gap: 0, height: '100%' }}>
             {MENU.map((m, i) => (
               <div key={i} style={{ position: 'relative', display: 'flex', alignItems: 'stretch' }}
