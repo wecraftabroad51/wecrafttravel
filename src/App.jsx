@@ -27,6 +27,8 @@ import PromotionsPage from './components/pages/PromotionsPage.jsx';
 import FAQPage from './components/pages/FAQPage.jsx';
 import ContactPage from './components/pages/ContactPage.jsx';
 import GroupQuotePage from './components/pages/GroupQuotePage.jsx';
+import AboutPage from './components/pages/AboutPage.jsx';
+import VisaPage from './components/pages/VisaPage.jsx';
 import AdminPanel from './components/admin/AdminPanel.jsx';
 
 const SETTINGS_DEFAULT = {
@@ -180,6 +182,8 @@ function AppInner() {
       faq:              '/faq',
       contact:          '/contact',
       'group-quote':    '/group-quote',
+      about:            '/about',
+      visa:             '/visa',
     };
     let path = map[page] || '/';
     if (page === 'tours' && filters) {
@@ -426,6 +430,8 @@ function AppInner() {
           <Route path="/faq"         element={<FAQPage {...pageProps} />} />
           <Route path="/contact"      element={<ContactPage {...pageProps} />} />
           <Route path="/group-quote" element={<GroupQuotePage lang={pageProps.lang} setMessages={pageProps.setMessages} />} />
+          <Route path="/about"       element={<AboutPage navigate={navigate} />} />
+          <Route path="/visa"        element={<VisaPage navigate={navigate} />} />
           <Route path="*"            element={<Navigate to="/" replace />} />
         </Routes>
       </main>
