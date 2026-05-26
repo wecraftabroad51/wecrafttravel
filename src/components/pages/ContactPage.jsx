@@ -72,7 +72,7 @@ export default function ContactPage({ lang, t, settings, setMessages }) {
       name: form.name,
       email: form.email,
       phone: form.phone,
-      body: `[${activeTopic}] ${form.message}`,
+      message: `[${activeTopic}] ${form.message}`,
       read: false,
       date: new Date().toISOString().split('T')[0],
     };
