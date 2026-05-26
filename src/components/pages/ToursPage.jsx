@@ -172,43 +172,15 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
   return (
     <main className="page-enter">
       {/* Header */}
-      <section style={{ padding: '48px 0 24px' }}>
-        <div className="wrap-wide">
-          <nav style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 12, padding: 0 }}>
-              {t ? t({ th: 'หน้าหลัก', en: 'Home' }) : 'Home'}
-            </button>
-            <span>/</span>
-            <span style={{ color: 'var(--ink)' }}>{t ? t({ th: 'ทัวร์', en: 'Tours' }) : 'Tours'}</span>
-          </nav>
-          <div className="layout-hero" style={{ gap: 64, alignItems: 'end' }}>
-            <h1 className="h-display">
-              <span className="tabular" style={{ color: 'var(--accent)' }}>{filtered.length}</span> tours,<br />
-              <span className="serif-accent">every</span> month.
-            </h1>
-            <p style={{ fontSize: 15, color: 'var(--ink-2)', lineHeight: 1.55, maxWidth: 360, marginBottom: 12 }}>
-              Filter by continent, season, or budget. Every tour holds for 48 hours while you decide — no card required.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Tour type tabs */}
-      <div style={{ background: 'var(--primary)', padding: '0' }}>
-        <div className="wrap-wide" style={{ display: 'flex', gap: 0, overflowX: 'auto' }}>
-          {TOUR_TYPE_TABS.map(tab => (
-            <button key={tab.value} onClick={() => { setTourType(tab.value); setContinent('All'); setCountry(''); }}
-              style={{
-                padding: '11px 18px', border: 'none', cursor: 'pointer',
-                background: tourType === tab.value ? 'rgba(255,255,255,.18)' : 'transparent',
-                color: '#fff', fontSize: 13, fontWeight: tourType === tab.value ? 700 : 500,
-                borderBottom: tourType === tab.value ? '3px solid #FFD54F' : '3px solid transparent',
-                whiteSpace: 'nowrap', fontFamily: 'inherit',
-              }}>
-              {tab.label}
-            </button>
-          ))}
-        </div>
+      {/* Breadcrumb */}
+      <div className="wrap-wide" style={{ padding: '16px 0 0' }}>
+        <nav style={{ fontSize: 12, color: 'var(--muted)', display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 12, padding: 0 }}>
+            หน้าหลัก
+          </button>
+          <span>/</span>
+          <span style={{ color: 'var(--ink)' }}>ทัวร์ทั้งหมด</span>
+        </nav>
       </div>
 
       {/* Sticky filter bar */}
