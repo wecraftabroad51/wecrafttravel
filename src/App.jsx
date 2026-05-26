@@ -216,7 +216,6 @@ export default function App() {
       </main>
 
       <Footer lang={lang} t={t} navigate={navigate} settings={settings} />
-      <SocialBar settings={settings} />
       <ChatWidget lang={lang} open={chatOpen} setOpen={setChatOpen} />
       {compareList.length >= 2 && (
         <CompareBar compareList={compareList} setCompareList={setCompareList}
