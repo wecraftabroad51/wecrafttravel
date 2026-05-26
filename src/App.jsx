@@ -42,7 +42,8 @@ function ToursRoute(props) {
     continent: searchParams.get('continent') || '',
     country:   searchParams.get('country')   || '',
   };
-  return <ToursPage {...props} initialFilters={initialFilters} />;
+  // key เปลี่ยนเมื่อ filter เปลี่ยน → remount เพื่อ reset state
+  return <ToursPage {...props} initialFilters={initialFilters} key={searchParams.toString()} />;
 }
 
 function TourDetailRoute(props) {

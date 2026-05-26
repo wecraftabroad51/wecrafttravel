@@ -56,7 +56,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
     );
   }
 
-  const tourReviews = reviews.filter(r => r.tourId === tour.id && r.approved);
+  const tourReviews = reviews.filter(r => String(r.tourId) === String(tour.id) && r.approved);
   const tier = tour.priceTiers?.find(p => p.tier === selectedTier) || tour.priceTiers?.[0];
   const basePrice = tier?.price || tour.price || 0;
 
