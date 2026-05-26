@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 const MENU = [
   {
     label: 'ทัวร์ต่างประเทศ',
-    key: 'tours',
+    key: 'tours', tourType: 'international',
     mega: [
       {
         continent: 'ยุโรป',
@@ -33,7 +33,7 @@ const MENU = [
   },
   {
     label: 'ทัวร์ในประเทศ',
-    key: 'tours',
+    key: 'tours', tourType: 'domestic',
     mega: [
       {
         continent: 'ภาคเหนือ',
@@ -55,7 +55,7 @@ const MENU = [
   },
   {
     label: 'ทัวร์พรีเมี่ยม',
-    key: 'tours',
+    key: 'tours', tourType: 'premium',
     mega: [
       {
         continent: 'ยุโรปพรีเมี่ยม',
@@ -73,7 +73,7 @@ const MENU = [
   },
   {
     label: 'ทัวร์โปรไฟไหม้ 🔥',
-    key: 'promotions',
+    key: 'tours', tourType: 'hotdeal',
     mega: null,
   },
   {
@@ -83,7 +83,7 @@ const MENU = [
   },
   {
     label: 'แพ็คเกจทัวร์',
-    key: 'tours',
+    key: 'tours', tourType: 'package',
     mega: [
       {
         continent: 'แพ็คเกจยอดนิยม',
@@ -97,7 +97,7 @@ const MENU = [
   },
   {
     label: 'เรือสำราญ',
-    key: 'tours',
+    key: 'tours', tourType: 'cruise',
     mega: [
       {
         continent: 'เส้นทางเรือสำราญ',
@@ -168,7 +168,7 @@ function MegaDropdown({ menu, navigate, onClose }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {group.countries.map(c => (
                 <button key={c}
-                  onClick={() => { navigate(menu.key); onClose(); }}
+                  onClick={() => { navigate(menu.key, null, menu.tourType ? { tourType: menu.tourType, country: c } : null); onClose(); }}
                   style={{
                     background: 'none', border: 'none', textAlign: 'left',
                     padding: '5px 6px', fontSize: 13, color: 'var(--ink-2)',
@@ -268,7 +268,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
                 onMouseLeave={closeMenu}
               >
                 <button
-                  onClick={() => { navigate(m.key); setActiveMenu(null); }}
+                  onClick={() => { navigate(m.key, null, m.tourType ? { tourType: m.tourType } : null); setActiveMenu(null); }}
                   style={{
                     padding: '0 11px',
                     border: 'none',
@@ -310,7 +310,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
           {MENU.map((m, i) => (
             <div key={i}>
               <button
-                onClick={() => { navigate(m.key); setMobileOpen(false); }}
+                onClick={() => { navigate(m.key, null, m.tourType ? { tourType: m.tourType } : null); setMobileOpen(false); }}
                 style={{
                   display: 'block', width: '100%', textAlign: 'left',
                   padding: '13px 20px', border: 'none',
@@ -330,7 +330,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px' }}>
                         {g.countries.map(c => (
                           <button key={c}
-                            onClick={() => { navigate(m.key); setMobileOpen(false); }}
+                            onClick={() => { navigate(m.key, null, m.tourType ? { tourType: m.tourType, country: c } : null); setMobileOpen(false); }}
                             style={{ background: 'none', border: 'none', fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'inherit', padding: '2px 0' }}>
                             {c}
                           </button>

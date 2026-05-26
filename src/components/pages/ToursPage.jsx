@@ -111,17 +111,47 @@ function TourRow({ tour, t, navigate, inCompare, onCompare }) {
   );
 }
 
-export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, reviews, settings, compareList, toggleCompare, setBookings, setReviews, setMessages }) {
-  const [continent, setContinent] = useState('All');
+const TOUR_TYPE_TABS = [
+  { value: 'all',           label: 'ทั้งหมด' },
+  { value: 'international', label: 'ทัวร์ต่างประเทศ' },
+  { value: 'domestic',      label: 'ทัวร์ในประเทศ' },
+  { value: 'premium',       label: 'ทัวร์พรีเมี่ยม' },
+  { value: 'hotdeal',       label: '🔥 โปรไฟไหม้' },
+  { value: 'package',       label: 'แพ็คเกจทัวร์' },
+  { value: 'cruise',        label: 'เรือสำราญ' },
+];
+
+const CONTINENT_TH = {
+  'Europe': 'ยุโรป', 'Asia': 'เอเชีย', 'Asia-East': 'เอเชียตะวันออก',
+  'Asia-SE': 'เอเชียตะวันออกเฉียงใต้', 'Asia-S-ME': 'เอเชียใต้/ตะวันออกกลาง',
+  'Middle East': 'ตะวันออกกลาง', 'Americas': 'อเมริกา',
+  'Oceania': 'โอเชียเนีย', 'Africa': 'แอฟริกา',
+  'Dom-North': 'ภาคเหนือ', 'Dom-Central': 'ภาคกลาง/ตะวันออก',
+  'Dom-South': 'ภาคใต้', 'Dom-NE': 'ภาคอีสาน',
+};
+
+export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, reviews, settings, compareList, toggleCompare, setBookings, setReviews, setMessages, initialFilters }) {
+  const [tourType,  setTourType]  = useState(initialFilters?.tourType  || 'all');
+  const [continent, setContinent] = useState(initialFilters?.continent || 'All');
+  const [country,   setCountry]   = useState(initialFilters?.country   || '');
   const [view, setView]           = useState('grid');
-  const [search, setSearch]       = useState('');
+  const [search, setSearch]       = useState(initialFilters?.search    || '');
   const [sort, setSort]           = useState('popular');
   const [priceMax, setPriceMax]   = useState(300000);
 
   const continents = ['All', ...Array.from(new Set(tours.map(tr => tr.continent).filter(Boolean)))];
 
   const filtered = useMemo(() => {
-    let list = tours.filter(tr => continent === 'All' || tr.continent === continent);
+    let list = [...tours];
+    if (tourType !== 'all') {
+      if (tourType === 'hotdeal') {
+        list = list.filter(tr => tr.tourType === 'hotdeal' || tr.featured);
+      } else {
+        list = list.filter(tr => tr.tourType === tourType);
+      }
+    }
+    if (continent !== 'All') list = list.filter(tr => tr.continent === continent);
+    if (country) list = list.filter(tr => tr.country === country || t(tr.destination)?.includes(country));
     list = list.filter(tr => !tr.price || tr.price <= priceMax);
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -137,7 +167,7 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
     if (sort === 'duration')   list = [...list].sort((a, b) => (b.duration || 0) - (a.duration || 0));
     if (sort === 'popular')    list = [...list].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
     return list;
-  }, [tours, continent, priceMax, search, sort, lang]);
+  }, [tours, tourType, continent, country, priceMax, search, sort, lang]);
 
   return (
     <main className="page-enter">
@@ -163,25 +193,43 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
         </div>
       </section>
 
+      {/* Tour type tabs */}
+      <div style={{ background: 'var(--primary)', padding: '0' }}>
+        <div className="wrap-wide" style={{ display: 'flex', gap: 0, overflowX: 'auto' }}>
+          {TOUR_TYPE_TABS.map(tab => (
+            <button key={tab.value} onClick={() => { setTourType(tab.value); setContinent('All'); setCountry(''); }}
+              style={{
+                padding: '11px 18px', border: 'none', cursor: 'pointer',
+                background: tourType === tab.value ? 'rgba(255,255,255,.18)' : 'transparent',
+                color: '#fff', fontSize: 13, fontWeight: tourType === tab.value ? 700 : 500,
+                borderBottom: tourType === tab.value ? '3px solid #FFD54F' : '3px solid transparent',
+                whiteSpace: 'nowrap', fontFamily: 'inherit',
+              }}>
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Sticky filter bar */}
       <section style={{
         position: 'sticky', top: 76, zIndex: 30,
         background: 'var(--canvas)', borderBottom: '1px solid var(--line)',
-        padding: '20px 0',
+        padding: '14px 0',
       }}>
-        <div className="wrap-wide" style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="wrap-wide" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           {/* Continent pills */}
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {continents.map(c => (
-              <button key={c} onClick={() => setContinent(c)}
+              <button key={c} onClick={() => { setContinent(c); setCountry(''); }}
                 style={{
-                  padding: '9px 16px', borderRadius: 999,
-                  border: `1px solid ${continent === c ? 'var(--ink)' : 'var(--line)'}`,
-                  background: continent === c ? 'var(--ink)' : 'var(--card)',
-                  color: continent === c ? 'var(--canvas)' : 'var(--ink)',
-                  fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                  padding: '7px 14px', borderRadius: 999,
+                  border: `1px solid ${continent === c ? 'var(--primary)' : 'var(--line)'}`,
+                  background: continent === c ? 'var(--primary)' : 'var(--card)',
+                  color: continent === c ? '#fff' : 'var(--ink)',
+                  fontSize: 12, fontWeight: 500, cursor: 'pointer',
                 }}>
-                {c}
+                {CONTINENT_TH[c] || c}
               </button>
             ))}
           </div>

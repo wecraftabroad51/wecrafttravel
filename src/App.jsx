@@ -51,8 +51,9 @@ export default function App() {
   const [chatSessions, setChatSessions] = useState([]);
   const [settings,     setSettings]     = useState(SETTINGS_DEFAULT);
 
-  const [compareList, setCompareList] = useState([]);
-  const [chatOpen,    setChatOpen]    = useState(false);
+  const [compareList,  setCompareList]  = useState([]);
+  const [chatOpen,     setChatOpen]     = useState(false);
+  const [tourFilters,  setTourFilters]  = useState({});
 
   // ── Loading / error state ─────────────────────────────────────
   const [loading, setLoading] = useState(true);
@@ -123,10 +124,11 @@ export default function App() {
     load();
   }, []);
 
-  const navigate = (p, id = null) => {
+  const navigate = (p, id = null, filters = null) => {
     setPage(p);
     if (p === 'tour-detail')    setSelectedTourId(id);
     if (p === 'article-detail') setSelectedArticleId(id);
+    if (p === 'tours') setTourFilters(filters || {});
     window.scrollTo(0, 0);
   };
 
@@ -205,7 +207,7 @@ export default function App() {
 
       <main>
         {page === 'home'           && <HomePage {...pageProps} />}
-        {page === 'tours'          && <ToursPage {...pageProps} />}
+        {page === 'tours'          && <ToursPage {...pageProps} initialFilters={tourFilters} />}
         {page === 'tour-detail'    && <TourDetailPage {...pageProps} tourId={selectedTourId} />}
         {page === 'gallery'        && <GalleryPage {...pageProps} />}
         {page === 'articles'       && <ArticlesPage {...pageProps} />}

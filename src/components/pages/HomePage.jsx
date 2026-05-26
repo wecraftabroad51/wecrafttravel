@@ -111,21 +111,57 @@ function HeroSection({ navigate }) {
 }
 
 // ─── SEARCH BOX (left sidebar) ────────────────────────────────
-const ZONES = ['ยุโรป', 'เอเชีย', 'อเมริกา', 'แอฟริกา', 'โอเชียเนีย', 'ตะวันออกกลาง'];
-const COUNTRIES = {
-  'ยุโรป': ['ฝรั่งเศส', 'อิตาลี', 'สวิตเซอร์แลนด์', 'เยอรมัน', 'อังกฤษ', 'สเปน', 'โปรตุเกส', 'นอร์เวย์', 'สวีเดน'],
-  'เอเชีย': ['ญี่ปุ่น', 'จีน', 'เกาหลีใต้', 'ไต้หวัน', 'ฮ่องกง', 'สิงคโปร์', 'เวียดนาม', 'อินเดีย'],
-  'อเมริกา': ['สหรัฐอเมริกา', 'แคนาดา', 'เม็กซิโก', 'เปรู', 'บราซิล'],
-};
+const TOUR_TYPE_OPTIONS = [
+  { value: 'international', label: 'ทัวร์ต่างประเทศ' },
+  { value: 'domestic',      label: 'ทัวร์ในประเทศ' },
+  { value: 'premium',       label: 'ทัวร์พรีเมี่ยม' },
+  { value: 'hotdeal',       label: '🔥 ทัวร์โปรไฟไหม้' },
+  { value: 'package',       label: 'แพ็คเกจทัวร์' },
+  { value: 'cruise',        label: 'เรือสำราญ' },
+];
+const ZONE_OPTIONS = [
+  { value: 'Europe',      label: 'ยุโรป',                         countries: ['ฝรั่งเศส','อิตาลี','สวิตเซอร์แลนด์','เยอรมัน','อังกฤษ','สเปน','โปรตุเกส','ออสเตรีย','นอร์เวย์','สวีเดน','กรีซ','ตุรกี'] },
+  { value: 'Asia-East',   label: 'เอเชียตะวันออก',                countries: ['ญี่ปุ่น','จีน','เกาหลีใต้','ไต้หวัน','ฮ่องกง','มาเก๊า'] },
+  { value: 'Asia-SE',     label: 'เอเชียตะวันออกเฉียงใต้',        countries: ['สิงคโปร์','เวียดนาม','มาเลเซีย','อินโดนีเซีย','ฟิลิปปินส์','พม่า','กัมพูชา','ลาว'] },
+  { value: 'Asia-S-ME',   label: 'เอเชียใต้ / ตะวันออกกลาง',     countries: ['อินเดีย','มัลดีฟส์','ศรีลังกา','สหรัฐอาหรับเอมิเรตส์','กาตาร์','จอร์แดน'] },
+  { value: 'Americas',    label: 'อเมริกา',                       countries: ['สหรัฐอเมริกา','แคนาดา','เม็กซิโก','เปรู','บราซิล'] },
+  { value: 'Oceania',     label: 'โอเชียเนีย / แปซิฟิก',          countries: ['ออสเตรเลีย','นิวซีแลนด์','ฟิจิ','ฮาวาย'] },
+  { value: 'Africa',      label: 'แอฟริกา',                       countries: ['โมร็อกโก','แอฟริกาใต้','เคนยา','อียิปต์','แทนซาเนีย'] },
+  { value: 'Dom-North',   label: 'ในประเทศ — ภาคเหนือ',           countries: ['เชียงใหม่','เชียงราย','แม่ฮ่องสอน','น่าน','ลำปาง'] },
+  { value: 'Dom-Central', label: 'ในประเทศ — ภาคกลาง/ตะวันออก',  countries: ['กรุงเทพฯ','พัทยา','ระยอง','เกาะเสม็ด','กาญจนบุรี'] },
+  { value: 'Dom-South',   label: 'ในประเทศ — ภาคใต้',             countries: ['ภูเก็ต','กระบี่','เกาะสมุย','เกาะพะงัน','เกาะลันตา','ตรัง'] },
+  { value: 'Dom-NE',      label: 'ในประเทศ — ภาคอีสาน',           countries: ['เขาใหญ่','โคราช','ขอนแก่น','อุดรธานี','หนองคาย','เลย'] },
+];
 const AIRLINES = ['การบินไทย', 'Thai Airways', 'AirAsia', 'Nok Air', 'Emirates', 'Qatar Airways', 'Singapore Airlines', 'Korean Air', 'Japan Airlines', 'Cathay Pacific'];
 
+const QUICK_LINKS = [
+  { label: 'ญี่ปุ่น',     country: 'ญี่ปุ่น',         continent: 'Asia-East',   tourType: 'international' },
+  { label: 'เกาหลี',     country: 'เกาหลีใต้',        continent: 'Asia-East',   tourType: 'international' },
+  { label: 'จีน',        country: 'จีน',              continent: 'Asia-East',   tourType: 'international' },
+  { label: 'ยุโรป',      country: '',                 continent: 'Europe',      tourType: 'international' },
+  { label: 'มัลดีฟส์',   country: 'มัลดีฟส์',         continent: 'Asia-S-ME',   tourType: 'international' },
+  { label: 'สิงคโปร์',   country: 'สิงคโปร์',          continent: 'Asia-SE',     tourType: 'international' },
+  { label: 'เวียดนาม',   country: 'เวียดนาม',          continent: 'Asia-SE',     tourType: 'international' },
+  { label: 'ไต้หวัน',    country: 'ไต้หวัน',           continent: 'Asia-East',   tourType: 'international' },
+];
+
 function SearchSidebar({ navigate }) {
+  const [tourType, setTourType] = useState('');
   const [zone, setZone] = useState('');
   const [country, setCountry] = useState('');
   const [airline, setAirline] = useState('');
   const [month, setMonth] = useState('');
-  const countries = zone ? (COUNTRIES[zone] || []) : [];
+  const zoneObj = ZONE_OPTIONS.find(z => z.value === zone);
+  const countries = zoneObj ? zoneObj.countries : [];
   const months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+  const handleSearch = () => {
+    const filters = {};
+    if (tourType) filters.tourType = tourType;
+    if (zone) filters.continent = zone;
+    if (country) filters.country = country;
+    navigate('tours', null, filters);
+  };
 
   return (
     <div style={{
@@ -144,22 +180,20 @@ function SearchSidebar({ navigate }) {
       <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
           <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>ประเภทการเดินทาง</label>
-          <select>
-            <option>ทัวร์ต่างประเทศ</option>
-            <option>ทัวร์ในประเทศ</option>
-            <option>ทัวร์พรีเมี่ยม</option>
-            <option>เรือสำราญ</option>
+          <select value={tourType} onChange={e => setTourType(e.target.value)}>
+            <option value="">-- ทุกประเภท --</option>
+            {TOUR_TYPE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
           </select>
         </div>
         <div>
           <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>โซน / ทวีป</label>
           <select value={zone} onChange={e => { setZone(e.target.value); setCountry(''); }}>
             <option value="">-- เลือกโซน --</option>
-            {ZONES.map(z => <option key={z} value={z}>{z}</option>)}
+            {ZONE_OPTIONS.map(z => <option key={z.value} value={z.value}>{z.label}</option>)}
           </select>
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>ประเทศ</label>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>ประเทศ / จังหวัด</label>
           <select value={country} onChange={e => setCountry(e.target.value)} disabled={!zone}>
             <option value="">-- เลือกประเทศ --</option>
             {countries.map(c => <option key={c} value={c}>{c}</option>)}
@@ -179,7 +213,7 @@ function SearchSidebar({ navigate }) {
             {months.map((m, i) => <option key={i} value={m}>{m} 2569</option>)}
           </select>
         </div>
-        <button onClick={() => navigate('tours')} style={{
+        <button onClick={handleSearch} style={{
           background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 6,
           padding: '12px 0', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
@@ -191,13 +225,13 @@ function SearchSidebar({ navigate }) {
         <div style={{ borderTop: '1px solid var(--line)', paddingTop: 10 }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 7 }}>ค้นหาด่วน</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-            {['ญี่ปุ่น','เกาหลี','จีน','ยุโรป','มัลดีฟส์','สิงคโปร์','เวียดนาม','ไต้หวัน'].map(c => (
-              <button key={c} onClick={() => navigate('tours')} style={{
+            {QUICK_LINKS.map(ql => (
+              <button key={ql.label} onClick={() => navigate('tours', null, { tourType: ql.tourType, continent: ql.continent, country: ql.country })} style={{
                 background: 'var(--primary-light)', color: 'var(--primary)',
                 border: '1px solid #ffc89a', borderRadius: 999,
                 padding: '3px 10px', fontSize: 12, fontWeight: 600,
                 cursor: 'pointer', fontFamily: 'inherit',
-              }}>{c}</button>
+              }}>{ql.label}</button>
             ))}
           </div>
         </div>
@@ -298,18 +332,18 @@ function NewToursSection({ tours, navigate, t, compareList, toggleCompare }) {
 
 // ─── DESTINATION CATEGORIES ──────────────────────────────────
 const DESTINATIONS = [
-  { name: 'ทัวร์จีน', count: 120, emoji: '🇨🇳', img: 'https://picsum.photos/seed/china1/400/300' },
-  { name: 'ทัวร์ญี่ปุ่น', count: 98, emoji: '🇯🇵', img: 'https://picsum.photos/seed/japan1/400/300' },
-  { name: 'ทัวร์เกาหลี', count: 64, emoji: '🇰🇷', img: 'https://picsum.photos/seed/korea1/400/300' },
-  { name: 'ทัวร์ยุโรป', count: 85, emoji: '🏰', img: 'https://picsum.photos/seed/europe1/400/300' },
-  { name: 'ทัวร์ไต้หวัน', count: 42, emoji: '🇹🇼', img: 'https://picsum.photos/seed/taiwan1/400/300' },
-  { name: 'ทัวร์สิงคโปร์', count: 38, emoji: '🇸🇬', img: 'https://picsum.photos/seed/singapore1/400/300' },
-  { name: 'ทัวร์ฮ่องกง', count: 55, emoji: '🏙️', img: 'https://picsum.photos/seed/hongkong1/400/300' },
-  { name: 'ทัวร์อเมริกา', count: 29, emoji: '🗽', img: 'https://picsum.photos/seed/america1/400/300' },
-  { name: 'ทัวร์เวียดนาม', count: 47, emoji: '🇻🇳', img: 'https://picsum.photos/seed/vietnam1/400/300' },
-  { name: 'ทัวร์อินเดีย', count: 31, emoji: '🇮🇳', img: 'https://picsum.photos/seed/india1/400/300' },
-  { name: 'ทัวร์สหรัฐอาหรับ', count: 22, emoji: '🕌', img: 'https://picsum.photos/seed/dubai1/400/300' },
-  { name: 'ทัวร์มัลดีฟส์', count: 18, emoji: '🏝️', img: 'https://picsum.photos/seed/maldives1/400/300' },
+  { name: 'ทัวร์จีน',        count: 120, emoji: '🇨🇳', img: 'https://picsum.photos/seed/china1/400/300',     country: 'จีน',         continent: 'Asia-East',  tourType: 'international' },
+  { name: 'ทัวร์ญี่ปุ่น',    count: 98,  emoji: '🇯🇵', img: 'https://picsum.photos/seed/japan1/400/300',     country: 'ญี่ปุ่น',     continent: 'Asia-East',  tourType: 'international' },
+  { name: 'ทัวร์เกาหลี',     count: 64,  emoji: '🇰🇷', img: 'https://picsum.photos/seed/korea1/400/300',     country: 'เกาหลีใต้',   continent: 'Asia-East',  tourType: 'international' },
+  { name: 'ทัวร์ยุโรป',      count: 85,  emoji: '🏰',  img: 'https://picsum.photos/seed/europe1/400/300',    country: '',             continent: 'Europe',     tourType: 'international' },
+  { name: 'ทัวร์ไต้หวัน',    count: 42,  emoji: '🇹🇼', img: 'https://picsum.photos/seed/taiwan1/400/300',    country: 'ไต้หวัน',     continent: 'Asia-East',  tourType: 'international' },
+  { name: 'ทัวร์สิงคโปร์',   count: 38,  emoji: '🇸🇬', img: 'https://picsum.photos/seed/singapore1/400/300', country: 'สิงคโปร์',    continent: 'Asia-SE',    tourType: 'international' },
+  { name: 'ทัวร์ฮ่องกง',     count: 55,  emoji: '🏙️', img: 'https://picsum.photos/seed/hongkong1/400/300',  country: 'ฮ่องกง',      continent: 'Asia-East',  tourType: 'international' },
+  { name: 'ทัวร์อเมริกา',    count: 29,  emoji: '🗽',  img: 'https://picsum.photos/seed/america1/400/300',   country: 'สหรัฐอเมริกา', continent: 'Americas',  tourType: 'international' },
+  { name: 'ทัวร์เวียดนาม',   count: 47,  emoji: '🇻🇳', img: 'https://picsum.photos/seed/vietnam1/400/300',   country: 'เวียดนาม',    continent: 'Asia-SE',    tourType: 'international' },
+  { name: 'ทัวร์อินเดีย',    count: 31,  emoji: '🇮🇳', img: 'https://picsum.photos/seed/india1/400/300',     country: 'อินเดีย',     continent: 'Asia-S-ME',  tourType: 'international' },
+  { name: 'ทัวร์สหรัฐอาหรับ', count: 22, emoji: '🕌',  img: 'https://picsum.photos/seed/dubai1/400/300',     country: 'สหรัฐอาหรับเอมิเรตส์', continent: 'Asia-S-ME', tourType: 'international' },
+  { name: 'ทัวร์มัลดีฟส์',   count: 18,  emoji: '🏝️', img: 'https://picsum.photos/seed/maldives1/400/300',  country: 'มัลดีฟส์',    continent: 'Asia-S-ME',  tourType: 'international' },
 ];
 
 function DestinationsSection({ navigate, inner }) {
@@ -319,7 +353,7 @@ function DestinationsSection({ navigate, inner }) {
       <SectionHeader title="หมวดหมู่ยอดนิยม" emoji="🌏" sub="เลือกปลายทางที่คุณฝัน" onMore={() => navigate('tours')} />
       <div className={cols} style={{ gap: 12 }}>
         {DESTINATIONS.map(d => (
-          <div key={d.name} className="cat-card" onClick={() => navigate('tours')}>
+          <div key={d.name} className="cat-card" onClick={() => navigate('tours', null, { tourType: d.tourType, continent: d.continent, country: d.country })}>
             <img src={d.img} alt={d.name} loading="lazy" />
             <div className="cat-card-overlay">
               <div className="cat-card-title">{d.emoji} {d.name.replace('ทัวร์', '')}</div>
@@ -579,7 +613,7 @@ function ContactCta({ navigate }) {
               fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
             }}
           >
-            LINE: @sanookholiday
+            LINE: @wecrafttravel
           </button>
         </div>
       </div>

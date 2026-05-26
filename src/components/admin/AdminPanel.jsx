@@ -31,7 +31,28 @@ const MENU = [
   { key: 'settings',    label: 'Settings',     icon: Settings },
 ];
 
-const CONTINENTS = ['Asia', 'Europe', 'Africa', 'Americas', 'Oceania', 'Middle East'];
+const TOUR_TYPES = [
+  { value: 'international', label: 'ทัวร์ต่างประเทศ' },
+  { value: 'domestic',      label: 'ทัวร์ในประเทศ' },
+  { value: 'premium',       label: 'ทัวร์พรีเมี่ยม' },
+  { value: 'hotdeal',       label: 'ทัวร์โปรไฟไหม้ 🔥' },
+  { value: 'package',       label: 'แพ็คเกจทัวร์' },
+  { value: 'cruise',        label: 'เรือสำราญ' },
+];
+
+const CONTINENT_OPTIONS = [
+  { value: 'Europe',     label: 'ยุโรป',                        countries: ['ฝรั่งเศส','อิตาลี','สวิตเซอร์แลนด์','เยอรมัน','อังกฤษ','สเปน','โปรตุเกส','ออสเตรีย','เนเธอร์แลนด์','เบลเยียม','นอร์เวย์','สวีเดน','เดนมาร์ก','กรีซ','ตุรกี'] },
+  { value: 'Asia-East',  label: 'เอเชียตะวันออก',               countries: ['ญี่ปุ่น','จีน','เกาหลีใต้','ไต้หวัน','ฮ่องกง','มาเก๊า'] },
+  { value: 'Asia-SE',    label: 'เอเชียตะวันออกเฉียงใต้',       countries: ['สิงคโปร์','เวียดนาม','มาเลเซีย','อินโดนีเซีย','ฟิลิปปินส์','พม่า','กัมพูชา','ลาว','บรูไน'] },
+  { value: 'Asia-S-ME',  label: 'เอเชียใต้ / ตะวันออกกลาง',    countries: ['อินเดีย','มัลดีฟส์','ศรีลังกา','สหรัฐอาหรับเอมิเรตส์','ซาอุดีอาระเบีย','กาตาร์','จอร์แดน','อิสราเอล','โอมาน'] },
+  { value: 'Americas',   label: 'อเมริกา',                      countries: ['สหรัฐอเมริกา','แคนาดา','เม็กซิโก','เปรู','บราซิล','อาร์เจนตินา','ชิลี'] },
+  { value: 'Oceania',    label: 'โอเชียเนีย / แปซิฟิก',         countries: ['ออสเตรเลีย','นิวซีแลนด์','ฟิจิ','ฮาวาย'] },
+  { value: 'Africa',     label: 'แอฟริกา',                      countries: ['โมร็อกโก','แอฟริกาใต้','เคนยา','อียิปต์','แทนซาเนีย','มาดากัสการ์'] },
+  { value: 'Dom-North',  label: 'ในประเทศ — ภาคเหนือ',          countries: ['เชียงใหม่','เชียงราย','แม่ฮ่องสอน','น่าน','ลำปาง','พะเยา','แพร่','อุตรดิตถ์'] },
+  { value: 'Dom-Central',label: 'ในประเทศ — ภาคกลาง/ตะวันออก', countries: ['กรุงเทพฯ','พัทยา','ระยอง','เกาะเสม็ด','เกาะช้าง','กาญจนบุรี','สุพรรณบุรี','อยุธยา'] },
+  { value: 'Dom-South',  label: 'ในประเทศ — ภาคใต้',            countries: ['ภูเก็ต','กระบี่','เกาะสมุย','เกาะพะงัน','เกาะลันตา','ตรัง','สตูล','หาดใหญ่'] },
+  { value: 'Dom-NE',     label: 'ในประเทศ — ภาคอีสาน',          countries: ['เขาใหญ่','โคราช','ขอนแก่น','อุดรธานี','หนองคาย','เลย','อุบลราชธานี','สกลนคร'] },
+];
 
 // ── Reusable Modal Shell ──────────────────────────────────────
 function Modal({ title, onClose, children, wide }) {
@@ -268,7 +289,7 @@ function DashboardSection({ tours, articles, bookings, messages, reviews, chatSe
 // ===== TOURS =====
 const EMPTY_TOUR = {
   name: { th: '', en: '' }, destination: { th: '', en: '' }, description: { th: '', en: '' },
-  image: '', continent: 'Asia', duration: 7, groupSize: 20, price: 0, featured: false, active: true,
+  image: '', tourType: 'international', continent: 'Asia-East', country: '', duration: 7, groupSize: 20, price: 0, featured: false, active: true,
   flight: { outbound: { airline: '', flightNo: '', departure: '', arrival: '' }, return: { airline: '', flightNo: '', departure: '', arrival: '' } },
   hotels: [], itinerary: [], includes: [], excludes: [], priceTiers: [], departures: [], gallery: [],
 };
@@ -415,6 +436,29 @@ function ToursSection({ tours, setTours, t }) {
           {/* ── Tab: พื้นฐาน ── */}
           {tourTab === 'พื้นฐาน' && (
             <div className="space-y-4">
+              {/* Tour type + continent + country */}
+              <div className="grid grid-cols-3 gap-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                <Field label="ประเภทการเดินทาง *">
+                  <select className={inp} value={form.tourType || 'international'} onChange={e => setF(['tourType'], e.target.value)}>
+                    {TOUR_TYPES.map(tt => <option key={tt.value} value={tt.value}>{tt.label}</option>)}
+                  </select>
+                </Field>
+                <Field label="โซน / ทวีป *">
+                  <select className={inp} value={form.continent || ''} onChange={e => { setF(['continent'], e.target.value); setF(['country'], ''); }}>
+                    <option value="">-- เลือกโซน --</option>
+                    {CONTINENT_OPTIONS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                  </select>
+                </Field>
+                <Field label="ประเทศ / จังหวัด *">
+                  <select className={inp} value={form.country || ''} onChange={e => setF(['country'], e.target.value)} disabled={!form.continent}>
+                    <option value="">-- เลือกประเทศ --</option>
+                    {(CONTINENT_OPTIONS.find(c => c.value === form.continent)?.countries || []).map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </Field>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <Field label="ชื่อทัวร์ (ไทย) *">
                   <input className={inp} value={form.name.th} onChange={e => setF(['name','th'], e.target.value)} placeholder="ทัวร์ญี่ปุ่น..." />
@@ -424,11 +468,11 @@ function ToursSection({ tours, setTours, t }) {
                 </Field>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <Field label="ปลายทาง (ไทย)">
-                  <input className={inp} value={form.destination.th} onChange={e => setF(['destination','th'], e.target.value)} placeholder="โตเกียว ญี่ปุ่น" />
+                <Field label="คำอธิบายปลายทาง (ไทย)">
+                  <input className={inp} value={form.destination.th} onChange={e => setF(['destination','th'], e.target.value)} placeholder="โตเกียว โอซาก้า เกียวโต" />
                 </Field>
-                <Field label="ปลายทาง (English)">
-                  <input className={inp} value={form.destination.en} onChange={e => setF(['destination','en'], e.target.value)} placeholder="Tokyo, Japan" />
+                <Field label="คำอธิบายปลายทาง (English)">
+                  <input className={inp} value={form.destination.en} onChange={e => setF(['destination','en'], e.target.value)} placeholder="Tokyo, Osaka, Kyoto" />
                 </Field>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -443,30 +487,28 @@ function ToursSection({ tours, setTours, t }) {
                 <input className={inp} value={form.image} onChange={e => setF(['image'], e.target.value)} placeholder="https://..." />
               </Field>
               <div className="grid grid-cols-3 gap-3">
-                <Field label="ทวีป">
-                  <select className={inp} value={form.continent} onChange={e => setF(['continent'], e.target.value)}>
-                    {CONTINENTS.map(c => <option key={c}>{c}</option>)}
-                  </select>
-                </Field>
                 <Field label="ราคาเริ่มต้น (฿)">
                   <input className={inp} type="number" value={form.price} onChange={e => setF(['price'], Number(e.target.value))} />
                 </Field>
                 <Field label="ระยะเวลา (วัน)">
                   <input className={inp} type="number" value={form.duration} onChange={e => setF(['duration'], Number(e.target.value))} />
                 </Field>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
                 <Field label="จำนวนคน (สูงสุด)">
                   <input className={inp} type="number" value={form.groupSize} onChange={e => setF(['groupSize'], Number(e.target.value))} />
                 </Field>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
                 <Field label="สายการบิน">
                   <input className={inp} value={form.flight?.outbound?.airline || ''} onChange={e => setF(['flight','outbound','airline'], e.target.value)} placeholder="Thai Airways" />
+                </Field>
+                <Field label="ส่วนลด (%)">
+                  <input className={inp} type="number" min={0} max={99} value={form.discount || 0} onChange={e => setF(['discount'], Number(e.target.value))} placeholder="0" />
                 </Field>
               </div>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.featured} onChange={e => setF(['featured'], e.target.checked)} className="w-4 h-4 accent-teal-600" />
-                  <span className="text-sm text-slate-700">Featured (แนะนำ)</span>
+                  <span className="text-sm text-slate-700">Featured (แนะนำ / โปรไฟไหม้)</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.active !== false} onChange={e => setF(['active'], e.target.checked)} className="w-4 h-4 accent-teal-600" />
