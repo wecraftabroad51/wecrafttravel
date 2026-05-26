@@ -29,6 +29,68 @@ const TOUR_TYPES = [
 ];
 const HOTEL_STARS = ['3 ดาว', '4 ดาว', '5 ดาว'];
 
+const AIRLINES = [
+  '-- ไม่ระบุ / ยืดหยุ่นได้ --',
+  // ─ สายการบินไทย ─
+  'การบินไทย (TG)',
+  'Bangkok Airways (PG)',
+  'Thai AirAsia (FD)',
+  'Thai Lion Air (SL)',
+  'Thai Smile (WE)',
+  'Thai VietJet (VZ)',
+  'Nok Air (DD)',
+  // ─ เอเชียตะวันออก ─
+  'Singapore Airlines (SQ)',
+  'Cathay Pacific (CX)',
+  'EVA Air (BR)',
+  'China Airlines (CI)',
+  'Japan Airlines (JL)',
+  'ANA - All Nippon Airways (NH)',
+  'Korean Air (KE)',
+  'Asiana Airlines (OZ)',
+  'Scoot (TR)',
+  'AirAsia X (D7)',
+  'Jetstar Asia (3K)',
+  'Peach Aviation (MM)',
+  // ─ ตะวันออกกลาง ─
+  'Emirates (EK)',
+  'Qatar Airways (QR)',
+  'Etihad Airways (EY)',
+  'flydubai (FZ)',
+  'Air Arabia (G9)',
+  'Oman Air (WY)',
+  'Gulf Air (GF)',
+  // ─ ยุโรป ─
+  'Lufthansa (LH)',
+  'Air France (AF)',
+  'British Airways (BA)',
+  'KLM (KL)',
+  'Swiss (LX)',
+  'Austrian Airlines (OS)',
+  'Turkish Airlines (TK)',
+  'Finnair (AY)',
+  'SAS (SK)',
+  'Norwegian (DY)',
+  // ─ อเมริกา / โอเชียเนีย ─
+  'United Airlines (UA)',
+  'American Airlines (AA)',
+  'Delta Air Lines (DL)',
+  'Air Canada (AC)',
+  'Qantas (QF)',
+  'Air New Zealand (NZ)',
+];
+
+// จำนวนวัน-คืน options
+const DURATION_OPTIONS = [
+  '-- เลือกระยะเวลา --',
+  '2 วัน 1 คืน', '3 วัน 2 คืน', '4 วัน 3 คืน', '5 วัน 4 คืน',
+  '6 วัน 5 คืน', '7 วัน 6 คืน', '8 วัน 7 คืน', '9 วัน 8 คืน',
+  '10 วัน 9 คืน', '11 วัน 10 คืน', '12 วัน 11 คืน', '13 วัน 12 คืน',
+  '14 วัน 13 คืน', '15 วัน 14 คืน', '16 วัน 15 คืน',
+  '18 วัน 17 คืน', '20 วัน 19 คืน', '21 วัน 20 คืน',
+  'มากกว่า 21 วัน (ระบุในหมายเหตุ)',
+];
+
 const EMPTY = {
   firstName: '', lastName: '', company: '', pax: '',
   phone: '', lineId: '', email: '', emailAlt: '',
@@ -87,7 +149,7 @@ export default function GroupQuotePage({ lang, setMessages }) {
     if (!form.email)       e.email       = true;
     if (!form.destination) e.destination = true;
     if (!form.travelDate)  e.travelDate  = true;
-    if (!form.duration)    e.duration    = true;
+    if (!form.duration || form.duration.startsWith('--')) e.duration = true;
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -412,14 +474,22 @@ export default function GroupQuotePage({ lang, setMessages }) {
                 value={form.travelDate} onChange={set('travelDate')} />
             </Field>
             <Field label="ต้องการทัวร์กี่วัน" required>
-              <input style={inpStyle('duration')} placeholder="เช่น 7 วัน 6 คืน"
-                value={form.duration} onChange={set('duration')} />
+              <select style={{ ...inpStyle('duration'), background: '#fff', cursor: 'pointer' }}
+                value={form.duration} onChange={set('duration')}>
+                {DURATION_OPTIONS.map(d => (
+                  <option key={d} value={d.startsWith('--') ? '' : d}>{d}</option>
+                ))}
+              </select>
             </Field>
 
             {/* สายการบิน-ข้อมูลเพิ่มเติม */}
             <Field label="ต้องการบินสายการบิน">
-              <input style={inpStyle()} placeholder="ต้องการบินสายการบิน"
-                value={form.airline} onChange={set('airline')} />
+              <select style={{ ...inpStyle(), background: '#fff', cursor: 'pointer' }}
+                value={form.airline} onChange={set('airline')}>
+                {AIRLINES.map(a => (
+                  <option key={a} value={a.startsWith('--') ? '' : a}>{a}</option>
+                ))}
+              </select>
             </Field>
             <Field label="ข้อมูลที่ต้องการแจ้งเราเพิ่มเติม">
               <input style={inpStyle()} placeholder="ข้อมูลที่ต้องการแจ้งเราเพิ่มเติม"
