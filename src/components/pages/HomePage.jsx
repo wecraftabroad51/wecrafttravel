@@ -1,268 +1,685 @@
-import { ArrowRight, Shield, Users, Award, Headphones, Star, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
 import TourCard from '../TourCard.jsx';
 
-export default function HomePage({ lang, t, navigate, tours, promotions, reviews, compareList, toggleCompare }) {
-  const featured = tours.filter(tr => tr.featured).sort((a, b) => a.featuredOrder - b.featuredOrder);
-  const approvedReviews = reviews.filter(r => r.approved);
+function Icon({ name, size = 18, stroke = 1.6 }) {
+  const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: stroke, strokeLinecap: 'round', strokeLinejoin: 'round' };
+  switch (name) {
+    case 'arrow-right':    return <svg {...p}><path d="M5 12h14M13 6l6 6-6 6"/></svg>;
+    case 'arrow-up-right': return <svg {...p}><path d="M7 17 17 7M8 7h9v9"/></svg>;
+    case 'arrow-left':     return <svg {...p}><path d="M19 12H5M11 6l-6 6 6 6"/></svg>;
+    case 'search':         return <svg {...p}><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>;
+    case 'map-pin':        return <svg {...p}><path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>;
+    case 'calendar':       return <svg {...p}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>;
+    case 'users':          return <svg {...p}><circle cx="9" cy="9" r="3.5"/><path d="M2 20c.8-3.5 3.8-5.5 7-5.5s6.2 2 7 5.5"/><circle cx="17" cy="7" r="2.5"/><path d="M17 13c3 0 5 1.6 5.5 4"/></svg>;
+    case 'sparkle':        return <svg {...p}><path d="M12 3v6M12 15v6M3 12h6M15 12h6M6 6l3 3M15 15l3 3M6 18l3-3M15 9l3-3"/></svg>;
+    case 'globe':          return <svg {...p}><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>;
+    case 'shield':         return <svg {...p}><path d="M12 3 4 6v6c0 5 3.5 8.5 8 9 4.5-.5 8-4 8-9V6l-8-3z"/></svg>;
+    case 'leaf':           return <svg {...p}><path d="M5 19c2-9 8-14 16-14-1 9-7 15-16 14zM5 19l7-7"/></svg>;
+    case 'play':           return <svg {...p} fill="currentColor" stroke="none"><path d="m8 5 12 7-12 7z"/></svg>;
+    case 'check':          return <svg {...p}><path d="m5 13 4 4 10-10"/></svg>;
+    case 'line':           return <svg {...p}><path d="M21 11c0 4.4-4 8-9 8-1 0-2-.1-3-.4L4 20l1.5-3.6A8.4 8.4 0 0 1 3 11c0-4.4 4-8 9-8s9 3.6 9 8z"/></svg>;
+    default: return null;
+  }
+}
 
+// ---- HERO ----
+function HomeHero({ navigate }) {
   return (
-    <div>
-      {/* ── Hero ───────────────────────────────────────── */}
-      <section className="relative h-[600px] md:h-[680px] flex items-center justify-center text-white overflow-hidden">
-        <img
-          src="https://picsum.photos/seed/hero-travel/1600/700"
-          alt="travel hero"
-          className="absolute inset-0 w-full h-full object-cover scale-105"
-          style={{ transition: 'transform 8s ease' }}
-        />
-        {/* Gradient overlay */}
-        <div className="absolute inset-0" style={{
-          background: 'linear-gradient(135deg, rgba(15,118,110,0.75) 0%, rgba(15,23,42,0.65) 60%, rgba(15,23,42,0.8) 100%)'
-        }} />
-
-        {/* Decorative circles */}
-        <div className="absolute top-20 right-20 w-64 h-64 rounded-full border border-white/10 hidden lg:block" />
-        <div className="absolute top-32 right-32 w-40 h-40 rounded-full border border-white/10 hidden lg:block" />
-
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-amber-400/20 border border-amber-400/40 backdrop-blur-sm text-amber-300 text-sm font-semibold px-5 py-2 rounded-full mb-6">
-            ✈️ {lang === 'th' ? 'ประสบการณ์กว่า 15 ปี | ลูกค้ากว่า 50,000 คน' : '15+ Years Experience | 50,000+ Happy Customers'}
+    <section style={{ position: 'relative', paddingTop: 12 }}>
+      <div className="wrap-wide" style={{ position: 'relative' }}>
+        {/* eyebrow row */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span className="pulse" style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' }} />
+            <span style={{ fontSize: 12, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--ink-2)', fontWeight: 500 }}>
+              Now booking · 2026 departures
+            </span>
           </div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', display: 'flex', gap: 24, alignItems: 'center' }}>
+            <span>14 countries</span>
+            <span className="dot" />
+            <span>62 departures</span>
+            <span className="dot" />
+            <span>4,800+ travelers</span>
+          </div>
+        </div>
 
-          <h1 className="text-5xl md:text-7xl font-extrabold mb-5 leading-tight tracking-tight">
-            {lang === 'th' ? (
-              <><span className="text-white">สำรวจโลก</span><br /><span className="text-amber-400">กับเรา</span></>
-            ) : (
-              <><span className="text-white">Explore</span><br /><span className="text-amber-400">The World</span></>
-            )}
+        {/* big title + description */}
+        <div style={{ marginTop: 56, position: 'relative' }}>
+          <h1 className="h-display">
+            We craft<br />
+            <span style={{ fontFamily: 'Instrument Serif, serif', fontStyle: 'italic', fontWeight: 400, color: 'var(--primary)' }}>journeys</span>,
+            <br />not itineraries.
           </h1>
 
-          <p className="text-lg md:text-xl text-white/80 mb-10 max-w-2xl mx-auto leading-relaxed">
-            {lang === 'th'
-              ? 'ทัวร์คุณภาพสูง มัคคุเทศก์ภาษาไทย ราคาสมเหตุสมผล บริการครบวงจร'
-              : 'Premium tours, Thai-speaking guides, fair prices & full service'}
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={() => navigate('tours')}
-              className="group inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 px-8 py-4 rounded-2xl font-bold text-base shadow-2xl shadow-amber-400/30 transition-all hover:scale-105"
-            >
-              {lang === 'th' ? 'ดูทัวร์ทั้งหมด' : 'View All Tours'}
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button
-              onClick={() => navigate('contact')}
-              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/30 text-white px-8 py-4 rounded-2xl font-bold text-base transition-all hover:scale-105"
-            >
-              {lang === 'th' ? 'ปรึกษาฟรี' : 'Free Consultation'}
-            </button>
-          </div>
-        </div>
-
-        {/* Bottom wave */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 60L60 50C120 40 240 20 360 15C480 10 600 20 720 25C840 30 960 30 1080 25C1200 20 1320 10 1380 5L1440 0V60H1380C1320 60 1200 60 1080 60C960 60 840 60 720 60C600 60 480 60 360 60C240 60 120 60 60 60H0Z" fill="#F8FAFC"/>
-          </svg>
-        </div>
-      </section>
-
-      {/* ── Stats strip ────────────────────────────────── */}
-      <section className="bg-white shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 py-6 grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[
-            { num: '15+', label: lang === 'th' ? 'ปีประสบการณ์' : 'Years Experience', icon: '🏆' },
-            { num: '50K+', label: lang === 'th' ? 'ลูกค้าพึงพอใจ' : 'Happy Customers', icon: '😊' },
-            { num: '80+', label: lang === 'th' ? 'จุดหมายปลายทาง' : 'Destinations', icon: '🌍' },
-            { num: '4.9★', label: lang === 'th' ? 'คะแนนเฉลี่ย' : 'Avg. Rating', icon: '⭐' },
-          ].map(s => (
-            <div key={s.num} className="text-center py-2">
-              <div className="text-2xl mb-1">{s.icon}</div>
-              <div className="text-2xl md:text-3xl font-extrabold text-teal-700">{s.num}</div>
-              <div className="text-xs md:text-sm text-slate-500 mt-0.5">{s.label}</div>
+          <div style={{
+            position: 'absolute', right: 0, top: 0,
+            maxWidth: 340, textAlign: 'right',
+          }}>
+            <div style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.55 }}>
+              Small-group European tours for Thai travelers who want pace, people, and the quiet hours between the postcard moments.
             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Featured Tours ──────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 py-16">
-        <div className="flex items-end justify-between mb-10">
-          <div>
-            <div className="text-teal-600 text-sm font-semibold uppercase tracking-widest mb-2">
-              {lang === 'th' ? '✦ ทัวร์คัดสรร' : '✦ Handpicked Tours'}
+            <div style={{ marginTop: 20, display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => navigate('tours')} className="btn btn-primary">
+                See 2026 tours <Icon name="arrow-right" size={14} />
+              </button>
+              <button onClick={() => navigate('contact')} className="btn btn-ghost">
+                Talk to a specialist
+              </button>
             </div>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800">
-              {lang === 'th' ? 'ทัวร์แนะนำ' : 'Featured Tours'}
-            </h2>
           </div>
-          <button
-            onClick={() => navigate('tours')}
-            className="hidden md:flex items-center gap-1 text-teal-700 hover:text-teal-600 font-semibold text-sm transition-colors"
-          >
-            {lang === 'th' ? 'ดูทั้งหมด' : 'View All'} <ChevronRight className="w-4 h-4" />
-          </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featured.map(tour => (
-            <TourCard
-              key={tour.id} tour={tour} t={t} navigate={navigate}
-              inCompare={compareList.includes(tour.id)}
-              onCompare={() => toggleCompare(tour.id)}
-            />
-          ))}
-        </div>
-
-        <div className="text-center mt-10 md:hidden">
-          <button
-            onClick={() => navigate('tours')}
-            className="inline-flex items-center gap-2 border-2 border-teal-700 text-teal-700 hover:bg-teal-700 hover:text-white px-8 py-3 rounded-2xl font-semibold transition-all"
-          >
-            {lang === 'th' ? 'ดูทัวร์ทั้งหมด' : 'View All Tours'} <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      </section>
-
-      {/* ── Why Choose Us ──────────────────────────────── */}
-      <section className="bg-gradient-to-br from-slate-900 to-teal-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <div className="text-amber-400 text-sm font-semibold uppercase tracking-widest mb-2">
-              {lang === 'th' ? '✦ ทำไมต้องเรา' : '✦ Why Us'}
+        {/* hero image collage */}
+        <div style={{
+          marginTop: 56,
+          display: 'grid',
+          gridTemplateColumns: '2.4fr 1fr 1.4fr',
+          gridTemplateRows: 'auto auto',
+          gap: 12,
+          height: 540,
+        }}>
+          {/* Big left image */}
+          <div style={{ position: 'relative', gridRow: 'span 2', borderRadius: 'var(--r-lg)', overflow: 'hidden', background: 'var(--canvas-2)' }}>
+            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--primary-deep), var(--ink-2))' }} />
+            <div style={{
+              position: 'absolute', left: 24, bottom: 24,
+              background: 'rgba(244,239,230,.95)', padding: '10px 16px',
+              borderRadius: 999, fontSize: 12, fontWeight: 600,
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+            }}>
+              <Icon name="play" size={11} /> Watch — 2 min on the road
             </div>
-            <h2 className="text-3xl md:text-4xl font-extrabold">
-              {lang === 'th' ? 'ทำไมต้องเลือก Wanderlust?' : 'Why Choose Wanderlust?'}
-            </h2>
+            <div style={{
+              position: 'absolute', top: 24, right: 24,
+              background: 'var(--ink)', color: 'var(--canvas)',
+              padding: '12px 18px', borderRadius: 'var(--r-md)',
+              display: 'flex', flexDirection: 'column', gap: 4,
+            }}>
+              <span className="eyebrow" style={{ color: 'rgba(244,239,230,.6)' }}>Now in season</span>
+              <span style={{ fontSize: 15, fontWeight: 600 }}>Swiss alpine — Jun→Sep</span>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Shield, title: lang === 'th' ? 'ปลอดภัย 100%' : '100% Safe', desc: lang === 'th' ? 'ประกันการเดินทางครบวงจร ดูแลทุกขั้นตอน' : 'Full travel insurance, every step covered', color: 'from-teal-500/20 to-teal-600/10' },
-              { icon: Users, title: lang === 'th' ? 'ไกด์ภาษาไทย' : 'Thai Guides', desc: lang === 'th' ? 'มัคคุเทศก์มืออาชีพดูแลตลอดทริป' : 'Professional Thai-speaking guides throughout', color: 'from-blue-500/20 to-blue-600/10' },
-              { icon: Award, title: lang === 'th' ? 'คุณภาพพรีเมียม' : 'Premium Quality', desc: lang === 'th' ? 'โรงแรมและบริการระดับพรีเมียมคัดสรร' : 'Handpicked premium hotels & services', color: 'from-amber-500/20 to-amber-600/10' },
-              { icon: Headphones, title: lang === 'th' ? 'ซัพพอร์ต 24/7' : '24/7 Support', desc: lang === 'th' ? 'ทีมงานพร้อมช่วยเหลือตลอด 24 ชม.' : 'Team ready to help around the clock', color: 'from-purple-500/20 to-purple-600/10' },
-            ].map(({ icon: Icon, title, desc, color }) => (
-              <div key={title} className={`bg-gradient-to-br ${color} border border-white/10 rounded-2xl p-6 text-center hover:border-white/20 transition-colors`}>
-                <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Icon className="w-7 h-7 text-amber-400" />
-                </div>
-                <h3 className="font-bold text-white mb-2">{title}</h3>
-                <p className="text-sm text-white/60 leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* ── Promotions ─────────────────────────────────── */}
-      {promotions.filter(p => p.active).length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 py-16">
-          <div className="flex items-end justify-between mb-10">
+          <div style={{ position: 'relative', borderRadius: 'var(--r-lg)', overflow: 'hidden', background: 'var(--sand)' }}>
+            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(160deg, #c8d6cf, #a8b8b0)' }} />
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(to top, rgba(10,31,26,.7), transparent 50%)',
+              display: 'flex', alignItems: 'flex-end', padding: 16, color: 'var(--canvas)',
+              fontSize: 13, fontWeight: 600,
+            }}>
+              Sognefjord, NO
+            </div>
+          </div>
+
+          <div style={{
+            position: 'relative', gridRow: 'span 2', borderRadius: 'var(--r-lg)', overflow: 'hidden',
+            background: 'var(--primary-deep)', color: 'var(--canvas)',
+            padding: 28, display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+          }}>
             <div>
-              <div className="text-amber-500 text-sm font-semibold uppercase tracking-widest mb-2">
-                {lang === 'th' ? '✦ ข้อเสนอพิเศษ' : '✦ Special Deals'}
-              </div>
-              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800">
-                {lang === 'th' ? 'โปรโมชั่นพิเศษ' : 'Special Promotions'}
-              </h2>
+              <div className="eyebrow" style={{ color: 'rgba(244,239,230,.6)' }}>Most-booked itinerary</div>
+              <h3 style={{ fontSize: 28, fontWeight: 600, letterSpacing: '-0.02em', marginTop: 12, lineHeight: 1.1 }}>
+                Italy · Switzerland · France
+              </h3>
+              <div style={{ marginTop: 8, fontSize: 13, opacity: .75 }}>9D7N · Qatar Airways · max 24</div>
             </div>
-            <button onClick={() => navigate('promotions')}
-              className="hidden md:flex items-center gap-1 text-teal-700 hover:text-teal-600 font-semibold text-sm">
-              {lang === 'th' ? 'ดูทั้งหมด' : 'View All'} <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {promotions.filter(p => p.active).map(promo => (
-              <div
-                key={promo.id}
-                onClick={() => navigate('promotions')}
-                className="relative rounded-2xl overflow-hidden cursor-pointer group shadow-lg hover:shadow-2xl transition-all hover:-translate-y-1"
-              >
-                <img src={promo.image} alt="" className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
-                <div className="absolute top-4 left-4">
-                  <span className="bg-amber-400 text-slate-900 text-lg font-black px-4 py-1.5 rounded-full shadow-lg">
-                    -{promo.discount}%
-                  </span>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <h3 className="text-white font-bold text-lg mb-1">{t(promo.title)}</h3>
-                  <p className="text-white/70 text-sm line-clamp-2">{t(promo.description)}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ── Reviews ────────────────────────────────────── */}
-      {approvedReviews.length > 0 && (
-        <section className="bg-slate-50 border-t border-slate-100 py-16">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-12">
-              <div className="text-teal-600 text-sm font-semibold uppercase tracking-widest mb-2">
-                {lang === 'th' ? '✦ รีวิวจากลูกค้าจริง' : '✦ Real Customer Reviews'}
-              </div>
-              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800">
-                {lang === 'th' ? 'เสียงจากลูกค้าของเรา' : 'What Our Customers Say'}
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-              {approvedReviews.map(r => (
-                <div key={r.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className={`w-5 h-5 ${i < r.rating ? 'text-amber-400 fill-amber-400' : 'text-slate-200 fill-slate-200'}`} />
-                    ))}
-                  </div>
-                  <p className="text-slate-600 leading-relaxed mb-5 italic">"{t(r.text)}"</p>
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-bold text-sm">
-                        {r.name.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-slate-800 text-sm">{r.name}</div>
-                        <div className="text-xs text-slate-400">{r.tier}</div>
-                      </div>
-                    </div>
-                    <span className="text-xs text-slate-400">{r.date}</span>
-                  </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {["Vatican + St. Peter's", "Jungfraujoch summit", "Eiffel + Versailles"].map(h => (
+                <div key={h} style={{ fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 8, opacity: .9 }}>
+                  <Icon name="check" size={12} /> {h}
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── CTA Banner ─────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 py-16">
-        <div className="bg-gradient-to-r from-teal-700 to-teal-900 rounded-3xl p-10 md:p-16 text-center text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4" />
-          <div className="relative z-10">
-            <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
-              {lang === 'th' ? 'พร้อมออกเดินทางแล้วหรือยัง? 🌍' : 'Ready to Explore the World? 🌍'}
-            </h2>
-            <p className="text-white/75 text-lg mb-8 max-w-xl mx-auto">
-              {lang === 'th'
-                ? 'ปรึกษาผู้เชี่ยวชาญด้านการท่องเที่ยวของเราฟรี ไม่มีข้อผูกมัด'
-                : 'Consult our travel experts for free, no commitment required.'}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button onClick={() => navigate('tours')}
-                className="bg-amber-400 hover:bg-amber-300 text-slate-900 px-8 py-4 rounded-2xl font-bold text-base transition-all hover:scale-105 shadow-lg">
-                {lang === 'th' ? 'ดูทัวร์ทั้งหมด' : 'View All Tours'}
-              </button>
-              <button onClick={() => navigate('contact')}
-                className="bg-white/10 hover:bg-white/20 border border-white/30 text-white px-8 py-4 rounded-2xl font-bold text-base transition-all">
-                {lang === 'th' ? 'ติดต่อเรา' : 'Contact Us'}
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+              <div>
+                <div className="eyebrow" style={{ color: 'rgba(244,239,230,.6)' }}>From</div>
+                <div className="tabular" style={{ fontSize: 30, fontWeight: 600, letterSpacing: '-0.02em' }}>
+                  ฿131,999
+                </div>
+                <div style={{ fontSize: 11, opacity: .7, marginTop: 2 }}>per traveler · 5 departures left</div>
+              </div>
+              <button className="btn btn-accent" onClick={() => navigate('tours')}>
+                Reserve <Icon name="arrow-right" size={14} />
               </button>
             </div>
           </div>
+
+          <div style={{ position: 'relative', borderRadius: 'var(--r-lg)', overflow: 'hidden', background: 'var(--canvas-2)' }}>
+            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(160deg, #d8c9b0, #c0ae94)' }} />
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(to top, rgba(10,31,26,.7), transparent 50%)',
+              display: 'flex', alignItems: 'flex-end', padding: 16, color: 'var(--canvas)',
+              fontSize: 13, fontWeight: 600,
+            }}>
+              Cabo da Roca, PT
+            </div>
+          </div>
         </div>
-      </section>
+
+        {/* hero search bar */}
+        <div style={{
+          marginTop: 28,
+          background: 'var(--card)',
+          border: '1px solid var(--line)',
+          borderRadius: 'var(--r-xl)',
+          padding: 8,
+          display: 'grid',
+          gridTemplateColumns: '1.4fr 1fr 1fr 1fr auto',
+          gap: 4,
+          boxShadow: 'var(--shadow-md)',
+        }}>
+          <SearchField label="Where to" icon="map-pin" placeholder="Italy, Switzerland, Norway…" />
+          <SearchField label="When" icon="calendar" placeholder="Any month in 2026" />
+          <SearchField label="Travelers" icon="users" placeholder="2 adults" />
+          <SearchField label="Budget" icon="sparkle" placeholder="Up to ฿140k" />
+          <button
+            onClick={() => navigate('tours')}
+            className="btn btn-accent btn-lg"
+            style={{ borderRadius: 999, margin: 4 }}
+          >
+            <Icon name="search" size={16} /> Search tours
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SearchField({ label, icon, placeholder }) {
+  return (
+    <div style={{ padding: '14px 18px', borderRight: '1px solid var(--line)', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <label style={{ fontSize: 11, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted)' }}>
+        {label}
+      </label>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Icon name={icon} size={14} stroke={1.8} />
+        <input
+          type="text"
+          placeholder={placeholder}
+          style={{ border: 'none', padding: 0, fontSize: 14, fontWeight: 500, background: 'transparent', width: '100%' }}
+        />
+      </div>
     </div>
+  );
+}
+
+// ---- MARQUEE ----
+function HomeMarquee() {
+  const items = [
+    'Italy', 'Switzerland', 'France', 'Portugal', 'Spain',
+    'Norway', 'Sweden', 'Denmark', 'Iceland', 'Austria',
+    'Czechia', 'Germany', 'Slovakia', 'UK', 'Netherlands',
+  ];
+  const doubled = [...items, ...items];
+  return (
+    <section style={{
+      borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)',
+      overflow: 'hidden', marginTop: 80,
+      padding: '22px 0',
+    }}>
+      <div className="marquee-track" style={{ gap: 48 }}>
+        {doubled.map((it, i) => (
+          <div key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 48, whiteSpace: 'nowrap' }}>
+            <span style={{
+              fontSize: 36, fontWeight: 500, letterSpacing: '-0.03em',
+              color: i % 3 === 1 ? 'var(--primary)' : 'var(--ink)',
+              fontStyle: i % 4 === 2 ? 'italic' : 'normal',
+              fontFamily: i % 4 === 2 ? 'Instrument Serif, serif' : 'inherit',
+            }}>
+              {it}
+            </span>
+            <span style={{ color: 'var(--muted)', fontSize: 20 }}>✦</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ---- FEATURED ----
+function HomeFeatured({ tours, navigate, t, compareList, toggleCompare }) {
+  return (
+    <section className="section">
+      <div className="wrap-wide">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 48 }}>
+          <div>
+            <div className="eyebrow">Featured · summer 2026</div>
+            <h2 className="h-1" style={{ marginTop: 12 }}>
+              The four<br />
+              <span className="serif-accent" style={{ color: 'var(--primary)' }}>most-booked</span> right now.
+            </h2>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); navigate('tours'); }}
+              className="link-u"
+              style={{ fontSize: 14, fontWeight: 500 }}
+            >
+              See all tours
+            </a>
+            <button onClick={() => navigate('tours')} className="btn btn-primary btn-sm">
+              <Icon name="arrow-right" size={14} />
+            </button>
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, alignItems: 'stretch' }}>
+          {tours.slice(0, 4).map(tr => (
+            <TourCard
+              key={tr.id}
+              tour={tr}
+              t={t}
+              navigate={navigate}
+              inCompare={compareList.includes(tr.id)}
+              onCompare={() => toggleCompare(tr.id)}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ---- WHY US ----
+function HomeWhy() {
+  const items = [
+    { num: '01', k: 'Max 26 travelers', v: 'Small enough to fit on one coach, large enough to keep prices honest.', icon: 'users' },
+    { num: '02', k: 'Bilingual TH/EN guides', v: 'Every tour has a Thai lead and a local English guide. Two perspectives on every place.', icon: 'globe' },
+    { num: '03', k: 'Visa support included', v: 'We prepare your full Schengen file and book your VFS appointment. Refund if refused.', icon: 'shield' },
+    { num: '04', k: 'No hidden costs', v: 'Tips, transfers, optional excursions: all costed up-front on the tour page.', icon: 'leaf' },
+  ];
+  return (
+    <section style={{ background: 'var(--ink)', color: 'var(--canvas)', padding: '120px 0' }}>
+      <div className="wrap-wide">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'start' }}>
+          <div style={{ position: 'sticky', top: 100 }}>
+            <div className="eyebrow" style={{ color: 'rgba(244,239,230,.6)' }}>Why WeCraft</div>
+            <h2 className="h-1" style={{ marginTop: 14 }}>
+              Eleven<br />years.<br />
+              <span style={{ color: 'var(--accent)' }}>One</span>{' '}
+              <span className="serif-accent">promise:</span>
+            </h2>
+            <p style={{ marginTop: 28, fontSize: 17, lineHeight: 1.6, color: 'rgba(244,239,230,.75)', maxWidth: 420 }}>
+              That the tour you booked is the tour you take. No swapped hotels, no surprise upgrades, no "the bus is full" at 6am. We over-document so you under-worry.
+            </p>
+            <div style={{ display: 'flex', gap: 16, marginTop: 36 }}>
+              <button className="btn" style={{ background: 'var(--canvas)', color: 'var(--ink)' }}>
+                Meet the guides <Icon name="arrow-right" size={14} />
+              </button>
+              <button className="btn btn-ghost" style={{ color: 'var(--canvas)', borderColor: 'rgba(244,239,230,.4)' }}>
+                Read reviews
+              </button>
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {items.map((it, i) => (
+              <div key={i} style={{
+                display: 'grid', gridTemplateColumns: '80px 1fr auto',
+                gap: 24, alignItems: 'start',
+                padding: '32px 0',
+                borderTop: '1px solid rgba(244,239,230,.15)',
+              }}>
+                <div className="tabular" style={{
+                  fontSize: 42, fontWeight: 300, letterSpacing: '-0.04em',
+                  color: 'var(--accent)', lineHeight: 1,
+                }}>{it.num}</div>
+                <div>
+                  <h3 style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em', margin: 0 }}>{it.k}</h3>
+                  <p style={{ marginTop: 10, color: 'rgba(244,239,230,.7)', fontSize: 14, lineHeight: 1.55, maxWidth: 380 }}>{it.v}</p>
+                </div>
+                <Icon name={it.icon} size={22} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ---- PROMOTIONS ----
+function HomePromos({ promotions, navigate, t }) {
+  const promos = promotions.slice(0, 3);
+  return (
+    <section className="section">
+      <div className="wrap-wide">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 48 }}>
+          <div>
+            <div className="eyebrow">Live offers</div>
+            <h2 className="h-1" style={{ marginTop: 12 }}>
+              Save now,<br />travel <span className="serif-accent" style={{ color: 'var(--accent)' }}>later</span>.
+            </h2>
+          </div>
+          <a href="#" onClick={(e) => { e.preventDefault(); navigate('promotions'); }} className="link-u" style={{ fontSize: 14, fontWeight: 500 }}>
+            All offers →
+          </a>
+        </div>
+        {promos.length > 0 ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+            {promos.map((p, i) => <PromoCard key={p.id} promo={p} highlight={i === 0} t={t} />)}
+          </div>
+        ) : (
+          <div style={{ padding: '48px 32px', textAlign: 'center', border: '1px dashed var(--line)', borderRadius: 'var(--r-lg)', color: 'var(--muted)' }}>
+            No promotions yet. Check back soon!
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function PromoCard({ promo, highlight, t }) {
+  return (
+    <div style={{
+      borderRadius: 'var(--r-lg)',
+      background: highlight ? 'var(--accent)' : 'var(--card)',
+      color: highlight ? '#fff' : 'var(--ink)',
+      border: highlight ? '1px solid var(--accent)' : '1px solid var(--line)',
+      padding: 28,
+      display: 'flex', flexDirection: 'column', gap: 18,
+      minHeight: 320,
+      position: 'relative', overflow: 'hidden',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div className="tabular" style={{ fontSize: 64, fontWeight: 600, letterSpacing: '-0.04em', lineHeight: 1 }}>
+          {promo.discount || 10}<span style={{ fontSize: 28, marginLeft: -4 }}>%</span>
+        </div>
+        <span className="chip" style={{
+          background: highlight ? 'rgba(255,255,255,.2)' : 'var(--ink)',
+          color: highlight ? '#fff' : 'var(--canvas)',
+          borderColor: 'transparent',
+        }}>off</span>
+      </div>
+      <div>
+        <h3 style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em', margin: 0 }}>
+          {t ? t(promo.title) : (promo.title?.en || promo.title?.th || promo.title || '')}
+        </h3>
+        <div style={{ marginTop: 6, fontSize: 13, opacity: .8 }}>
+          {t ? t(promo.description) : (promo.description?.en || promo.description?.th || '')}
+        </div>
+      </div>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        paddingTop: 14, borderTop: `1px dashed ${highlight ? 'rgba(255,255,255,.3)' : 'var(--line)'}`,
+        marginTop: 'auto',
+      }}>
+        {promo.code && (
+          <div>
+            <div style={{ fontSize: 10, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .7 }}>Code</div>
+            <div style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 600, marginTop: 2 }}>{promo.code}</div>
+          </div>
+        )}
+        {promo.validUntil && (
+          <div style={{ fontSize: 11, opacity: .7, textAlign: 'right' }}>
+            Ends<br />{new Date(promo.validUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---- REVIEWS ----
+function HomeReviews({ reviews }) {
+  const [idx, setIdx] = useState(0);
+  const approved = reviews.filter(r => r.approved);
+  if (!approved.length) return null;
+  const r = approved[idx % approved.length];
+
+  return (
+    <section className="section" style={{ background: 'var(--canvas-2)' }}>
+      <div className="wrap-wide">
+        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 80, alignItems: 'center' }}>
+          <div>
+            <div className="eyebrow">Notes from past travelers</div>
+            <h2 className="h-1" style={{ marginTop: 12, marginBottom: 32 }}>
+              <span className="tabular" style={{ color: 'var(--accent)', fontWeight: 600 }}>4.94</span> / 5<br />
+              <span className="serif-accent">across</span> {approved.length}+ reviews.
+            </h2>
+
+            <blockquote style={{
+              margin: 0, padding: 0,
+              fontFamily: 'Instrument Serif, serif',
+              fontSize: 28, lineHeight: 1.25, letterSpacing: '-0.01em',
+              color: 'var(--ink)',
+            }}>
+              "{r.text?.th || r.text?.en || r.text || r.quote || ''}"
+            </blockquote>
+
+            <div style={{ marginTop: 32, display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--primary)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: 18, color: '#fff' }}>
+                {(r.name || '?')[0]}
+              </div>
+              <div>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>{r.name}</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)' }}>{r.tourId} · {r.date}</div>
+              </div>
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+                <button className="arrow" onClick={() => setIdx(i => (i - 1 + approved.length) % approved.length)}>
+                  <Icon name="arrow-left" size={14} />
+                </button>
+                <button className="arrow" onClick={() => setIdx(i => (i + 1) % approved.length)}>
+                  <Icon name="arrow-right" size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {[
+              { n: '4,842', l: 'Travelers since 2015' },
+              { n: '94%',   l: 'Repeat or referral' },
+              { n: '62',    l: 'Departures in 2026' },
+              { n: '0',     l: 'Visa refunds withheld' },
+            ].map((s, i) => (
+              <div key={i} style={{
+                background: 'var(--card)', padding: 28,
+                borderRadius: 'var(--r-lg)', border: '1px solid var(--line)',
+              }}>
+                <div className="tabular" style={{ fontSize: 44, fontWeight: 500, letterSpacing: '-0.04em', lineHeight: 1, color: i === 0 ? 'var(--primary)' : 'var(--ink)' }}>
+                  {s.n}
+                </div>
+                <div style={{ marginTop: 14, fontSize: 13, color: 'var(--muted)' }}>{s.l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ---- ARTICLES ----
+function HomeArticles({ articles, navigate, t }) {
+  const list = articles.slice(0, 4);
+  if (!list.length) return null;
+
+  return (
+    <section className="section">
+      <div className="wrap-wide">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 48 }}>
+          <div>
+            <div className="eyebrow">From the journal</div>
+            <h2 className="h-1" style={{ marginTop: 12 }}>
+              Field notes &<br />
+              <span className="serif-accent">small useful</span> things.
+            </h2>
+          </div>
+          <button onClick={() => navigate('articles')} className="btn btn-ghost">
+            Read journal <Icon name="arrow-right" size={14} />
+          </button>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr', gap: 16 }}>
+          {/* big lead */}
+          {list[0] && (
+            <article
+              style={{ position: 'relative', borderRadius: 'var(--r-lg)', overflow: 'hidden', aspectRatio: '5/6', cursor: 'pointer' }}
+              onClick={() => navigate('article-detail', list[0].id)}
+            >
+              {list[0].image ? (
+                <img src={list[0].image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--primary-deep), var(--ink-2))' }} />
+              )}
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: 'linear-gradient(to top, rgba(10,31,26,.95) 0%, rgba(10,31,26,0) 55%)',
+                display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+                padding: 36, color: 'var(--canvas)',
+              }}>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+                  {list[0].category && (
+                    <span className="chip" style={{ background: 'var(--accent)', color: '#fff', borderColor: 'transparent' }}>
+                      {list[0].category}
+                    </span>
+                  )}
+                </div>
+                <h3 style={{ fontSize: 30, fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1.05, margin: 0, maxWidth: 480 }}>
+                  {t ? t(list[0].title) : (list[0].title?.en || list[0].title?.th || list[0].title || '')}
+                </h3>
+                <div style={{ marginTop: 20, fontSize: 12, opacity: .7 }}>
+                  {list[0].date}
+                </div>
+              </div>
+            </article>
+          )}
+          {/* secondary columns */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {list.slice(1, 3).map(a => <ArticleSmall key={a.id} a={a} navigate={navigate} t={t} />)}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {list.slice(3).map(a => <ArticleSmall key={a.id} a={a} navigate={navigate} t={t} />)}
+            <ArticleTextOnly />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ArticleSmall({ a, navigate, t }) {
+  const title = t ? t(a.title) : (a.title?.en || a.title?.th || a.title || '');
+  return (
+    <article
+      className="card"
+      style={{ display: 'flex', flexDirection: 'column', flex: 1, cursor: 'pointer' }}
+      onClick={() => navigate('article-detail', a.id)}
+    >
+      <div style={{ aspectRatio: '16/10', overflow: 'hidden' }}>
+        {a.image
+          ? <img src={a.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          : <div style={{ width: '100%', height: '100%', background: 'var(--canvas-2)' }} />
+        }
+      </div>
+      <div style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--muted)', letterSpacing: '.08em', textTransform: 'uppercase' }}>
+          <span>{a.category}</span>
+        </div>
+        <h3 style={{ fontSize: 17, fontWeight: 600, letterSpacing: '-0.005em', margin: 0, lineHeight: 1.25 }}>{title}</h3>
+        <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 'auto' }}>{a.date}</div>
+      </div>
+    </article>
+  );
+}
+
+function ArticleTextOnly() {
+  return (
+    <article style={{
+      flex: 1, background: 'var(--ink)', color: 'var(--canvas)',
+      borderRadius: 'var(--r-lg)', padding: 24,
+      display: 'flex', flexDirection: 'column', gap: 14,
+      justifyContent: 'space-between',
+    }}>
+      <div className="eyebrow" style={{ color: 'rgba(244,239,230,.5)' }}>Editorial</div>
+      <h3 style={{
+        fontSize: 20, fontWeight: 500, letterSpacing: '-0.01em', lineHeight: 1.15, margin: 0,
+        fontFamily: 'Instrument Serif, serif', fontStyle: 'italic',
+      }}>
+        "A good itinerary leaves room for the village you didn't plan to stop in."
+      </h3>
+      <div style={{ fontSize: 12, color: 'rgba(244,239,230,.7)' }}>— From our 2026 design brief</div>
+    </article>
+  );
+}
+
+// ---- CTA ----
+function HomeCta({ navigate }) {
+  return (
+    <section className="section" style={{ paddingBottom: 0 }}>
+      <div className="wrap-wide">
+        <div style={{
+          background: 'var(--primary)',
+          color: 'var(--canvas)',
+          borderRadius: 'var(--r-xl)',
+          padding: '80px 64px',
+          display: 'grid', gridTemplateColumns: '1.5fr 1fr',
+          gap: 64, alignItems: 'center',
+          position: 'relative', overflow: 'hidden',
+        }}>
+          <div style={{
+            position: 'absolute', top: -80, right: -80, width: 360, height: 360,
+            borderRadius: '50%', background: 'var(--primary-deep)', opacity: .6, pointerEvents: 'none',
+          }} />
+          <div style={{ position: 'relative' }}>
+            <div className="eyebrow" style={{ color: 'rgba(244,239,230,.7)' }}>Get in touch</div>
+            <h2 className="h-1" style={{ marginTop: 14 }}>
+              Not sure where<br />
+              to go? <span className="serif-accent">Let's</span> talk.
+            </h2>
+            <p style={{ marginTop: 20, fontSize: 16, opacity: .85, lineHeight: 1.55, maxWidth: 420 }}>
+              Tell us your dates and we'll send three tour suggestions within a day — even if none of them are ours.
+            </p>
+          </div>
+          <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <button
+              onClick={() => navigate('contact')}
+              className="btn btn-lg"
+              style={{ background: 'var(--canvas)', color: 'var(--ink)', justifyContent: 'space-between' }}
+            >
+              <span>Book a free 15-min call</span>
+              <Icon name="arrow-up-right" size={16} />
+            </button>
+            <button
+              className="btn btn-lg"
+              style={{ background: 'transparent', color: 'var(--canvas)', border: '1px solid rgba(244,239,230,.4)', justifyContent: 'space-between' }}
+            >
+              <span>Message us on LINE</span>
+              <Icon name="line" size={16} />
+            </button>
+            <div style={{ marginTop: 14, display: 'flex', gap: 28, fontSize: 13 }}>
+              <div>
+                <div style={{ opacity: .7, fontSize: 11, letterSpacing: '.08em', textTransform: 'uppercase' }}>Call</div>
+                <div style={{ fontWeight: 600, marginTop: 4 }}>+66 2 123 4567</div>
+              </div>
+              <div>
+                <div style={{ opacity: .7, fontSize: 11, letterSpacing: '.08em', textTransform: 'uppercase' }}>Email</div>
+                <div style={{ fontWeight: 600, marginTop: 4 }}>hello@wecrafttravel.co</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ---- MAIN EXPORT ----
+export default function HomePage({ lang, t, navigate, tours, articles, promotions, faqs, reviews, settings, compareList, toggleCompare, setBookings, setReviews, setMessages }) {
+  const featured = tours.filter(tr => tr.featured).sort((a, b) => (a.featuredOrder || 0) - (b.featuredOrder || 0));
+
+  return (
+    <main className="page-enter">
+      <HomeHero navigate={navigate} />
+      <HomeMarquee />
+      <HomeFeatured tours={featured} navigate={navigate} t={t} compareList={compareList} toggleCompare={toggleCompare} />
+      <HomeWhy />
+      <HomePromos promotions={promotions} navigate={navigate} t={t} />
+      <HomeReviews reviews={reviews} />
+      <HomeArticles articles={articles} navigate={navigate} t={t} />
+      <HomeCta navigate={navigate} />
+    </main>
   );
 }

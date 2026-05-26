@@ -1,13 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Clock, ArrowRight } from 'lucide-react';
+
+function Icon({ name, size = 16 }) {
+  const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round' };
+  switch (name) {
+    case 'arrow-right': return <svg {...p}><path d="M5 12h14M13 6l6 6-6 6"/></svg>;
+    default: return null;
+  }
+}
 
 function Countdown({ endDate }) {
   const calc = () => {
     const diff = new Date(endDate) - new Date();
-    if (diff <= 0) return { d: 0, h: 0, m: 0, s: 0 };
+    if (diff <= 0) return { h: 0, m: 0, s: 0 };
     return {
-      d: Math.floor(diff / 86400000),
-      h: Math.floor((diff % 86400000) / 3600000),
+      h: Math.floor(diff / 3600000),
       m: Math.floor((diff % 3600000) / 60000),
       s: Math.floor((diff % 60000) / 1000),
     };
@@ -19,77 +25,190 @@ function Countdown({ endDate }) {
   }, [endDate]);
 
   return (
-    <div className="flex gap-2 mt-3">
-      {[['d', 'วัน'], ['h', 'ชั่วโมง'], ['m', 'นาที'], ['s', 'วินาที']].map(([k, lbl]) => (
-        <div key={k} className="bg-white/20 rounded-lg px-2 py-1 text-center min-w-[44px]">
-          <div className="text-xl font-bold">{String(time[k]).padStart(2, '0')}</div>
-          <div className="text-xs text-white/70">{lbl}</div>
+    <div style={{ marginTop: 24, display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+      {[
+        { v: String(time.h).padStart(2, '0'), l: 'hours' },
+        { v: String(time.m).padStart(2, '0'), l: 'min' },
+        { v: String(time.s).padStart(2, '0'), l: 'sec' },
+      ].map(b => (
+        <div key={b.l} style={{
+          padding: '12px 16px', background: 'rgba(244,239,230,.08)',
+          borderRadius: 'var(--r-md)', textAlign: 'center', minWidth: 76,
+        }}>
+          <div className="tabular" style={{ fontSize: 28, fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1 }}>{b.v}</div>
+          <div style={{ fontSize: 10, opacity: .6, letterSpacing: '.12em', textTransform: 'uppercase', marginTop: 6 }}>{b.l}</div>
         </div>
       ))}
     </div>
   );
 }
 
-export default function PromotionsPage({ lang, t, navigate, promotions, tours }) {
-  const active = promotions.filter(p => p.active);
+function PromoCard({ p, highlight, t }) {
+  const title = t ? t(p.title) : (p.title?.en || p.title?.th || p.title || '');
+  const desc  = t ? t(p.description) : (p.description?.en || p.description?.th || p.description || '');
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">{t({ th: 'โปรโมชั่นพิเศษ', en: 'Special Promotions' })}</h1>
-        <p className="text-slate-500">{t({ th: 'อย่าพลาดข้อเสนอสุดพิเศษจาก Wanderlust Tours', en: "Don't miss our special offers" })}</p>
+    <div className="card" style={{ padding: 26, display: 'flex', flexDirection: 'column', gap: 14, minHeight: 280, background: 'var(--card)' }}>
+      <div className="tabular" style={{ fontSize: 56, fontWeight: 500, letterSpacing: '-0.04em', lineHeight: 1, color: 'var(--accent)' }}>
+        −{p.discount || 10}<span style={{ fontSize: 24, marginLeft: -2 }}>%</span>
       </div>
+      <div>
+        <h3 style={{ fontSize: 20, fontWeight: 600, margin: 0, letterSpacing: '-0.01em' }}>{title}</h3>
+        {desc && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>{desc}</div>}
+      </div>
+      <p style={{ fontSize: 12, color: 'var(--ink-2)', lineHeight: 1.5, margin: 0, flex: 1 }}>{desc}</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 14, borderTop: '1px dashed var(--line)' }}>
+        {p.code && (
+          <div style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 700, letterSpacing: '.04em' }}>{p.code}</div>
+        )}
+        {p.validUntil && (
+          <div style={{ fontSize: 11, color: 'var(--muted)', textAlign: 'right' }}>
+            Ends {new Date(p.validUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
-      {active.length === 0 ? (
-        <div className="text-center py-16 text-slate-400">
-          <p>{t({ th: 'ไม่มีโปรโมชั่นในขณะนี้', en: 'No active promotions' })}</p>
+export default function PromotionsPage({ lang, t, navigate, promotions, tours, faqs, reviews, settings, compareList, toggleCompare, setBookings, setReviews, setMessages }) {
+  const active = promotions.filter(p => p.active !== false);
+  const featured = active[0];
+  const rest = active.slice(1);
+
+  const getTitle = p => t ? t(p.title) : (p.title?.en || p.title?.th || p.title || '');
+  const getDesc  = p => t ? t(p.description) : (p.description?.en || p.description?.th || p.description || '');
+
+  return (
+    <main className="page-enter">
+      {/* Header */}
+      <section style={{ padding: '48px 0 24px' }}>
+        <div className="wrap-wide">
+          <nav style={{ fontSize: 12, color: 'var(--muted)', display: 'flex', gap: 8, marginBottom: 24, alignItems: 'center' }}>
+            <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 12, padding: 0 }}>
+              {t ? t({ th: 'หน้าหลัก', en: 'Home' }) : 'Home'}
+            </button>
+            <span>/</span>
+            <span style={{ color: 'var(--ink)' }}>{t ? t({ th: 'โปรโมชั่น', en: 'Promotions' }) : 'Promotions'}</span>
+          </nav>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 64, alignItems: 'end' }}>
+            <h1 className="h-display">
+              Live <span className="serif-accent" style={{ color: 'var(--accent)' }}>offers</span>.<br />
+              Stack them if<br />you can.
+            </h1>
+            <p style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.55, marginBottom: 12, maxWidth: 360 }}>
+              {t ? t({
+                th: 'ส่วนลดทั้งหมดใช้กับราคาทัวร์ก่อนบินและภาษี ส่วนใหญ่สามารถใช้ร่วมกันได้',
+                en: 'All discounts apply to the tour price before flights and taxes. Most stack — except where noted.'
+              }) : 'Discounts on tour price before flights and taxes. Most can be combined.'}
+            </p>
+          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {active.map(promo => {
-            const tour = tours.find(tr => tr.id === promo.tourId);
-            const discountedPrice = tour ? Math.round(tour.price * (1 - promo.discount / 100)) : 0;
-            return (
-              <div key={promo.id} className="bg-gradient-to-br from-teal-700 to-teal-900 rounded-2xl overflow-hidden text-white shadow-lg relative">
-                <div className="relative">
-                  <img src={promo.image} alt="" className="w-full h-40 object-cover opacity-30" />
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-amber-400 text-slate-900 text-xl font-black px-4 py-1.5 rounded-full">
-                      -{promo.discount}%
-                    </span>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2">{t(promo.title)}</h3>
-                  <p className="text-teal-100 text-sm mb-3">{t(promo.description)}</p>
+      </section>
 
-                  {tour && (
-                    <div className="bg-white/10 rounded-xl p-3 mb-3">
-                      <div className="text-xs text-teal-200">{t({ th: 'ทัวร์', en: 'Tour' })}</div>
-                      <div className="font-semibold">{t(tour.name)}</div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm line-through text-teal-300">฿{tour.price.toLocaleString()}</span>
-                        <span className="text-lg font-bold text-amber-400">฿{discountedPrice.toLocaleString()}</span>
+      {/* Featured promo banner */}
+      {featured && (
+        <section style={{ padding: '32px 0 48px' }}>
+          <div className="wrap-wide">
+            <div style={{
+              background: 'var(--ink)', color: 'var(--canvas)',
+              borderRadius: 'var(--r-xl)', padding: '48px 56px',
+              display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 48, alignItems: 'center',
+              position: 'relative', overflow: 'hidden',
+            }}>
+              {/* Background number */}
+              <div style={{ position: 'absolute', right: -100, top: -100, fontSize: 320, fontWeight: 700, lineHeight: 1, color: 'rgba(255,90,31,.1)', letterSpacing: '-0.04em', userSelect: 'none', pointerEvents: 'none' }}>
+                {featured.discount || 10}%
+              </div>
+              <div style={{ position: 'relative' }}>
+                <div className="eyebrow" style={{ color: 'rgba(244,239,230,.6)' }}>
+                  {t ? t({ th: 'ข้อเสนอพิเศษ', en: 'Featured offer' }) : 'Featured offer'}
+                </div>
+                <h2 className="h-1" style={{ marginTop: 14 }}>
+                  {getTitle(featured)}<br />
+                  <span className="serif-accent" style={{ color: 'var(--accent)' }}>−{featured.discount || 10}% off</span> everything.
+                </h2>
+                <p style={{ marginTop: 20, fontSize: 15, opacity: .85, lineHeight: 1.55, maxWidth: 460 }}>
+                  {getDesc(featured)}
+                </p>
+                {featured.validUntil && <Countdown endDate={featured.validUntil} />}
+              </div>
+              <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{ background: 'var(--canvas)', color: 'var(--ink)', padding: 24, borderRadius: 'var(--r-lg)', display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {featured.code && (
+                    <>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div>
+                          <div className="eyebrow">Use code at checkout</div>
+                          <div style={{ fontFamily: 'monospace', fontSize: 24, fontWeight: 700, letterSpacing: '.05em', marginTop: 6 }}>{featured.code}</div>
+                        </div>
+                        <button
+                          onClick={() => navigator.clipboard?.writeText(featured.code)}
+                          className="btn btn-light btn-sm">Copy</button>
                       </div>
+                      <div style={{ height: 1, background: 'var(--line)' }} />
+                    </>
+                  )}
+                  {featured.validUntil && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                      <span style={{ color: 'var(--muted)' }}>Expires</span>
+                      <span style={{ fontWeight: 600 }}>
+                        {new Date(featured.validUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </span>
                     </div>
                   )}
-
-                  <div className="flex items-center gap-2 text-xs text-teal-200 mb-2">
-                    <Clock className="w-3.5 h-3.5" />
-                    {t({ th: 'โปรโมชั่นสิ้นสุด:', en: 'Ends:' })} {promo.endDate}
-                  </div>
-
-                  <Countdown endDate={promo.endDate} />
-
-                  <button onClick={() => navigate('tour-detail', promo.tourId)}
-                    className="mt-4 w-full bg-amber-400 hover:bg-amber-300 text-slate-900 py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors">
-                    {t({ th: 'จองเลย', en: 'Book Now' })} <ArrowRight className="w-4 h-4" />
-                  </button>
                 </div>
+                <button onClick={() => navigate('tours')} className="btn btn-accent btn-lg" style={{ justifyContent: 'space-between' }}>
+                  <span>{t ? t({ th: 'ดูทัวร์ที่เข้าร่วม', en: 'Browse eligible tours' }) : 'Browse eligible tours'}</span>
+                  <Icon name="arrow-right" size={14} />
+                </button>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          </div>
+        </section>
       )}
-    </div>
+
+      {/* All promotions grid */}
+      <section style={{ padding: '32px 0 80px' }}>
+        <div className="wrap-wide">
+          <h2 className="h-2" style={{ marginBottom: 32 }}>
+            {t ? t({ th: 'ข้อเสนอทั้งหมด', en: 'All current offers' }) : 'All current offers'}
+          </h2>
+          {active.length === 0 ? (
+            <div style={{ padding: 80, textAlign: 'center', border: '1px dashed var(--line)', borderRadius: 'var(--r-lg)', color: 'var(--muted)' }}>
+              {t ? t({ th: 'ยังไม่มีโปรโมชั่น', en: 'No active promotions right now.' }) : 'No active promotions right now.'}
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
+              {active.map((p, i) => {
+                const title = t ? t(p.title) : (p.title?.en || p.title?.th || p.title || '');
+                const desc  = t ? t(p.description) : (p.description?.en || p.description?.th || p.description || '');
+                return (
+                  <div key={p.id} className="card" style={{ padding: 26, display: 'flex', flexDirection: 'column', gap: 14, minHeight: 280, background: 'var(--card)' }}>
+                    <div className="tabular" style={{ fontSize: 56, fontWeight: 500, letterSpacing: '-0.04em', lineHeight: 1, color: 'var(--accent)' }}>
+                      −{p.discount || 10}<span style={{ fontSize: 24, marginLeft: -2 }}>%</span>
+                    </div>
+                    <div>
+                      <h3 style={{ fontSize: 20, fontWeight: 600, margin: 0, letterSpacing: '-0.01em' }}>{title}</h3>
+                      {desc && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>{desc}</div>}
+                    </div>
+                    <div style={{ flex: 1 }} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 14, borderTop: '1px dashed var(--line)', marginTop: 'auto' }}>
+                      {p.code && (
+                        <div style={{ fontFamily: 'monospace', fontSize: 13, fontWeight: 700, letterSpacing: '.04em' }}>{p.code}</div>
+                      )}
+                      {p.validUntil && (
+                        <div style={{ fontSize: 11, color: 'var(--muted)', textAlign: 'right' }}>
+                          Ends {new Date(p.validUntil).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
+    </main>
   );
 }

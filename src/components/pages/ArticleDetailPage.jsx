@@ -1,44 +1,186 @@
-import { ArrowLeft, Calendar, User } from 'lucide-react';
+function Icon({ name, size = 16 }) {
+  const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round' };
+  switch (name) {
+    case 'arrow-left':     return <svg {...p}><path d="M19 12H5M11 6l-6 6 6 6"/></svg>;
+    case 'arrow-right':    return <svg {...p}><path d="M5 12h14M13 6l6 6-6 6"/></svg>;
+    case 'clock':          return <svg {...p}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>;
+    case 'user':           return <svg {...p}><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>;
+    case 'calendar':       return <svg {...p}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>;
+    default: return null;
+  }
+}
 
 export default function ArticleDetailPage({ lang, t, navigate, articles, articleId }) {
   const article = articles.find(a => a.id === articleId);
-  if (!article) return <div className="p-10 text-center text-slate-400">Article not found</div>;
 
-  const body = t(article.body);
+  if (!article) {
+    return (
+      <main style={{ background: 'var(--canvas)', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', color: 'var(--muted)' }}>
+          {lang === 'th' ? 'ไม่พบบทความ' : 'Article not found.'}
+        </div>
+      </main>
+    );
+  }
+
+  const title   = t ? t(article.title)   : (article.title?.en   || article.title?.th   || article.title   || '');
+  const excerpt = t ? t(article.excerpt) : (article.excerpt?.en || article.excerpt?.th || article.excerpt || '');
+  const body    = t ? t(article.body)    : (article.body?.en    || article.body?.th    || article.body    || '');
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
-      <button onClick={() => navigate('articles')}
-        className="flex items-center gap-2 text-teal-700 hover:text-teal-600 mb-6 text-sm font-medium transition-colors">
-        <ArrowLeft className="w-4 h-4" /> {t({ th: 'กลับไปบทความ', en: 'Back to Articles' })}
-      </button>
+    <main className="page-enter" style={{ background: 'var(--canvas)' }}>
+      {/* Hero */}
+      <section style={{ padding: '48px 0 0' }}>
+        <div className="wrap-wide">
+          {/* Breadcrumb */}
+          <nav style={{ fontSize: 12, color: 'var(--muted)', display: 'flex', gap: 8, marginBottom: 32, alignItems: 'center' }}>
+            <button onClick={() => navigate('home')}
+              style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 12, padding: 0 }}>
+              {lang === 'th' ? 'หน้าหลัก' : 'Home'}
+            </button>
+            <span>/</span>
+            <button onClick={() => navigate('articles')}
+              style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 12, padding: 0 }}>
+              {lang === 'th' ? 'บทความ' : 'Journal'}
+            </button>
+            <span>/</span>
+            <span style={{ color: 'var(--ink)' }}>{title}</span>
+          </nav>
 
-      <img src={article.coverImage} alt={t(article.title)} className="w-full h-64 object-cover rounded-2xl mb-6" />
+          {/* Meta */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+            {article.category && <span className="chip chip-jade">{article.category}</span>}
+            {article.readTime && (
+              <span className="chip" style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                <Icon name="clock" size={11} /> {article.readTime} min read
+              </span>
+            )}
+            {article.date && (
+              <span className="chip" style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                <Icon name="calendar" size={11} /> {article.date}
+              </span>
+            )}
+          </div>
 
-      <div className="flex items-center gap-4 text-sm text-slate-400 mb-4">
-        <span className="flex items-center gap-1"><User className="w-4 h-4" />{article.author}</span>
-        <span className="flex items-center gap-1"><Calendar className="w-4 h-4" />{article.date}</span>
-      </div>
+          {/* Title */}
+          <h1 className="h-1" style={{ maxWidth: 800, marginBottom: 24 }}>{title}</h1>
 
-      <h1 className="text-3xl font-bold text-slate-800 mb-6">{t(article.title)}</h1>
+          {/* Author row */}
+          {article.author && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 40 }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: '50%',
+                background: 'var(--primary)', color: 'var(--canvas)',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                fontWeight: 600, fontSize: 16,
+              }}>
+                {article.author[0]}
+              </div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)' }}>{article.author}</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)' }}>WeCraft Journal</div>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
 
-      <div className="prose prose-slate max-w-none">
-        {body.split('\n').map((line, i) => {
-          if (!line.trim()) return <br key={i} />;
-          const bold = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-          return (
-            <p key={i} className="mb-3 text-slate-600 leading-relaxed text-base"
-              dangerouslySetInnerHTML={{ __html: bold }} />
-          );
-        })}
-      </div>
+      {/* Cover image */}
+      {(article.image || article.coverImage) && (
+        <section style={{ padding: '0 0 48px' }}>
+          <div className="wrap-wide">
+            <div style={{ aspectRatio: '16/7', borderRadius: 'var(--r-xl)', overflow: 'hidden' }}>
+              <img
+                src={article.image || article.coverImage}
+                alt={title}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            </div>
+          </div>
+        </section>
+      )}
 
-      <div className="mt-10 pt-6 border-t">
-        <button onClick={() => navigate('articles')}
-          className="text-teal-700 hover:text-teal-600 font-medium transition-colors">
-          ← {t({ th: 'ดูบทความทั้งหมด', en: 'View All Articles' })}
-        </button>
-      </div>
-    </div>
+      {/* Article body */}
+      <section style={{ padding: '0 0 100px' }}>
+        <div className="wrap-wide">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 80, alignItems: 'start' }}>
+
+            {/* Body text */}
+            <div style={{ maxWidth: 720 }}>
+              {excerpt && (
+                <p style={{
+                  fontSize: 19, lineHeight: 1.6, color: 'var(--ink-2)',
+                  borderLeft: '3px solid var(--primary)',
+                  paddingLeft: 20, marginBottom: 36,
+                  fontStyle: 'italic',
+                }}>
+                  {excerpt}
+                </p>
+              )}
+              <div style={{ fontSize: 16, lineHeight: 1.75, color: 'var(--ink-2)' }}>
+                {body ? body.split('\n').map((line, i) => {
+                  if (!line.trim()) return <div key={i} style={{ height: 12 }} />;
+                  // Handle **bold** syntax
+                  const parts = line.split(/(\*\*[^*]+\*\*)/g);
+                  return (
+                    <p key={i} style={{ margin: '0 0 16px' }}>
+                      {parts.map((part, j) => {
+                        if (part.startsWith('**') && part.endsWith('**')) {
+                          return <strong key={j}>{part.slice(2, -2)}</strong>;
+                        }
+                        return part;
+                      })}
+                    </p>
+                  );
+                }) : (
+                  <p style={{ color: 'var(--muted)' }}>
+                    {lang === 'th' ? 'ยังไม่มีเนื้อหา' : 'No content yet.'}
+                  </p>
+                )}
+              </div>
+
+              {/* Back link */}
+              <div style={{ marginTop: 56, paddingTop: 32, borderTop: '1px solid var(--line)' }}>
+                <button
+                  onClick={() => navigate('articles')}
+                  className="btn btn-ghost"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                >
+                  <Icon name="arrow-left" size={14} />
+                  {lang === 'th' ? 'กลับไปยังบทความทั้งหมด' : 'Back to all articles'}
+                </button>
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <aside style={{ position: 'sticky', top: 100 }}>
+              <div style={{
+                padding: 24, background: 'var(--ink)', color: 'var(--canvas)',
+                borderRadius: 'var(--r-lg)',
+              }}>
+                <div className="eyebrow" style={{ color: 'rgba(244,239,230,.6)' }}>
+                  {lang === 'th' ? 'สำรวจทัวร์' : 'Explore tours'}
+                </div>
+                <h3 style={{ margin: '12px 0 0', fontSize: 20, fontWeight: 600, letterSpacing: '-0.01em' }}>
+                  {lang === 'th' ? 'พร้อมเดินทางหรือยัง?' : 'Ready to travel?'}
+                </h3>
+                <p style={{ fontSize: 13, opacity: .8, marginTop: 10, lineHeight: 1.5 }}>
+                  {lang === 'th'
+                    ? 'ดูทัวร์คัดสรรและออกเดินทางในครั้งต่อไปของคุณ'
+                    : 'Browse our curated tours and plan your next journey.'}
+                </p>
+                <button
+                  onClick={() => navigate('tours')}
+                  className="btn"
+                  style={{ marginTop: 18, width: '100%', justifyContent: 'space-between', background: 'var(--accent)', border: 'none', color: '#fff' }}>
+                  <span>{lang === 'th' ? 'ดูทัวร์ทั้งหมด' : 'Browse all tours'}</span>
+                  <Icon name="arrow-right" size={14} />
+                </button>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

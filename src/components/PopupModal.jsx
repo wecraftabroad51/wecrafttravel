@@ -1,27 +1,85 @@
-import { X } from 'lucide-react';
+function CloseIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 6l12 12M18 6 6 18"/>
+    </svg>
+  );
+}
+
+function ArrowRightIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14M13 6l6 6-6 6"/>
+    </svg>
+  );
+}
 
 export default function PopupModal({ settings, t, onClose, navigate }) {
   const { popup } = settings;
+  const title = t ? t(popup.title) : (popup.title?.en || popup.title?.th || popup.title || '');
+  const description = t ? t(popup.description) : (popup.description?.en || popup.description?.th || popup.description || '');
+  const ctaText = t ? t(popup.ctaText) : (popup.ctaText?.en || popup.ctaText?.th || popup.ctaText || '');
+
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden" onClick={e => e.stopPropagation()}>
+    <div
+      style={{
+        position: 'fixed', inset: 0,
+        background: 'rgba(0,0,0,.6)',
+        zIndex: 50,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 16,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: 'var(--canvas)',
+          borderRadius: 'var(--r-xl)',
+          boxShadow: 'var(--shadow-lg)',
+          maxWidth: 460, width: '100%',
+          overflow: 'hidden',
+          animation: 'pageIn .25s ease',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
         {popup.image && (
-          <img src={popup.image} alt="" className="w-full h-48 object-cover" />
+          <div style={{ aspectRatio: '16/7', overflow: 'hidden' }}>
+            <img src={popup.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
         )}
-        <div className="p-6">
-          {popup.title && <h2 className="text-xl font-bold text-slate-800 mb-2">{t(popup.title)}</h2>}
-          {popup.description && <p className="text-slate-600 mb-4">{t(popup.description)}</p>}
-          <div className="flex gap-3">
-            {popup.ctaText && (
+        <div style={{ padding: 28 }}>
+          {title && (
+            <h2 style={{ margin: '0 0 10px', fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em', color: 'var(--ink)' }}>
+              {title}
+            </h2>
+          )}
+          {description && (
+            <p style={{ margin: '0 0 22px', fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.55 }}>
+              {description}
+            </p>
+          )}
+          <div style={{ display: 'flex', gap: 10 }}>
+            {ctaText && (
               <button
                 onClick={() => { navigate(popup.ctaLink || 'promotions'); onClose(); }}
-                className="flex-1 bg-teal-700 hover:bg-teal-600 text-white py-2.5 rounded-lg font-semibold transition-colors"
+                className="btn btn-primary"
+                style={{ flex: 1, justifyContent: 'space-between' }}
               >
-                {t(popup.ctaText)}
+                <span>{ctaText}</span>
+                <ArrowRightIcon />
               </button>
             )}
-            <button onClick={onClose} className="px-4 py-2.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors">
-              <X className="w-5 h-5" />
+            <button
+              onClick={onClose}
+              style={{
+                width: 44, height: 44, borderRadius: 'var(--r-md)',
+                border: '1px solid var(--line)', background: 'transparent',
+                color: 'var(--ink)', cursor: 'pointer',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <CloseIcon />
             </button>
           </div>
         </div>

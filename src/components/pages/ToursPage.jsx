@@ -1,86 +1,285 @@
-import { useState } from 'react';
-import { Search, Filter } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import TourCard from '../TourCard.jsx';
 
-const CONTINENTS = ['All', 'Asia', 'Europe', 'Africa', 'Americas', 'Oceania'];
+function Icon({ name, size = 16 }) {
+  const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round' };
+  switch (name) {
+    case 'search':  return <svg {...p}><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>;
+    case 'grid':    return <svg {...p}><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>;
+    case 'list':    return <svg {...p}><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>;
+    case 'arrow-right': return <svg {...p}><path d="M5 12h14M13 6l6 6-6 6"/></svg>;
+    case 'swap':    return <svg {...p}><path d="M3 8h14m0 0-4-4m4 4-4 4M21 16H7m0 0 4 4m-4-4 4-4"/></svg>;
+    case 'check':   return <svg {...p}><path d="m5 13 4 4 10-10"/></svg>;
+    case 'clock':   return <svg {...p}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>;
+    case 'users':   return <svg {...p}><circle cx="9" cy="9" r="3.5"/><path d="M2 20c.8-3.5 3.8-5.5 7-5.5s6.2 2 7 5.5"/><circle cx="17" cy="7" r="2.5"/><path d="M17 13c3 0 5 1.6 5.5 4"/></svg>;
+    case 'plane':   return <svg {...p}><path d="M3 13.5 21 6l-6 16-3-7-7-2z"/></svg>;
+    case 'calendar':return <svg {...p}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>;
+    default: return null;
+  }
+}
 
-export default function ToursPage({ lang, t, navigate, tours, compareList, toggleCompare }) {
-  const [search, setSearch] = useState('');
-  const [continent, setContinent] = useState('All');
-  const [sortBy, setSortBy] = useState('featured');
-
-  let filtered = tours.filter(tr => {
-    const q = search.toLowerCase();
-    const matchSearch = !q || t(tr.name).toLowerCase().includes(q) || t(tr.destination).toLowerCase().includes(q);
-    const matchContinent = continent === 'All' || tr.continent === continent;
-    return matchSearch && matchContinent;
-  });
-
-  if (sortBy === 'price-asc') filtered.sort((a, b) => a.price - b.price);
-  else if (sortBy === 'price-desc') filtered.sort((a, b) => b.price - a.price);
-  else if (sortBy === 'duration') filtered.sort((a, b) => b.duration - a.duration);
-  else filtered.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+function TourRow({ tour, t, navigate, inCompare, onCompare }) {
+  const name = t ? t(tour.name) : (tour.name?.en || tour.name?.th || tour.name || '');
+  const destination = t ? t(tour.destination) : (tour.destination?.en || tour.destination?.th || '');
+  const description = t ? t(tour.description) : (tour.description?.en || tour.description?.th || tour.description || '');
+  const airline = tour.flight?.outbound?.airline || tour.airline || '';
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">{t({ th: 'ทัวร์ทั้งหมด', en: 'All Tours' })}</h1>
-        <p className="text-slate-500">{t({ th: `พบ ${filtered.length} ทัวร์`, en: `Found ${filtered.length} tours` })}</p>
+    <article className="card" style={{ display: 'grid', gridTemplateColumns: '240px 1fr 280px', overflow: 'hidden', background: 'var(--card)' }}>
+      <div style={{ position: 'relative', overflow: 'hidden', minHeight: 180 }}>
+        <img src={tour.image} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        {tour.featured && (
+          <span style={{
+            position: 'absolute', top: 12, left: 12,
+            background: 'var(--primary)', color: '#fff',
+            fontSize: 11, fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase',
+            padding: '5px 10px', borderRadius: 999,
+          }}>Featured</span>
+        )}
       </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm mb-6 flex flex-wrap gap-3 items-center">
-        <div className="flex items-center gap-2 flex-1 min-w-48">
-          <Search className="w-4 h-4 text-slate-400" />
-          <input
-            className="flex-1 text-sm focus:outline-none"
-            placeholder={t({ th: 'ค้นหาทัวร์...', en: 'Search tours...' })}
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
+      <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--muted)', letterSpacing: '.1em', textTransform: 'uppercase' }}>
+          <span>{tour.continent}</span>
+          {destination && <><span>·</span><span>{destination}</span></>}
         </div>
-        <select
-          value={sortBy}
-          onChange={e => setSortBy(e.target.value)}
-          className="text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+        <h3
+          style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.015em', margin: 0, cursor: 'pointer' }}
+          onClick={() => navigate('tour-detail', tour.id)}
         >
-          <option value="featured">{t({ th: 'แนะนำ', en: 'Featured' })}</option>
-          <option value="price-asc">{t({ th: 'ราคา: น้อย → มาก', en: 'Price: Low → High' })}</option>
-          <option value="price-desc">{t({ th: 'ราคา: มาก → น้อย', en: 'Price: High → Low' })}</option>
-          <option value="duration">{t({ th: 'ระยะเวลา (ยาวสุด)', en: 'Duration (Longest)' })}</option>
-        </select>
+          {name}
+        </h3>
+        {description && (
+          <p style={{ margin: 0, color: 'var(--muted)', fontSize: 13, lineHeight: 1.5 }}>{description}</p>
+        )}
+        <div style={{ display: 'flex', gap: 18, fontSize: 13, color: 'var(--ink-2)', marginTop: 'auto' }}>
+          {tour.duration && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <Icon name="clock" size={14} /> {tour.duration} {t ? t({ th: 'วัน', en: 'days' }) : 'days'}
+            </span>
+          )}
+          {tour.groupSize && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <Icon name="users" size={14} /> max {tour.groupSize}
+            </span>
+          )}
+          {airline && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <Icon name="plane" size={14} /> {airline}
+            </span>
+          )}
+          {tour.departures?.length > 0 && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <Icon name="calendar" size={14} /> {tour.departures.length} dep.
+            </span>
+          )}
+        </div>
       </div>
-
-      {/* Continent tabs */}
-      <div className="flex gap-2 flex-wrap mb-6">
-        {CONTINENTS.map(c => (
+      <div style={{ borderLeft: '1px solid var(--line)', padding: 24, display: 'flex', flexDirection: 'column', gap: 14, justifyContent: 'space-between' }}>
+        <div>
+          <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '.12em', textTransform: 'uppercase' }}>
+            {t ? t({ th: 'เริ่มต้น / คน', en: 'From / pax' }) : 'From / pax'}
+          </div>
+          <div className="tabular" style={{ fontSize: 28, fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1.1 }}>
+            ฿{tour.price?.toLocaleString()}
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
           <button
-            key={c}
-            onClick={() => setContinent(c)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-              continent === c
-                ? 'bg-teal-700 text-white'
-                : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
-            }`}
+            onClick={() => onCompare?.()}
+            className="btn btn-light btn-sm"
+            style={{
+              flex: 1,
+              background: inCompare ? 'var(--accent)' : 'var(--card)',
+              color: inCompare ? '#fff' : 'var(--ink)',
+              borderColor: inCompare ? 'var(--accent)' : 'var(--line)',
+              justifyContent: 'center',
+            }}
           >
-            {c === 'All' ? t({ th: 'ทั้งหมด', en: 'All' }) : c}
+            <Icon name={inCompare ? 'check' : 'swap'} size={12} />
+            {inCompare ? 'Comparing' : 'Compare'}
           </button>
-        ))}
+          <button
+            onClick={() => navigate('tour-detail', tour.id)}
+            className="btn btn-primary btn-sm"
+            style={{ flex: 1, justifyContent: 'center' }}
+          >
+            {t ? t({ th: 'ดูทัวร์', en: 'View tour' }) : 'View tour'}
+          </button>
+        </div>
       </div>
+    </article>
+  );
+}
 
-      {filtered.length === 0 ? (
-        <div className="text-center py-16 text-slate-400">
-          <Filter className="w-12 h-12 mx-auto mb-4 opacity-30" />
-          <p>{t({ th: 'ไม่พบทัวร์ที่ค้นหา', en: 'No tours found' })}</p>
+export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, reviews, settings, compareList, toggleCompare, setBookings, setReviews, setMessages }) {
+  const [continent, setContinent] = useState('All');
+  const [view, setView]           = useState('grid');
+  const [search, setSearch]       = useState('');
+  const [sort, setSort]           = useState('popular');
+  const [priceMax, setPriceMax]   = useState(300000);
+
+  const continents = ['All', ...Array.from(new Set(tours.map(tr => tr.continent).filter(Boolean)))];
+
+  const filtered = useMemo(() => {
+    let list = tours.filter(tr => continent === 'All' || tr.continent === continent);
+    list = list.filter(tr => !tr.price || tr.price <= priceMax);
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(tr => {
+        const name = t ? t(tr.name) : (tr.name?.en || tr.name?.th || '');
+        const dest = t ? t(tr.destination) : (tr.destination?.en || tr.destination?.th || '');
+        const desc = t ? t(tr.description) : (tr.description?.en || tr.description?.th || '');
+        return name.toLowerCase().includes(q) || dest.toLowerCase().includes(q) || desc.toLowerCase().includes(q);
+      });
+    }
+    if (sort === 'price-low')  list = [...list].sort((a, b) => (a.price || 0) - (b.price || 0));
+    if (sort === 'price-high') list = [...list].sort((a, b) => (b.price || 0) - (a.price || 0));
+    if (sort === 'duration')   list = [...list].sort((a, b) => (b.duration || 0) - (a.duration || 0));
+    if (sort === 'popular')    list = [...list].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+    return list;
+  }, [tours, continent, priceMax, search, sort, lang]);
+
+  return (
+    <main className="page-enter">
+      {/* Header */}
+      <section style={{ padding: '48px 0 24px' }}>
+        <div className="wrap-wide">
+          <nav style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 24, display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 12, padding: 0 }}>
+              {t ? t({ th: 'หน้าหลัก', en: 'Home' }) : 'Home'}
+            </button>
+            <span>/</span>
+            <span style={{ color: 'var(--ink)' }}>{t ? t({ th: 'ทัวร์', en: 'Tours' }) : 'Tours'}</span>
+          </nav>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 64, alignItems: 'end' }}>
+            <h1 className="h-display">
+              <span className="tabular" style={{ color: 'var(--accent)' }}>{filtered.length}</span> tours,<br />
+              <span className="serif-accent">every</span> month.
+            </h1>
+            <p style={{ fontSize: 15, color: 'var(--ink-2)', lineHeight: 1.55, maxWidth: 360, marginBottom: 12 }}>
+              Filter by continent, season, or budget. Every tour holds for 48 hours while you decide — no card required.
+            </p>
+          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map(tour => (
-            <TourCard key={tour.id} tour={tour} t={t} navigate={navigate}
-              inCompare={compareList.includes(tour.id)} onCompare={() => toggleCompare(tour.id)} />
-          ))}
+      </section>
+
+      {/* Sticky filter bar */}
+      <section style={{
+        position: 'sticky', top: 76, zIndex: 30,
+        background: 'var(--canvas)', borderBottom: '1px solid var(--line)',
+        padding: '20px 0',
+      }}>
+        <div className="wrap-wide" style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Continent pills */}
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {continents.map(c => (
+              <button key={c} onClick={() => setContinent(c)}
+                style={{
+                  padding: '9px 16px', borderRadius: 999,
+                  border: `1px solid ${continent === c ? 'var(--ink)' : 'var(--line)'}`,
+                  background: continent === c ? 'var(--ink)' : 'var(--card)',
+                  color: continent === c ? 'var(--canvas)' : 'var(--ink)',
+                  fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                }}>
+                {c}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 200,
+            padding: '8px 12px 8px 14px',
+            border: '1px solid var(--line)', borderRadius: 999, background: 'var(--card)',
+          }}>
+            <Icon name="search" size={15} />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder={t ? t({ th: 'ค้นหาทัวร์...', en: 'Search tours…' }) : 'Search tours…'}
+              style={{ border: 'none', padding: 0, background: 'transparent', fontSize: 13, width: '100%' }}
+            />
+          </div>
+
+          {/* Budget */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--muted)' }}>
+            <span style={{ letterSpacing: '.08em', textTransform: 'uppercase', fontWeight: 600 }}>Budget</span>
+            <input
+              type="range" min={50000} max={300000} step={5000} value={priceMax}
+              onChange={e => setPriceMax(+e.target.value)}
+              style={{ width: 120, accentColor: 'var(--ink)' }}
+            />
+            <span className="tabular" style={{ color: 'var(--ink)', fontWeight: 600, minWidth: 72 }}>
+              ≤ ฿{(priceMax / 1000).toFixed(0)}k
+            </span>
+          </div>
+
+          {/* Sort + view toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <select
+              value={sort} onChange={e => setSort(e.target.value)}
+              style={{
+                padding: '9px 14px', border: '1px solid var(--line)',
+                borderRadius: 999, background: 'var(--card)', fontSize: 13,
+                cursor: 'pointer', width: 'auto',
+              }}
+            >
+              <option value="popular">Popular</option>
+              <option value="price-low">Price ↑</option>
+              <option value="price-high">Price ↓</option>
+              <option value="duration">Duration ↓</option>
+            </select>
+            <div style={{ display: 'flex', border: '1px solid var(--line)', borderRadius: 999, padding: 3, background: 'var(--card)' }}>
+              {['grid', 'list'].map(v => (
+                <button key={v} onClick={() => setView(v)}
+                  style={{
+                    padding: '6px 10px', border: 'none', borderRadius: 999,
+                    background: view === v ? 'var(--ink)' : 'transparent',
+                    color: view === v ? 'var(--canvas)' : 'var(--ink)', cursor: 'pointer',
+                  }}>
+                  <Icon name={v} size={14} />
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-      )}
-    </div>
+      </section>
+
+      {/* Results */}
+      <section style={{ padding: '32px 0 80px' }}>
+        <div className="wrap-wide">
+          {filtered.length === 0 ? (
+            <div style={{ padding: 80, textAlign: 'center', border: '1px dashed var(--line)', borderRadius: 'var(--r-lg)' }}>
+              <div style={{ fontSize: 18, fontWeight: 600 }}>
+                {t ? t({ th: 'ไม่พบทัวร์', en: 'No tours match these filters.' }) : 'No tours match.'}
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 8 }}>
+                Try broadening continent or budget.
+              </div>
+            </div>
+          ) : view === 'grid' ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+              {filtered.map(tr => (
+                <TourCard
+                  key={tr.id} tour={tr} t={t} navigate={navigate}
+                  inCompare={compareList.includes(tr.id)}
+                  onCompare={() => toggleCompare(tr.id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {filtered.map(tr => (
+                <TourRow
+                  key={tr.id} tour={tr} t={t} navigate={navigate}
+                  inCompare={compareList.includes(tr.id)}
+                  onCompare={() => toggleCompare(tr.id)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </main>
   );
 }

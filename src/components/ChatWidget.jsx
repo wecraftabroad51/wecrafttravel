@@ -1,8 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send } from 'lucide-react';
 import { upsertChatSession, subscribeChatSessions } from '../lib/db.js';
 
-const QUICK_REPLIES = ['สนใจทัวร์ญี่ปุ่น', 'สนใจทัวร์ยุโรป', 'ต้องการใบเสนอราคา', 'ถามเรื่องวีซ่า'];
+const QUICK_REPLIES = ['สนใจทัวร์ยุโรป', 'สนใจทัวร์ญี่ปุ่น', 'ต้องการใบเสนอราคา', 'ถามเรื่องวีซ่า'];
+
+function Icon({ name, size = 18 }) {
+  const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round' };
+  switch (name) {
+    case 'chat':  return <svg {...p}><path d="M21 12a8 8 0 0 1-11.5 7.2L4 21l1.8-5.5A8 8 0 1 1 21 12z"/></svg>;
+    case 'close': return <svg {...p}><path d="M6 6l12 12M18 6 6 18"/></svg>;
+    case 'send':  return <svg {...p}><path d="M3 11 21 4l-7 18-3-7-8-4z"/></svg>;
+    case 'arrow-right': return <svg {...p}><path d="M5 12h14M13 6l6 6-6 6"/></svg>;
+    default: return null;
+  }
+}
 
 export default function ChatWidget({ lang, open, setOpen }) {
   const [visitor, setVisitor]   = useState(null);
@@ -17,7 +27,7 @@ export default function ChatWidget({ lang, open, setOpen }) {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, open]);
 
-  // ── Subscribe to admin replies via Supabase Realtime ──
+  // Subscribe to admin replies via Supabase Realtime
   useEffect(() => {
     if (!sessionId) return;
     const unsubscribe = subscribeChatSessions((payload) => {
@@ -34,7 +44,6 @@ export default function ChatWidget({ lang, open, setOpen }) {
     if (open) setUnread(0);
   }, [open]);
 
-  // ── Start chat session ────────────────────────────────
   const startChat = async () => {
     if (!regForm.name.trim()) return;
     const welcomeMsg = {
@@ -56,7 +65,6 @@ export default function ChatWidget({ lang, open, setOpen }) {
     setMessages([welcomeMsg]);
   };
 
-  // ── Send message ──────────────────────────────────────
   const sendMsg = async (text) => {
     if (!text.trim() || !sessionId) return;
     const msg = {
@@ -69,105 +77,146 @@ export default function ChatWidget({ lang, open, setOpen }) {
     await upsertChatSession({ id: sessionId, visitor, messages: newMessages, status: 'open' });
   };
 
-  const adminMsgCount = messages.filter(m => m.sender === 'admin' && m.id !== 1).length;
-
   return (
     <>
       {/* Bubble */}
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-teal-700 hover:bg-teal-600 text-white rounded-full shadow-2xl flex items-center justify-center transition-all chat-bounce"
+        style={{
+          position: 'fixed', right: 24, bottom: 24, zIndex: 50,
+          width: 64, height: 64, borderRadius: '50%',
+          background: 'var(--ink)', color: 'var(--canvas)',
+          border: 'none', cursor: 'pointer',
+          boxShadow: 'var(--shadow-lg)',
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        }}
       >
-        {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+        <Icon name={open ? 'close' : 'chat'} size={22} />
         {!open && unread > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center font-bold">
-            {unread}
-          </span>
+          <span style={{
+            position: 'absolute', top: -4, right: -4,
+            width: 20, height: 20, borderRadius: '50%',
+            background: 'var(--accent)', border: '2px solid var(--canvas)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 10, fontWeight: 700, color: '#fff',
+          }}>{unread}</span>
+        )}
+        {!open && unread === 0 && (
+          <span style={{
+            position: 'absolute', top: -4, right: -4,
+            width: 16, height: 16, borderRadius: '50%',
+            background: 'var(--accent)', border: '2px solid var(--canvas)',
+          }} />
         )}
       </button>
 
       {/* Chat window */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200"
-          style={{ height: 460 }}>
+        <div style={{
+          position: 'fixed', right: 24, bottom: 100, zIndex: 50,
+          width: 340, height: 460, background: 'var(--card)',
+          borderRadius: 'var(--r-lg)', border: '1px solid var(--line)',
+          boxShadow: 'var(--shadow-lg)',
+          display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        }}>
           {/* Header */}
-          <div className="bg-teal-700 text-white p-4 flex items-center gap-3">
-            <div className="w-9 h-9 bg-teal-600 rounded-full flex items-center justify-center">
-              <MessageCircle className="w-5 h-5" />
-            </div>
+          <div style={{
+            background: 'var(--ink)', color: 'var(--canvas)', padding: '18px 20px',
+            display: 'flex', alignItems: 'center', gap: 12,
+          }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: '50%',
+              background: 'var(--primary)', display: 'inline-flex',
+              alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: 14,
+            }}>M</div>
             <div>
-              <div className="font-semibold text-sm">WeCraftTravel</div>
-              <div className="text-xs text-teal-200">🟢 Online</div>
+              <div style={{ fontWeight: 600, fontSize: 14 }}>
+                {lang === 'th' ? 'ทีมงาน WeCraft' : 'Mod from WeCraft'}
+              </div>
+              <div style={{ fontSize: 11, color: 'rgba(244,239,230,.7)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span className="pulse" style={{ width: 6, height: 6, borderRadius: '50%', background: '#5fd97f', display: 'inline-block' }} />
+                {lang === 'th' ? 'ตอบกลับใน ~10 นาที · 9:00–20:00 น.' : 'Replies in ~10 min · 9am–8pm Bangkok'}
+              </div>
             </div>
           </div>
 
           {!visitor ? (
-            <div className="flex-1 p-4 flex flex-col justify-center">
-              <p className="text-sm text-slate-600 mb-4 text-center">
+            <div style={{ flex: 1, padding: '20px 16px', display: 'flex', flexDirection: 'column', justifyContent: 'center', background: 'var(--canvas)' }}>
+              <p style={{ fontSize: 13, color: 'var(--ink-2)', marginBottom: 16, textAlign: 'center', lineHeight: 1.5 }}>
                 {lang === 'th' ? 'กรุณาแนะนำตัวก่อนเริ่มสนทนาครับ' : 'Please introduce yourself before chatting.'}
               </p>
               <input
-                className="border border-slate-200 rounded-lg px-3 py-2 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 placeholder={lang === 'th' ? 'ชื่อของคุณ *' : 'Your name *'}
                 value={regForm.name}
                 onChange={e => setRegForm(p => ({ ...p, name: e.target.value }))}
                 onKeyDown={e => e.key === 'Enter' && startChat()}
+                style={{ marginBottom: 8 }}
               />
               <input
-                className="border border-slate-200 rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                type="email"
                 placeholder={lang === 'th' ? 'อีเมล (ไม่บังคับ)' : 'Email (optional)'}
                 value={regForm.email}
                 onChange={e => setRegForm(p => ({ ...p, email: e.target.value }))}
+                style={{ marginBottom: 16 }}
               />
               <button
                 onClick={startChat}
-                className="bg-teal-700 hover:bg-teal-600 text-white py-2.5 rounded-lg font-semibold text-sm transition-colors"
+                className="btn btn-primary"
+                style={{ justifyContent: 'center' }}
               >
-                {lang === 'th' ? 'เริ่มสนทนา' : 'Start Chat'}
+                {lang === 'th' ? 'เริ่มสนทนา' : 'Start Chat'} <Icon name="arrow-right" size={14} />
               </button>
             </div>
           ) : (
             <>
-              <div className="flex-1 overflow-y-auto p-3 space-y-2">
+              <div style={{ flex: 1, padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 10, background: 'var(--canvas)' }}>
                 {messages.map((msg, i) => (
-                  <div key={msg.id || i} className={`flex ${msg.sender === 'visitor' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
-                      msg.sender === 'visitor'
-                        ? 'bg-teal-700 text-white rounded-br-sm'
-                        : 'bg-slate-100 text-slate-800 rounded-bl-sm'
-                    }`}>
-                      <div>{msg.text}</div>
-                      <div className={`text-xs mt-0.5 ${msg.sender === 'visitor' ? 'text-teal-200' : 'text-slate-400'}`}>
-                        {msg.timestamp || msg.time}
-                      </div>
-                    </div>
+                  <div key={msg.id || i} style={{
+                    alignSelf: msg.sender === 'visitor' ? 'flex-end' : 'flex-start',
+                    maxWidth: '80%',
+                    padding: '10px 14px',
+                    borderRadius: 14,
+                    background: msg.sender === 'visitor' ? 'var(--ink)' : 'var(--card)',
+                    color: msg.sender === 'visitor' ? 'var(--canvas)' : 'var(--ink)',
+                    border: msg.sender === 'visitor' ? 'none' : '1px solid var(--line)',
+                    fontSize: 13, lineHeight: 1.4,
+                  }}>
+                    <div>{msg.text}</div>
+                    <div style={{ fontSize: 10, opacity: .6, marginTop: 4 }}>{msg.timestamp || msg.time}</div>
                   </div>
                 ))}
                 <div ref={bottomRef} />
               </div>
 
               {messages.length <= 1 && (
-                <div className="px-3 pb-2 flex flex-wrap gap-1">
+                <div style={{ padding: '8px 12px', display: 'flex', flexWrap: 'wrap', gap: 6, borderTop: '1px solid var(--line)' }}>
                   {QUICK_REPLIES.map(q => (
                     <button key={q} onClick={() => sendMsg(q)}
-                      className="text-xs bg-slate-100 hover:bg-teal-50 hover:text-teal-700 border border-slate-200 px-2 py-1 rounded-full transition-colors">
+                      style={{
+                        fontSize: 11, padding: '5px 10px', borderRadius: 999,
+                        background: 'var(--canvas-2)', border: '1px solid var(--line)',
+                        color: 'var(--ink)', cursor: 'pointer',
+                      }}>
                       {q}
                     </button>
                   ))}
                 </div>
               )}
 
-              <div className="p-3 border-t border-slate-100 flex gap-2">
+              <div style={{ padding: 12, borderTop: '1px solid var(--line)', display: 'flex', gap: 8 }}>
                 <input
-                  className="flex-1 border border-slate-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  placeholder={lang === 'th' ? 'พิมพ์ข้อความ...' : 'Type a message...'}
                   value={input}
                   onChange={e => setInput(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && sendMsg(input)}
+                  placeholder={lang === 'th' ? 'พิมพ์ข้อความ...' : 'Type a message…'}
+                  style={{ flex: 1, padding: '10px 12px' }}
                 />
-                <button onClick={() => sendMsg(input)}
-                  className="w-9 h-9 bg-teal-700 hover:bg-teal-600 text-white rounded-full flex items-center justify-center transition-colors">
-                  <Send className="w-4 h-4" />
+                <button
+                  onClick={() => sendMsg(input)}
+                  className="btn btn-primary btn-sm"
+                  style={{ padding: '0 14px' }}
+                >
+                  <Icon name="send" size={14} />
                 </button>
               </div>
             </>
