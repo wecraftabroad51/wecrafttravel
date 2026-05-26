@@ -31,53 +31,231 @@ const HOTEL_STARS = ['3 ดาว', '4 ดาว', '5 ดาว'];
 
 const AIRLINES = [
   '-- ไม่ระบุ / ยืดหยุ่นได้ --',
-  // ─ สายการบินไทย ─
+
+  // ─── สายการบินไทย ───────────────────────────────────────
+  '✈ สายการบินไทย',
   'การบินไทย (TG)',
   'Bangkok Airways (PG)',
   'Thai AirAsia (FD)',
+  'Thai AirAsia X (XJ)',
   'Thai Lion Air (SL)',
   'Thai Smile (WE)',
   'Thai VietJet (VZ)',
   'Nok Air (DD)',
-  // ─ เอเชียตะวันออก ─
+  'NokScoot (XW)',
+  'PC Air',
+  'Kan Air (KR)',
+
+  // ─── เอเชียตะวันออกเฉียงใต้ ──────────────────────────────
+  '✈ เอเชียตะวันออกเฉียงใต้',
   'Singapore Airlines (SQ)',
+  'Scoot (TR)',
+  'Jetstar Asia (3K)',
+  'Batik Air Malaysia (OD)',
+  'Malaysia Airlines (MH)',
+  'AirAsia (AK)',
+  'AirAsia X (D7)',
+  'Malindo Air (OD)',
+  'Garuda Indonesia (GA)',
+  'Lion Air (JT)',
+  'Batik Air (ID)',
+  'Citilink (QG)',
+  'Wings Air (IW)',
+  'Vietnam Airlines (VN)',
+  'VietJet Air (VJ)',
+  'Bamboo Airways (QH)',
+  'Pacific Airlines (BL)',
+  'Philippine Airlines (PR)',
+  'Cebu Pacific (5J)',
+  'AirAsia Philippines (Z2)',
+  'Myanmar Airways International (8M)',
+  'Air KBZ (K7)',
+  'Lao Airlines (QV)',
+  'Cambodia Angkor Air (K6)',
+  'Silk Air (MI)',
+  'Firefly (FY)',
+
+  // ─── เอเชียตะวันออก ───────────────────────────────────────
+  '✈ เอเชียตะวันออก',
   'Cathay Pacific (CX)',
+  'HK Express (UO)',
+  'Greater Bay Airlines (HB)',
   'EVA Air (BR)',
   'China Airlines (CI)',
+  'Starlux Airlines (JX)',
+  'Tigerair Taiwan (IT)',
   'Japan Airlines (JL)',
   'ANA - All Nippon Airways (NH)',
+  'Peach Aviation (MM)',
+  'Jetstar Japan (GK)',
+  'Zipair (ZG)',
+  'Vanilla Air (JW)',
   'Korean Air (KE)',
   'Asiana Airlines (OZ)',
-  'Scoot (TR)',
-  'AirAsia X (D7)',
-  'Jetstar Asia (3K)',
-  'Peach Aviation (MM)',
-  // ─ ตะวันออกกลาง ─
+  'Jeju Air (7C)',
+  'Jin Air (LJ)',
+  'T'way Air (TW)',
+  'Air Busan (BX)',
+  'Air Seoul (RS)',
+  'Air China (CA)',
+  'China Eastern (MU)',
+  'China Southern (CZ)',
+  'Xiamen Airlines (MF)',
+  'Shenzhen Airlines (ZH)',
+  'Hainan Airlines (HU)',
+  'Sichuan Airlines (3U)',
+  'Juneyao Airlines (HO)',
+  'Shanghai Airlines (FM)',
+  'Lucky Air (8L)',
+  'Ruili Airlines (DR)',
+  'Spring Airlines (9C)',
+  'Air Macau (NX)',
+  'Mongolian Airlines (OM)',
+
+  // ─── เอเชียใต้ ────────────────────────────────────────────
+  '✈ เอเชียใต้',
+  'Air India (AI)',
+  'IndiGo (6E)',
+  'SpiceJet (SG)',
+  'Vistara (UK)',
+  'GoFirst (G8)',
+  'SriLankan Airlines (UL)',
+  'FitsAir (8D)',
+  'Maldivian (Q2)',
+  'Biman Bangladesh (BG)',
+  'Regent Airways (RX)',
+  'Himalaya Airlines (H9)',
+  'Buddha Air (U4)',
+  'Yeti Airlines (YT)',
+
+  // ─── ตะวันออกกลาง ────────────────────────────────────────
+  '✈ ตะวันออกกลาง',
   'Emirates (EK)',
   'Qatar Airways (QR)',
   'Etihad Airways (EY)',
   'flydubai (FZ)',
+  'flynas (XY)',
+  'flyadeal (F3)',
+  'Saudia (SV)',
   'Air Arabia (G9)',
+  'Air Arabia Abu Dhabi (3L)',
   'Oman Air (WY)',
+  'SalamAir (OV)',
   'Gulf Air (GF)',
-  // ─ ยุโรป ─
+  'Kuwait Airways (KU)',
+  'Jazeera Airways (J9)',
+  'Wataniya Airways (WAY)',
+  'Iraqi Airways (IA)',
+  'Middle East Airlines (ME)',
+  'Royal Jordanian (RJ)',
+  'Air Astana (KC)',
+  'FlyArystan (KC)',
+
+  // ─── เอเชียกลาง / รัสเซีย ────────────────────────────────
+  '✈ เอเชียกลาง / รัสเซีย',
+  'Aeroflot (SU)',
+  'S7 Airlines (S7)',
+  'Ural Airlines (U6)',
+  'Pobeda (DP)',
+  'Uzbekistan Airways (HY)',
+  'Air Manas (ZM)',
+  'SCAT Airlines (DV)',
+
+  // ─── ยุโรป ────────────────────────────────────────────────
+  '✈ ยุโรป',
   'Lufthansa (LH)',
   'Air France (AF)',
   'British Airways (BA)',
-  'KLM (KL)',
-  'Swiss (LX)',
+  'KLM Royal Dutch (KL)',
+  'Swiss International (LX)',
   'Austrian Airlines (OS)',
   'Turkish Airlines (TK)',
   'Finnair (AY)',
-  'SAS (SK)',
-  'Norwegian (DY)',
-  // ─ อเมริกา / โอเชียเนีย ─
+  'SAS Scandinavian (SK)',
+  'Norwegian Air (DY)',
+  'Iberia (IB)',
+  'Vueling (VY)',
+  'Transavia (HV)',
+  'TAP Air Portugal (TP)',
+  'Alitalia / ITA Airways (AZ)',
+  'LOT Polish Airlines (LO)',
+  'Czech Airlines (OK)',
+  'Brussels Airlines (SN)',
+  'Eurowings (EW)',
+  'Condor (DE)',
+  'TUI Airways (BY)',
+  'Jet2 (LS)',
+  'easyJet (U2)',
+  'Ryanair (FR)',
+  'Wizz Air (W6)',
+  'Aegean Airlines (A3)',
+  'Olympic Air (OA)',
+  'Croatia Airlines (OU)',
+  'Adria Airways',
+  'Air Serbia (JU)',
+  'Air Malta (KM)',
+  'Air Baltic (BT)',
+  'Estonian Air (OV)',
+  'airBaltic (BT)',
+  'Icelandair (FI)',
+  'PLAY Airlines (OG)',
+  'Luxair (LG)',
+  'Aer Lingus (EI)',
+
+  // ─── แอฟริกา ──────────────────────────────────────────────
+  '✈ แอฟริกา',
+  'Ethiopian Airlines (ET)',
+  'Kenya Airways (KQ)',
+  'Egypt Air (MS)',
+  'Royal Air Maroc (AT)',
+  'Air Mauritius (MK)',
+  'South African Airways (SA)',
+  'Mango Airlines (JE)',
+  'Air Tanzania (TC)',
+  'RwandAir (WB)',
+  'ASKY Airlines (KP)',
+  'Tunisair (TU)',
+  'Air Algérie (AH)',
+  'Nile Air (NP)',
+
+  // ─── อเมริกาเหนือ ─────────────────────────────────────────
+  '✈ อเมริกาเหนือ',
   'United Airlines (UA)',
   'American Airlines (AA)',
   'Delta Air Lines (DL)',
+  'Southwest Airlines (WN)',
+  'Alaska Airlines (AS)',
+  'JetBlue Airways (B6)',
+  'Spirit Airlines (NK)',
+  'Frontier Airlines (F9)',
   'Air Canada (AC)',
+  'WestJet (WS)',
+  'Air Transat (TS)',
+  'Aeromexico (AM)',
+  'Volaris (Y4)',
+  'VivaAerobus (VB)',
+
+  // ─── อเมริกาใต้ ───────────────────────────────────────────
+  '✈ อเมริกาใต้',
+  'LATAM Airlines (LA)',
+  'Avianca (AV)',
+  'Copa Airlines (CM)',
+  'Gol Airlines (G3)',
+  'Azul Airlines (AD)',
+  'Aerolineas Argentinas (AR)',
+  'Sky Airline (H2)',
+
+  // ─── โอเชียเนีย ───────────────────────────────────────────
+  '✈ โอเชียเนีย',
   'Qantas (QF)',
+  'Jetstar Airways (JQ)',
+  'Virgin Australia (VA)',
+  'Bonza (AB)',
   'Air New Zealand (NZ)',
+  'Fiji Airways (FJ)',
+  'Air Vanuatu (NF)',
+  'Solomon Airlines (IE)',
+  'Air Niugini (PX)',
 ];
 
 // จำนวนวัน-คืน options
@@ -486,9 +664,16 @@ export default function GroupQuotePage({ lang, setMessages }) {
             <Field label="ต้องการบินสายการบิน">
               <select style={{ ...inpStyle(), background: '#fff', cursor: 'pointer' }}
                 value={form.airline} onChange={set('airline')}>
-                {AIRLINES.map(a => (
-                  <option key={a} value={a.startsWith('--') ? '' : a}>{a}</option>
-                ))}
+                {AIRLINES.map(a => {
+                  const isHeader = a.startsWith('✈ ');
+                  const isPlaceholder = a.startsWith('--');
+                  return (
+                    <option key={a} value={isHeader || isPlaceholder ? '' : a}
+                      disabled={isHeader} style={isHeader ? { fontWeight: 'bold', color: '#888', background: '#f5f5f5' } : {}}>
+                      {a}
+                    </option>
+                  );
+                })}
               </select>
             </Field>
             <Field label="ข้อมูลที่ต้องการแจ้งเราเพิ่มเติม">
