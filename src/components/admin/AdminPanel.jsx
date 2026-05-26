@@ -14,6 +14,8 @@ import {
   fetchChatSessions,
   subscribeChatSessions,
 } from '../../lib/db.js';
+import { seedDatabase } from '../../lib/seed.js';
+import { supabase } from '../../lib/supabase.js';
 import {
   TOURS_DATA, ARTICLES_DATA, PROMOTIONS_DATA, FAQS_DATA, REVIEWS_DATA
 } from '../../data.js';
@@ -1369,8 +1371,11 @@ function ChatSection() {
 
 // ===== SETTINGS =====
 function SettingsSection({ settings, setSettings, t }) {
-  const [tab, setTab]       = useState('contact');
-  const [saving, setSaving] = useState(false);
+  const [tab, setTab]         = useState('contact');
+  const [saving, setSaving]   = useState(false);
+  const [seeding, setSeeding] = useState(false);
+  const [seedLog, setSeedLog] = useState([]);
+  const [seedDone, setSeedDone] = useState(null);
 
   const update = (path, value) => {
     setSettings(prev => {
@@ -1392,10 +1397,10 @@ function SettingsSection({ settings, setSettings, t }) {
     <div>
       <h2 className="text-2xl font-bold text-slate-800 mb-6">Site Settings</h2>
       <div className="flex gap-2 mb-6">
-        {['contact','social'].map(tb => (
+        {['contact','social','database'].map(tb => (
           <button key={tb} onClick={() => setTab(tb)}
             className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${tab === tb ? 'bg-teal-700 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
-            {tb}
+            {tb === 'database' ? '🗄 Database' : tb}
           </button>
         ))}
       </div>
@@ -1442,10 +1447,83 @@ function SettingsSection({ settings, setSettings, t }) {
           </div>
         )}
 
+        {tab === 'database' && (
+          <div className="space-y-5">
+            {/* Supabase status */}
+            <div className={`flex items-center gap-3 p-4 rounded-xl border ${supabase ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+              <div className={`w-3 h-3 rounded-full ${supabase ? 'bg-green-500' : 'bg-red-500'}`} />
+              <div>
+                <div className={`font-semibold text-sm ${supabase ? 'text-green-800' : 'text-red-800'}`}>
+                  {supabase ? 'Supabase: เชื่อมต่อแล้ว ✅' : 'Supabase: ยังไม่ได้เชื่อมต่อ ❌'}
+                </div>
+                {!supabase && (
+                  <div className="text-xs text-red-600 mt-0.5">
+                    กรุณาใส่ VITE_SUPABASE_URL และ VITE_SUPABASE_ANON_KEY ใน .env.local แล้ว restart server
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Seed section */}
+            <div className="border border-amber-200 bg-amber-50 rounded-xl p-5">
+              <h3 className="font-bold text-amber-900 mb-1">🌱 Seed Mock Data</h3>
+              <p className="text-sm text-amber-700 mb-4">
+                นำข้อมูลตัวอย่าง (ทัวร์ 6 รายการ, บทความ, โปรโมชั่น, FAQ ฯลฯ) เข้า Supabase
+                <br /><span className="font-semibold">⚠️ ควร seed เฉพาะเมื่อตาราง DB ว่างเท่านั้น</span>
+              </p>
+              <button
+                disabled={seeding || !supabase}
+                onClick={async () => {
+                  if (!confirm('ต้องการ seed mock data เข้า Supabase ใช่ไหม?\n(ถ้ามีข้อมูลอยู่แล้วอาจเกิด duplicate)')) return;
+                  setSeeding(true);
+                  setSeedLog([]);
+                  setSeedDone(null);
+                  const { errors, success } = await seedDatabase((msg) =>
+                    setSeedLog(prev => [...prev, msg])
+                  );
+                  setSeedDone({ errors, success });
+                  setSeeding(false);
+                }}
+                className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition-colors"
+              >
+                {seeding ? '⏳ กำลัง seed...' : '🚀 Seed Database'}
+              </button>
+
+              {seedLog.length > 0 && (
+                <div className="mt-4 bg-slate-900 rounded-lg p-3 text-xs text-green-400 font-mono space-y-0.5 max-h-48 overflow-y-auto">
+                  {seedLog.map((line, i) => <div key={i}>{line}</div>)}
+                </div>
+              )}
+
+              {seedDone && (
+                <div className={`mt-3 p-3 rounded-lg text-sm font-semibold ${seedDone.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                  {seedDone.success
+                    ? '✅ Seed สำเร็จ! รีเฟรชหน้าเพื่อดูข้อมูลจาก DB'
+                    : `❌ เกิด error ${seedDone.errors.length} รายการ:\n${seedDone.errors.join('\n')}`}
+                </div>
+              )}
+            </div>
+
+            {/* Schema instructions */}
+            <div className="border border-slate-200 rounded-xl p-5">
+              <h3 className="font-bold text-slate-800 mb-2">📋 วิธีตั้งค่า Supabase</h3>
+              <ol className="text-sm text-slate-600 space-y-1 list-decimal list-inside">
+                <li>ไปที่ <span className="font-mono bg-slate-100 px-1 rounded">supabase.com</span> → สร้าง Project ใหม่</li>
+                <li>ไปที่ SQL Editor → วาง SQL จากไฟล์ <span className="font-mono bg-slate-100 px-1 rounded">supabase-setup.sql</span> → Run</li>
+                <li>ไปที่ Project Settings → API → Copy URL + anon key</li>
+                <li>ใส่ใน <span className="font-mono bg-slate-100 px-1 rounded">.env.local</span> แล้ว restart dev server</li>
+                <li>กลับมากด "Seed Database" ด้านบน</li>
+              </ol>
+            </div>
+          </div>
+        )}
+
+        {tab !== 'database' && (
         <button onClick={handleSave} disabled={saving}
           className="mt-6 bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-colors">
           {saving ? 'กำลังบันทึก...' : '💾 บันทึก Settings'}
         </button>
+        )}
       </div>
     </div>
   );
