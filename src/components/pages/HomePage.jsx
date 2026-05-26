@@ -71,7 +71,7 @@ function HomeHero({ navigate }) {
         </div>
 
         {/* hero image collage */}
-        <div className="layout-hero-3" style={{
+        <div className="layout-hero-3 hero-collage" style={{
           marginTop: 56,
           gridTemplateRows: 'auto auto',
           gap: 12,
@@ -157,8 +157,8 @@ function HomeHero({ navigate }) {
           </div>
         </div>
 
-        {/* hero search bar */}
-        <div className="search-bar" style={{
+        {/* hero search bar — desktop only */}
+        <div className="search-bar hide-mobile" style={{
           marginTop: 28,
           background: 'var(--card)',
           border: '1px solid var(--line)',
@@ -177,6 +177,12 @@ function HomeHero({ navigate }) {
             style={{ borderRadius: 999, margin: 4 }}
           >
             <Icon name="search" size={16} /> Search tours
+          </button>
+        </div>
+        {/* Mobile: simple CTA instead of search bar */}
+        <div className="show-mobile" style={{ marginTop: 24, display: 'flex', gap: 10 }}>
+          <button onClick={() => navigate('tours')} className="btn btn-accent" style={{ flex: 1, justifyContent: 'center' }}>
+            <Icon name="search" size={15} /> Browse all tours
           </button>
         </div>
       </div>

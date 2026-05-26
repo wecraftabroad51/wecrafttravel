@@ -285,6 +285,9 @@ label { font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--i
 .hide-mobile {}
 .show-mobile { display: none !important; }
 
+/* Hamburger hidden by default — only shown by media query below */
+.mobile-menu-btn { display: none; }
+
 /* Sticky aside — becomes static on mobile */
 .sticky-aside { position: sticky; top: 100px; }
 
@@ -292,7 +295,8 @@ label { font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--i
 @media (max-width: 1100px) {
   .layout-footer  { grid-template-columns: 1fr 1fr 1fr; }
   .grid-cols-4    { grid-template-columns: repeat(2, 1fr); }
-  .layout-hero-3  { grid-template-columns: 1fr 1fr; }
+  /* NOTE: layout-hero-3 (hero image collage) intentionally kept at 3-col
+     to preserve the designed height:540 layout — only collapses on mobile */
   .layout-tour    { grid-template-columns: 1fr 360px; }
 }
 
@@ -303,11 +307,17 @@ label { font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--i
   .nav-right-btn   { display: none !important; }
   .mobile-menu-btn { display: inline-flex !important; }
 
+  /* Hero collage: on mobile hide complex collage, show just first image */
+  .hero-collage { height: 260px !important; grid-template-columns: 1fr !important;
+    grid-template-rows: 1fr !important; }
+  .hero-collage > *:not(:first-child) { display: none !important; }
+  .hero-collage > *:first-child { grid-row: 1 !important; }
+
   /* Grids collapse to 1 column */
   .layout-hero, .layout-hero-3, .layout-feat,
   .layout-tour, .layout-faq, .layout-sidebar,
   .layout-tours-item { grid-template-columns: 1fr !important; }
-  .search-bar { grid-template-columns: 1fr 1fr; }
+  .search-bar { grid-template-columns: 1fr; }
   .grid-review-item { grid-template-columns: 60px 1fr; }
 
   .layout-half { grid-template-columns: 1fr 1fr; }
@@ -320,7 +330,7 @@ label { font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--i
 
   /* Visibility */
   .hide-mobile { display: none !important; }
-  .show-mobile { display: block !important; }
+  .show-mobile { display: revert !important; }
 
   /* Container padding */
   .wrap, .wrap-wide { padding: 0 16px; }
