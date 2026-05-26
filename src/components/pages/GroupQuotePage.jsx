@@ -94,7 +94,7 @@ const AIRLINES = [
   'Asiana Airlines (OZ)',
   'Jeju Air (7C)',
   'Jin Air (LJ)',
-  'T'way Air (TW)',
+  "T'way Air (TW)",
   'Air Busan (BX)',
   'Air Seoul (RS)',
   'Air China (CA)',
