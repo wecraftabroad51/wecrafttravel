@@ -217,10 +217,10 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
       <div style={{ background: '#222', color: '#fff', fontSize: 12, padding: '5px 0' }}>
         <div className="wrap" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
           <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <span className="navbar-topbar-phone" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <PhoneIcon /> 061-868-6889
             </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <span className="navbar-topbar-phone" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <ClockIcon /> จ–ศ 09:00–18:00 น.
             </span>
           </div>

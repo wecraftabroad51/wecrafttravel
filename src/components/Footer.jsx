@@ -69,7 +69,7 @@ export default function Footer({ lang, t, navigate, settings }) {
     <footer style={{ background: '#1a1a2e', color: '#fff', marginTop: 0 }}>
       {/* Main footer */}
       <div className="wrap" style={{ padding: '48px 20px 32px' }}>
-        <div className="layout-footer" style={{ gap: 40, alignItems: 'start' }}>
+        <div className="layout-footer" style={{ gap: 32, alignItems: 'start' }}>
           {/* Brand */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>

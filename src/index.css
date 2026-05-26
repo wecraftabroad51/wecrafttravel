@@ -321,6 +321,104 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
   .search-bar { grid-template-columns: 1fr; }
 }
 
+/* ====================== RESPONSIVE HELPERS ====================== */
+
+/* HomePage 2-column: sidebar + main */
+.home-2col {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+  padding: 24px 20px;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.home-2col-main {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-width: 0;
+}
+
+/* Navbar top bar */
+.navbar-topbar { display: flex; }
+.navbar-topbar-phone { display: flex; }
+
+/* Hero */
+.hero-wrap { height: 440px; }
+
+/* Stats strip */
+.stats-strip-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Why us grid */
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* Contact CTA buttons */
+.cta-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ---- Tablet responsive ---- */
+@media (max-width: 1024px) {
+  .home-2col {
+    grid-template-columns: 220px 1fr;
+    gap: 16px;
+  }
+  .why-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-strip-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ---- Mobile responsive ---- */
+@media (max-width: 768px) {
+  /* HomePage layout — stack sidebar below content */
+  .home-2col {
+    grid-template-columns: 1fr !important;
+    padding: 12px !important;
+    gap: 16px !important;
+  }
+  .home-sidebar { order: 2; } /* search sidebar goes below */
+  .home-2col-main { order: 1; }
+
+  /* Hero */
+  .hero-wrap { height: 280px !important; }
+
+  /* Navbar top bar — hide phone, keep LINE */
+  .navbar-topbar-phone { display: none !important; }
+
+  /* Stats strip */
+  .stats-strip-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Why us */
+  .why-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Section padding */
+  section { padding-top: 24px !important; padding-bottom: 24px !important; }
+
+  /* Tour detail page */
+  .tour-detail-grid { grid-template-columns: 1fr !important; }
+  .tour-booking-panel { position: static !important; }
+}
+
+/* ---- Small mobile ---- */
+@media (max-width: 480px) {
+  .hero-wrap { height: 220px !important; }
+  .home-2col { padding: 8px !important; }
+  .stats-strip-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .why-grid { grid-template-columns: 1fr !important; }
+  .cta-btns { flex-direction: column; align-items: center; }
+  .cta-btns button { width: 100%; max-width: 280px; }
+}
+
 /* Discount flame animation */
 @keyframes flame {
   0%, 100% { transform: scale(1) rotate(-3deg); }

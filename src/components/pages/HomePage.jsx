@@ -56,7 +56,7 @@ function HeroSection({ navigate }) {
 
   const s = SLIDES[idx];
   return (
-    <div style={{ position: 'relative', height: 440, overflow: 'hidden' }}>
+    <div className="hero-wrap" style={{ position: 'relative', overflow: 'hidden' }}>
       {/* Slides */}
       {SLIDES.map((sl, i) => (
         <div key={i} style={{ position: 'absolute', inset: 0, opacity: i === idx ? 1 : 0, transition: 'opacity .7s ease' }}>
@@ -386,7 +386,7 @@ function WhyUsSection() {
     <section style={{ background: '#fff', padding: '36px 0' }}>
       <div className="wrap">
         <SectionHeader title="ทำไมต้องเลือกเรา?" emoji="💎" />
-        <div className="grid-cols-4" style={{ gap: 20 }}>
+        <div className="why-grid">
           {WHY_ITEMS.map((w, i) => (
             <div key={i} style={{
               textAlign: 'center', padding: '24px 16px',
@@ -564,7 +564,7 @@ function StatsStrip() {
       color: '#fff', padding: '28px 0',
     }}>
       <div className="wrap">
-        <div className="grid-cols-4" style={{ gap: 0 }}>
+        <div className="stats-strip-grid" style={{ gap: 0 }}>
           {stats.map((s, i) => (
             <div key={i} style={{
               textAlign: 'center', padding: '10px 20px',
@@ -595,7 +595,7 @@ function ContactCta({ navigate }) {
           ทีมงานผู้เชี่ยวชาญพร้อมให้คำปรึกษา ฟรี! ไม่มีข้อผูกมัด<br />
           โทรหาเรา หรือแอดไลน์ได้เลยทันที จ-ศ 09:00-18:00 น.
         </p>
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div className="cta-btns">
           <button
             onClick={() => navigate('contact')}
             style={{
@@ -631,12 +631,14 @@ export default function HomePage({ lang, t, navigate, tours, articles, promotion
       <HeroSection navigate={navigate} />
 
       {/* 2-column: search sidebar (left) + hot deals & categories (right) */}
-      <div className="wrap" style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 24, padding: '24px 20px', alignItems: 'start' }}>
+      <div className="home-2col">
         {/* Left: sticky search */}
-        <SearchSidebar navigate={navigate} />
+        <div className="home-sidebar">
+          <SearchSidebar navigate={navigate} />
+        </div>
 
         {/* Right: hot deals + destinations */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 28, minWidth: 0 }}>
+        <div className="home-2col-main">
           {featured.length > 0 && (
             <div style={{ background: '#fff7f0', borderRadius: 10, padding: '24px 20px', borderTop: '3px solid var(--primary)' }}>
               <HotDealsSection tours={featured} navigate={navigate} t={t} compareList={compareList} toggleCompare={toggleCompare} inner />
