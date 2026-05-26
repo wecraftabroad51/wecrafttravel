@@ -210,14 +210,45 @@ function httpsPost(hostname, path, headers, body) {
   });
 }
 
-// ── Send LINE push ─────────────────────────────────────────────
+// ── Send LINE push (plain text) ────────────────────────────────
 async function sendLine(formData) {
   const token  = process.env.LINE_CHANNEL_ACCESS_TOKEN;
   const userId = process.env.LINE_OWNER_USER_ID;
   if (!token || !userId) { console.log('LINE skipped: env vars not set'); return; }
 
-  const message = buildFlexMessage(formData);
-  const body = JSON.stringify({ to: userId, messages: [message] });
+  const f = formData;
+  const tourTypeLabel = (f.tourType === 'อื่นๆ' && f.tourTypeOther)
+    ? `อื่นๆ: ${f.tourTypeOther}` : (f.tourType || '-');
+
+  const text = [
+    '🎉🎊 มาแล้วๆๆ!!! งานเหมา มาแล้ว!! ✈️',
+    '━━━━━━━━━━━━━━━━━━',
+    '👤 ข้อมูลผู้ติดต่อ',
+    `ชื่อ: ${f.firstName} ${f.lastName}`,
+    f.company   ? `บริษัท: ${f.company}`           : null,
+    `โทร: ${f.phone}`,
+    f.lineId    ? `LINE ID: ${f.lineId}`            : null,
+    `อีเมล: ${f.email}`,
+    f.emailAlt  ? `อีเมลสำรอง: ${f.emailAlt}`      : null,
+    '━━━━━━━━━━━━━━━━━━',
+    '✈️ รายละเอียดทัวร์',
+    `📍 ปลายทาง: ${f.destination}`,
+    f.pax       ? `👥 จำนวน: ${f.pax} คน`          : null,
+    `📅 วันเดินทาง: ${f.travelDate}`,
+    `⏱️ ระยะเวลา: ${f.duration}`,
+    `🎒 รูปแบบ: ${tourTypeLabel}`,
+    `🏨 โรงแรม: ${f.hotel}`,
+    f.airline   ? `✈️ สายการบิน: ${f.airline}`     : null,
+    f.budget    ? `💰 งบ/ท่าน: ${f.budget}`        : null,
+    f.extraInfo ? `💬 เพิ่มเติม: ${f.extraInfo}`   : null,
+    '━━━━━━━━━━━━━━━━━━',
+    '⚡ รีบตอบกลับภายใน 24 ชั่วโมง!',
+  ].filter(Boolean).join('\n');
+
+  const body = JSON.stringify({
+    to: userId,
+    messages: [{ type: 'text', text }],
+  });
 
   await httpsPost(
     'api.line.me',
@@ -225,7 +256,7 @@ async function sendLine(formData) {
     { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
     body
   );
-  console.log('LINE Flex sent OK');
+  console.log('LINE text sent OK');
 }
 
 // ── Send Email ─────────────────────────────────────────────────
