@@ -167,11 +167,14 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
       {/* ── Row 1: teal quick-links bar ─────────────────── */}
       <div style={{ background: 'var(--primary)', color: '#fff', fontSize: 13 }}>
         <div className="wrap" style={{
-          display: 'flex', justifyContent: 'space-between',
-          alignItems: 'center', flexWrap: 'wrap', gap: 4,
+          display: 'grid',
+          gridTemplateColumns: '1fr auto 1fr',
+          alignItems: 'center',
           padding: '6px 20px',
         }}>
-          {/* Quick links */}
+          {/* Left spacer */}
+          <div />
+          {/* Quick links — center column */}
           <div className="navbar-topbar-phone" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0 }}>
             {QUICK_LINKS.map((ql, i) => (
               <span key={i} style={{ display: 'flex', alignItems: 'center' }}>
@@ -192,8 +195,8 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
               </span>
             ))}
           </div>
-          {/* Right: lang + admin */}
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginLeft: 'auto' }}>
+          {/* Right: lang */}
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'flex-end' }}>
             <button onClick={() => setLang(lang === 'th' ? 'en' : 'th')}
               style={{
                 background: 'rgba(255,255,255,.15)', border: '1px solid rgba(255,255,255,.35)',
