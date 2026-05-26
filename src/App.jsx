@@ -200,15 +200,163 @@ function AppInner() {
 
   // ── Loading screen ─────────────────────────────────────────
   if (loading) {
+    const stars = [
+      { top:'8%',  left:'12%', s:3, o:0.7, d:0 },
+      { top:'15%', left:'78%', s:2, o:0.5, d:0.4 },
+      { top:'22%', left:'45%', s:4, o:0.6, d:0.8 },
+      { top:'5%',  left:'60%', s:2, o:0.4, d:1.2 },
+      { top:'35%', left:'88%', s:3, o:0.7, d:0.6 },
+      { top:'55%', left:'5%',  s:2, o:0.5, d:1.0 },
+      { top:'70%', left:'92%', s:4, o:0.6, d:0.2 },
+      { top:'80%', left:'20%', s:2, o:0.4, d:1.5 },
+      { top:'90%', left:'55%', s:3, o:0.6, d:0.9 },
+      { top:'45%', left:'72%', s:2, o:0.5, d:0.3 },
+      { top:'62%', left:'38%', s:3, o:0.7, d:1.1 },
+      { top:'28%', left:'22%', s:2, o:0.4, d:0.7 },
+    ];
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-14 h-14 bg-amber-400 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg animate-pulse">
-            <span className="text-2xl">✈</span>
+      <>
+        <style>{`
+          @keyframes splashGrad {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+          }
+          @keyframes logoIn {
+            0%   { opacity:0; transform: scale(0.5) translateY(30px); }
+            65%  { transform: scale(1.1) translateY(-6px); }
+            100% { opacity:1; transform: scale(1) translateY(0); }
+          }
+          @keyframes glow {
+            0%,100% { box-shadow: 0 0 24px rgba(45,176,75,0.5), 0 0 60px rgba(45,176,75,0.2), 0 8px 32px rgba(0,0,0,0.4); }
+            50%      { box-shadow: 0 0 48px rgba(45,176,75,0.9), 0 0 100px rgba(45,176,75,0.4), 0 8px 32px rgba(0,0,0,0.4); }
+          }
+          @keyframes ringPulse {
+            0%   { transform:translate(-50%,-50%) scale(0.9); opacity:0.8; }
+            100% { transform:translate(-50%,-50%) scale(1.9); opacity:0; }
+          }
+          @keyframes orbit {
+            from { transform: rotate(0deg)   translateX(88px) rotate(0deg); }
+            to   { transform: rotate(360deg) translateX(88px) rotate(-360deg); }
+          }
+          @keyframes textSlide {
+            0%   { opacity:0; transform:translateY(28px); }
+            100% { opacity:1; transform:translateY(0); }
+          }
+          @keyframes shimmer {
+            0%   { background-position: -300% center; }
+            100% { background-position:  300% center; }
+          }
+          @keyframes twinkle {
+            0%,100% { opacity:0.2; transform:scale(1); }
+            50%      { opacity:1;   transform:scale(1.4); }
+          }
+          @keyframes dot1 { 0%,80%,100%{transform:scale(0);opacity:0} 40%{transform:scale(1);opacity:1} }
+          @keyframes floatY {
+            0%,100% { transform:translateY(0); }
+            50%      { transform:translateY(-10px); }
+          }
+          .splash-logo {
+            animation: logoIn 0.9s cubic-bezier(.34,1.56,.64,1) forwards,
+                       glow 2.8s ease-in-out 0.9s infinite,
+                       floatY 3.5s ease-in-out 0.9s infinite;
+          }
+        `}</style>
+
+        <div style={{
+          minHeight:'100vh',
+          background:'linear-gradient(135deg,#0d1b2a,#1b3a4b,#0f3460,#16213e)',
+          backgroundSize:'400% 400%',
+          animation:'splashGrad 7s ease infinite',
+          display:'flex', flexDirection:'column',
+          alignItems:'center', justifyContent:'center',
+          position:'relative', overflow:'hidden',
+        }}>
+
+          {/* Stars */}
+          {stars.map((st,i) => (
+            <div key={i} style={{
+              position:'absolute', top:st.top, left:st.left,
+              width:st.s, height:st.s, borderRadius:'50%',
+              background:'#fff', opacity:st.o,
+              animation:`twinkle ${1.8+st.d}s ease-in-out ${st.d}s infinite`,
+            }}/>
+          ))}
+
+          {/* Decorative blobs */}
+          <div style={{
+            position:'absolute', top:'-80px', right:'-80px',
+            width:320, height:320, borderRadius:'50%',
+            background:'radial-gradient(circle,rgba(45,176,75,0.15),transparent 70%)',
+            pointerEvents:'none',
+          }}/>
+          <div style={{
+            position:'absolute', bottom:'-60px', left:'-60px',
+            width:260, height:260, borderRadius:'50%',
+            background:'radial-gradient(circle,rgba(0,180,216,0.12),transparent 70%)',
+            pointerEvents:'none',
+          }}/>
+
+          {/* Logo area */}
+          <div style={{ position:'relative', width:140, height:140, marginBottom:36 }}>
+            {/* Pulse rings */}
+            {[0,1].map(i => (
+              <div key={i} style={{
+                position:'absolute', top:'50%', left:'50%',
+                width:140, height:140, borderRadius:'50%',
+                border:'2px solid rgba(45,176,75,0.5)',
+                animation:`ringPulse 2.4s ease-out ${i*1.2}s infinite`,
+              }}/>
+            ))}
+
+            {/* Logo circle */}
+            <div className="splash-logo" style={{
+              width:140, height:140, borderRadius:'50%',
+              background:'rgba(255,255,255,0.97)',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              position:'relative', zIndex:2,
+            }}>
+              <img src="/logo.png" alt="WeCraft Travel"
+                style={{ width:108, height:108, objectFit:'contain' }}/>
+            </div>
+
+            {/* Orbiting plane */}
+            <div style={{
+              position:'absolute', top:'50%', left:'50%',
+              width:0, height:0, zIndex:3,
+              animation:'orbit 3.2s linear infinite',
+            }}>
+              <span style={{ fontSize:22, position:'absolute', transform:'translate(-11px,-11px)' }}>✈️</span>
+            </div>
           </div>
-          <p className="text-slate-500 text-sm font-medium">กำลังเชื่อมต่อฐานข้อมูล...</p>
+
+          {/* Company name */}
+          <div style={{ textAlign:'center', animation:'textSlide 0.7s ease 0.5s both' }}>
+            <div style={{
+              fontSize:30, fontWeight:900, letterSpacing:1,
+              background:'linear-gradient(90deg,#fff 0%,#FFD700 40%,#2db04b 60%,#fff 100%)',
+              backgroundSize:'300% auto',
+              WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent',
+              animation:'shimmer 3s linear 1s infinite',
+            }}>WeCraft Travel</div>
+            <div style={{
+              color:'rgba(255,255,255,0.55)', fontSize:11,
+              letterSpacing:5, marginTop:6, fontWeight:600,
+            }}>WE CRAFT ABROAD</div>
+          </div>
+
+          {/* Loading dots */}
+          <div style={{ display:'flex', gap:10, marginTop:40 }}>
+            {[0,1,2,3].map(i => (
+              <div key={i} style={{
+                width:9, height:9, borderRadius:'50%',
+                background: i%2===0 ? '#2db04b' : '#FFD700',
+                animation:`dot1 1.5s ease-in-out ${i*0.18}s infinite`,
+              }}/>
+            ))}
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
