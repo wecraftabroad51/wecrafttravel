@@ -74,6 +74,13 @@ export default function AdminPanel(props) {
     bookings, setBookings, messages, setMessages,
     chatSessions, setChatSessions, settings, setSettings, onLogout } = props;
 
+  const ADMIN_USER = import.meta.env.VITE_ADMIN_USER || 'admin';
+  const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASS || 'admin123';
+  const checkLogin = () => {
+    if (loginForm.user === ADMIN_USER && loginForm.pass === ADMIN_PASS) setLoggedIn(true);
+    else alert('Username หรือ Password ไม่ถูกต้อง');
+  };
+
   if (!loggedIn) {
     return (
       <div className="min-h-screen bg-slate-100 flex items-center justify-center">
@@ -89,14 +96,13 @@ export default function AdminPanel(props) {
               onChange={e => setLoginForm(p => ({ ...p, user: e.target.value }))} />
             <input type="password" className={inp} placeholder="Password" value={loginForm.pass}
               onChange={e => setLoginForm(p => ({ ...p, pass: e.target.value }))}
-              onKeyDown={e => { if (e.key === 'Enter' && loginForm.user === 'admin' && loginForm.pass === 'admin123') setLoggedIn(true); }} />
+              onKeyDown={e => { if (e.key === 'Enter') checkLogin(); }} />
             <button
-              onClick={() => { if (loginForm.user === 'admin' && loginForm.pass === 'admin123') setLoggedIn(true); else alert('รหัสผ่านไม่ถูกต้อง'); }}
+              onClick={checkLogin}
               className="w-full bg-teal-700 hover:bg-teal-600 text-white py-3 rounded-xl font-semibold transition-colors">
               Login
             </button>
           </div>
-          <p className="text-xs text-slate-400 text-center mt-4">admin / admin123</p>
           <button onClick={onLogout} className="w-full mt-3 text-slate-400 hover:text-slate-600 text-sm transition-colors">← Back to Website</button>
         </div>
       </div>
