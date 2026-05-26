@@ -334,10 +334,25 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
             ))}
           </nav>
 
+          {/* Mobile: ขอราคากรุ๊ปเหมา shortcut */}
+          <button
+            className="mobile-menu-btn"
+            onClick={() => navigate('group-quote')}
+            style={{
+              marginLeft: 'auto',
+              background: 'var(--primary)', color: '#fff',
+              border: 'none', borderRadius: 20,
+              padding: '6px 12px', fontSize: 12, fontWeight: 700,
+              cursor: 'pointer', fontFamily: 'inherit',
+              whiteSpace: 'nowrap', flexShrink: 0,
+            }}>
+            🎯 กรุ๊ปเหมา
+          </button>
+
           {/* Mobile hamburger */}
           <button onClick={() => setMobileOpen(!mobileOpen)}
             className="mobile-menu-btn"
-            style={{ padding: 7, borderRadius: 6, border: '1px solid var(--line)', background: 'transparent', color: 'var(--ink)', cursor: 'pointer', marginLeft: 'auto' }}>
+            style={{ padding: 7, borderRadius: 6, border: '1px solid var(--line)', background: 'transparent', color: 'var(--ink)', cursor: 'pointer' }}>
             {mobileOpen ? <CloseIcon /> : <MenuIcon />}
           </button>
 
@@ -383,14 +398,33 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
             </div>
           ))}
           {/* Mobile quick links */}
-          <div style={{ padding: '12px 20px', borderTop: '2px solid var(--primary)', background: '#fafafa' }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)', marginBottom: 8, textTransform: 'uppercase' }}>บริการ / ข้อมูล</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px' }}>
-              {QUICK_LINKS.map((ql, i) => (
+          <div style={{ padding: '14px 16px', borderTop: '2px solid var(--primary)', background: '#fff3e0' }}>
+            {/* ขอราคากรุ๊ปเหมา — CTA ใหญ่ */}
+            <button
+              onClick={() => { navigate('group-quote'); setMobileOpen(false); }}
+              style={{
+                display: 'block', width: '100%',
+                background: 'var(--primary)', color: '#fff',
+                border: 'none', borderRadius: 10,
+                padding: '12px 16px', fontSize: 15, fontWeight: 800,
+                cursor: 'pointer', fontFamily: 'inherit',
+                marginBottom: 10, textAlign: 'center',
+                boxShadow: '0 3px 10px rgba(0,0,0,0.15)',
+              }}>
+              🎯 ขอราคากรุ๊ปเหมา
+            </button>
+            {/* Other quick links */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 0' }}>
+              {QUICK_LINKS.slice(1).map((ql, i) => (
                 <button key={i}
                   onClick={() => { navigate(ql.key); setMobileOpen(false); }}
-                  style={{ background: 'none', border: 'none', fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'inherit', padding: '2px 0' }}>
-                  {ql.label}
+                  style={{
+                    background: 'none', border: 'none',
+                    fontSize: 13, color: 'var(--primary)',
+                    cursor: 'pointer', fontFamily: 'inherit',
+                    padding: '3px 10px 3px 0', fontWeight: 600,
+                  }}>
+                  › {ql.label}
                 </button>
               ))}
             </div>
