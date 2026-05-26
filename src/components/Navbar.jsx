@@ -218,7 +218,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
         <div className="wrap" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
           <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <PhoneIcon /> 02-123-4567 | 098-765-4321
+              <PhoneIcon /> 061-868-6889
             </span>
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <ClockIcon /> จ–ศ 09:00–18:00 น.
@@ -226,7 +226,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
           </div>
           <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4CAF50' }}>
-              <LineIcon /> LINE: @tourholiday
+              <LineIcon /> LINE: @wecrafttravel
             </span>
             <button onClick={() => setLang(lang === 'th' ? 'en' : 'th')}
               style={{ background: 'transparent', border: '1px solid rgba(255,255,255,.35)', color: '#fff', padding: '1px 8px', borderRadius: 3, fontSize: 11, cursor: 'pointer', fontFamily: 'inherit' }}>
@@ -256,7 +256,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
             <img src="/logo.png" alt="WeCraft Travel" style={{ width: 48, height: 48, objectFit: 'contain' }} />
             <div style={{ lineHeight: 1.2 }}>
               <div style={{ fontSize: 19, fontWeight: 800, color: 'var(--primary)' }}>WeCraft Travel</div>
-              <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '.04em' }}>WE CRAFT TRAVEL · est. 2017</div>
+              <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '.04em' }}>WE CRAFT ABROAD · ททท. 11/11550</div>
             </div>
           </button>
 
