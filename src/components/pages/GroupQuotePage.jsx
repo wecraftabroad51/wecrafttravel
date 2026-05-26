@@ -5,18 +5,18 @@ import { insertMessage } from '../../lib/db.js';
 // Setup: เพิ่ม 2 ตัวแปรใน Vercel → Environment Variables:
 //   GMAIL_USER     = wecraftabroad51@gmail.com
 //   GMAIL_APP_PASS = (App Password 16 ตัว จาก Google Account → Security → App passwords)
-const sendEmail = async (subject, html) => {
+const sendNotifications = async (subject, html, lineText) => {
   try {
     const res = await fetch('/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subject, html }),
+      body: JSON.stringify({ subject, html, lineText }),
     });
     const data = await res.json();
-    if (!res.ok) console.error('Email API error:', data.error);
-    else console.log('Email sent OK:', data);
+    if (!res.ok) console.error('Notification error:', data.error);
+    else console.log('Notifications:', data.results);
   } catch (err) {
-    console.error('Email fetch error:', err.message);
+    console.error('Notification fetch error:', err.message);
   }
 };
 
@@ -182,9 +182,23 @@ export default function GroupQuotePage({ lang, setMessages }) {
         </div>
       </div>`;
 
-    await sendEmail(
+    const lineText = [
+      `🔔 แบบฟอร์มขอราคากรุ๊ปเหมาใหม่!`,
+      `👤 ${form.firstName} ${form.lastName}`,
+      form.company ? `🏢 ${form.company}` : null,
+      `📍 ${form.destination}`,
+      form.pax ? `👥 ${form.pax} คน` : null,
+      `📅 ${form.travelDate} (${form.duration})`,
+      `📞 ${form.phone}`,
+      form.lineId ? `💬 LINE: ${form.lineId}` : null,
+      `✉️ ${form.email}`,
+      `\n⚡ ตอบกลับภายใน 24 ชม.`,
+    ].filter(Boolean).join('\n');
+
+    await sendNotifications(
       `[กรุ๊ปเหมา] ${form.firstName} ${form.lastName} — ${form.destination}`,
-      emailHtml
+      emailHtml,
+      lineText
     );
 
     setSaving(false);
