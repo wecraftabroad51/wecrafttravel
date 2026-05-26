@@ -5,127 +5,69 @@ const MENU = [
     label: 'ทัวร์ต่างประเทศ',
     key: 'tours', tourType: 'international',
     mega: [
-      {
-        continent: 'ยุโรป',
-        countries: ['ฝรั่งเศส', 'อิตาลี', 'สวิตเซอร์แลนด์', 'เยอรมัน', 'อังกฤษ', 'สเปน', 'โปรตุเกส', 'ออสเตรีย', 'เนเธอร์แลนด์', 'เบลเยียม', 'นอร์เวย์', 'สวีเดน', 'เดนมาร์ก'],
-      },
-      {
-        continent: 'เอเชียตะวันออก',
-        countries: ['ญี่ปุ่น', 'จีน', 'เกาหลีใต้', 'ไต้หวัน', 'ฮ่องกง', 'มาเก๊า'],
-      },
-      {
-        continent: 'เอเชียตะวันออกเฉียงใต้',
-        countries: ['สิงคโปร์', 'เวียดนาม', 'มาเลเซีย', 'อินโดนีเซีย', 'ฟิลิปปินส์', 'พม่า', 'กัมพูชา', 'ลาว'],
-      },
-      {
-        continent: 'เอเชียใต้ / ตะวันออกกลาง',
-        countries: ['อินเดีย', 'มัลดีฟส์', 'ศรีลังกา', 'สหรัฐอาหรับเอมิเรตส์', 'ซาอุดีอาระเบีย', 'กาตาร์', 'จอร์แดน'],
-      },
-      {
-        continent: 'อเมริกา / แปซิฟิก',
-        countries: ['สหรัฐอเมริกา', 'แคนาดา', 'เม็กซิโก', 'เปรู', 'บราซิล', 'ออสเตรเลีย', 'นิวซีแลนด์'],
-      },
-      {
-        continent: 'แอฟริกา',
-        countries: ['โมร็อกโก', 'แอฟริกาใต้', 'เคนยา', 'อียิปต์', 'แทนซาเนีย'],
-      },
+      { continent: 'ยุโรป', countries: ['ฝรั่งเศส','อิตาลี','สวิตเซอร์แลนด์','เยอรมัน','อังกฤษ','สเปน','โปรตุเกส','ออสเตรีย','เนเธอร์แลนด์','เบลเยียม','นอร์เวย์','สวีเดน','เดนมาร์ก'] },
+      { continent: 'เอเชียตะวันออก', countries: ['ญี่ปุ่น','จีน','เกาหลีใต้','ไต้หวัน','ฮ่องกง','มาเก๊า'] },
+      { continent: 'เอเชียตะวันออกเฉียงใต้', countries: ['สิงคโปร์','เวียดนาม','มาเลเซีย','อินโดนีเซีย','ฟิลิปปินส์','พม่า','กัมพูชา','ลาว'] },
+      { continent: 'เอเชียใต้ / ตะวันออกกลาง', countries: ['อินเดีย','มัลดีฟส์','ศรีลังกา','สหรัฐอาหรับเอมิเรตส์','ซาอุดีอาระเบีย','กาตาร์','จอร์แดน'] },
+      { continent: 'อเมริกา / แปซิฟิก', countries: ['สหรัฐอเมริกา','แคนาดา','เม็กซิโก','เปรู','บราซิล','ออสเตรเลีย','นิวซีแลนด์'] },
+      { continent: 'แอฟริกา', countries: ['โมร็อกโก','แอฟริกาใต้','เคนยา','อียิปต์','แทนซาเนีย'] },
     ],
   },
   {
     label: 'ทัวร์ในประเทศ',
     key: 'tours', tourType: 'domestic',
     mega: [
-      {
-        continent: 'ภาคเหนือ',
-        countries: ['เชียงใหม่', 'เชียงราย', 'แม่ฮ่องสอน', 'น่าน', 'ลำปาง', 'พะเยา'],
-      },
-      {
-        continent: 'ภาคกลาง / ตะวันออก',
-        countries: ['กรุงเทพฯ', 'พัทยา', 'ระยอง', 'เกาะเสม็ด', 'เกาะช้าง', 'กาญจนบุรี'],
-      },
-      {
-        continent: 'ภาคใต้',
-        countries: ['ภูเก็ต', 'กระบี่', 'เกาะสมุย', 'เกาะพะงัน', 'เกาะลันตา', 'ตรัง', 'สตูล'],
-      },
-      {
-        continent: 'ภาคอีสาน',
-        countries: ['เขาใหญ่', 'โคราช', 'ขอนแก่น', 'อุดรธานี', 'หนองคาย', 'เลย'],
-      },
+      { continent: 'ภาคเหนือ', countries: ['เชียงใหม่','เชียงราย','แม่ฮ่องสอน','น่าน','ลำปาง','พะเยา'] },
+      { continent: 'ภาคกลาง / ตะวันออก', countries: ['กรุงเทพฯ','พัทยา','ระยอง','เกาะเสม็ด','เกาะช้าง','กาญจนบุรี'] },
+      { continent: 'ภาคใต้', countries: ['ภูเก็ต','กระบี่','เกาะสมุย','เกาะพะงัน','เกาะลันตา','ตรัง','สตูล'] },
+      { continent: 'ภาคอีสาน', countries: ['เขาใหญ่','โคราช','ขอนแก่น','อุดรธานี','หนองคาย','เลย'] },
     ],
   },
   {
     label: 'ทัวร์พรีเมี่ยม',
     key: 'tours', tourType: 'premium',
     mega: [
-      {
-        continent: 'ยุโรปพรีเมี่ยม',
-        countries: ['สวิตเซอร์แลนด์ VIP', 'อิตาลีหรูหรา', 'ฝรั่งเศสไฮเอนด์', 'นอร์เวย์ Fjord'],
-      },
-      {
-        continent: 'เอเชียพรีเมี่ยม',
-        countries: ['ญี่ปุ่น Luxury', 'มัลดีฟส์ Overwater Villa', 'บาหลี Exclusive', 'สิงคโปร์ Fine Dining'],
-      },
-      {
-        continent: 'ไฟลท์ชั้นธุรกิจ',
-        countries: ['ยุโรปธุรกิจ', 'ญี่ปุ่นธุรกิจ', 'อเมริกาธุรกิจ', 'ออสเตรเลียธุรกิจ'],
-      },
+      { continent: 'ยุโรปพรีเมี่ยม', countries: ['สวิตเซอร์แลนด์ VIP','อิตาลีหรูหรา','ฝรั่งเศสไฮเอนด์','นอร์เวย์ Fjord'] },
+      { continent: 'เอเชียพรีเมี่ยม', countries: ['ญี่ปุ่น Luxury','มัลดีฟส์ Overwater Villa','บาหลี Exclusive','สิงคโปร์ Fine Dining'] },
+      { continent: 'ไฟลท์ชั้นธุรกิจ', countries: ['ยุโรปธุรกิจ','ญี่ปุ่นธุรกิจ','อเมริกาธุรกิจ','ออสเตรเลียธุรกิจ'] },
     ],
   },
-  {
-    label: 'ทัวร์โปรไฟไหม้ 🔥',
-    key: 'tours', tourType: 'hotdeal',
-    mega: null,
-  },
-  {
-    label: 'ทัวร์โปรโมชั่น',
-    key: 'promotions',
-    mega: null,
-  },
+  { label: 'ทัวร์โปรไฟไหม้ 🔥', key: 'tours', tourType: 'hotdeal', mega: null },
+  { label: 'ทัวร์โปรโมชั่น', key: 'promotions', mega: null },
   {
     label: 'แพ็คเกจทัวร์',
     key: 'tours', tourType: 'package',
     mega: [
-      {
-        continent: 'แพ็คเกจยอดนิยม',
-        countries: ['แพ็คเกจฮันนีมูน', 'แพ็คเกจครอบครัว', 'แพ็คเกจกลุ่มใหญ่', 'แพ็คเกจวันเกิด'],
-      },
-      {
-        continent: 'แพ็คเกจตามธีม',
-        countries: ['ทัวร์ซากุระ', 'ทัวร์ใบไม้เปลี่ยนสี', 'ทัวร์คริสต์มาส', 'ทัวร์ปีใหม่'],
-      },
+      { continent: 'แพ็คเกจยอดนิยม', countries: ['แพ็คเกจฮันนีมูน','แพ็คเกจครอบครัว','แพ็คเกจกลุ่มใหญ่','แพ็คเกจวันเกิด'] },
+      { continent: 'แพ็คเกจตามธีม', countries: ['ทัวร์ซากุระ','ทัวร์ใบไม้เปลี่ยนสี','ทัวร์คริสต์มาส','ทัวร์ปีใหม่'] },
     ],
   },
   {
     label: 'เรือสำราญ',
     key: 'tours', tourType: 'cruise',
     mega: [
-      {
-        continent: 'เส้นทางเรือสำราญ',
-        countries: ['เมดิเตอร์เรเนียน', 'แคริบเบียน', 'สแกนดิเนเวีย', 'เอเชียตะวันออกเฉียงใต้', 'ญี่ปุ่น-เกาหลี'],
-      },
+      { continent: 'เส้นทางเรือสำราญ', countries: ['เมดิเตอร์เรเนียน','แคริบเบียน','สแกนดิเนเวีย','เอเชียตะวันออกเฉียงใต้','ญี่ปุ่น-เกาหลี'] },
     ],
   },
   {
     label: 'บริการอื่นๆ',
     key: 'contact',
     mega: [
-      {
-        continent: 'บริการของเรา',
-        countries: ['บริการยื่นวีซ่า', 'ประกันการเดินทาง', 'จองโรงแรม', 'เช่ารถต่างประเทศ', 'รับ-ส่งสนามบิน', 'SIM Card ต่างประเทศ'],
-      },
+      { continent: 'บริการของเรา', countries: ['บริการยื่นวีซ่า','ประกันการเดินทาง','จองโรงแรม','เช่ารถต่างประเทศ','รับ-ส่งสนามบิน','SIM Card ต่างประเทศ'] },
     ],
   },
 ];
 
-function PhoneIcon() {
-  return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>;
-}
-function ClockIcon() {
-  return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>;
-}
-function LineIcon() {
-  return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11c0 4.4-4 8-9 8-1 0-2-.1-3-.4L4 20l1.5-3.6A8.4 8.4 0 0 1 3 11c0-4.4 4-8 9-8s9 3.6 9 8z"/></svg>;
-}
+// Quick links in teal top bar
+const QUICK_LINKS = [
+  { label: 'ขอราคากรุ๊ปเหมา', key: 'contact' },
+  { label: 'บริการยื่นวีซ่า',  key: 'contact' },
+  { label: 'บทความท่องเที่ยว', key: 'articles' },
+  { label: 'ผลงานที่ผ่านมา',   key: 'gallery' },
+  { label: 'เกี่ยวกับเรา',     key: 'contact' },
+  { label: 'ติดต่อเรา',        key: 'contact' },
+];
+
 function MenuIcon() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>;
 }
@@ -136,25 +78,26 @@ function ChevronDown() {
   return <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>;
 }
 
-function MegaDropdown({ menu, navigate, onClose }) {
+function MegaDropdown({ menu, navigate, onClose, topOffset }) {
   if (!menu.mega) return null;
   return (
-    <div style={{
-      position: 'fixed',
-      top: 112, left: 0, right: 0,
-      background: '#fff',
-      borderTop: '3px solid var(--primary)',
-      boxShadow: '0 8px 32px rgba(0,0,0,.15)',
-      zIndex: 200,
-      padding: '24px 0',
-    }}
+    <div
+      style={{
+        position: 'fixed',
+        top: topOffset,
+        left: 0, right: 0,
+        background: '#fff',
+        borderTop: '3px solid var(--primary)',
+        boxShadow: '0 8px 32px rgba(0,0,0,.15)',
+        zIndex: 200,
+        padding: '24px 0',
+      }}
       onMouseLeave={onClose}
     >
       <div className="wrap" style={{ display: 'flex', gap: 0 }}>
         {menu.mega.map((group, gi) => (
           <div key={gi} style={{
-            flex: 1,
-            padding: '0 20px',
+            flex: 1, padding: '0 20px',
             borderRight: gi < menu.mega.length - 1 ? '1px solid var(--line)' : 'none',
           }}>
             <div style={{
@@ -190,10 +133,12 @@ function MegaDropdown({ menu, navigate, onClose }) {
 }
 
 export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick }) {
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled]     = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
+  const [headerH, setHeaderH]       = useState(172);
   const closeTimer = useRef(null);
+  const headerRef  = useRef(null);
 
   useEffect(() => {
     const onS = () => setScrolled(window.scrollY > 8);
@@ -202,39 +147,68 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
     return () => window.removeEventListener('scroll', onS);
   }, []);
 
-  const openMenu = (i) => {
-    clearTimeout(closeTimer.current);
-    setActiveMenu(i);
-  };
-  const closeMenu = () => {
-    closeTimer.current = setTimeout(() => setActiveMenu(null), 120);
-  };
-  const keepMenu = () => clearTimeout(closeTimer.current);
+  // Measure header height for mega-dropdown positioning
+  useEffect(() => {
+    if (!headerRef.current) return;
+    const ro = new ResizeObserver(() => {
+      setHeaderH(headerRef.current?.offsetHeight || 172);
+    });
+    ro.observe(headerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  const openMenu  = (i) => { clearTimeout(closeTimer.current); setActiveMenu(i); };
+  const closeMenu = ()  => { closeTimer.current = setTimeout(() => setActiveMenu(null), 120); };
+  const keepMenu  = ()  => clearTimeout(closeTimer.current);
 
   return (
-    <header style={{ position: 'sticky', top: 0, zIndex: 150 }}>
-      {/* Top info bar */}
-      <div style={{ background: '#222', color: '#fff', fontSize: 12, padding: '5px 0' }}>
-        <div className="wrap" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-          <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-            <span className="navbar-topbar-phone" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <PhoneIcon /> 061-868-6889
-            </span>
-            <span className="navbar-topbar-phone" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <ClockIcon /> จ–ศ 09:00–18:00 น.
-            </span>
+    <header ref={headerRef} style={{ position: 'sticky', top: 0, zIndex: 150 }}>
+
+      {/* ── Row 1: teal quick-links bar ─────────────────── */}
+      <div style={{ background: 'var(--primary)', color: '#fff', fontSize: 13 }}>
+        <div className="wrap" style={{
+          display: 'flex', justifyContent: 'space-between',
+          alignItems: 'center', flexWrap: 'wrap', gap: 4,
+          padding: '6px 20px',
+        }}>
+          {/* Quick links */}
+          <div className="navbar-topbar-phone" style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0 }}>
+            {QUICK_LINKS.map((ql, i) => (
+              <span key={i} style={{ display: 'flex', alignItems: 'center' }}>
+                {i > 0 && <span style={{ color: 'rgba(255,255,255,.4)', padding: '0 8px' }}>|</span>}
+                <button
+                  onClick={() => navigate(ql.key)}
+                  style={{
+                    background: 'none', border: 'none', color: '#fff',
+                    fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
+                    padding: '2px 0',
+                    transition: 'color .15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,.75)'}
+                  onMouseLeave={e => e.currentTarget.style.color = '#fff'}
+                >
+                  {ql.label}
+                </button>
+              </span>
+            ))}
           </div>
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4CAF50' }}>
-              <LineIcon /> LINE: @wecrafttravel
-            </span>
+          {/* Right: lang + admin */}
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginLeft: 'auto' }}>
             <button onClick={() => setLang(lang === 'th' ? 'en' : 'th')}
-              style={{ background: 'transparent', border: '1px solid rgba(255,255,255,.35)', color: '#fff', padding: '1px 8px', borderRadius: 3, fontSize: 11, cursor: 'pointer', fontFamily: 'inherit' }}>
+              style={{
+                background: 'rgba(255,255,255,.15)', border: '1px solid rgba(255,255,255,.35)',
+                color: '#fff', padding: '2px 10px', borderRadius: 3,
+                fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
+              }}>
               {lang === 'th' ? 'EN' : 'TH'}
             </button>
             {onAdminClick && (
               <button onClick={onAdminClick}
-                style={{ background: 'var(--primary)', border: 'none', color: '#fff', padding: '2px 10px', borderRadius: 3, fontSize: 11, cursor: 'pointer', fontFamily: 'inherit' }}>
+                style={{
+                  background: 'rgba(0,0,0,.2)', border: 'none',
+                  color: '#fff', padding: '2px 10px', borderRadius: 3,
+                  fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
+                }}>
                 Admin
               </button>
             )}
@@ -242,25 +216,92 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
         </div>
       </div>
 
-      {/* Logo bar */}
+      {/* ── Row 2: info bar (hours / hotline / LINE) ─────── */}
+      <div className="navbar-topbar-phone" style={{ background: '#fff', borderBottom: '1px solid #e8e8e8' }}>
+        <div className="wrap" style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr 1fr',
+          alignItems: 'center',
+          padding: '10px 20px',
+          gap: 12,
+        }}>
+
+          {/* เวลาทำการ */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+            <span style={{ color: 'var(--primary)', marginTop: 2 }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
+                <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+              </svg>
+            </span>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: '#333' }}>เวลาทำการ</div>
+              <div style={{ fontSize: 12, color: '#666', marginTop: 1 }}>จันทร์-ศุกร์ : 09.00 - 18.00 น.</div>
+            </div>
+          </div>
+
+          {/* Hotline */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+            <span style={{ color: 'var(--primary)', marginTop: 2 }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
+                <path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/>
+              </svg>
+            </span>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: '#333' }}>Hotline</div>
+              <a href="tel:0618686889" style={{ display: 'block', fontSize: 13, color: '#555', textDecoration: 'none', marginTop: 1 }}>
+                061-868-6889
+              </a>
+            </div>
+          </div>
+
+          {/* LINE */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+            <a href="https://line.me/R/ti/p/@wecrafttravel" target="_blank" rel="noopener noreferrer"
+              style={{
+                background: '#06c755', borderRadius: 8,
+                width: 36, height: 36, display: 'flex',
+                alignItems: 'center', justifyContent: 'center',
+                color: '#fff', flexShrink: 0, textDecoration: 'none',
+              }}>
+              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                <path d="M21 11c0 4.4-4 8-9 8-1 0-2-.1-3-.4L4 20l1.5-3.6A8.4 8.4 0 0 1 3 11c0-4.4 4-8 9-8s9 3.6 9 8z"/>
+              </svg>
+            </a>
+            <div>
+              <div style={{ fontSize: 12, color: '#888' }}>เราช่วยคุณได้</div>
+              <a href="https://line.me/R/ti/p/@wecrafttravel" target="_blank" rel="noopener noreferrer"
+                style={{ fontWeight: 800, fontSize: 15, color: '#06c755', textDecoration: 'none' }}>
+                @wecrafttravel
+              </a>
+              <div style={{ fontSize: 11, color: '#aaa', marginTop: 1 }}>Travel License : 11/11550</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ── Row 3: logo + main nav ───────────────────────── */}
       <div style={{
         background: '#fff',
         borderBottom: '3px solid var(--primary)',
         boxShadow: scrolled ? '0 2px 12px rgba(0,0,0,.1)' : 'none',
         transition: 'box-shadow .2s',
       }}>
-        <div className="wrap" style={{ display: 'flex', alignItems: 'center', height: 64, gap: 16 }}>
+        <div className="wrap" style={{ display: 'flex', alignItems: 'center', height: 60, gap: 16 }}>
+
           {/* Logo */}
           <button onClick={() => navigate('home')}
             style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
-            <img src="/logo.png" alt="WeCraft Travel" style={{ width: 48, height: 48, objectFit: 'contain' }} />
+            <img src="/logo.png" alt="WeCraft Travel" style={{ width: 44, height: 44, objectFit: 'contain' }} />
             <div style={{ lineHeight: 1.2 }}>
-              <div style={{ fontSize: 19, fontWeight: 800, color: 'var(--primary)' }}>WeCraft Travel</div>
-              <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '.04em' }}>WE CRAFT ABROAD · ททท. 11/11550</div>
+              <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--primary)' }}>WeCraft Travel</div>
+              <div style={{ fontSize: 9.5, color: 'var(--muted)', letterSpacing: '.04em' }}>WE CRAFT ABROAD · ททท. 11/11550</div>
             </div>
           </button>
 
-          {/* Desktop nav — full width */}
+          {/* Desktop nav */}
           <nav className="nav-desktop" style={{ display: 'flex', flex: 1, alignItems: 'stretch', gap: 0, height: '100%' }}>
             {MENU.map((m, i) => (
               <div key={i} style={{ position: 'relative', display: 'flex', alignItems: 'stretch' }}
@@ -270,8 +311,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
                 <button
                   onClick={() => { navigate(m.key, null, m.tourType ? { tourType: m.tourType } : null); setActiveMenu(null); }}
                   style={{
-                    padding: '0 11px',
-                    border: 'none',
+                    padding: '0 10px', border: 'none',
                     borderBottom: activeMenu === i || page === m.key ? '3px solid var(--primary)' : '3px solid transparent',
                     color: activeMenu === i || page === m.key ? 'var(--primary)' : 'var(--ink-2)',
                     background: 'transparent',
@@ -285,10 +325,9 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
                   {m.label}
                   {m.mega && <ChevronDown />}
                 </button>
-                {/* Mega dropdown */}
                 {activeMenu === i && m.mega && (
                   <div onMouseEnter={keepMenu} onMouseLeave={closeMenu}>
-                    <MegaDropdown menu={m} navigate={navigate} onClose={() => setActiveMenu(null)} />
+                    <MegaDropdown menu={m} navigate={navigate} onClose={() => setActiveMenu(null)} topOffset={headerH} />
                   </div>
                 )}
               </div>
@@ -301,6 +340,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
             style={{ padding: 7, borderRadius: 6, border: '1px solid var(--line)', background: 'transparent', color: 'var(--ink)', cursor: 'pointer', marginLeft: 'auto' }}>
             {mobileOpen ? <CloseIcon /> : <MenuIcon />}
           </button>
+
         </div>
       </div>
 
@@ -342,8 +382,22 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
               )}
             </div>
           ))}
+          {/* Mobile quick links */}
+          <div style={{ padding: '12px 20px', borderTop: '2px solid var(--primary)', background: '#fafafa' }}>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)', marginBottom: 8, textTransform: 'uppercase' }}>บริการ / ข้อมูล</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px' }}>
+              {QUICK_LINKS.map((ql, i) => (
+                <button key={i}
+                  onClick={() => { navigate(ql.key); setMobileOpen(false); }}
+                  style={{ background: 'none', border: 'none', fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'inherit', padding: '2px 0' }}>
+                  {ql.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
+
     </header>
   );
 }
