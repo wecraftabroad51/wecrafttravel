@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { LogOut, LayoutDashboard, Globe, Tag, Star, FileText, HelpCircle,
-  MessageSquare, Mail, Settings, Plane, Check, X, Eye, Trash2, Plus, Edit2, Upload } from 'lucide-react';
+  Mail, Settings, Plane, Check, X, Eye, Trash2, Plus, Edit2, Upload, MessageSquare } from 'lucide-react';
 import {
   upsertTour, deleteTour, toggleTourFeatured, toggleTourActive,
   upsertArticle, deleteArticle,
@@ -10,9 +10,6 @@ import {
   updateBookingStatus,
   markMessageRead,
   updateSettings,
-  upsertChatSession,
-  fetchChatSessions,
-  subscribeChatSessions,
 } from '../../lib/db.js';
 import { seedDatabase } from '../../lib/seed.js';
 import { supabase } from '../../lib/supabase.js';
@@ -29,7 +26,6 @@ const MENU = [
   { key: 'faqs',        label: 'FAQs',         icon: HelpCircle },
   { key: 'bookings',    label: 'Bookings',     icon: Plane },
   { key: 'messages',    label: 'Messages',     icon: Mail },
-  { key: 'chat',        label: 'Live Chat',    icon: MessageSquare },
   { key: 'settings',    label: 'Settings',     icon: Settings },
 ];
 
@@ -95,7 +91,7 @@ export default function AdminPanel(props) {
   const { lang, t, setLang, tours, setTours, articles, setArticles,
     promotions, setPromotions, faqs, setFaqs, reviews, setReviews,
     bookings, setBookings, messages, setMessages,
-    chatSessions, setChatSessions, settings, setSettings, onLogout } = props;
+    settings, setSettings, onLogout } = props;
 
   const ADMIN_USER = import.meta.env.VITE_ADMIN_USER || 'admin';
   const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASS || 'admin123';
@@ -186,7 +182,7 @@ export default function AdminPanel(props) {
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">
-          {section === 'dashboard'  && <DashboardSection tours={tours} articles={articles} bookings={bookings} messages={messages} reviews={reviews} chatSessions={chatSessions} setTours={setTours} setArticles={setArticles} setPromotions={setPromotions} setFaqs={setFaqs} setReviews={setReviews} />}
+          {section === 'dashboard'  && <DashboardSection tours={tours} articles={articles} bookings={bookings} messages={messages} reviews={reviews} setTours={setTours} setArticles={setArticles} setPromotions={setPromotions} setFaqs={setFaqs} setReviews={setReviews} />}
           {section === 'tours'      && <ToursSection tours={tours} setTours={setTours} t={t} />}
           {section === 'promotions' && <PromotionsSection promotions={promotions} setPromotions={setPromotions} t={t} />}
           {section === 'reviews'    && <ReviewsSection reviews={reviews} setReviews={setReviews} tours={tours} t={t} />}
@@ -194,7 +190,6 @@ export default function AdminPanel(props) {
           {section === 'faqs'       && <FaqsSection faqs={faqs} setFaqs={setFaqs} t={t} />}
           {section === 'bookings'   && <BookingsSection bookings={bookings} setBookings={setBookings} tours={tours} t={t} />}
           {section === 'messages'   && <MessagesSection messages={messages} setMessages={setMessages} />}
-          {section === 'chat'       && <ChatSection />}
           {section === 'settings'   && <SettingsSection settings={settings} setSettings={setSettings} t={t} />}
         </div>
       </div>
@@ -203,7 +198,7 @@ export default function AdminPanel(props) {
 }
 
 // ===== DASHBOARD =====
-function DashboardSection({ tours, articles, bookings, messages, reviews, chatSessions, setTours, setArticles, setPromotions, setFaqs, setReviews }) {
+function DashboardSection({ tours, articles, bookings, messages, reviews, setTours, setArticles, setPromotions, setFaqs, setReviews }) {
   const [seeding, setSeeding] = useState(false);
   const [seedDone, setSeedDone] = useState(false);
 
@@ -254,7 +249,6 @@ function DashboardSection({ tours, articles, bookings, messages, reviews, chatSe
     { label: 'บทความ',         value: articles.length,                                     color: 'bg-purple-500' },
     { label: 'รีวิวรอ',        value: reviews.filter(r => !r.approved).length,             color: 'bg-amber-500' },
     { label: 'ข้อความใหม่',    value: messages.filter(m => !m.read).length,                color: 'bg-red-500' },
-    { label: 'แชทแอคทีฟ',     value: chatSessions.filter(s => s.status === 'open').length, color: 'bg-green-500' },
   ];
 
   return (
@@ -1214,156 +1208,6 @@ function MessagesSection({ messages, setMessages }) {
           </div>
         ))}
         {messages.length === 0 && <p className="text-slate-400 text-sm">ยังไม่มีข้อความ</p>}
-      </div>
-    </div>
-  );
-}
-
-// ===== CHAT =====
-function ChatSection() {
-  const [sessions, setSessions]         = useState([]);
-  const [activeId, setActiveId]         = useState(null);
-  const [reply, setReply]               = useState('');
-  const [newCount, setNewCount]         = useState({});
-  const bottomRef                       = useRef(null);
-
-  // Load sessions + subscribe Realtime
-  useEffect(() => {
-    fetchChatSessions().then(({ data }) => {
-      if (data?.length) {
-        setSessions(data);
-        setActiveId(data[0]?.id || null);
-      }
-    });
-    const unsubscribe = subscribeChatSessions((payload) => {
-      const row = payload.new;
-      if (!row) return;
-      setSessions(prev => {
-        const exists = prev.find(s => s.id === row.id);
-        const updated = exists
-          ? prev.map(s => s.id === row.id ? { ...s, ...row } : s)
-          : [row, ...prev];
-        return updated;
-      });
-      // Mark new message badge if not active
-      setActiveId(curr => {
-        if (curr !== row.id) {
-          setNewCount(c => ({ ...c, [row.id]: (c[row.id] || 0) + 1 }));
-        }
-        return curr;
-      });
-    });
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [activeId, sessions]);
-
-  const session = sessions.find(s => s.id === activeId);
-
-  const sendReply = async () => {
-    if (!reply.trim() || !session) return;
-    const msg = {
-      id: Date.now(), sender: 'admin', text: reply,
-      timestamp: new Date().toLocaleTimeString('th', { hour: '2-digit', minute: '2-digit' })
-    };
-    const newMessages = [...(session.messages || []), msg];
-    const prevMessages = session.messages || [];
-    // Optimistic update
-    setSessions(prev => prev.map(s => s.id === session.id ? { ...s, messages: newMessages } : s));
-    setReply('');
-    const { error } = await upsertChatSession({ id: session.id, visitor: session.visitor, messages: newMessages, status: session.status });
-    if (error) {
-      // Rollback on failure
-      setSessions(prev => prev.map(s => s.id === session.id ? { ...s, messages: prevMessages } : s));
-      setReply(msg.text);
-      alert('ส่งข้อความไม่สำเร็จ');
-    }
-  };
-
-  const handleSelect = (id) => {
-    setActiveId(id);
-    setNewCount(c => ({ ...c, [id]: 0 }));
-  };
-
-  return (
-    <div>
-      <h2 className="text-2xl font-bold text-slate-800 mb-6">
-        Live Chat
-        {Object.values(newCount).some(v => v > 0) && (
-          <span className="ml-2 bg-red-500 text-white text-sm px-2 py-0.5 rounded-full">ใหม่!</span>
-        )}
-      </h2>
-      <div className="bg-white rounded-2xl shadow-sm overflow-hidden flex" style={{ height: 520 }}>
-        {/* Session list */}
-        <div className="w-64 border-r border-slate-100 flex flex-col overflow-y-auto">
-          {sessions.length === 0 && (
-            <div className="p-6 text-center text-slate-400 text-sm">
-              <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-30" />
-              ยังไม่มีแชทเข้ามา
-            </div>
-          )}
-          {sessions.map(s => (
-            <button key={s.id} onClick={() => handleSelect(s.id)}
-              className={`p-4 text-left border-b border-slate-50 hover:bg-slate-50 transition-colors ${activeId === s.id ? 'bg-teal-50 border-l-2 border-l-teal-500' : ''}`}>
-              <div className="flex items-center justify-between">
-                <div className="font-semibold text-sm text-slate-700 truncate">{s.visitor?.name}</div>
-                {newCount[s.id] > 0 && (
-                  <span className="bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center shrink-0">{newCount[s.id]}</span>
-                )}
-              </div>
-              <div className="text-xs text-slate-400 truncate">{s.visitor?.email}</div>
-              <div className="flex items-center gap-1 mt-1">
-                <span className={`w-1.5 h-1.5 rounded-full ${s.status === 'open' ? 'bg-green-500' : 'bg-slate-300'}`} />
-                <span className="text-xs text-slate-400">{s.status === 'open' ? 'กำลังคุย' : 'ปิดแล้ว'}</span>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {/* Chat panel */}
-        <div className="flex-1 flex flex-col">
-          {session ? (
-            <>
-              <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
-                <div>
-                  <div className="font-semibold text-slate-700">{session.visitor?.name}</div>
-                  <div className="text-xs text-slate-400">{session.visitor?.email}</div>
-                </div>
-                <span className={`text-xs px-2 py-1 rounded-full font-medium ${session.status === 'open' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
-                  {session.status === 'open' ? '🟢 Online' : '⚫ Closed'}
-                </span>
-              </div>
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/30">
-                {(session.messages || []).map((msg, i) => (
-                  <div key={msg.id || i} className={`flex ${msg.sender === 'admin' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-xs rounded-2xl px-3 py-2 text-sm shadow-sm ${msg.sender === 'admin' ? 'bg-teal-700 text-white' : 'bg-white text-slate-800 border border-slate-100'}`}>
-                      <div>{msg.text}</div>
-                      <div className="text-xs mt-1 opacity-60">{msg.timestamp}</div>
-                    </div>
-                  </div>
-                ))}
-                <div ref={bottomRef} />
-              </div>
-              <div className="p-3 border-t bg-white flex gap-2">
-                <input className="flex-1 border border-slate-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  placeholder="ตอบกลับ..." value={reply}
-                  onChange={e => setReply(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && sendReply()} />
-                <button onClick={sendReply}
-                  className="bg-teal-700 hover:bg-teal-600 text-white px-5 py-2 rounded-full text-sm font-medium transition-colors">
-                  ส่ง
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-slate-400 text-sm flex-col gap-2">
-              <MessageSquare className="w-10 h-10 opacity-20" />
-              <span>เลือก session เพื่อตอบกลับ</span>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

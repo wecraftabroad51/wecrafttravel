@@ -15,7 +15,7 @@ import {
 } from './data.js';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
-import ChatWidget from './components/ChatWidget.jsx';
+import FloatingContact from './components/FloatingContact.jsx';
 import CompareBar from './components/CompareBar.jsx';
 import HomePage from './components/pages/HomePage.jsx';
 import ToursPage from './components/pages/ToursPage.jsx';
@@ -88,7 +88,6 @@ function AppInner() {
   const [settings,     setSettings]     = useState(SETTINGS_DEFAULT);
 
   const [compareList, setCompareList] = useState([]);
-  const [chatOpen,    setChatOpen]    = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [dbError, setDbError] = useState(null);
@@ -245,7 +244,6 @@ function AppInner() {
     reviews,      setReviews,
     bookings,     setBookings,
     messages,     setMessages,
-    chatSessions, setChatSessions,
     settings,     setSettings,
     onLogout: () => routerNav('/'),
   };
@@ -278,7 +276,7 @@ function AppInner() {
         </Routes>
       </main>
       <Footer lang={lang} t={t} navigate={navigate} settings={settings} />
-      <ChatWidget lang={lang} open={chatOpen} setOpen={setChatOpen} />
+      <FloatingContact settings={settings} />
       {compareList.length >= 2 && (
         <CompareBar compareList={compareList} setCompareList={setCompareList}
           tours={tours} t={t} navigate={navigate} />
