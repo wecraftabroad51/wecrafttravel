@@ -216,18 +216,30 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
         </div>
       </div>
 
-      {/* ── Row 2: info bar (hours / hotline / LINE) ─────── */}
+      {/* ── Row 2: logo + info bar ──────────────────────── */}
       <div className="navbar-topbar-phone" style={{ background: '#fff', borderBottom: '1px solid #e8e8e8' }}>
         <div className="wrap" style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr',
+          display: 'flex',
           alignItems: 'center',
-          padding: '10px 20px',
-          gap: 12,
+          padding: '8px 20px',
+          gap: 0,
         }}>
 
+          {/* Logo */}
+          <button onClick={() => navigate('home')}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0, marginRight: 28 }}>
+            <img src="/logo.png" alt="WeCraft Travel" style={{ width: 52, height: 52, objectFit: 'contain' }} />
+            <div style={{ lineHeight: 1.25 }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--primary)' }}>WeCraft Travel</div>
+              <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '.04em' }}>WE CRAFT ABROAD · ททท. 11/11550</div>
+            </div>
+          </button>
+
+          {/* Divider */}
+          <div style={{ width: 1, height: 40, background: '#e8e8e8', marginRight: 28, flexShrink: 0 }} />
+
           {/* เวลาทำการ */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginRight: 28 }}>
             <span style={{ color: 'var(--primary)', marginTop: 2 }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
                 strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
@@ -240,8 +252,11 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
             </div>
           </div>
 
+          {/* Divider */}
+          <div style={{ width: 1, height: 40, background: '#e8e8e8', marginRight: 28, flexShrink: 0 }} />
+
           {/* Hotline */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginRight: 28 }}>
             <span style={{ color: 'var(--primary)', marginTop: 2 }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
                 strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
@@ -255,6 +270,9 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
               </a>
             </div>
           </div>
+
+          {/* Divider */}
+          <div style={{ width: 1, height: 40, background: '#e8e8e8', marginRight: 28, flexShrink: 0 }} />
 
           {/* LINE */}
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
@@ -282,27 +300,28 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
         </div>
       </div>
 
-      {/* ── Row 3: logo + main nav ───────────────────────── */}
+      {/* ── Row 3: main nav ──────────────────────────────── */}
       <div style={{
         background: '#fff',
         borderBottom: '3px solid var(--primary)',
         boxShadow: scrolled ? '0 2px 12px rgba(0,0,0,.1)' : 'none',
         transition: 'box-shadow .2s',
       }}>
-        <div className="wrap" style={{ display: 'flex', alignItems: 'center', height: 60, gap: 16 }}>
+        <div className="wrap" style={{ display: 'flex', alignItems: 'center', height: 50, gap: 0 }}>
 
-          {/* Logo */}
+          {/* Mobile: logo (only visible on mobile, row 2 is hidden on mobile) */}
           <button onClick={() => navigate('home')}
-            style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
-            <img src="/logo.png" alt="WeCraft Travel" style={{ width: 44, height: 44, objectFit: 'contain' }} />
+            className="mobile-menu-btn"
+            style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0, marginRight: 8 }}>
+            <img src="/logo.png" alt="WeCraft Travel" style={{ width: 38, height: 38, objectFit: 'contain' }} />
             <div style={{ lineHeight: 1.2 }}>
-              <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--primary)' }}>WeCraft Travel</div>
-              <div style={{ fontSize: 9.5, color: 'var(--muted)', letterSpacing: '.04em' }}>WE CRAFT ABROAD · ททท. 11/11550</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--primary)' }}>WeCraft Travel</div>
+              <div style={{ fontSize: 9, color: 'var(--muted)' }}>WE CRAFT ABROAD · ททท. 11/11550</div>
             </div>
           </button>
 
           {/* Desktop nav */}
-          <nav className="nav-desktop" style={{ display: 'flex', flex: 1, alignItems: 'stretch', gap: 0, height: '100%' }}>
+          <nav className="nav-desktop" style={{ display: 'flex', alignItems: 'stretch', gap: 0, height: '100%' }}>
             {MENU.map((m, i) => (
               <div key={i} style={{ position: 'relative', display: 'flex', alignItems: 'stretch' }}
                 onMouseEnter={() => openMenu(i)}
@@ -348,6 +367,9 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
             }}>
             🎯 กรุ๊ปเหมา
           </button>
+
+          {/* Desktop: push hamburger-area to right */}
+          <div className="nav-desktop" style={{ flex: 1 }} />
 
           {/* Mobile hamburger */}
           <button onClick={() => setMobileOpen(!mobileOpen)}
