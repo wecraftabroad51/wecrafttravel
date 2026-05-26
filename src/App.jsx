@@ -91,7 +91,11 @@ function AppInner() {
   const [compareList, setCompareList] = useState([]);
 
   const [loading, setLoading] = useState(true);
+  const [minDelay, setMinDelay] = useState(true);   // splash shows at least 2.8s
   const [dbError, setDbError] = useState(null);
+
+  // Minimum splash duration
+  useState(() => { setTimeout(() => setMinDelay(false), 2800); });
 
   const t = (obj) => (obj && (obj[lang] || obj['th'])) || '';
 
@@ -199,7 +203,7 @@ function AppInner() {
   };
 
   // ── Loading screen ─────────────────────────────────────────
-  if (loading) {
+  if (loading || minDelay) {
     const stars = [
       { top:'8%',  left:'12%', s:3, o:0.7, d:0 },
       { top:'15%', left:'78%', s:2, o:0.5, d:0.4 },
