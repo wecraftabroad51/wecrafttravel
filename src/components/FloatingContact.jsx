@@ -113,8 +113,8 @@ export default function FloatingContact({ settings }) {
         .fc-popup {
           background: #2db04b;
           border-radius: 16px;
-          padding: 20px 18px 16px;
-          width: 240px;
+          padding: 16px 14px 14px;
+          width: 200px;
           box-shadow: 0 8px 32px rgba(0,0,0,0.25);
           pointer-events: all;
           transition: transform 0.3s cubic-bezier(.4,0,.2,1), opacity 0.3s;
@@ -162,9 +162,9 @@ export default function FloatingContact({ settings }) {
         }
         .fc-social-btn:hover { transform: scale(1.15); filter: brightness(1.15); }
         .fc-qr {
-          width: 130px; height: 130px;
+          width: 110px; height: 110px;
           display: block;
-          margin: 10px auto;
+          margin: 8px auto;
           border-radius: 8px;
           background: #fff;
           padding: 4px;
@@ -175,21 +175,29 @@ export default function FloatingContact({ settings }) {
       <div className="fc-panel">
         {/* Popup panel — sits above the trigger button */}
         <div className={`fc-popup ${open ? 'open' : 'closed'}`}>
+            {/* Logo */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 10 }}>
+            <img src="/logo.png" alt="WeCraft Travel"
+              style={{ width: 56, height: 56, objectFit: 'contain', borderRadius: 12, background: '#fff', padding: 4 }} />
+            <div style={{ color: '#fff', fontWeight: 800, fontSize: 13, marginTop: 4, lineHeight: 1.2, textAlign: 'center' }}>WeCraft Travel</div>
+            <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 10, textAlign: 'center' }}>WE CRAFT ABROAD</div>
+          </div>
+
+          <hr className="fc-divider" />
+
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 2, marginTop: 8 }}>
             <span style={{
-              background: '#fff', borderRadius: 8,
-              width: 32, height: 32,
+              background: '#fff', borderRadius: 7,
+              width: 28, height: 28,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: '#06c755', flexShrink: 0,
             }}>
               {LINE_ICON}
             </span>
-            <div>
-              <div style={{ color: '#fff', fontWeight: 800, fontSize: 16, lineHeight: 1.2 }}>จองผ่านไลน์</div>
-            </div>
+            <div style={{ color: '#fff', fontWeight: 800, fontSize: 14, lineHeight: 1.2 }}>จองผ่านไลน์</div>
           </div>
-          <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: 12, marginBottom: 4 }}>
+          <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: 11, marginBottom: 4 }}>
             ติดต่อข่าวสารโปรโมชั่นทัวร์
           </div>
 
@@ -205,9 +213,9 @@ export default function FloatingContact({ settings }) {
           />
           {/* Fallback QR placeholder */}
           <div style={{
-            display: 'none', width: 130, height: 130,
+            display: 'none', width: 110, height: 110,
             background: '#fff', borderRadius: 8,
-            margin: '10px auto',
+            margin: '8px auto',
             alignItems: 'center', justifyContent: 'center',
             flexDirection: 'column', gap: 4,
           }}>
@@ -218,7 +226,7 @@ export default function FloatingContact({ settings }) {
           </div>
 
           {/* LINE ID */}
-          <div style={{ textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
+          <div style={{ textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 13, marginBottom: 4 }}>
             {lineId}
           </div>
 
@@ -234,17 +242,17 @@ export default function FloatingContact({ settings }) {
             </span>
             <div>
               <a href={`tel:${phone.replace(/-/g,'')}`}
-                style={{ display: 'block', color: '#fff', textDecoration: 'none', fontSize: 14, fontWeight: 600, lineHeight: 1.4 }}>
+                style={{ display: 'block', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600, lineHeight: 1.4 }}>
                 {phone}
               </a>
             </div>
           </div>
 
           {/* Hours */}
-          <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: 12, textAlign: 'center', marginBottom: 2 }}>
+          <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11, textAlign: 'center', marginBottom: 2 }}>
             จันทร์-ศุกร์ :
           </div>
-          <div style={{ color: '#fff', fontSize: 13, fontWeight: 700, textAlign: 'center', marginBottom: 12 }}>
+          <div style={{ color: '#fff', fontSize: 12, fontWeight: 700, textAlign: 'center', marginBottom: 10 }}>
             09.00 - 18.00 น.
           </div>
 
