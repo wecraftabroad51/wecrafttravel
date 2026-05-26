@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { insertMessage } from '../../lib/db.js';
 
 // ─── Email sending via Vercel API route (/api/send-email) ────────
@@ -75,6 +75,7 @@ export default function GroupQuotePage({ lang, setMessages }) {
   const [sent, setSent] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
+  const submittingRef = useRef(false); // prevent double submit
 
   const set = (k) => (e) => setForm(p => ({ ...p, [k]: e.target.value }));
 
@@ -93,6 +94,8 @@ export default function GroupQuotePage({ lang, setMessages }) {
 
   const submit = async () => {
     if (!validate()) return;
+    if (submittingRef.current) return; // block double submit
+    submittingRef.current = true;
     setSaving(true);
 
     const tourTypeLabel = form.tourType === 'อื่นๆ' && form.tourTypeOther
@@ -189,6 +192,7 @@ export default function GroupQuotePage({ lang, setMessages }) {
     );
 
     setSaving(false);
+    submittingRef.current = false;
     setSent(true);
   };
 
