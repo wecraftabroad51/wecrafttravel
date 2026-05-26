@@ -1,24 +1,18 @@
 import { useState } from 'react';
 import { insertMessage } from '../../lib/db.js';
 
-// ─── Email sending via EmailJS (no package needed) ───────────────
-// Setup: สร้าง account ที่ https://emailjs.com แล้วเพิ่ม env vars ใน Vercel:
-//   VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, VITE_EMAILJS_PUBLIC_KEY
-const sendEmail = async (templateParams) => {
-  const svcId  = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-  const tplId  = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-  const pubKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-  if (!svcId || !tplId || !pubKey) return; // not configured → skip silently
-  await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      service_id:      svcId,
-      template_id:     tplId,
-      user_id:         pubKey,
-      template_params: templateParams,
-    }),
-  });
+// ─── Email sending via Vercel API route (/api/send-email) ────────
+// Setup: เพิ่ม 2 ตัวแปรใน Vercel → Environment Variables:
+//   GMAIL_USER     = wecraftabroad51@gmail.com
+//   GMAIL_APP_PASS = (App Password 16 ตัว จาก Google Account → Security → App passwords)
+const sendEmail = async (subject, html) => {
+  try {
+    await fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subject, html }),
+    });
+  } catch (_) { /* silent fail */ }
 };
 
 const TOUR_TYPES = [
@@ -147,29 +141,46 @@ export default function GroupQuotePage({ lang, setMessages }) {
       date: new Date().toISOString().split('T')[0],
     }, ...prev]);
 
-    // 2. Try send email (requires EmailJS env vars in Vercel)
-    try {
-      await sendEmail({
-        to_email:      'wecraftabroad51@gmail.com, wecraft.sale@gmail.com',
-        from_name:     `${form.firstName} ${form.lastName}`,
-        from_email:    form.email,
-        phone:         form.phone,
-        line_id:       form.lineId || '-',
-        company:       form.company || '-',
-        pax:           form.pax || '-',
-        destination:   form.destination,
-        budget:        form.budget || '-',
-        tour_type:     tourTypeLabel,
-        hotel:         form.hotel,
-        travel_date:   form.travelDate,
-        duration:      form.duration,
-        airline:       form.airline || '-',
-        extra_info:    form.extraInfo || '-',
-        full_message:  messageBody,
-      });
-    } catch (_) {
-      // Email failed silently — data still saved to Supabase
-    }
+    // 2. Send email via /api/send-email (Vercel serverless)
+    const emailHtml = `
+      <div style="font-family:sans-serif;max-width:600px;margin:0 auto;border:1px solid #eee;border-radius:8px;overflow:hidden">
+        <div style="background:#e65c00;color:#fff;padding:20px 24px">
+          <h2 style="margin:0;font-size:20px">📋 ขอราคากรุ๊ปเหมา — WeCraft Travel</h2>
+        </div>
+        <div style="padding:24px;background:#fff">
+          <table style="width:100%;border-collapse:collapse;font-size:14px">
+            ${[
+              ['ชื่อ-นามสกุล', `${form.firstName} ${form.lastName}`],
+              ['บริษัท/หน่วยงาน', form.company || '-'],
+              ['จำนวนผู้เดินทาง', form.pax ? `${form.pax} คน` : '-'],
+              ['โทรศัพท์', form.phone],
+              ['LINE ID', form.lineId || '-'],
+              ['อีเมล', form.email],
+              ['อีเมลสำรอง', form.emailAlt || '-'],
+              ['ปลายทาง', form.destination],
+              ['งบประมาณ/ท่าน', form.budget || '-'],
+              ['รูปแบบทัวร์', tourTypeLabel],
+              ['โรงแรม', form.hotel],
+              ['วันเดินทาง', form.travelDate],
+              ['ระยะเวลา', form.duration],
+              ['สายการบิน', form.airline || '-'],
+              ['ข้อมูลเพิ่มเติม', form.extraInfo || '-'],
+            ].map(([k, v]) => `
+              <tr style="border-bottom:1px solid #f0f0f0">
+                <td style="padding:8px 12px;color:#888;width:160px;vertical-align:top">${k}</td>
+                <td style="padding:8px 12px;color:#333;font-weight:600">${v}</td>
+              </tr>`).join('')}
+          </table>
+        </div>
+        <div style="background:#f9f9f9;padding:14px 24px;font-size:12px;color:#aaa;text-align:center">
+          ส่งจากเว็บไซต์ wecraft-travel.com · ${new Date().toLocaleString('th-TH')}
+        </div>
+      </div>`;
+
+    await sendEmail(
+      `[กรุ๊ปเหมา] ${form.firstName} ${form.lastName} — ${form.destination}`,
+      emailHtml
+    );
 
     setSaving(false);
     setSent(true);
