@@ -88,30 +88,6 @@ export default function ContactPage({ lang, t, settings, setMessages }) {
 
   return (
     <main className="page-enter" style={{ background: 'var(--canvas)' }}>
-      {/* Hero */}
-      <section style={{ padding: '48px 0 32px' }}>
-        <div className="wrap-wide">
-          <nav style={{ fontSize: 12, color: 'var(--muted)', display: 'flex', gap: 8, marginBottom: 24 }}>
-            <span>Home</span><span>/</span>
-            <span style={{ color: 'var(--ink)' }}>{lang === 'th' ? 'ติดต่อเรา' : 'Contact'}</span>
-          </nav>
-          <div className="layout-hero" style={{ gap: 64, alignItems: 'end' }}>
-            <h1 className="h-display">
-              {lang === 'th' ? (
-                <>มาวางแผน<br />การเดินทาง<br /><span className="serif-accent" style={{ color: 'var(--primary)' }}>ด้วยกัน</span>.</>
-              ) : (
-                <>Let's plan<br />something<br /><span className="serif-accent" style={{ color: 'var(--primary)' }}>together</span>.</>
-              )}
-            </h1>
-            <p style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.55, marginBottom: 12, maxWidth: 360 }}>
-              {lang === 'th'
-                ? 'เปิดทำการทุกวัน 9.00–20.00 น. (ตามเวลากรุงเทพ) ตอบ LINE ภายใน 10 นาทีในเวลาทำการ'
-                : 'Office hours 9am–8pm Bangkok, every day. We reply on LINE in under an hour during those hours.'}
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* Main content */}
       <section style={{ padding: '32px 0 80px' }}>
         <div className="wrap-wide">
