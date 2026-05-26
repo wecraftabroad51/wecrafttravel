@@ -71,10 +71,8 @@ function HomeHero({ navigate }) {
         </div>
 
         {/* hero image collage */}
-        <div style={{
+        <div className="layout-hero-3" style={{
           marginTop: 56,
-          display: 'grid',
-          gridTemplateColumns: '2.4fr 1fr 1.4fr',
           gridTemplateRows: 'auto auto',
           gap: 12,
           height: 540,
@@ -160,14 +158,12 @@ function HomeHero({ navigate }) {
         </div>
 
         {/* hero search bar */}
-        <div style={{
+        <div className="search-bar" style={{
           marginTop: 28,
           background: 'var(--card)',
           border: '1px solid var(--line)',
           borderRadius: 'var(--r-xl)',
           padding: 8,
-          display: 'grid',
-          gridTemplateColumns: '1.4fr 1fr 1fr 1fr auto',
           gap: 4,
           boxShadow: 'var(--shadow-md)',
         }}>
@@ -266,7 +262,7 @@ function HomeFeatured({ tours, navigate, t, compareList, toggleCompare }) {
             </button>
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, alignItems: 'stretch' }}>
+        <div className="grid-cols-4" style={{ gap: 16, alignItems: 'stretch' }}>
           {tours.slice(0, 4).map(tr => (
             <TourCard
               key={tr.id}
@@ -294,8 +290,8 @@ function HomeWhy() {
   return (
     <section style={{ background: 'var(--ink)', color: 'var(--canvas)', padding: '120px 0' }}>
       <div className="wrap-wide">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'start' }}>
-          <div style={{ position: 'sticky', top: 100 }}>
+        <div className="layout-half" style={{ gap: 80, alignItems: 'start' }}>
+          <div className="sticky-aside" style={{ top: 100 }}>
             <div className="eyebrow" style={{ color: 'rgba(244,239,230,.6)' }}>Why WeCraft</div>
             <h2 className="h-1" style={{ marginTop: 14 }}>
               Eleven<br />years.<br />
@@ -316,8 +312,7 @@ function HomeWhy() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {items.map((it, i) => (
-              <div key={i} style={{
-                display: 'grid', gridTemplateColumns: '80px 1fr auto',
+              <div key={i} className="grid-review-item" style={{
                 gap: 24, alignItems: 'start',
                 padding: '32px 0',
                 borderTop: '1px solid rgba(244,239,230,.15)',
@@ -358,7 +353,7 @@ function HomePromos({ promotions, navigate, t }) {
           </a>
         </div>
         {promos.length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+          <div className="grid-cols-3" style={{ gap: 16 }}>
             {promos.map((p, i) => <PromoCard key={p.id} promo={p} highlight={i === 0} t={t} />)}
           </div>
         ) : (
@@ -432,7 +427,7 @@ function HomeReviews({ reviews }) {
   return (
     <section className="section" style={{ background: 'var(--canvas-2)' }}>
       <div className="wrap-wide">
-        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 80, alignItems: 'center' }}>
+        <div className="layout-feat" style={{ gap: 80, alignItems: 'center' }}>
           <div>
             <div className="eyebrow">Notes from past travelers</div>
             <h2 className="h-1" style={{ marginTop: 12, marginBottom: 32 }}>
@@ -468,7 +463,7 @@ function HomeReviews({ reviews }) {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div className="layout-half" style={{ gap: 12 }}>
             {[
               { n: '4,842', l: 'Travelers since 2015' },
               { n: '94%',   l: 'Repeat or referral' },
@@ -512,7 +507,7 @@ function HomeArticles({ articles, navigate, t }) {
             Read journal <Icon name="arrow-right" size={14} />
           </button>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr', gap: 16 }}>
+        <div className="grid-cols-3" style={{ gap: 16 }}>
           {/* big lead */}
           {list[0] && (
             <article
@@ -610,12 +605,11 @@ function HomeCta({ navigate }) {
   return (
     <section className="section" style={{ paddingBottom: 0 }}>
       <div className="wrap-wide">
-        <div style={{
+        <div className="layout-feat" style={{
           background: 'var(--primary)',
           color: 'var(--canvas)',
           borderRadius: 'var(--r-xl)',
           padding: '80px 64px',
-          display: 'grid', gridTemplateColumns: '1.5fr 1fr',
           gap: 64, alignItems: 'center',
           position: 'relative', overflow: 'hidden',
         }}>

@@ -32,7 +32,7 @@ export default function ArticlesPage({ lang, t, navigate, articles, promotions, 
             <span>/</span>
             <span style={{ color: 'var(--ink)' }}>{t ? t({ th: 'บทความ', en: 'Journal' }) : 'Journal'}</span>
           </nav>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 64, alignItems: 'end' }}>
+          <div className="layout-hero" style={{ gap: 64, alignItems: 'end' }}>
             <h1 className="h-display">
               The <span className="serif-accent" style={{ color: 'var(--accent)' }}>journal</span>.<br />
               Field notes &<br />slow guides.
@@ -51,8 +51,7 @@ export default function ArticlesPage({ lang, t, navigate, articles, promotions, 
       {list[0] && (
         <section style={{ padding: '32px 0 48px' }}>
           <div className="wrap-wide">
-            <div style={{
-              display: 'grid', gridTemplateColumns: '1.4fr 1fr',
+            <div className="layout-feat" style={{
               gap: 32, alignItems: 'center',
               background: 'var(--card-alt)',
               border: '1px solid var(--line)',
@@ -124,7 +123,7 @@ export default function ArticlesPage({ lang, t, navigate, articles, promotions, 
               {t ? t({ th: 'ยังไม่มีบทความ', en: 'No articles yet.' }) : 'No articles yet.'}
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+            <div className="grid-cols-3" style={{ gap: 24 }}>
               {list.slice(1).map(a => (
                 <article key={a.id} className="card"
                   style={{ display: 'flex', flexDirection: 'column', cursor: 'pointer' }}

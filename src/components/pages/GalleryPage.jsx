@@ -55,7 +55,7 @@ export default function GalleryPage({ lang, t, navigate, tours }) {
             <span>/</span>
             <span style={{ color: 'var(--ink)' }}>{t ? t({ th: 'แกลเลอรี่', en: 'Gallery' }) : 'Gallery'}</span>
           </nav>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 64, alignItems: 'end' }}>
+          <div className="layout-hero" style={{ gap: 64, alignItems: 'end' }}>
             <h1 className="h-display">
               <span className="serif-accent" style={{ color: 'var(--primary)' }}>{allImages.length}+</span><br />
               photos from<br />the road.
@@ -106,7 +106,7 @@ export default function GalleryPage({ lang, t, navigate, tours }) {
               {t ? t({ th: 'ไม่พบภาพ', en: 'No photos in this category.' }) : 'No photos in this category.'}
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+            <div className="grid-cols-4" style={{ gap: 12 }}>
               {cols.map((col, ci) => (
                 <div key={ci} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {col.map((p, idx) => {

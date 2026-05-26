@@ -45,11 +45,7 @@ export default function Footer({ lang, t, navigate, settings }) {
   return (
     <footer style={{ background: 'var(--ink)', color: 'var(--canvas)', marginTop: 80 }}>
       <div className="wrap-wide" style={{ padding: '80px 32px 28px' }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1.6fr 1fr 1fr 1fr 1.2fr',
-          gap: 48, alignItems: 'start',
-        }}>
+        <div className="layout-footer" style={{ gap: 48, alignItems: 'start' }}>
           {/* Brand */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

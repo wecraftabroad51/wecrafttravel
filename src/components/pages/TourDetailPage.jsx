@@ -158,7 +158,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
 
       {/* Main content + sidebar */}
       <div className="wrap-wide" style={{ marginTop: -120, position: 'relative', zIndex: 5, paddingBottom: 80 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 48, alignItems: 'start' }}>
+        <div className="layout-tour" style={{ gap: 48, alignItems: 'start' }}>
           {/* Left: tabs */}
           <div style={{
             background: 'var(--card)', borderRadius: 'var(--r-xl)',
@@ -246,7 +246,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                     <div className="eyebrow">Where you'll sleep</div>
                     <h2 className="h-2" style={{ marginTop: 8 }}>Hotels for every night.</h2>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                  <div className="layout-half" style={{ gap: 14 }}>
                     {(tour.hotels || []).map((h, i) => (
                       <div key={i} className="card" style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 10 }}>
                         {h.image && (
@@ -286,13 +286,12 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                       { label: t ? t({ th: 'ขาไป', en: 'Outbound' }) : 'Outbound', flight: tour.flight?.outbound },
                       { label: t ? t({ th: 'ขากลับ', en: 'Return' }) : 'Return',   flight: tour.flight?.return },
                     ].filter(x => x.flight).map(({ label, flight }) => (
-                      <div key={label} style={{
-                        display: 'grid', gridTemplateColumns: '1fr 60px 1fr 1.4fr',
-                        gap: 24, alignItems: 'center',
+                      <div key={label} className="scroll-x" style={{
                         padding: '20px 24px',
                         background: 'var(--card)', border: '1px solid var(--line)',
                         borderRadius: 'var(--r-md)',
                       }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 60px 1fr 1.4fr', gap: 24, alignItems: 'center', minWidth: 460 }}>
                         <div>
                           <div className="tabular" style={{ fontSize: 20, fontWeight: 600 }}>{flight.from}</div>
                           <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{flight.departure}</div>
@@ -309,6 +308,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                           {flight.baggage && <div style={{ fontSize: 11, color: 'var(--muted)' }}>🧳 {flight.baggage}</div>}
                           <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{label}</div>
                         </div>
+                      </div>{/* end inner grid */}
                       </div>
                     ))}
                   </div>
@@ -317,7 +317,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
 
               {/* Included / Not included */}
               {activeTab === 'includes' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                <div className="layout-half" style={{ gap: 24 }}>
                   <div style={{ padding: 28, background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--r-md)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
                       <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--primary)', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -364,7 +364,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                     <div className="eyebrow">Photos from past departures</div>
                     <h2 className="h-2" style={{ marginTop: 8 }}>What you'll see, more or less.</h2>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                  <div className="grid-cols-3" style={{ gap: 8 }}>
                     {(tour.gallery || []).map((src, i) => (
                       <button key={i} onClick={() => setLightbox(i)}
                         style={{ aspectRatio: '4/3', borderRadius: 'var(--r-md)', overflow: 'hidden', border: 'none', padding: 0, cursor: 'zoom-in' }}>
@@ -430,7 +430,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                       </div>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                        <div className="layout-half" style={{ gap: 10 }}>
                           <input placeholder={t ? t({ th: 'ชื่อ', en: 'Name' }) : 'Name'} value={reviewForm.name} onChange={e => setReviewForm(p => ({ ...p, name: e.target.value }))} />
                           <input placeholder="Email" value={reviewForm.email} onChange={e => setReviewForm(p => ({ ...p, email: e.target.value }))} />
                         </div>
@@ -458,8 +458,8 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
           </div>
 
           {/* Sidebar */}
-          <aside style={{
-            position: 'sticky', top: 120,
+          <aside className="sticky-aside" style={{
+            top: 120,
             background: 'var(--card)', borderRadius: 'var(--r-xl)',
             border: '1px solid var(--line)', boxShadow: 'var(--shadow-md)',
             overflow: 'hidden',
@@ -605,7 +605,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
               <h2 className="h-2">If you like this, you'll like…</h2>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+            <div className="grid-cols-4" style={{ gap: 16 }}>
               {tours.filter(tr => tr.id !== tour.id).slice(0, 4).map(tr => (
                 <TourCard key={tr.id} tour={tr} t={t} navigate={navigate}
                   inCompare={compareList?.includes(tr.id)}

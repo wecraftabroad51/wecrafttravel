@@ -96,7 +96,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
         </button>
 
         {/* Desktop nav */}
-        <nav style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+        <nav className="nav-desktop" style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
           {NAV_LINKS.map(l => {
             const active = page === l.key;
             return (
@@ -140,13 +140,14 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
           </button>
           <button
             onClick={() => navigate('tours')}
-            className="btn btn-primary btn-sm"
+            className="btn btn-primary btn-sm nav-right-btn"
           >
             Browse tours <ArrowRightIcon />
           </button>
           {onAdminClick && (
             <button
               onClick={onAdminClick}
+              className="nav-right-btn"
               style={{
                 padding: '8px 14px', borderRadius: 999,
                 background: 'var(--accent)', color: '#fff',
@@ -160,7 +161,6 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
           <button
             onClick={() => setOpen(!open)}
             style={{
-              display: 'none',
               padding: 8, borderRadius: 'var(--r-md)',
               border: '1px solid var(--line)', background: 'transparent',
               color: 'var(--ink)', cursor: 'pointer',

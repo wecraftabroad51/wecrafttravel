@@ -90,7 +90,7 @@ export default function PromotionsPage({ lang, t, navigate, promotions, tours, f
             <span>/</span>
             <span style={{ color: 'var(--ink)' }}>{t ? t({ th: 'โปรโมชั่น', en: 'Promotions' }) : 'Promotions'}</span>
           </nav>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 64, alignItems: 'end' }}>
+          <div className="layout-hero" style={{ gap: 64, alignItems: 'end' }}>
             <h1 className="h-display">
               Live <span className="serif-accent" style={{ color: 'var(--accent)' }}>offers</span>.<br />
               Stack them if<br />you can.
@@ -109,10 +109,10 @@ export default function PromotionsPage({ lang, t, navigate, promotions, tours, f
       {featured && (
         <section style={{ padding: '32px 0 48px' }}>
           <div className="wrap-wide">
-            <div style={{
+            <div className="layout-feat" style={{
               background: 'var(--ink)', color: 'var(--canvas)',
               borderRadius: 'var(--r-xl)', padding: '48px 56px',
-              display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 48, alignItems: 'center',
+              gap: 48, alignItems: 'center',
               position: 'relative', overflow: 'hidden',
             }}>
               {/* Background number */}
@@ -178,7 +178,7 @@ export default function PromotionsPage({ lang, t, navigate, promotions, tours, f
               {t ? t({ th: 'ยังไม่มีโปรโมชั่น', en: 'No active promotions right now.' }) : 'No active promotions right now.'}
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
+            <div className="grid-cols-4" style={{ gap: 14 }}>
               {active.map((p, i) => {
                 const title = t ? t(p.title) : (p.title?.en || p.title?.th || p.title || '');
                 const desc  = t ? t(p.description) : (p.description?.en || p.description?.th || p.description || '');

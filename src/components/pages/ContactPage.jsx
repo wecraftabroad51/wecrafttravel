@@ -95,7 +95,7 @@ export default function ContactPage({ lang, t, settings, setMessages }) {
             <span>Home</span><span>/</span>
             <span style={{ color: 'var(--ink)' }}>{lang === 'th' ? 'ติดต่อเรา' : 'Contact'}</span>
           </nav>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 64, alignItems: 'end' }}>
+          <div className="layout-hero" style={{ gap: 64, alignItems: 'end' }}>
             <h1 className="h-display">
               {lang === 'th' ? (
                 <>มาวางแผน<br />การเดินทาง<br /><span className="serif-accent" style={{ color: 'var(--primary)' }}>ด้วยกัน</span>.</>
@@ -115,7 +115,7 @@ export default function ContactPage({ lang, t, settings, setMessages }) {
       {/* Main content */}
       <section style={{ padding: '32px 0 80px' }}>
         <div className="wrap-wide">
-          <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 32, alignItems: 'start' }}>
+          <div className="layout-feat" style={{ gap: 32, alignItems: 'start' }}>
 
             {/* Form */}
             <div style={{
@@ -169,7 +169,7 @@ export default function ContactPage({ lang, t, settings, setMessages }) {
                     ))}
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div className="layout-half" style={{ gap: 12 }}>
                     <div>
                       <label>{lang === 'th' ? 'ชื่อ-นามสกุล *' : 'Full name *'}</label>
                       <input type="text"

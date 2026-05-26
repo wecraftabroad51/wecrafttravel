@@ -48,7 +48,7 @@ export default function FAQPage({ lang, t, faqs, settings }) {
             <span>Home</span><span>/</span>
             <span style={{ color: 'var(--ink)' }}>FAQ</span>
           </nav>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 64, alignItems: 'end' }}>
+          <div className="layout-hero" style={{ gap: 64, alignItems: 'end' }}>
             <h1 className="h-display">
               {lang === 'th' ? (
                 <>คำตอบที่<br /><span className="serif-accent" style={{ color: 'var(--primary)' }}>ตรงไปตรงมา</span>.<br />ไม่มีตัวหนังสือเล็ก.</>
@@ -68,10 +68,10 @@ export default function FAQPage({ lang, t, faqs, settings }) {
       {/* 3-col layout */}
       <section style={{ padding: '32px 0 100px' }}>
         <div className="wrap-wide">
-          <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr 300px', gap: 48, alignItems: 'start' }}>
+          <div className="layout-faq" style={{ gap: 48, alignItems: 'start' }}>
 
             {/* Left: category sidebar */}
-            <aside style={{ position: 'sticky', top: 100 }}>
+            <aside className="sticky-aside">
               <div className="eyebrow" style={{ marginBottom: 14 }}>
                 {lang === 'th' ? 'หมวดหมู่' : 'Categories'}
               </div>
@@ -152,7 +152,7 @@ export default function FAQPage({ lang, t, faqs, settings }) {
             </div>
 
             {/* Right: contact CTA */}
-            <aside style={{ position: 'sticky', top: 100 }}>
+            <aside className="sticky-aside">
               <div style={{
                 padding: 24, background: 'var(--ink)', color: 'var(--canvas)',
                 borderRadius: 'var(--r-lg)',

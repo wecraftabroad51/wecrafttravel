@@ -25,7 +25,7 @@ export default function SocialBar({ settings }) {
     : DEFAULT_ITEMS;
 
   return (
-    <aside style={{
+    <aside className="social-bar-desktop" style={{
       position: 'fixed', left: 16, top: '50%',
       transform: 'translateY(-50%)',
       display: 'flex', flexDirection: 'column', gap: 8,

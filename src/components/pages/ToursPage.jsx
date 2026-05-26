@@ -25,7 +25,7 @@ function TourRow({ tour, t, navigate, inCompare, onCompare }) {
   const airline = tour.flight?.outbound?.airline || tour.airline || '';
 
   return (
-    <article className="card" style={{ display: 'grid', gridTemplateColumns: '240px 1fr 280px', overflow: 'hidden', background: 'var(--card)' }}>
+    <article className="card layout-tours-item" style={{ overflow: 'hidden', background: 'var(--card)' }}>
       <div style={{ position: 'relative', overflow: 'hidden', minHeight: 180 }}>
         <img src={tour.image} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         {tour.featured && (
@@ -151,7 +151,7 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
             <span>/</span>
             <span style={{ color: 'var(--ink)' }}>{t ? t({ th: 'ทัวร์', en: 'Tours' }) : 'Tours'}</span>
           </nav>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 64, alignItems: 'end' }}>
+          <div className="layout-hero" style={{ gap: 64, alignItems: 'end' }}>
             <h1 className="h-display">
               <span className="tabular" style={{ color: 'var(--accent)' }}>{filtered.length}</span> tours,<br />
               <span className="serif-accent">every</span> month.
@@ -258,7 +258,7 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
               </div>
             </div>
           ) : view === 'grid' ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+            <div className="grid-cols-3" style={{ gap: 16 }}>
               {filtered.map(tr => (
                 <TourCard
                   key={tr.id} tour={tr} t={t} navigate={navigate}

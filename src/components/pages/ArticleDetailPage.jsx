@@ -103,7 +103,7 @@ export default function ArticleDetailPage({ lang, t, navigate, articles, article
       {/* Article body */}
       <section style={{ padding: '0 0 100px' }}>
         <div className="wrap-wide">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 80, alignItems: 'start' }}>
+          <div className="layout-sidebar" style={{ gap: 80, alignItems: 'start' }}>
 
             {/* Body text */}
             <div style={{ maxWidth: 720 }}>
