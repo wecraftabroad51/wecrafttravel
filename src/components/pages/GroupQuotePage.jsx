@@ -34,7 +34,7 @@ const AIRLINES = [
 
   // ─── สายการบินไทย ───────────────────────────────────────
   '✈ สายการบินไทย',
-  'การบินไทย (TG)',
+  'Thai Airways (TG)',
   'Bangkok Airways (PG)',
   'Thai AirAsia (FD)',
   'Thai AirAsia X (XJ)',
