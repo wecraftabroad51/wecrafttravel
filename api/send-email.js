@@ -1,193 +1,6 @@
 const nodemailer = require('nodemailer');
 const https      = require('https');
-
-// ── Build LINE Flex Message ────────────────────────────────────
-function buildFlexMessage(f) {
-  const tourTypeLabel = (f.tourType === 'อื่นๆ' && f.tourTypeOther)
-    ? `อื่นๆ: ${f.tourTypeOther}` : (f.tourType || '-');
-
-  // colored row helper
-  const row = (icon, label, value, valueColor) => value ? {
-    type: 'box', layout: 'horizontal', spacing: 'sm',
-    paddingTop: '5px', paddingBottom: '5px',
-    contents: [
-      { type: 'text', text: icon, size: 'sm', flex: 0, margin: 'none' },
-      { type: 'text', text: label, size: 'xs', color: '#777777', flex: 3, margin: 'sm', wrap: true },
-      { type: 'text', text: String(value), size: 'xs', color: valueColor || '#222222', flex: 5, wrap: true, weight: 'bold' },
-    ],
-  } : null;
-
-  // section header box
-  const sectionHeader = (emoji, title, bg, textColor) => ({
-    type: 'box', layout: 'horizontal', spacing: 'sm',
-    backgroundColor: bg, cornerRadius: '8px',
-    paddingAll: '10px', margin: 'md',
-    contents: [
-      { type: 'text', text: emoji, size: 'md', flex: 0 },
-      { type: 'text', text: title, size: 'sm', weight: 'bold', color: textColor, margin: 'sm' },
-    ],
-  });
-
-  const now = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'short', timeStyle: 'short' });
-
-  return {
-    type: 'flex',
-    altText: `🎉 มาแล้วๆๆ!! งานเหมา — ${f.firstName} ${f.lastName} ไป ${f.destination}`,
-    contents: {
-      type: 'bubble',
-      size: 'mega',
-
-      // ── HEADER ──────────────────────────────────────────────
-      header: {
-        type: 'box', layout: 'vertical',
-        paddingAll: '0px',
-        contents: [
-          // Top band: yellow excitement
-          {
-            type: 'box', layout: 'vertical',
-            backgroundColor: '#FFD700', paddingAll: '14px',
-            contents: [
-              {
-                type: 'text',
-                text: '🎉🎊  มาแล้วๆๆ!!!  🎊🎉',
-                weight: 'bold', size: 'xl', color: '#7B3F00',
-                align: 'center',
-              },
-              {
-                type: 'text',
-                text: '💼  งานเหมา มาแล้ว!!  ✈️',
-                weight: 'bold', size: 'lg', color: '#c0392b',
-                align: 'center', margin: 'xs',
-              },
-            ],
-          },
-          // Orange info band
-          {
-            type: 'box', layout: 'horizontal',
-            backgroundColor: '#e65c00', paddingAll: '12px', spacing: 'md',
-            contents: [
-              {
-                type: 'box', layout: 'vertical', flex: 1,
-                contents: [
-                  { type: 'text', text: '📍 ปลายทาง', size: 'xxs', color: 'rgba(255,255,255,0.7)' },
-                  { type: 'text', text: f.destination || '-', size: 'sm', weight: 'bold', color: '#ffffff', wrap: true },
-                ],
-              },
-              { type: 'separator', color: 'rgba(255,255,255,0.3)' },
-              {
-                type: 'box', layout: 'vertical', flex: 1, paddingStart: 'md',
-                contents: [
-                  { type: 'text', text: '👥 จำนวน', size: 'xxs', color: 'rgba(255,255,255,0.7)' },
-                  { type: 'text', text: f.pax ? `${f.pax} คน` : '-', size: 'sm', weight: 'bold', color: '#FFD700' },
-                ],
-              },
-              { type: 'separator', color: 'rgba(255,255,255,0.3)' },
-              {
-                type: 'box', layout: 'vertical', flex: 1, paddingStart: 'md',
-                contents: [
-                  { type: 'text', text: '📅 วันเดินทาง', size: 'xxs', color: 'rgba(255,255,255,0.7)' },
-                  { type: 'text', text: f.travelDate || '-', size: 'xs', weight: 'bold', color: '#ffffff', wrap: true },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-
-      // ── BODY ────────────────────────────────────────────────
-      body: {
-        type: 'box', layout: 'vertical', spacing: 'none',
-        paddingAll: '14px', backgroundColor: '#fafafa',
-        contents: [
-
-          // ─ Contact section ─
-          sectionHeader('👤', 'ข้อมูลผู้ติดต่อ', '#fff3e0', '#c0392b'),
-          {
-            type: 'box', layout: 'vertical',
-            backgroundColor: '#ffffff', paddingAll: '10px', margin: 'sm',
-            contents: [
-              row('👤', 'ชื่อ-นามสกุล',    `${f.firstName} ${f.lastName}`, '#1a1a2e'),
-              row('🏢', 'บริษัท/หน่วยงาน',  f.company,  '#444444'),
-              row('📞', 'โทรศัพท์',         f.phone,    '#0066cc'),
-              row('💚', 'LINE ID',          f.lineId,   '#06c755'),
-              row('✉️', 'อีเมล',            f.email,    '#0066cc'),
-              row('✉️', 'อีเมลสำรอง',       f.emailAlt, '#0066cc'),
-            ].filter(Boolean),
-          },
-
-          // ─ Tour detail section ─
-          sectionHeader('✈️', 'รายละเอียดทัวร์', '#e8f4fd', '#1a5276'),
-          {
-            type: 'box', layout: 'vertical',
-            backgroundColor: '#ffffff', paddingAll: '10px', margin: 'sm',
-            contents: [
-              row('📍', 'ปลายทาง',           f.destination,               '#c0392b'),
-              row('👥', 'จำนวนผู้เดินทาง',   f.pax ? `${f.pax} คน` : null,'#7d3c98'),
-              row('📅', 'วันเดินทาง',         f.travelDate,                '#1a5276'),
-              row('⏱️', 'ระยะเวลา',           f.duration,                  '#1a5276'),
-              row('🎒', 'รูปแบบทัวร์',        tourTypeLabel,               '#117a65'),
-              row('🏨', 'โรงแรม',             f.hotel,                     '#117a65'),
-              row('✈️', 'สายการบิน',          f.airline,                   '#444444'),
-              row('💰', 'งบประมาณ/ท่าน',     f.budget,                    '#c0392b'),
-            ].filter(Boolean),
-          },
-
-          // ─ Extra info ─
-          f.extraInfo ? {
-            type: 'box', layout: 'vertical',
-            backgroundColor: '#f0fff4', paddingAll: '10px', margin: 'md',
-            contents: [
-              { type: 'text', text: '💬  ข้อมูลเพิ่มเติม', size: 'xs', weight: 'bold', color: '#1e8449' },
-              { type: 'text', text: f.extraInfo, size: 'xs', color: '#333333', wrap: true, margin: 'sm' },
-            ],
-          } : null,
-
-          // ─ Timestamp ─
-          {
-            type: 'text', text: `🕐 รับฟอร์มเมื่อ ${now}`,
-            size: 'xxs', color: '#aaaaaa', align: 'center', margin: 'lg',
-          },
-        ].filter(Boolean),
-      },
-
-      // ── FOOTER ──────────────────────────────────────────────
-      footer: {
-        type: 'box', layout: 'vertical',
-        paddingAll: '0px', spacing: 'none',
-        contents: [
-          {
-            type: 'box', layout: 'horizontal', spacing: 'none',
-            contents: [
-              {
-                type: 'button',
-                action: { type: 'uri', label: '📞  โทรกลับเลย!', uri: `tel:${(f.phone||'').replace(/-/g,'')}` },
-                style: 'primary', color: '#e65c00', flex: 1, height: 'md',
-              },
-              f.lineId ? {
-                type: 'button',
-                action: { type: 'uri', label: '💬  LINE ลูกค้า', uri: `https://line.me/R/ti/p/${f.lineId}` },
-                style: 'primary', color: '#06c755', flex: 1, height: 'md',
-              } : {
-                type: 'button',
-                action: { type: 'uri', label: '✉️  ส่งอีเมล', uri: `mailto:${f.email}` },
-                style: 'primary', color: '#2980b9', flex: 1, height: 'md',
-              },
-            ],
-          },
-          {
-            type: 'box', layout: 'vertical',
-            backgroundColor: '#FFD700', paddingAll: '8px',
-            contents: [{
-              type: 'text',
-              text: '⚡  รีบตอบกลับภายใน 24 ชั่วโมง!  ⚡',
-              size: 'xs', weight: 'bold', color: '#7B3F00', align: 'center',
-            }],
-          },
-        ],
-      },
-    },
-  };
-}
+const { google }  = require('googleapis');
 
 // ── HTTPS POST helper (no fetch needed) ───────────────────────
 function httpsPost(hostname, path, headers, body) {
@@ -210,8 +23,25 @@ function httpsPost(hostname, path, headers, body) {
   });
 }
 
+// ── Generate sequence number: YYMMNN (พ.ศ.) ──────────────────
+async function generateSeqNo(sheets, sheetId) {
+  const nowDate     = new Date();
+  const buddhistYear = (nowDate.getFullYear() + 543).toString().slice(-2); // e.g. "69"
+  const month        = String(nowDate.getMonth() + 1).padStart(2, '0');    // e.g. "05"
+  const prefix       = `${buddhistYear}${month}`;                          // e.g. "6905"
+
+  const meta = await sheets.spreadsheets.values.get({
+    spreadsheetId: sheetId,
+    range: 'Sheet1!A:A',
+  });
+  const allValues = meta.data.values || [];
+  const countThisMonth = allValues.filter(r => r[0] && String(r[0]).startsWith(prefix)).length;
+  const runNo = String(countThisMonth + 1).padStart(2, '0');
+  return `${prefix}${runNo}`; // e.g. "690501"
+}
+
 // ── Send LINE push (plain text) ────────────────────────────────
-async function sendLine(formData) {
+async function sendLine(formData, seqNo) {
   const token  = process.env.LINE_CHANNEL_ACCESS_TOKEN;
   const userId = process.env.LINE_OWNER_USER_ID;
   if (!token || !userId) { console.log('LINE skipped: env vars not set'); return; }
@@ -222,6 +52,7 @@ async function sendLine(formData) {
 
   const text = [
     '🎉🎊 มาแล้วๆๆ!!! งานเหมา มาแล้ว!! ✈️',
+    seqNo ? `🔢 ลำดับที่: ${seqNo}` : null,
     '━━━━━━━━━━━━━━━━━━',
     '👤 ข้อมูลผู้ติดต่อ',
     `ชื่อ: ${f.firstName} ${f.lastName}`,
@@ -260,10 +91,19 @@ async function sendLine(formData) {
 }
 
 // ── Send Email ─────────────────────────────────────────────────
-async function sendEmail(subject, html) {
+async function sendEmail(subject, html, seqNo) {
   const user = process.env.GMAIL_USER;
   const pass = process.env.GMAIL_APP_PASS;
   if (!user || !pass) { console.log('Email skipped: no credentials'); return; }
+
+  // Inject seqNo banner at top of email HTML
+  const seqBanner = seqNo
+    ? `<div style="background:#1a1a2e;color:#FFD700;text-align:center;padding:10px 16px;font-size:15px;font-weight:bold;letter-spacing:1px;border-radius:8px 8px 0 0;">
+        🔢 ลำดับที่ &nbsp;<span style="font-size:20px;color:#fff;">${seqNo}</span>
+       </div>`
+    : '';
+  const finalHtml = seqBanner + html;
+  const finalSubject = seqNo ? `[${seqNo}] ${subject}` : subject;
 
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com', port: 465, secure: true,
@@ -273,9 +113,53 @@ async function sendEmail(subject, html) {
   const info = await transporter.sendMail({
     from: `"WeCraft Travel" <${user}>`,
     to: 'wecraftabroad51@gmail.com, wecraft.sale@gmail.com',
-    subject, html,
+    subject: finalSubject,
+    html: finalHtml,
   });
   console.log('Email sent:', info.messageId);
+}
+
+// ── Append row to Google Sheet ────────────────────────────────
+async function appendToSheet(formData, seqNo, sheets, sheetId) {
+  const f = formData;
+  const tourTypeLabel = (f.tourType === 'อื่นๆ' && f.tourTypeOther)
+    ? `อื่นๆ: ${f.tourTypeOther}` : (f.tourType || '-');
+
+  const now = new Date().toLocaleString('th-TH', {
+    timeZone: 'Asia/Bangkok',
+    dateStyle: 'short',
+    timeStyle: 'short',
+  });
+
+  const row = [
+    seqNo,
+    now,
+    `${f.firstName} ${f.lastName}`,
+    f.company    || '',
+    f.phone      || '',
+    f.lineId     || '',
+    f.email      || '',
+    f.emailAlt   || '',
+    f.destination|| '',
+    f.pax        || '',
+    f.travelDate || '',
+    f.duration   || '',
+    tourTypeLabel,
+    f.hotel      || '',
+    f.airline    || '',
+    f.budget     || '',
+    f.extraInfo  || '',
+  ];
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: sheetId,
+    range: 'Sheet1!A1',
+    valueInputOption: 'USER_ENTERED',
+    insertDataOption: 'INSERT_ROWS',
+    requestBody: { values: [row] },
+  });
+
+  console.log('Google Sheet row appended OK');
 }
 
 // ── Handler ────────────────────────────────────────────────────
@@ -291,13 +175,45 @@ module.exports = async function handler(req, res) {
 
   const results = {};
 
-  // Run email + LINE in parallel
+  // ── Generate seqNo first (requires Sheet read) ────────────────
+  let seqNo = null;
+  let sheetsClient = null;
+  const sheetId  = process.env.GOOGLE_SHEET_ID;
+  const credJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+
+  if (formData && sheetId && credJson) {
+    try {
+      const credentials = JSON.parse(credJson);
+      const auth = new google.auth.GoogleAuth({
+        credentials,
+        scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+      });
+      sheetsClient = google.sheets({ version: 'v4', auth });
+      seqNo = await generateSeqNo(sheetsClient, sheetId);
+      console.log('SeqNo generated:', seqNo);
+    } catch (e) {
+      console.error('SeqNo generation failed:', e.message);
+    }
+  }
+
+  // ── Run email + LINE + Google Sheet in parallel ───────────────
   await Promise.allSettled([
-    sendEmail(subject, html).then(() => { results.email = 'ok'; }).catch(e => { results.email = e.message; console.error('Email:', e.message); }),
+    sendEmail(subject, html, seqNo)
+      .then(() => { results.email = 'ok'; })
+      .catch(e => { results.email = e.message; console.error('Email:', e.message); }),
+
     formData
-      ? sendLine(formData).then(() => { results.line = 'ok'; }).catch(e => { results.line = e.message; console.error('LINE:', e.message); })
+      ? sendLine(formData, seqNo)
+          .then(() => { results.line = 'ok'; })
+          .catch(e => { results.line = e.message; console.error('LINE:', e.message); })
+      : Promise.resolve(),
+
+    (formData && sheetsClient && sheetId)
+      ? appendToSheet(formData, seqNo, sheetsClient, sheetId)
+          .then(() => { results.sheet = 'ok'; })
+          .catch(e => { results.sheet = e.message; console.error('Sheet:', e.message); })
       : Promise.resolve(),
   ]);
 
-  return res.status(200).json({ ok: true, results });
+  return res.status(200).json({ ok: true, results, seqNo });
 };
