@@ -101,50 +101,51 @@ export default function FloatingContact({ settings }) {
       <style>{`
         .fc-panel {
           position: fixed;
-          left: 0;
-          top: 50%;
-          transform: translateY(-50%);
+          right: 24px;
+          bottom: 24px;
           z-index: 9999;
           display: flex;
-          align-items: center;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 10px;
           pointer-events: none;
         }
         .fc-popup {
           background: #2db04b;
-          border-radius: 0 16px 16px 0;
+          border-radius: 16px;
           padding: 20px 18px 16px;
           width: 240px;
-          box-shadow: 4px 4px 24px rgba(0,0,0,0.25);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.25);
           pointer-events: all;
           transition: transform 0.3s cubic-bezier(.4,0,.2,1), opacity 0.3s;
-          transform-origin: left center;
+          transform-origin: bottom right;
         }
         .fc-popup.closed {
-          transform: translateX(-100%) scaleX(0.8);
+          transform: scale(0.85) translateY(10px);
           opacity: 0;
           pointer-events: none;
         }
         .fc-popup.open {
-          transform: translateX(0) scaleX(1);
+          transform: scale(1) translateY(0);
           opacity: 1;
         }
         .fc-tab {
-          width: 42px;
-          min-height: 64px;
+          width: 56px;
+          height: 56px;
           background: #2db04b;
-          border-radius: 0 12px 12px 0;
+          border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
           pointer-events: all;
-          box-shadow: 3px 3px 12px rgba(0,0,0,0.22);
+          box-shadow: 0 4px 16px rgba(0,0,0,0.25);
           border: none;
           color: #fff;
           flex-shrink: 0;
-          transition: background 0.2s;
+          transition: background 0.2s, transform 0.2s;
         }
-        .fc-tab:hover { background: #24a040; }
+        .fc-tab:hover { background: #24a040; transform: scale(1.08); }
         .fc-divider {
           border: none;
           border-top: 1px solid rgba(255,255,255,0.25);
@@ -172,7 +173,7 @@ export default function FloatingContact({ settings }) {
       `}</style>
 
       <div className="fc-panel">
-        {/* Popup panel */}
+        {/* Popup panel — sits above the trigger button */}
         <div className={`fc-popup ${open ? 'open' : 'closed'}`}>
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
