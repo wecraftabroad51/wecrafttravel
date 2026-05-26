@@ -433,6 +433,7 @@ export default function GroupQuotePage({ lang, setMessages }) {
 
     setSaving(false);
     submittingRef.current = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setSent(true);
   };
 
