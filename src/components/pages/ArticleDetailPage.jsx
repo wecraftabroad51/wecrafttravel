@@ -11,7 +11,7 @@ function Icon({ name, size = 16 }) {
 }
 
 export default function ArticleDetailPage({ lang, t, navigate, articles, articleId }) {
-  const article = articles.find(a => a.id === articleId);
+  const article = articles.find(a => String(a.id) === String(articleId));
 
   if (!article) {
     return (

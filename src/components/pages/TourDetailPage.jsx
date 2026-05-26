@@ -38,7 +38,7 @@ function Stars({ value = 5, size = 14 }) {
 }
 
 export default function TourDetailPage({ lang, t, navigate, tours, reviews, setBookings, setReviews, tourId, compareList, toggleCompare }) {
-  const tour = tours.find(tr => tr.id === tourId);
+  const tour = tours.find(tr => String(tr.id) === String(tourId));
   const [activeTab, setActiveTab]     = useState('itinerary');
   const [selectedTier, setSelectedTier] = useState(tour?.priceTiers?.[0]?.tier || 'Standard');
   const [selectedDep, setSelectedDep]   = useState(null);

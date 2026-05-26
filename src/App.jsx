@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 import {
+  BrowserRouter, Routes, Route, Navigate,
+  useNavigate, useParams, useSearchParams, useLocation,
+} from 'react-router-dom';
+import {
   fetchTours, fetchArticles, fetchPromotions, fetchFaqs,
   fetchReviews, fetchBookings, fetchMessages, fetchChatSessions,
   fetchSettings
@@ -12,7 +16,6 @@ import {
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
 import ChatWidget from './components/ChatWidget.jsx';
-import SocialBar from './components/SocialBar.jsx';
 import CompareBar from './components/CompareBar.jsx';
 import HomePage from './components/pages/HomePage.jsx';
 import ToursPage from './components/pages/ToursPage.jsx';
@@ -25,22 +28,54 @@ import FAQPage from './components/pages/FAQPage.jsx';
 import ContactPage from './components/pages/ContactPage.jsx';
 import AdminPanel from './components/admin/AdminPanel.jsx';
 
-const IS_ADMIN_PATH = window.location.pathname.startsWith('/admin');
-
 const SETTINGS_DEFAULT = {
   contact: { address: { th: '', en: '' }, phone: '', email: '', line: '' },
   social: [],
   popup: { enabled: false },
 };
 
-export default function App() {
-  const [lang, setLang]   = useState('th');
-  const [page, setPage]   = useState('home');
-  const [selectedTourId, setSelectedTourId]       = useState(null);
-  const [selectedArticleId, setSelectedArticleId] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(IS_ADMIN_PATH);
+// ── Route wrappers that inject URL params ─────────────────────
+function ToursRoute(props) {
+  const [searchParams] = useSearchParams();
+  const initialFilters = {
+    tourType:  searchParams.get('type')      || '',
+    continent: searchParams.get('continent') || '',
+    country:   searchParams.get('country')   || '',
+  };
+  return <ToursPage {...props} initialFilters={initialFilters} />;
+}
 
-  // ── All state starts EMPTY — filled from Supabase only ───────
+function TourDetailRoute(props) {
+  const { id } = useParams();
+  return <TourDetailPage {...props} tourId={id} />;
+}
+
+function ArticleDetailRoute(props) {
+  const { id } = useParams();
+  return <ArticleDetailPage {...props} articleId={id} />;
+}
+
+// ── Path → page name mapping (for Navbar active state) ────────
+function getPageFromPath(pathname) {
+  if (pathname === '/')                       return 'home';
+  if (pathname.startsWith('/tours/'))         return 'tours';
+  if (pathname === '/tours')                  return 'tours';
+  if (pathname === '/gallery')                return 'gallery';
+  if (pathname.startsWith('/articles/'))      return 'articles';
+  if (pathname === '/articles')               return 'articles';
+  if (pathname === '/promotions')             return 'promotions';
+  if (pathname === '/faq')                    return 'faq';
+  if (pathname === '/contact')                return 'contact';
+  return 'home';
+}
+
+// ── Inner app (needs router context for hooks) ─────────────────
+function AppInner() {
+  const routerNav  = useNavigate();
+  const location   = useLocation();
+
+  const [lang, setLang] = useState('th');
+
   const [tours,        setTours]        = useState([]);
   const [articles,     setArticles]     = useState([]);
   const [promotions,   setPromotions]   = useState([]);
@@ -51,20 +86,17 @@ export default function App() {
   const [chatSessions, setChatSessions] = useState([]);
   const [settings,     setSettings]     = useState(SETTINGS_DEFAULT);
 
-  const [compareList,  setCompareList]  = useState([]);
-  const [chatOpen,     setChatOpen]     = useState(false);
-  const [tourFilters,  setTourFilters]  = useState({});
+  const [compareList, setCompareList] = useState([]);
+  const [chatOpen,    setChatOpen]    = useState(false);
 
-  // ── Loading / error state ─────────────────────────────────────
   const [loading, setLoading] = useState(true);
-  const [dbError, setDbError] = useState(null); // null | string
+  const [dbError, setDbError] = useState(null);
 
   const t = (obj) => (obj && (obj[lang] || obj['th'])) || '';
 
-  // ── Load from Supabase — fallback to mock data if not configured ──
+  // ── Load data ──────────────────────────────────────────────
   useEffect(() => {
     if (!supabase) {
-      // Use mock data so the site works without Supabase
       setTours(TOURS_DATA);
       setArticles(ARTICLES_DATA);
       setPromotions(PROMOTIONS_DATA);
@@ -124,11 +156,29 @@ export default function App() {
     load();
   }, []);
 
-  const navigate = (p, id = null, filters = null) => {
-    setPage(p);
-    if (p === 'tour-detail')    setSelectedTourId(id);
-    if (p === 'article-detail') setSelectedArticleId(id);
-    if (p === 'tours') setTourFilters(filters || {});
+  // ── navigate helper — maps page names → real URLs ──────────
+  const navigate = (page, id = null, filters = null) => {
+    const map = {
+      home:             '/',
+      tours:            '/tours',
+      'tour-detail':    `/tours/${id}`,
+      gallery:          '/gallery',
+      articles:         '/articles',
+      'article-detail': `/articles/${id}`,
+      promotions:       '/promotions',
+      faq:              '/faq',
+      contact:          '/contact',
+    };
+    let path = map[page] || '/';
+    if (page === 'tours' && filters) {
+      const p = new URLSearchParams();
+      if (filters.tourType)  p.set('type',      filters.tourType);
+      if (filters.continent) p.set('continent', filters.continent);
+      if (filters.country)   p.set('country',   filters.country);
+      const qs = p.toString();
+      if (qs) path += '?' + qs;
+    }
+    routerNav(path);
     window.scrollTo(0, 0);
   };
 
@@ -140,7 +190,7 @@ export default function App() {
     );
   };
 
-  // ── Loading screen ────────────────────────────────────────────
+  // ── Loading screen ─────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -154,7 +204,7 @@ export default function App() {
     );
   }
 
-  // ── DB Error screen ───────────────────────────────────────────
+  // ── DB Error screen ────────────────────────────────────────
   if (dbError) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
@@ -164,10 +214,8 @@ export default function App() {
           </div>
           <h2 className="text-xl font-bold text-slate-800 mb-3">เชื่อมต่อฐานข้อมูลไม่ได้</h2>
           <p className="text-sm text-slate-500 whitespace-pre-line mb-6">{dbError}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-teal-700 hover:bg-teal-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-colors"
-          >
+          <button onClick={() => window.location.reload()}
+            className="bg-teal-700 hover:bg-teal-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-colors">
             ลองใหม่
           </button>
         </div>
@@ -175,48 +223,53 @@ export default function App() {
     );
   }
 
-  // ── Admin panel ───────────────────────────────────────────────
-  if (isAdmin) {
-    return (
-      <AdminPanel
-        lang={lang} t={t} setLang={setLang}
-        tours={tours}           setTours={setTours}
-        articles={articles}     setArticles={setArticles}
-        promotions={promotions} setPromotions={setPromotions}
-        faqs={faqs}             setFaqs={setFaqs}
-        reviews={reviews}       setReviews={setReviews}
-        bookings={bookings}     setBookings={setBookings}
-        messages={messages}     setMessages={setMessages}
-        chatSessions={chatSessions} setChatSessions={setChatSessions}
-        settings={settings}     setSettings={setSettings}
-        onLogout={() => window.location.href = '/'}
-      />
-    );
-  }
-
   const pageProps = {
     lang, t, navigate, tours, articles, promotions, faqs,
     reviews, settings, compareList, toggleCompare,
-    setBookings, setReviews, setMessages
+    setBookings, setReviews, setMessages,
   };
+
+  const adminProps = {
+    lang, t, setLang,
+    tours,        setTours,
+    articles,     setArticles,
+    promotions,   setPromotions,
+    faqs,         setFaqs,
+    reviews,      setReviews,
+    bookings,     setBookings,
+    messages,     setMessages,
+    chatSessions, setChatSessions,
+    settings,     setSettings,
+    onLogout: () => routerNav('/'),
+  };
+
+  // ── Admin panel (full-page, no navbar/footer) ──────────────
+  if (location.pathname.startsWith('/admin')) {
+    return <AdminPanel {...adminProps} />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Navbar lang={lang} setLang={setLang} page={page} navigate={navigate} t={t}
-        onAdminClick={() => window.location.href = '/admin'} />
-
+      <Navbar
+        lang={lang} setLang={setLang}
+        page={getPageFromPath(location.pathname)}
+        navigate={navigate} t={t}
+        onAdminClick={() => routerNav('/admin')}
+      />
       <main>
-        {page === 'home'           && <HomePage {...pageProps} />}
-        {page === 'tours'          && <ToursPage {...pageProps} initialFilters={tourFilters} />}
-        {page === 'tour-detail'    && <TourDetailPage {...pageProps} tourId={selectedTourId} />}
-        {page === 'gallery'        && <GalleryPage {...pageProps} />}
-        {page === 'articles'       && <ArticlesPage {...pageProps} />}
-        {page === 'article-detail' && <ArticleDetailPage {...pageProps} articleId={selectedArticleId} />}
-        {page === 'promotions'     && <PromotionsPage {...pageProps} />}
-        {page === 'faq'            && <FAQPage {...pageProps} />}
-        {page === 'contact'        && <ContactPage {...pageProps} setMessages={setMessages} />}
+        <Routes>
+          <Route path="/"            element={<HomePage {...pageProps} />} />
+          <Route path="/tours"       element={<ToursRoute {...pageProps} />} />
+          <Route path="/tours/:id"   element={<TourDetailRoute {...pageProps} />} />
+          <Route path="/gallery"     element={<GalleryPage {...pageProps} />} />
+          <Route path="/articles"    element={<ArticlesPage {...pageProps} />} />
+          <Route path="/articles/:id" element={<ArticleDetailRoute {...pageProps} />} />
+          <Route path="/promotions"  element={<PromotionsPage {...pageProps} />} />
+          <Route path="/faq"         element={<FAQPage {...pageProps} />} />
+          <Route path="/contact"     element={<ContactPage {...pageProps} />} />
+          <Route path="*"            element={<Navigate to="/" replace />} />
+        </Routes>
       </main>
-
       <Footer lang={lang} t={t} navigate={navigate} settings={settings} />
       <ChatWidget lang={lang} open={chatOpen} setOpen={setChatOpen} />
       {compareList.length >= 2 && (
@@ -224,5 +277,13 @@ export default function App() {
           tours={tours} t={t} navigate={navigate} />
       )}
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppInner />
+    </BrowserRouter>
   );
 }
