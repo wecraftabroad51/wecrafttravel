@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const https      = require('https');
 
 // ── Build LINE Flex Message ────────────────────────────────────
 function buildFlexMessage(f) {
@@ -194,6 +195,27 @@ function buildFlexMessage(f) {
   };
 }
 
+// ── HTTPS POST helper (no fetch needed) ───────────────────────
+function httpsPost(hostname, path, headers, body) {
+  return new Promise((resolve, reject) => {
+    const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
+    const req = https.request({
+      hostname, path, method: 'POST',
+      headers: { ...headers, 'Content-Length': Buffer.byteLength(bodyStr) },
+    }, (res) => {
+      let data = '';
+      res.on('data', chunk => { data += chunk; });
+      res.on('end', () => {
+        if (res.statusCode >= 400) reject(new Error(`HTTP ${res.statusCode}: ${data}`));
+        else resolve(data);
+      });
+    });
+    req.on('error', reject);
+    req.write(bodyStr);
+    req.end();
+  });
+}
+
 // ── Send LINE push ─────────────────────────────────────────────
 async function sendLine(formData) {
   const token  = process.env.LINE_CHANNEL_ACCESS_TOKEN;
@@ -201,20 +223,14 @@ async function sendLine(formData) {
   if (!token || !userId) { console.log('LINE skipped: env vars not set'); return; }
 
   const message = buildFlexMessage(formData);
+  const body = JSON.stringify({ to: userId, messages: [message] });
 
-  const res = await fetch('https://api.line.me/v2/bot/message/push', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify({ to: userId, messages: [message] }),
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error('LINE API: ' + err);
-  }
+  await httpsPost(
+    'api.line.me',
+    '/v2/bot/message/push',
+    { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body
+  );
   console.log('LINE Flex sent OK');
 }
 
