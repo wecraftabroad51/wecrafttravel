@@ -1,1 +1,7 @@
-{"rewrites":[{"source":"/((?!api/).*)","destination":"/index.html"}]}
+{
+  "rewrites": [{"source": "/((?!api/).*)", "destination": "/index.html"}],
+  "functions": {
+    "api/upload-drive.js": { "maxDuration": 30 },
+    "api/send-email.js":   { "maxDuration": 30 }
+  }
+}
