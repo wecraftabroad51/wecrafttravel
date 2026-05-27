@@ -30,12 +30,21 @@ function sheetNameFor(type) {
   return 'กรุ๊ปเหมา';
 }
 
-// ── Generate sequence number: YYMMNN (พ.ศ.) ──────────────────
-async function generateSeqNo(sheets, sheetId, sheetName) {
-  const nowDate     = new Date();
+// ── SeqNo prefix per type ──────────────────────────────────────
+function seqPrefixFor(type) {
+  if (type === 'ticket')     return 'TK';
+  if (type === 'car-rental') return 'RC';
+  return 'GI';
+}
+
+// ── Generate sequence number: PREFIX-YYMMNN (พ.ศ.) ───────────
+async function generateSeqNo(sheets, sheetId, sheetName, type) {
+  const nowDate      = new Date();
   const buddhistYear = (nowDate.getFullYear() + 543).toString().slice(-2); // e.g. "69"
   const month        = String(nowDate.getMonth() + 1).padStart(2, '0');    // e.g. "05"
-  const prefix       = `${buddhistYear}${month}`;                          // e.g. "6905"
+  const typePrefix   = seqPrefixFor(type);                                 // e.g. "TK"
+  const datePrefix   = `${buddhistYear}${month}`;                          // e.g. "6905"
+  const fullPrefix   = `${typePrefix}${datePrefix}`;                       // e.g. "TK6905"
 
   const range = sheetName ? `${sheetName}!A:A` : 'A:A';
   const meta = await sheets.spreadsheets.values.get({
@@ -43,9 +52,9 @@ async function generateSeqNo(sheets, sheetId, sheetName) {
     range,
   });
   const allValues = meta.data.values || [];
-  const countThisMonth = allValues.filter(r => r[0] && String(r[0]).startsWith(prefix)).length;
+  const countThisMonth = allValues.filter(r => r[0] && String(r[0]).startsWith(fullPrefix)).length;
   const runNo = String(countThisMonth + 1).padStart(2, '0');
-  return `${prefix}${runNo}`; // e.g. "690501"
+  return `${fullPrefix}${runNo}`; // e.g. "TK690501"
 }
 
 // ── Send LINE push (plain text) ────────────────────────────────
@@ -302,8 +311,8 @@ module.exports = async function handler(req, res) {
         scopes: ['https://www.googleapis.com/auth/spreadsheets'],
       });
       sheetsClient = google.sheets({ version: 'v4', auth });
-      seqNo = await generateSeqNo(sheetsClient, sheetId, sheetName);
-      console.log('SeqNo generated:', seqNo, '| worksheet:', sheetName || 'Sheet1');
+      seqNo = await generateSeqNo(sheetsClient, sheetId, sheetName, formData._type);
+      console.log('SeqNo generated:', seqNo, '| worksheet:', sheetName);
     } catch (e) {
       console.error('SeqNo generation failed:', e.message);
     }
