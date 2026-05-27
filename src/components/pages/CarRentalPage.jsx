@@ -97,14 +97,31 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const th = lang !== 'en';
     if (!form.fullName || !form.phone || !form.pickupDate || !form.pickupLocation) {
-      setError(lang === 'th' ? 'กรุณากรอกข้อมูลที่จำเป็น' : 'Please fill in required fields.');
+      setError(th ? 'กรุณากรอกข้อมูลที่จำเป็น (ชื่อ, เบอร์โทร, วันรับรถ, สถานที่รับรถ)' : 'Please fill in required fields.');
       return;
     }
-    // Phone format validation: Thai 10 digits starting with 0
-    const phoneClean = form.phone.replace(/[\s\-]/g, '');
+    // Phone — Thai 10 digits starting with 0
+    const phoneClean = form.phone.replace(/[\s\-().]/g, '');
     if (!/^0[0-9]{9}$/.test(phoneClean)) {
-      setError('เบอร์โทรศัพท์ไม่ถูกต้อง กรุณากรอกเบอร์ 10 หลัก');
+      setError(th ? 'เบอร์โทรไม่ถูกต้อง (ต้อง 10 หลัก ขึ้นต้นด้วย 0 เช่น 081-234-5678)' : 'Invalid phone number (must be 10 digits starting with 0).');
+      return;
+    }
+    // Email (optional — validate only if filled)
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      setError(th ? 'รูปแบบอีเมลไม่ถูกต้อง (เช่น example@mail.com)' : 'Invalid email address format.');
+      return;
+    }
+    // Pickup date — must be today or future
+    const today = new Date(); today.setHours(0,0,0,0);
+    if (new Date(form.pickupDate) < today) {
+      setError(th ? 'วันรับรถต้องเป็นวันปัจจุบันหรืออนาคต' : 'Pickup date must be today or in the future.');
+      return;
+    }
+    // Return date — must be after pickup date
+    if (form.returnDate && form.returnDate <= form.pickupDate) {
+      setError(th ? 'วันคืนรถต้องเป็นวันหลังจากวันรับรถ' : 'Return date must be after pickup date.');
       return;
     }
     setSubmitting(true);
@@ -259,12 +276,16 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
               <div>
                 <Label th="วันที่รับรถ" en="Pickup Date" lang={lang} required />
-                <Input type="date" value={form.pickupDate} onChange={e => set('pickupDate', e.target.value)} />
+                <Input type="date" value={form.pickupDate}
+                  min={new Date().toISOString().split('T')[0]}
+                  onChange={e => set('pickupDate', e.target.value)} />
               </div>
               {!isAirport && (
                 <div>
                   <Label th="วันที่คืนรถ" en="Return Date" lang={lang} />
-                  <Input type="date" value={form.returnDate} onChange={e => set('returnDate', e.target.value)} />
+                  <Input type="date" value={form.returnDate}
+                    min={form.pickupDate || new Date().toISOString().split('T')[0]}
+                    onChange={e => set('returnDate', e.target.value)} />
                 </div>
               )}
             </div>

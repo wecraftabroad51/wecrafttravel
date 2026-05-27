@@ -289,15 +289,18 @@ function Radio({ name, value, checked, onChange, label }) {
   );
 }
 
-function Field({ label, required, optional, children }) {
+function Field({ label, required, optional, children, error }) {
   return (
     <div>
       <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#333' }}>
         {label}
         {required && <span style={{ color: '#e53e3e', marginLeft: 4 }}>*</span>}
-        {optional && <span style={{ color: '#e53e3e', fontWeight: 400, marginLeft: 4 }}>({optional})</span>}
+        {optional && <span style={{ color: '#888', fontWeight: 400, fontSize: 11, marginLeft: 4 }}>({optional})</span>}
       </label>
       {children}
+      {error && (
+        <div style={{ color: '#e53e3e', fontSize: 12, marginTop: 4 }}>⚠ {error}</div>
+      )}
     </div>
   );
 }
@@ -321,13 +324,50 @@ export default function GroupQuotePage({ lang, setMessages }) {
 
   const validate = () => {
     const e = {};
-    if (!form.firstName)   e.firstName   = true;
-    if (!form.lastName)    e.lastName    = true;
-    if (!form.phone)       e.phone       = true;
-    if (!form.email)       e.email       = true;
-    if (!form.destination) e.destination = true;
-    if (!form.travelDate)  e.travelDate  = true;
-    if (!form.duration || form.duration.startsWith('--')) e.duration = true;
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const today   = new Date(); today.setHours(0,0,0,0);
+
+    if (!form.firstName)   e.firstName   = 'กรุณากรอกชื่อ';
+    if (!form.lastName)    e.lastName    = 'กรุณากรอกนามสกุล';
+    if (!form.destination) e.destination = 'กรุณาระบุปลายทาง';
+
+    // Phone
+    if (!form.phone) {
+      e.phone = 'กรุณากรอกเบอร์โทรศัพท์';
+    } else {
+      const ph = form.phone.replace(/[\s\-().]/g, '');
+      if (!/^0[0-9]{9}$/.test(ph))
+        e.phone = 'เบอร์โทรไม่ถูกต้อง (ต้อง 10 หลัก ขึ้นต้นด้วย 0 เช่น 081-234-5678)';
+    }
+
+    // Email
+    if (!form.email) {
+      e.email = 'กรุณากรอกอีเมล';
+    } else if (!emailRe.test(form.email)) {
+      e.email = 'รูปแบบอีเมลไม่ถูกต้อง (เช่น example@mail.com)';
+    }
+
+    // Email สำรอง (optional — validate only if filled)
+    if (form.emailAlt && !emailRe.test(form.emailAlt))
+      e.emailAlt = 'รูปแบบอีเมลสำรองไม่ถูกต้อง';
+
+    // Travel date — must be today or future
+    if (!form.travelDate) {
+      e.travelDate = 'กรุณาระบุวันเดินทาง';
+    } else if (new Date(form.travelDate) < today) {
+      e.travelDate = 'วันเดินทางต้องเป็นวันปัจจุบันหรืออนาคต';
+    }
+
+    // Duration
+    if (!form.duration || form.duration.startsWith('--'))
+      e.duration = 'กรุณาเลือกระยะเวลาการเดินทาง';
+
+    // Pax — optional, but if filled must be ≥ 1
+    if (form.pax !== '' && form.pax !== null) {
+      const n = parseInt(form.pax, 10);
+      if (isNaN(n) || n < 1) e.pax = 'จำนวนผู้เดินทางต้องอย่างน้อย 1 คน';
+    }
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -440,7 +480,8 @@ export default function GroupQuotePage({ lang, setMessages }) {
 
   const inpStyle = (k) => ({
     ...inputStyle,
-    borderColor: errors[k] ? '#e53e3e' : '#ddd',
+    borderColor: k && errors[k] ? '#e53e3e' : '#ddd',
+    outline: k && errors[k] ? 'none' : undefined,
   });
 
   if (sent) {
@@ -571,11 +612,11 @@ export default function GroupQuotePage({ lang, setMessages }) {
           <div className="gq-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 24px' }}>
 
             {/* ชื่อ-นามสกุล */}
-            <Field label="ชื่อผู้ติดต่อ" required>
+            <Field label="ชื่อผู้ติดต่อ" required error={errors.firstName}>
               <input style={inpStyle('firstName')} placeholder="ชื่อผู้ติดต่อ"
                 value={form.firstName} onChange={set('firstName')} />
             </Field>
-            <Field label="นามสกุลผู้ติดต่อ" required>
+            <Field label="นามสกุลผู้ติดต่อ" required error={errors.lastName}>
               <input style={inpStyle('lastName')} placeholder="นามสกุลผู้ติดต่อ"
                 value={form.lastName} onChange={set('lastName')} />
             </Field>
@@ -585,34 +626,40 @@ export default function GroupQuotePage({ lang, setMessages }) {
               <input style={inpStyle()} placeholder="บริษัทฯ-หน่วยงาน"
                 value={form.company} onChange={set('company')} />
             </Field>
-            <Field label="จำนวนผู้เดินทาง">
-              <input style={inpStyle()} placeholder="จำนวนผู้เดินทาง" type="number" min="1"
+            <Field label="จำนวนผู้เดินทาง" optional="ถ้าทราบ" error={errors.pax}>
+              <input style={inpStyle('pax')} placeholder="เช่น 15" type="number" min="1"
                 value={form.pax} onChange={set('pax')} />
             </Field>
 
             {/* โทร-LINE */}
-            <Field label="หมายเลขโทรศัพท์" required>
-              <input style={inpStyle('phone')} placeholder="หมายเลขโทรศัพท์" type="tel"
-                value={form.phone} onChange={set('phone')} />
+            <Field label="หมายเลขโทรศัพท์" required error={errors.phone}>
+              <input style={inpStyle('phone')} placeholder="081-234-5678" type="tel"
+                value={form.phone} onChange={set('phone')}
+                onBlur={e => {
+                  const v = e.target.value.replace(/[\s\-().]/g, '');
+                  if (v.length === 10 && /^0[0-9]{9}$/.test(v)) {
+                    setForm(p => ({ ...p, phone: v.replace(/^(\d{3})(\d{3})(\d{4})$/, '$1-$2-$3') }));
+                  }
+                }} />
             </Field>
             <Field label="Line ID" optional="ถ้ามี">
-              <input style={inpStyle()} placeholder="Line ID"
+              <input style={inpStyle()} placeholder="@wecrafttravel"
                 value={form.lineId} onChange={set('lineId')} />
             </Field>
 
             {/* Email */}
-            <Field label="อีเมล" required>
-              <input style={inpStyle('email')} placeholder="อีเมล" type="email"
+            <Field label="อีเมล" required error={errors.email}>
+              <input style={inpStyle('email')} placeholder="example@email.com" type="email"
                 value={form.email} onChange={set('email')} />
             </Field>
-            <Field label="อีเมลสำรอง" optional="ถ้ามี">
-              <input style={inpStyle()} placeholder="อีเมลสำรอง" type="email"
+            <Field label="อีเมลสำรอง" optional="ถ้ามี" error={errors.emailAlt}>
+              <input style={inpStyle('emailAlt')} placeholder="example@email.com" type="email"
                 value={form.emailAlt} onChange={set('emailAlt')} />
             </Field>
 
             {/* ปลายทาง-งบ */}
-            <Field label="ประเทศ-เมือง-สถานที่ ที่ต้องการไป" required>
-              <input style={inpStyle('destination')} placeholder="ประเทศ-เมือง-สถานที่ ที่ต้องการไป"
+            <Field label="ประเทศ-เมือง-สถานที่ ที่ต้องการไป" required error={errors.destination}>
+              <input style={inpStyle('destination')} placeholder="เช่น ญี่ปุ่น, โตเกียว"
                 value={form.destination} onChange={set('destination')} />
             </Field>
             <Field label="งบประมาณ/ท่าน" optional="ถ้ามี">
@@ -659,11 +706,12 @@ export default function GroupQuotePage({ lang, setMessages }) {
             </div>
 
             {/* วันเดินทาง-ระยะเวลา */}
-            <Field label="วันที่ต้องการเดินทางไป" required>
-              <input style={inpStyle('travelDate')} placeholder="วันที่ต้องการเดินทางไป" type="date"
+            <Field label="วันที่ต้องการเดินทางไป" required error={errors.travelDate}>
+              <input style={inpStyle('travelDate')} type="date"
+                min={new Date().toISOString().split('T')[0]}
                 value={form.travelDate} onChange={set('travelDate')} />
             </Field>
-            <Field label="ต้องการทัวร์กี่วัน" required>
+            <Field label="ต้องการทัวร์กี่วัน" required error={errors.duration}>
               <select style={{ ...inpStyle('duration'), background: '#fff', cursor: 'pointer' }}
                 value={form.duration} onChange={set('duration')}>
                 {DURATION_OPTIONS.map(d => (
@@ -698,11 +746,16 @@ export default function GroupQuotePage({ lang, setMessages }) {
           {/* Error summary */}
           {Object.keys(errors).length > 0 && (
             <div style={{
-              marginTop: 20, padding: '12px 16px',
+              marginTop: 20, padding: '14px 16px',
               background: '#fff5f5', border: '1px solid #feb2b2',
               borderRadius: 8, fontSize: 13, color: '#c53030',
             }}>
-              กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบก่อนส่งข้อมูล
+              <strong>กรุณาแก้ไขข้อมูลที่ไม่ถูกต้องก่อนส่ง:</strong>
+              <ul style={{ margin: '6px 0 0', paddingLeft: 20 }}>
+                {Object.values(errors).filter(Boolean).map((msg, i) => (
+                  <li key={i}>{msg}</li>
+                ))}
+              </ul>
             </div>
           )}
 

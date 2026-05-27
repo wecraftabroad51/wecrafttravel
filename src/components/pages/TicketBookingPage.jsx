@@ -149,13 +149,33 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const th = lang !== 'en';
     if (!form.fullName || !form.passportNo || !form.outboundDate) {
-      setError(lang === 'th' ? 'กรุณากรอกข้อมูลที่จำเป็น' : 'Please fill in required fields.');
+      setError(th ? 'กรุณากรอกข้อมูลที่จำเป็น (ชื่อ, เลขพาสปอร์ต, วันเดินทาง)' : 'Please fill in required fields (name, passport, outbound date).');
+      return;
+    }
+    // เบอร์โทร
+    if (form.phone) {
+      const ph = form.phone.replace(/[\s\-().]/g, '');
+      if (!/^0[0-9]{9}$/.test(ph)) {
+        setError(th ? 'เบอร์โทรไม่ถูกต้อง (ต้อง 10 หลัก ขึ้นต้นด้วย 0 เช่น 081-234-5678)' : 'Invalid phone number (must be 10 digits starting with 0).');
+        return;
+      }
+    }
+    // อีเมล
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      setError(th ? 'รูปแบบอีเมลไม่ถูกต้อง (เช่น example@mail.com)' : 'Invalid email address format.');
+      return;
+    }
+    // วันขาไปต้องเป็นอนาคต
+    const today = new Date(); today.setHours(0,0,0,0);
+    if (new Date(form.outboundDate) < today) {
+      setError(th ? 'วันเดินทางขาไปต้องเป็นวันปัจจุบันหรืออนาคต' : 'Outbound date must be today or in the future.');
       return;
     }
     // วันขาไปต้องมาก่อนวันขากลับ
     if (form.returnDate && form.outboundDate >= form.returnDate) {
-      setError(lang === 'th' ? 'วันขาไปต้องมาก่อนวันขากลับ' : 'Outbound date must be before return date.');
+      setError(th ? 'วันขาไปต้องมาก่อนวันขากลับ' : 'Outbound date must be before return date.');
       return;
     }
     // พาสปอร์ตต้องเหลืออย่างน้อย 6 เดือนหลังวันขากลับ (หรือขาไปถ้าไม่มีขากลับ)
@@ -167,7 +187,7 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
         minExpiry.setMonth(minExpiry.getMonth() + 6);
         if (expiry < minExpiry) {
           const d = minExpiry.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
-          setError(lang === 'th'
+          setError(th
             ? `พาสปอร์ตต้องมีอายุเหลืออย่างน้อย 6 เดือนหลังวันเดินทาง (หมดอายุหลัง ${d})`
             : `Passport must be valid for at least 6 months after travel date (expires after ${d})`);
           return;
@@ -373,7 +393,9 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
             {/* Outbound */}
             <div style={{ marginBottom: 18 }}>
               <Label th="ขาไป — วันที่" en="Outbound — Date" lang={lang} required />
-              <Input type="date" value={form.outboundDate} onChange={e => set('outboundDate', e.target.value)} style={{ marginBottom: 10 }} />
+              <Input type="date" value={form.outboundDate}
+                min={new Date().toISOString().split('T')[0]}
+                onChange={e => set('outboundDate', e.target.value)} style={{ marginBottom: 10 }} />
               <Label th="ขาไป — ช่วงเวลาที่ต้องการ" en="Outbound — Preferred Time" lang={lang} />
               <RadioGroup options={TIME_SLOTS.map(s => ({ value: s, th: s, en: s }))}
                 value={form.outboundTime} onChange={v => set('outboundTime', v)} lang={lang} />
@@ -381,7 +403,9 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
             {/* Return */}
             <div>
               <Label th="ขากลับ — วันที่" en="Return — Date" lang={lang} />
-              <Input type="date" value={form.returnDate} onChange={e => set('returnDate', e.target.value)} style={{ marginBottom: 10 }} />
+              <Input type="date" value={form.returnDate}
+                min={form.outboundDate || new Date().toISOString().split('T')[0]}
+                onChange={e => set('returnDate', e.target.value)} style={{ marginBottom: 10 }} />
               <Label th="ขากลับ — ช่วงเวลาที่ต้องการ" en="Return — Preferred Time" lang={lang} />
               <RadioGroup options={TIME_SLOTS.map(s => ({ value: s, th: s, en: s }))}
                 value={form.returnTime} onChange={v => set('returnTime', v)} lang={lang} />

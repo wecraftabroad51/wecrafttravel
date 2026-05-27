@@ -67,6 +67,19 @@ export default function ContactPage({ lang, t, settings, setMessages }) {
 
   const submit = async () => {
     if (!form.name || !form.email || !form.message) return;
+    // Email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      alert(lang === 'th' ? 'รูปแบบอีเมลไม่ถูกต้อง' : 'Invalid email address format.');
+      return;
+    }
+    // Phone (optional — validate only if filled)
+    if (form.phone) {
+      const ph = form.phone.replace(/[\s\-().]/g, '');
+      if (!/^0[0-9]{9}$/.test(ph)) {
+        alert(lang === 'th' ? 'เบอร์โทรไม่ถูกต้อง (ต้อง 10 หลัก ขึ้นต้นด้วย 0)' : 'Invalid phone number (must be 10 digits starting with 0).');
+        return;
+      }
+    }
     setSaving(true);
     const msg = {
       name: form.name,
