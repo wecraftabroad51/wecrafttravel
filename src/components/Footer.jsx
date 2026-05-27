@@ -115,7 +115,7 @@ export default function Footer({ lang, t, navigate, settings }) {
                 <span>
                   {th
                     ? (contact?.address?.th || 'เลขที่ 99/548 อาคารบี ชั้น 14 ถ.รัชดาภิเษก(ท่าพระ-ตากสิน) แขวงตลาดพลู เขตธนบุรี กทม. 10600')
-                    : (contact?.address?.en || '99/548 Building B, 14th Floor, Ratchadaphisek Rd. (Tha Phra–Taksin), Talat Phlu, Thon Buri, Bangkok 10600')}
+                    : (contact?.address?.en || 'No. 99/548, Building B, 14th Floor, Ratchadaphisek Road (Tha Phra–Taksin), Talat Phlu Subdistrict, Thon Buri District, Bangkok 10600, Thailand')}
                 </span>
               </div>
             </div>
