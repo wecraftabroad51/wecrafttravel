@@ -57,11 +57,14 @@ async function generateSeqNo(sheets, sheetId, sheetName, type) {
   return `${fullPrefix}${runNo}`; // e.g. "TK690501"
 }
 
-// ── Send LINE push (plain text) ────────────────────────────────
+// ── Send LINE push (plain text) — ส่งไปทั้ง User และ Group ───
 async function sendLine(formData, seqNo, sheetUrl) {
-  const token  = process.env.LINE_CHANNEL_ACCESS_TOKEN;
-  const userId = process.env.LINE_OWNER_USER_ID;
-  if (!token || !userId) { console.log('LINE skipped: env vars not set'); return; }
+  const token   = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  const userId  = process.env.LINE_OWNER_USER_ID;
+  const groupId = process.env.LINE_GROUP_ID;
+
+  if (!token) { console.log('LINE skipped: no token'); return; }
+  if (!userId && !groupId) { console.log('LINE skipped: no userId or groupId'); return; }
 
   const f = formData;
   let text;
@@ -144,18 +147,23 @@ async function sendLine(formData, seqNo, sheetUrl) {
     text += `\n━━━━━━━━━━━━━━━━━━\n📊 ดูข้อมูลใน Google Sheet:\n${sheetUrl}`;
   }
 
-  const body = JSON.stringify({
-    to: userId,
-    messages: [{ type: 'text', text }],
-  });
+  const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
 
-  await httpsPost(
-    'api.line.me',
-    '/v2/bot/message/push',
-    { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    body
-  );
-  console.log('LINE text sent OK');
+  // ส่งไปทุก recipient ที่ตั้งไว้ (userId และ/หรือ groupId)
+  const recipients = [
+    userId  ? { id: userId,  label: 'owner' } : null,
+    groupId ? { id: groupId, label: 'group' } : null,
+  ].filter(Boolean);
+
+  await Promise.all(recipients.map(r =>
+    httpsPost(
+      'api.line.me',
+      '/v2/bot/message/push',
+      headers,
+      JSON.stringify({ to: r.id, messages: [{ type: 'text', text }] })
+    ).then(() => console.log(`LINE push OK → ${r.label} (${r.id.slice(0,8)}...)`))
+     .catch(e  => console.error(`LINE push FAILED → ${r.label}:`, e.message))
+  ));
 }
 
 // ── Send Email ─────────────────────────────────────────────────
