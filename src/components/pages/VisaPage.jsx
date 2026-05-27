@@ -1,23 +1,23 @@
 // code = ISO 3166-1 alpha-2 (lowercase) — used with flagcdn.com
 const VISA_LIST = [
-  { code: 'jp', country: 'ญี่ปุ่น',               note: 'ยื่นล่วงหน้า 2–4 สัปดาห์' },
-  { code: 'cn', country: 'จีน',                   note: 'ยื่นล่วงหน้า 2–3 สัปดาห์' },
-  { code: 'gb', country: 'อังกฤษ',                note: 'ยื่นล่วงหน้า 4–6 สัปดาห์' },
-  { code: 'eu', country: 'กลุ่มเชงเก้น (ยุโรป)', note: 'ฝรั่งเศส, เยอรมัน, อิตาลี ฯลฯ' },
-  { code: 'us', country: 'สหรัฐอเมริกา',          note: 'ยื่นล่วงหน้า 2–3 เดือน' },
-  { code: 'ca', country: 'แคนาดา',               note: 'ยื่นล่วงหน้า 4–8 สัปดาห์' },
-  { code: 'au', country: 'ออสเตรเลีย',            note: 'ยื่นออนไลน์ 1–4 สัปดาห์' },
-  { code: 'nz', country: 'นิวซีแลนด์',            note: 'ยื่นออนไลน์ 1–3 สัปดาห์' },
-  { code: 'in', country: 'อินเดีย',               note: 'e-Visa 3–5 วันทำการ' },
-  { code: 'ae', country: 'สหรัฐอาหรับเอมิเรตส์', note: 'e-Visa 3–5 วันทำการ' },
-  { code: 'sa', country: 'ซาอุดีอาระเบีย',        note: 'ยื่นล่วงหน้า 2–4 สัปดาห์' },
-  { code: 'ru', country: 'รัสเซีย',               note: 'ยื่นล่วงหน้า 2–4 สัปดาห์' },
-  { code: 'za', country: 'แอฟริกาใต้',            note: 'ยื่นล่วงหน้า 4–6 สัปดาห์' },
-  { code: 'eg', country: 'อียิปต์',               note: 'e-Visa หรือยื่นที่ด่าน' },
-  { code: 'ma', country: 'โมร็อกโก',              note: 'ยื่นล่วงหน้า 2–3 สัปดาห์' },
+  { code: 'jp', th: 'ญี่ปุ่น',               en: 'Japan',                noteTh: 'ยื่นล่วงหน้า 2–4 สัปดาห์',        noteEn: 'Apply 2–4 weeks in advance' },
+  { code: 'cn', th: 'จีน',                   en: 'China',                noteTh: 'ยื่นล่วงหน้า 2–3 สัปดาห์',        noteEn: 'Apply 2–3 weeks in advance' },
+  { code: 'gb', th: 'อังกฤษ',                en: 'United Kingdom',       noteTh: 'ยื่นล่วงหน้า 4–6 สัปดาห์',        noteEn: 'Apply 4–6 weeks in advance' },
+  { code: 'eu', th: 'กลุ่มเชงเก้น (ยุโรป)', en: 'Schengen (Europe)',    noteTh: 'ฝรั่งเศส, เยอรมัน, อิตาลี ฯลฯ',  noteEn: 'France, Germany, Italy, etc.' },
+  { code: 'us', th: 'สหรัฐอเมริกา',          en: 'United States',        noteTh: 'ยื่นล่วงหน้า 2–3 เดือน',          noteEn: 'Apply 2–3 months in advance' },
+  { code: 'ca', th: 'แคนาดา',               en: 'Canada',               noteTh: 'ยื่นล่วงหน้า 4–8 สัปดาห์',        noteEn: 'Apply 4–8 weeks in advance' },
+  { code: 'au', th: 'ออสเตรเลีย',            en: 'Australia',            noteTh: 'ยื่นออนไลน์ 1–4 สัปดาห์',         noteEn: 'Online application 1–4 weeks' },
+  { code: 'nz', th: 'นิวซีแลนด์',            en: 'New Zealand',          noteTh: 'ยื่นออนไลน์ 1–3 สัปดาห์',         noteEn: 'Online application 1–3 weeks' },
+  { code: 'in', th: 'อินเดีย',               en: 'India',                noteTh: 'e-Visa 3–5 วันทำการ',             noteEn: 'e-Visa 3–5 business days' },
+  { code: 'ae', th: 'สหรัฐอาหรับเอมิเรตส์', en: 'UAE',                  noteTh: 'e-Visa 3–5 วันทำการ',             noteEn: 'e-Visa 3–5 business days' },
+  { code: 'sa', th: 'ซาอุดีอาระเบีย',        en: 'Saudi Arabia',         noteTh: 'ยื่นล่วงหน้า 2–4 สัปดาห์',        noteEn: 'Apply 2–4 weeks in advance' },
+  { code: 'ru', th: 'รัสเซีย',               en: 'Russia',               noteTh: 'ยื่นล่วงหน้า 2–4 สัปดาห์',        noteEn: 'Apply 2–4 weeks in advance' },
+  { code: 'za', th: 'แอฟริกาใต้',            en: 'South Africa',         noteTh: 'ยื่นล่วงหน้า 4–6 สัปดาห์',        noteEn: 'Apply 4–6 weeks in advance' },
+  { code: 'eg', th: 'อียิปต์',               en: 'Egypt',                noteTh: 'e-Visa หรือยื่นที่ด่าน',           noteEn: 'e-Visa or visa on arrival' },
+  { code: 'ma', th: 'โมร็อกโก',              en: 'Morocco',              noteTh: 'ยื่นล่วงหน้า 2–3 สัปดาห์',        noteEn: 'Apply 2–3 weeks in advance' },
 ];
 
-const DOCS = [
+const DOCS_TH = [
   'หนังสือเดินทาง (Passport) อายุเหลืออย่างน้อย 6 เดือน',
   'รูปถ่ายสีพื้นหลังขาว ขนาด 2×2 นิ้ว (ตามข้อกำหนดแต่ละประเทศ)',
   'สำเนาทะเบียนบ้าน / สำเนาบัตรประชาชน',
@@ -25,6 +25,44 @@ const DOCS = [
   'หลักฐานการจอง: ตั๋วเครื่องบิน / โรงแรม',
   'จดหมายรับรองการทำงาน / ใบจดทะเบียนธุรกิจ',
   'ประกันการเดินทาง (บางประเทศบังคับ)',
+];
+
+const DOCS_EN = [
+  'Passport valid for at least 6 months',
+  'White-background photo, 2×2 inches (per country requirements)',
+  'Copy of house registration / national ID card',
+  'Bank statement for the past 3–6 months',
+  'Booking confirmation: flight ticket / hotel',
+  'Employment letter / business registration certificate',
+  'Travel insurance (mandatory for some countries)',
+];
+
+const WHY_US_TH = [
+  { icon: '🎯', title: 'ประสบการณ์สูง',   desc: 'ทีมงานเชี่ยวชาญด้านเอกสารวีซ่าทุกประเทศ' },
+  { icon: '⚡', title: 'รวดเร็ว',          desc: 'ดำเนินการเร็ว แจ้งผลทันที' },
+  { icon: '📋', title: 'เอกสารครบ',        desc: 'แนะนำเอกสารครบถ้วนลดโอกาสถูกปฏิเสธ' },
+  { icon: '🛡️', title: 'น่าเชื่อถือ',      desc: 'มีใบอนุญาต ททท. เลขที่ 11/11550' },
+];
+
+const WHY_US_EN = [
+  { icon: '🎯', title: 'Highly Experienced', desc: 'Expert team specialising in visa documentation for every country' },
+  { icon: '⚡', title: 'Fast Processing',    desc: 'Quick turnaround with immediate status updates' },
+  { icon: '📋', title: 'Complete Documents', desc: 'Full document guidance to minimise rejection risk' },
+  { icon: '🛡️', title: 'Trustworthy',        desc: 'TAT-licensed agency, licence no. 11/11550' },
+];
+
+const STEPS_TH = [
+  { title: 'ติดต่อเจ้าหน้าที่',      desc: 'แจ้งประเทศปลายทาง วันเดินทาง และจำนวนผู้เดินทาง ผ่าน LINE หรือโทรศัพท์' },
+  { title: 'รับเช็กลิสต์เอกสาร',    desc: 'เจ้าหน้าที่จะส่งรายการเอกสารที่จำเป็นสำหรับประเทศนั้นๆ โดยเฉพาะ' },
+  { title: 'จัดส่งเอกสาร',          desc: 'นำเอกสารมาส่งได้ที่สำนักงาน หรือส่งทางไปรษณีย์' },
+  { title: 'รับวีซ่า',              desc: 'เมื่อสถานทูตอนุมัติ เจ้าหน้าที่จะแจ้งให้ทราบทันทีและนัดรับเอกสารคืน' },
+];
+
+const STEPS_EN = [
+  { title: 'Contact Our Team',       desc: 'Let us know your destination, travel dates, and number of travellers via LINE or phone' },
+  { title: 'Receive Document Checklist', desc: 'Our staff will send you a tailored document checklist specific to that country' },
+  { title: 'Submit Documents',       desc: 'Drop off documents at our office or send them by post' },
+  { title: 'Collect Your Visa',      desc: 'Once the embassy approves, we will notify you immediately and arrange document collection' },
 ];
 
 // Flag image from flagcdn.com — renders on all browsers/OS
@@ -44,7 +82,6 @@ function FlagImg({ code }) {
         flexShrink: 0,
       }}
       onError={e => {
-        // fallback: show code text if image fails
         e.currentTarget.style.display = 'none';
         e.currentTarget.nextSibling && (e.currentTarget.nextSibling.style.display = 'flex');
       }}
@@ -52,7 +89,9 @@ function FlagImg({ code }) {
   );
 }
 
-export default function VisaPage({ navigate }) {
+export default function VisaPage({ lang = 'th', navigate }) {
+  const th = lang === 'th';
+
   return (
     <div style={{ background: '#f8f9fa', minHeight: '100vh', paddingBottom: 60 }}>
       <style>{`
@@ -88,9 +127,13 @@ export default function VisaPage({ navigate }) {
       <div style={{ background: 'linear-gradient(135deg, #1a5276, #2e86c1)', padding: '40px 20px', marginBottom: 32 }}>
         <div className="visa-wrap" style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,.75)', letterSpacing: 3, marginBottom: 8 }}>VISA SERVICE</div>
-          <h1 style={{ fontSize: 30, fontWeight: 900, color: '#fff', margin: 0 }}>บริการยื่นวีซ่า</h1>
+          <h1 style={{ fontSize: 30, fontWeight: 900, color: '#fff', margin: 0 }}>
+            {th ? 'บริการยื่นวีซ่า' : 'Visa Application Service'}
+          </h1>
           <p style={{ color: 'rgba(255,255,255,.8)', marginTop: 8, fontSize: 15 }}>
-            ครบทุกประเทศ — ทีมงานมืออาชีพช่วยดูแลทุกขั้นตอน
+            {th
+              ? 'ครบทุกประเทศ — ทีมงานมืออาชีพช่วยดูแลทุกขั้นตอน'
+              : 'All countries covered — our professional team handles every step for you'}
           </p>
         </div>
       </div>
@@ -99,14 +142,11 @@ export default function VisaPage({ navigate }) {
 
         {/* Why us */}
         <div className="visa-card">
-          <div className="visa-section-title">✅ ทำไมต้องใช้บริการยื่นวีซ่ากับเรา</div>
+          <div className="visa-section-title">
+            {th ? '✅ ทำไมต้องใช้บริการยื่นวีซ่ากับเรา' : '✅ Why Choose Our Visa Service'}
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
-            {[
-              { icon: '🎯', title: 'ประสบการณ์สูง', desc: 'ทีมงานเชี่ยวชาญด้านเอกสารวีซ่าทุกประเทศ' },
-              { icon: '⚡', title: 'รวดเร็ว', desc: 'ดำเนินการเร็ว แจ้งผลทันที' },
-              { icon: '📋', title: 'เอกสารครบ', desc: 'แนะนำเอกสารครบถ้วนลดโอกาสถูกปฏิเสธ' },
-              { icon: '🛡️', title: 'น่าเชื่อถือ', desc: 'มีใบอนุญาต ททท. เลขที่ 11/11550' },
-            ].map((item, i) => (
+            {(th ? WHY_US_TH : WHY_US_EN).map((item, i) => (
               <div key={i} style={{ background: '#f0f8ff', borderRadius: 10, padding: '16px 18px' }}>
                 <div style={{ fontSize: 28, marginBottom: 8 }}>{item.icon}</div>
                 <div style={{ fontWeight: 800, fontSize: 14, color: '#222', marginBottom: 4 }}>{item.title}</div>
@@ -118,13 +158,13 @@ export default function VisaPage({ navigate }) {
 
         {/* Country list */}
         <div className="visa-card">
-          <div className="visa-section-title">🌍 ประเทศที่ให้บริการยื่นวีซ่า</div>
+          <div className="visa-section-title">
+            {th ? '🌍 ประเทศที่ให้บริการยื่นวีซ่า' : '🌍 Countries We Cover'}
+          </div>
           <div className="visa-country-grid">
             {VISA_LIST.map((v, i) => (
               <div key={i} className="visa-country-item">
-                {/* Flag image — real PNG from flagcdn.com */}
                 <FlagImg code={v.code} />
-                {/* Fallback code badge (hidden unless image errors) */}
                 <div style={{
                   display: 'none', width: 48, height: 36,
                   background: '#e8eaf0', borderRadius: 5,
@@ -135,26 +175,29 @@ export default function VisaPage({ navigate }) {
                   {v.code.toUpperCase()}
                 </div>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: '#222', lineHeight: 1.3 }}>{v.country}</div>
-                  <div style={{ fontSize: 11, color: '#888', marginTop: 3 }}>{v.note}</div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: '#222', lineHeight: 1.3 }}>
+                    {th ? v.th : v.en}
+                  </div>
+                  <div style={{ fontSize: 11, color: '#888', marginTop: 3 }}>
+                    {th ? v.noteTh : v.noteEn}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
           <p style={{ marginTop: 16, fontSize: 13, color: '#888', fontStyle: 'italic' }}>
-            * สามารถยื่นวีซ่าได้ทุกประเทศ — ติดต่อสอบถามเพิ่มเติมได้เลยครับ
+            {th
+              ? '* สามารถยื่นวีซ่าได้ทุกประเทศ — ติดต่อสอบถามเพิ่มเติมได้เลยครับ'
+              : '* We can assist with visa applications for all countries — feel free to enquire.'}
           </p>
         </div>
 
         {/* Steps */}
         <div className="visa-card">
-          <div className="visa-section-title">📌 ขั้นตอนการใช้บริการ</div>
-          {[
-            { title: 'ติดต่อเจ้าหน้าที่', desc: 'แจ้งประเทศปลายทาง วันเดินทาง และจำนวนผู้เดินทาง ผ่าน LINE หรือโทรศัพท์' },
-            { title: 'รับเช็กลิสต์เอกสาร', desc: 'เจ้าหน้าที่จะส่งรายการเอกสารที่จำเป็นสำหรับประเทศนั้นๆ โดยเฉพาะ' },
-            { title: 'จัดส่งเอกสาร', desc: 'นำเอกสารมาส่งได้ที่สำนักงาน หรือส่งทางไปรษณีย์' },
-            { title: 'รับวีซ่า', desc: 'เมื่อสถานทูตอนุมัติ เจ้าหน้าที่จะแจ้งให้ทราบทันทีและนัดรับเอกสารคืน' },
-          ].map((step, i) => (
+          <div className="visa-section-title">
+            {th ? '📌 ขั้นตอนการใช้บริการ' : '📌 How It Works'}
+          </div>
+          {(th ? STEPS_TH : STEPS_EN).map((step, i) => (
             <div key={i} className="visa-step">
               <div className="visa-step-no">{i + 1}</div>
               <div>
@@ -167,9 +210,11 @@ export default function VisaPage({ navigate }) {
 
         {/* Required docs */}
         <div className="visa-card">
-          <div className="visa-section-title">📄 เอกสารทั่วไปที่ต้องใช้</div>
+          <div className="visa-section-title">
+            {th ? '📄 เอกสารทั่วไปที่ต้องใช้' : '📄 General Documents Required'}
+          </div>
           <div style={{ columns: 2, columnGap: 24 }}>
-            {DOCS.map((doc, i) => (
+            {(th ? DOCS_TH : DOCS_EN).map((doc, i) => (
               <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 10, breakInside: 'avoid' }}>
                 <span style={{ color: 'var(--primary)', fontWeight: 900, flexShrink: 0 }}>•</span>
                 <span style={{ fontSize: 14, color: '#444', lineHeight: 1.6 }}>{doc}</span>
@@ -177,14 +222,20 @@ export default function VisaPage({ navigate }) {
             ))}
           </div>
           <p style={{ marginTop: 12, fontSize: 13, color: '#888' }}>
-            * เอกสารอาจแตกต่างกันตามแต่ละประเทศและสถานทูต ทีมงานจะแจ้งรายละเอียดเฉพาะให้ทราบ
+            {th
+              ? '* เอกสารอาจแตกต่างกันตามแต่ละประเทศและสถานทูต ทีมงานจะแจ้งรายละเอียดเฉพาะให้ทราบ'
+              : '* Required documents vary by country and embassy. Our team will provide a specific checklist for your destination.'}
           </p>
         </div>
 
         {/* CTA */}
         <div className="visa-card" style={{ textAlign: 'center', background: 'linear-gradient(135deg, #eaf3fb, #fff)' }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: '#222', marginBottom: 8 }}>สอบถามบริการวีซ่า</div>
-          <p style={{ fontSize: 14, color: '#666', marginBottom: 20 }}>ติดต่อเราได้เลย ทีมงานพร้อมให้คำแนะนำ</p>
+          <div style={{ fontSize: 20, fontWeight: 800, color: '#222', marginBottom: 8 }}>
+            {th ? 'สอบถามบริการวีซ่า' : 'Enquire About Visa Service'}
+          </div>
+          <p style={{ fontSize: 14, color: '#666', marginBottom: 20 }}>
+            {th ? 'ติดต่อเราได้เลย ทีมงานพร้อมให้คำแนะนำ' : 'Contact us anytime — our team is ready to help'}
+          </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="tel:0618686889" style={{
               background: '#1a5276', color: '#fff',
