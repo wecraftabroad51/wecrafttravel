@@ -115,13 +115,13 @@ function TourRow({ tour, t, navigate, inCompare, onCompare }) {
 }
 
 const TOUR_TYPE_TABS = [
-  { value: 'all',           label: 'ทั้งหมด' },
-  { value: 'international', label: 'ทัวร์ต่างประเทศ' },
-  { value: 'domestic',      label: 'ทัวร์ในประเทศ' },
-  { value: 'premium',       label: 'ทัวร์พรีเมี่ยม' },
-  { value: 'hotdeal',       label: '🔥 โปรไฟไหม้' },
-  { value: 'package',       label: 'แพ็คเกจทัวร์' },
-  { value: 'cruise',        label: 'เรือสำราญ' },
+  { value: 'all',           label: 'ทั้งหมด',         labelEn: 'All' },
+  { value: 'international', label: 'ทัวร์ต่างประเทศ', labelEn: 'International' },
+  { value: 'domestic',      label: 'ทัวร์ในประเทศ',   labelEn: 'Domestic' },
+  { value: 'premium',       label: 'ทัวร์พรีเมี่ยม',  labelEn: 'Premium' },
+  { value: 'hotdeal',       label: '🔥 โปรไฟไหม้',    labelEn: '🔥 Hot Deals' },
+  { value: 'package',       label: 'แพ็คเกจทัวร์',    labelEn: 'Packages' },
+  { value: 'cruise',        label: 'เรือสำราญ',        labelEn: 'Cruise' },
 ];
 
 const CONTINENT_TH = {
@@ -131,6 +131,16 @@ const CONTINENT_TH = {
   'Oceania': 'โอเชียเนีย', 'Africa': 'แอฟริกา',
   'Dom-North': 'ภาคเหนือ', 'Dom-Central': 'ภาคกลาง/ตะวันออก',
   'Dom-South': 'ภาคใต้', 'Dom-NE': 'ภาคอีสาน',
+};
+
+const CONTINENT_EN = {
+  'Europe': 'Europe', 'Asia': 'Asia', 'Asia-East': 'East Asia',
+  'Asia-SE': 'Southeast Asia', 'Asia-S-ME': 'South Asia / Middle East',
+  'Middle East': 'Middle East', 'Americas': 'Americas',
+  'Oceania': 'Oceania', 'Africa': 'Africa',
+  'Dom-North': 'Northern TH', 'Dom-Central': 'Central TH',
+  'Dom-South': 'Southern TH', 'Dom-NE': 'Northeastern TH',
+  'All': 'All',
 };
 
 export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, reviews, settings, compareList, toggleCompare, setBookings, setReviews, setMessages, initialFilters }) {
@@ -204,7 +214,7 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
                   color: continent === c ? '#fff' : 'var(--ink)',
                   fontSize: 12, fontWeight: 500, cursor: 'pointer',
                 }}>
-                {CONTINENT_TH[c] || c}
+                {c === 'All' ? (lang === 'th' ? 'ทั้งหมด' : 'All') : (lang === 'en' ? (CONTINENT_EN[c] || c) : (CONTINENT_TH[c] || c))}
               </button>
             ))}
           </div>

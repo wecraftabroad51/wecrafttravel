@@ -113,40 +113,40 @@ function HeroSection({ navigate, lang }) {
 
 // ─── SEARCH BOX (left sidebar) ────────────────────────────────
 const TOUR_TYPE_OPTIONS = [
-  { value: 'international', label: 'ทัวร์ต่างประเทศ' },
-  { value: 'domestic',      label: 'ทัวร์ในประเทศ' },
-  { value: 'premium',       label: 'ทัวร์พรีเมี่ยม' },
-  { value: 'hotdeal',       label: '🔥 ทัวร์โปรไฟไหม้' },
-  { value: 'package',       label: 'แพ็คเกจทัวร์' },
-  { value: 'cruise',        label: 'เรือสำราญ' },
+  { value: 'international', label: 'ทัวร์ต่างประเทศ', labelEn: 'International' },
+  { value: 'domestic',      label: 'ทัวร์ในประเทศ',   labelEn: 'Domestic' },
+  { value: 'premium',       label: 'ทัวร์พรีเมี่ยม',  labelEn: 'Premium' },
+  { value: 'hotdeal',       label: '🔥 ทัวร์โปรไฟไหม้', labelEn: '🔥 Hot Deals' },
+  { value: 'package',       label: 'แพ็คเกจทัวร์',    labelEn: 'Packages' },
+  { value: 'cruise',        label: 'เรือสำราญ',        labelEn: 'Cruise' },
 ];
 const ZONE_OPTIONS = [
-  { value: 'Europe',      label: 'ยุโรป',                         countries: ['ฝรั่งเศส','อิตาลี','สวิตเซอร์แลนด์','เยอรมัน','อังกฤษ','สเปน','โปรตุเกส','ออสเตรีย','นอร์เวย์','สวีเดน','กรีซ','ตุรกี'] },
-  { value: 'Asia-East',   label: 'เอเชียตะวันออก',                countries: ['ญี่ปุ่น','จีน','เกาหลีใต้','ไต้หวัน','ฮ่องกง','มาเก๊า'] },
-  { value: 'Asia-SE',     label: 'เอเชียตะวันออกเฉียงใต้',        countries: ['สิงคโปร์','เวียดนาม','มาเลเซีย','อินโดนีเซีย','ฟิลิปปินส์','พม่า','กัมพูชา','ลาว'] },
-  { value: 'Asia-S-ME',   label: 'เอเชียใต้ / ตะวันออกกลาง',     countries: ['อินเดีย','มัลดีฟส์','ศรีลังกา','สหรัฐอาหรับเอมิเรตส์','กาตาร์','จอร์แดน'] },
-  { value: 'Americas',    label: 'อเมริกา',                       countries: ['สหรัฐอเมริกา','แคนาดา','เม็กซิโก','เปรู','บราซิล'] },
-  { value: 'Oceania',     label: 'โอเชียเนีย / แปซิฟิก',          countries: ['ออสเตรเลีย','นิวซีแลนด์','ฟิจิ','ฮาวาย'] },
-  { value: 'Africa',      label: 'แอฟริกา',                       countries: ['โมร็อกโก','แอฟริกาใต้','เคนยา','อียิปต์','แทนซาเนีย'] },
-  { value: 'Dom-North',   label: 'ในประเทศ — ภาคเหนือ',           countries: ['เชียงใหม่','เชียงราย','แม่ฮ่องสอน','น่าน','ลำปาง'] },
-  { value: 'Dom-Central', label: 'ในประเทศ — ภาคกลาง/ตะวันออก',  countries: ['กรุงเทพฯ','พัทยา','ระยอง','เกาะเสม็ด','กาญจนบุรี'] },
-  { value: 'Dom-South',   label: 'ในประเทศ — ภาคใต้',             countries: ['ภูเก็ต','กระบี่','เกาะสมุย','เกาะพะงัน','เกาะลันตา','ตรัง'] },
-  { value: 'Dom-NE',      label: 'ในประเทศ — ภาคอีสาน',           countries: ['เขาใหญ่','โคราช','ขอนแก่น','อุดรธานี','หนองคาย','เลย'] },
+  { value: 'Europe',      label: 'ยุโรป',                        labelEn: 'Europe',                   countries: ['ฝรั่งเศส','อิตาลี','สวิตเซอร์แลนด์','เยอรมัน','อังกฤษ','สเปน','โปรตุเกส','ออสเตรีย','นอร์เวย์','สวีเดน','กรีซ','ตุรกี'] },
+  { value: 'Asia-East',   label: 'เอเชียตะวันออก',               labelEn: 'East Asia',                countries: ['ญี่ปุ่น','จีน','เกาหลีใต้','ไต้หวัน','ฮ่องกง','มาเก๊า'] },
+  { value: 'Asia-SE',     label: 'เอเชียตะวันออกเฉียงใต้',       labelEn: 'Southeast Asia',           countries: ['สิงคโปร์','เวียดนาม','มาเลเซีย','อินโดนีเซีย','ฟิลิปปินส์','พม่า','กัมพูชา','ลาว'] },
+  { value: 'Asia-S-ME',   label: 'เอเชียใต้ / ตะวันออกกลาง',    labelEn: 'South Asia / Middle East', countries: ['อินเดีย','มัลดีฟส์','ศรีลังกา','สหรัฐอาหรับเอมิเรตส์','กาตาร์','จอร์แดน'] },
+  { value: 'Americas',    label: 'อเมริกา',                      labelEn: 'Americas',                 countries: ['สหรัฐอเมริกา','แคนาดา','เม็กซิโก','เปรู','บราซิล'] },
+  { value: 'Oceania',     label: 'โอเชียเนีย / แปซิฟิก',         labelEn: 'Oceania / Pacific',        countries: ['ออสเตรเลีย','นิวซีแลนด์','ฟิจิ','ฮาวาย'] },
+  { value: 'Africa',      label: 'แอฟริกา',                      labelEn: 'Africa',                   countries: ['โมร็อกโก','แอฟริกาใต้','เคนยา','อียิปต์','แทนซาเนีย'] },
+  { value: 'Dom-North',   label: 'ในประเทศ — ภาคเหนือ',          labelEn: 'Domestic — North',         countries: ['เชียงใหม่','เชียงราย','แม่ฮ่องสอน','น่าน','ลำปาง'] },
+  { value: 'Dom-Central', label: 'ในประเทศ — ภาคกลาง/ตะวันออก', labelEn: 'Domestic — Central/East',  countries: ['กรุงเทพฯ','พัทยา','ระยอง','เกาะเสม็ด','กาญจนบุรี'] },
+  { value: 'Dom-South',   label: 'ในประเทศ — ภาคใต้',            labelEn: 'Domestic — South',         countries: ['ภูเก็ต','กระบี่','เกาะสมุย','เกาะพะงัน','เกาะลันตา','ตรัง'] },
+  { value: 'Dom-NE',      label: 'ในประเทศ — ภาคอีสาน',          labelEn: 'Domestic — Northeast',     countries: ['เขาใหญ่','โคราช','ขอนแก่น','อุดรธานี','หนองคาย','เลย'] },
 ];
 const AIRLINES = ['การบินไทย', 'Thai Airways', 'AirAsia', 'Nok Air', 'Emirates', 'Qatar Airways', 'Singapore Airlines', 'Korean Air', 'Japan Airlines', 'Cathay Pacific'];
 
 const QUICK_LINKS = [
-  { label: 'ญี่ปุ่น',     country: 'ญี่ปุ่น',         continent: 'Asia-East',   tourType: 'international' },
-  { label: 'เกาหลี',     country: 'เกาหลีใต้',        continent: 'Asia-East',   tourType: 'international' },
-  { label: 'จีน',        country: 'จีน',              continent: 'Asia-East',   tourType: 'international' },
-  { label: 'ยุโรป',      country: '',                 continent: 'Europe',      tourType: 'international' },
-  { label: 'มัลดีฟส์',   country: 'มัลดีฟส์',         continent: 'Asia-S-ME',   tourType: 'international' },
-  { label: 'สิงคโปร์',   country: 'สิงคโปร์',          continent: 'Asia-SE',     tourType: 'international' },
-  { label: 'เวียดนาม',   country: 'เวียดนาม',          continent: 'Asia-SE',     tourType: 'international' },
-  { label: 'ไต้หวัน',    country: 'ไต้หวัน',           continent: 'Asia-East',   tourType: 'international' },
+  { label: 'ญี่ปุ่น',   labelEn: 'Japan',     country: 'ญี่ปุ่น',   continent: 'Asia-East',  tourType: 'international' },
+  { label: 'เกาหลี',   labelEn: 'Korea',     country: 'เกาหลีใต้', continent: 'Asia-East',  tourType: 'international' },
+  { label: 'จีน',      labelEn: 'China',     country: 'จีน',       continent: 'Asia-East',  tourType: 'international' },
+  { label: 'ยุโรป',    labelEn: 'Europe',    country: '',          continent: 'Europe',     tourType: 'international' },
+  { label: 'มัลดีฟส์', labelEn: 'Maldives',  country: 'มัลดีฟส์',  continent: 'Asia-S-ME',  tourType: 'international' },
+  { label: 'สิงคโปร์', labelEn: 'Singapore', country: 'สิงคโปร์',  continent: 'Asia-SE',    tourType: 'international' },
+  { label: 'เวียดนาม', labelEn: 'Vietnam',   country: 'เวียดนาม',  continent: 'Asia-SE',    tourType: 'international' },
+  { label: 'ไต้หวัน',  labelEn: 'Taiwan',    country: 'ไต้หวัน',   continent: 'Asia-East',  tourType: 'international' },
 ];
 
-function SearchSidebar({ navigate }) {
+function SearchSidebar({ navigate, lang }) {
   const [tourType, setTourType] = useState('');
   const [zone, setZone] = useState('');
   const [country, setCountry] = useState('');
@@ -176,41 +176,41 @@ function SearchSidebar({ navigate }) {
     }}>
       {/* Header */}
       <div style={{ background: 'var(--primary)', color: '#fff', padding: '14px 18px', fontSize: 15, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Icon name="search" size={17} color="#fff" /> ค้นหาทัวร์ที่ต้องการ
+        <Icon name="search" size={17} color="#fff" /> {lang === 'th' ? 'ค้นหาทัวร์ที่ต้องการ' : 'Find Your Tour'}
       </div>
       <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
-          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>ประเภทการเดินทาง</label>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'ประเภทการเดินทาง' : 'Tour Type'}</label>
           <select value={tourType} onChange={e => setTourType(e.target.value)}>
-            <option value="">-- ทุกประเภท --</option>
-            {TOUR_TYPE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+            <option value="">{lang === 'th' ? '-- ทุกประเภท --' : '-- All Types --'}</option>
+            {TOUR_TYPE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{lang === 'en' ? opt.labelEn : opt.label}</option>)}
           </select>
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>โซน / ทวีป</label>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'โซน / ทวีป' : 'Zone / Continent'}</label>
           <select value={zone} onChange={e => { setZone(e.target.value); setCountry(''); }}>
-            <option value="">-- เลือกโซน --</option>
-            {ZONE_OPTIONS.map(z => <option key={z.value} value={z.value}>{z.label}</option>)}
+            <option value="">{lang === 'th' ? '-- เลือกโซน --' : '-- Select Zone --'}</option>
+            {ZONE_OPTIONS.map(z => <option key={z.value} value={z.value}>{lang === 'en' ? z.labelEn : z.label}</option>)}
           </select>
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>ประเทศ / จังหวัด</label>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'ประเทศ / จังหวัด' : 'Country / Province'}</label>
           <select value={country} onChange={e => setCountry(e.target.value)} disabled={!zone}>
-            <option value="">-- เลือกประเทศ --</option>
+            <option value="">{lang === 'th' ? '-- เลือกประเทศ --' : '-- Select Country --'}</option>
             {countries.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>สายการบิน</label>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'สายการบิน' : 'Airline'}</label>
           <select value={airline} onChange={e => setAirline(e.target.value)}>
-            <option value="">-- ทุกสายการบิน --</option>
+            <option value="">{lang === 'th' ? '-- ทุกสายการบิน --' : '-- All Airlines --'}</option>
             {AIRLINES.map(a => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>เดือนที่เดินทาง</label>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'เดือนที่เดินทาง' : 'Travel Month'}</label>
           <select value={month} onChange={e => setMonth(e.target.value)}>
-            <option value="">-- ทุกเดือน --</option>
+            <option value="">{lang === 'th' ? '-- ทุกเดือน --' : '-- Any Month --'}</option>
             {months.map((m, i) => <option key={i} value={m}>{m} 2569</option>)}
           </select>
         </div>
@@ -220,11 +220,11 @@ function SearchSidebar({ navigate }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           boxShadow: '0 3px 10px rgba(230,92,0,.3)', marginTop: 2,
         }}>
-          <Icon name="search" size={15} color="#fff" /> ค้นหาทัวร์
+          <Icon name="search" size={15} color="#fff" /> {lang === 'th' ? 'ค้นหาทัวร์' : 'Search Tours'}
         </button>
         {/* Quick links */}
         <div style={{ borderTop: '1px solid var(--line)', paddingTop: 10 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 7 }}>ค้นหาด่วน</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', marginBottom: 7 }}>{lang === 'th' ? 'ค้นหาด่วน' : 'Quick Links'}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
             {QUICK_LINKS.map(ql => (
               <button key={ql.label} onClick={() => navigate('tours', null, { tourType: ql.tourType, continent: ql.continent, country: ql.country })} style={{
@@ -232,7 +232,7 @@ function SearchSidebar({ navigate }) {
                 border: '1px solid #ffc89a', borderRadius: 999,
                 padding: '3px 10px', fontSize: 12, fontWeight: 600,
                 cursor: 'pointer', fontFamily: 'inherit',
-              }}>{ql.label}</button>
+              }}>{lang === 'en' ? ql.labelEn : ql.label}</button>
             ))}
           </div>
         </div>
@@ -271,17 +271,18 @@ function SectionHeader({ title, emoji, sub, onMore, moreLabel = 'ดูทั้
 }
 
 // ─── HOT DEALS SECTION ───────────────────────────────────────
-function HotDealsSection({ tours, navigate, t, compareList, toggleCompare, inner }) {
+function HotDealsSection({ tours, navigate, t, compareList, toggleCompare, inner, lang }) {
   const hotTours = tours.filter(tr => tr.featured).slice(0, inner ? 3 : 4);
   if (!hotTours.length) return null;
 
   const content = (
     <>
       <SectionHeader
-        title="ทัวร์โปรไฟไหม้"
+        title={lang === 'th' ? 'ทัวร์โปรไฟไหม้' : 'Hot Deals'}
         emoji="🔥"
-        sub="โปรโมชั่นพิเศษ ราคาถูกมาก จองด่วน ก่อนเต็ม!"
+        sub={lang === 'th' ? 'โปรโมชั่นพิเศษ ราคาถูกมาก จองด่วน ก่อนเต็ม!' : 'Special deals — book fast before sold out!'}
         onMore={() => navigate('tours')}
+        moreLabel={lang === 'th' ? 'ดูทั้งหมด' : 'View all'}
       />
       <div className={inner ? 'grid-cols-3' : 'grid-cols-4'} style={{ gap: 16 }}>
         {hotTours.map(tr => (
@@ -304,7 +305,7 @@ function HotDealsSection({ tours, navigate, t, compareList, toggleCompare, inner
 }
 
 // ─── NEW TOURS ───────────────────────────────────────────────
-function NewToursSection({ tours, navigate, t, compareList, toggleCompare }) {
+function NewToursSection({ tours, navigate, t, compareList, toggleCompare, lang }) {
   const newTours = tours.slice(0, 4);
   if (!newTours.length) return null;
 
@@ -312,10 +313,11 @@ function NewToursSection({ tours, navigate, t, compareList, toggleCompare }) {
     <section style={{ background: '#fff', padding: '36px 0' }}>
       <div className="wrap">
         <SectionHeader
-          title="โปรแกรมทัวร์มาใหม่"
+          title={lang === 'th' ? 'โปรแกรมทัวร์มาใหม่' : 'New Tours'}
           emoji="✨"
-          sub="อัพเดทโปรแกรมท่องเที่ยวใหม่ล่าสุด พร้อมออกเดินทาง"
+          sub={lang === 'th' ? 'อัพเดทโปรแกรมท่องเที่ยวใหม่ล่าสุด พร้อมออกเดินทาง' : 'Latest tour programs, ready to depart'}
           onMore={() => navigate('tours')}
+          moreLabel={lang === 'th' ? 'ดูทั้งหมด' : 'View all'}
         />
         <div className="grid-cols-4" style={{ gap: 16 }}>
           {newTours.map(tr => (
@@ -333,32 +335,32 @@ function NewToursSection({ tours, navigate, t, compareList, toggleCompare }) {
 
 // ─── DESTINATION CATEGORIES ──────────────────────────────────
 const DESTINATIONS = [
-  { name: 'ทัวร์จีน',        count: 120, emoji: '🇨🇳', img: 'https://picsum.photos/seed/china1/400/300',     country: 'จีน',         continent: 'Asia-East',  tourType: 'international' },
-  { name: 'ทัวร์ญี่ปุ่น',    count: 98,  emoji: '🇯🇵', img: 'https://picsum.photos/seed/japan1/400/300',     country: 'ญี่ปุ่น',     continent: 'Asia-East',  tourType: 'international' },
-  { name: 'ทัวร์เกาหลี',     count: 64,  emoji: '🇰🇷', img: 'https://picsum.photos/seed/korea1/400/300',     country: 'เกาหลีใต้',   continent: 'Asia-East',  tourType: 'international' },
-  { name: 'ทัวร์ยุโรป',      count: 85,  emoji: '🏰',  img: 'https://picsum.photos/seed/europe1/400/300',    country: '',             continent: 'Europe',     tourType: 'international' },
-  { name: 'ทัวร์ไต้หวัน',    count: 42,  emoji: '🇹🇼', img: 'https://picsum.photos/seed/taiwan1/400/300',    country: 'ไต้หวัน',     continent: 'Asia-East',  tourType: 'international' },
-  { name: 'ทัวร์สิงคโปร์',   count: 38,  emoji: '🇸🇬', img: 'https://picsum.photos/seed/singapore1/400/300', country: 'สิงคโปร์',    continent: 'Asia-SE',    tourType: 'international' },
-  { name: 'ทัวร์ฮ่องกง',     count: 55,  emoji: '🏙️', img: 'https://picsum.photos/seed/hongkong1/400/300',  country: 'ฮ่องกง',      continent: 'Asia-East',  tourType: 'international' },
-  { name: 'ทัวร์อเมริกา',    count: 29,  emoji: '🗽',  img: 'https://picsum.photos/seed/america1/400/300',   country: 'สหรัฐอเมริกา', continent: 'Americas',  tourType: 'international' },
-  { name: 'ทัวร์เวียดนาม',   count: 47,  emoji: '🇻🇳', img: 'https://picsum.photos/seed/vietnam1/400/300',   country: 'เวียดนาม',    continent: 'Asia-SE',    tourType: 'international' },
-  { name: 'ทัวร์อินเดีย',    count: 31,  emoji: '🇮🇳', img: 'https://picsum.photos/seed/india1/400/300',     country: 'อินเดีย',     continent: 'Asia-S-ME',  tourType: 'international' },
-  { name: 'ทัวร์สหรัฐอาหรับ', count: 22, emoji: '🕌',  img: 'https://picsum.photos/seed/dubai1/400/300',     country: 'สหรัฐอาหรับเอมิเรตส์', continent: 'Asia-S-ME', tourType: 'international' },
-  { name: 'ทัวร์มัลดีฟส์',   count: 18,  emoji: '🏝️', img: 'https://picsum.photos/seed/maldives1/400/300',  country: 'มัลดีฟส์',    continent: 'Asia-S-ME',  tourType: 'international' },
+  { name: 'ทัวร์จีน',        nameEn: 'China Tours',        count: 120, emoji: '🇨🇳', img: 'https://picsum.photos/seed/china1/400/300',     country: 'จีน',         continent: 'Asia-East',  tourType: 'international' },
+  { name: 'ทัวร์ญี่ปุ่น',    nameEn: 'Japan Tours',        count: 98,  emoji: '🇯🇵', img: 'https://picsum.photos/seed/japan1/400/300',     country: 'ญี่ปุ่น',     continent: 'Asia-East',  tourType: 'international' },
+  { name: 'ทัวร์เกาหลี',     nameEn: 'Korea Tours',        count: 64,  emoji: '🇰🇷', img: 'https://picsum.photos/seed/korea1/400/300',     country: 'เกาหลีใต้',   continent: 'Asia-East',  tourType: 'international' },
+  { name: 'ทัวร์ยุโรป',      nameEn: 'Europe Tours',       count: 85,  emoji: '🏰',  img: 'https://picsum.photos/seed/europe1/400/300',    country: '',             continent: 'Europe',     tourType: 'international' },
+  { name: 'ทัวร์ไต้หวัน',    nameEn: 'Taiwan Tours',       count: 42,  emoji: '🇹🇼', img: 'https://picsum.photos/seed/taiwan1/400/300',    country: 'ไต้หวัน',     continent: 'Asia-East',  tourType: 'international' },
+  { name: 'ทัวร์สิงคโปร์',   nameEn: 'Singapore Tours',    count: 38,  emoji: '🇸🇬', img: 'https://picsum.photos/seed/singapore1/400/300', country: 'สิงคโปร์',    continent: 'Asia-SE',    tourType: 'international' },
+  { name: 'ทัวร์ฮ่องกง',     nameEn: 'Hong Kong Tours',    count: 55,  emoji: '🏙️', img: 'https://picsum.photos/seed/hongkong1/400/300',  country: 'ฮ่องกง',      continent: 'Asia-East',  tourType: 'international' },
+  { name: 'ทัวร์อเมริกา',    nameEn: 'USA Tours',          count: 29,  emoji: '🗽',  img: 'https://picsum.photos/seed/america1/400/300',   country: 'สหรัฐอเมริกา', continent: 'Americas',  tourType: 'international' },
+  { name: 'ทัวร์เวียดนาม',   nameEn: 'Vietnam Tours',      count: 47,  emoji: '🇻🇳', img: 'https://picsum.photos/seed/vietnam1/400/300',   country: 'เวียดนาม',    continent: 'Asia-SE',    tourType: 'international' },
+  { name: 'ทัวร์อินเดีย',    nameEn: 'India Tours',        count: 31,  emoji: '🇮🇳', img: 'https://picsum.photos/seed/india1/400/300',     country: 'อินเดีย',     continent: 'Asia-S-ME',  tourType: 'international' },
+  { name: 'ทัวร์สหรัฐอาหรับ', nameEn: 'UAE Tours',         count: 22,  emoji: '🕌',  img: 'https://picsum.photos/seed/dubai1/400/300',     country: 'สหรัฐอาหรับเอมิเรตส์', continent: 'Asia-S-ME', tourType: 'international' },
+  { name: 'ทัวร์มัลดีฟส์',   nameEn: 'Maldives Tours',     count: 18,  emoji: '🏝️', img: 'https://picsum.photos/seed/maldives1/400/300',  country: 'มัลดีฟส์',    continent: 'Asia-S-ME',  tourType: 'international' },
 ];
 
-function DestinationsSection({ navigate, inner }) {
+function DestinationsSection({ navigate, inner, lang }) {
   const cols = inner ? 'grid-cols-4' : 'grid-cols-6';
   const content = (
     <>
-      <SectionHeader title="หมวดหมู่ยอดนิยม" emoji="🌏" sub="เลือกปลายทางที่คุณฝัน" onMore={() => navigate('tours')} />
+      <SectionHeader title={lang === 'th' ? 'หมวดหมู่ยอดนิยม' : 'Popular Destinations'} emoji="🌏" sub={lang === 'th' ? 'เลือกปลายทางที่คุณฝัน' : 'Choose your dream destination'} onMore={() => navigate('tours')} moreLabel={lang === 'th' ? 'ดูทั้งหมด' : 'View all'} />
       <div className={cols} style={{ gap: 12 }}>
         {DESTINATIONS.map(d => (
           <div key={d.name} className="cat-card" onClick={() => navigate('tours', null, { tourType: d.tourType, continent: d.continent, country: d.country })}>
             <img src={d.img} alt={d.name} loading="lazy" />
             <div className="cat-card-overlay">
-              <div className="cat-card-title">{d.emoji} {d.name.replace('ทัวร์', '')}</div>
-              <div className="cat-card-count">{d.count} โปรแกรม</div>
+              <div className="cat-card-title">{d.emoji} {lang === 'en' ? (d.nameEn || d.name).replace('Tours','') : d.name.replace('ทัวร์', '')}</div>
+              <div className="cat-card-count">{d.count} {lang === 'th' ? 'โปรแกรม' : 'tours'}</div>
             </div>
           </div>
         ))}
@@ -376,17 +378,17 @@ function DestinationsSection({ navigate, inner }) {
 
 // ─── WHY US ──────────────────────────────────────────────────
 const WHY_ITEMS = [
-  { icon: 'plane', title: 'ใบอนุญาตนำเที่ยว', desc: 'ได้รับใบอนุญาตประกอบธุรกิจนำเที่ยวจากกรมการท่องเที่ยว เลขที่ 11/06310' },
-  { icon: 'shield', title: 'ประกันภัยการเดินทาง', desc: 'ทุกทริปมีประกันภัยครบถ้วน คุ้มครองอุบัติเหตุและการเจ็บป่วย' },
-  { icon: 'headset', title: 'ทีมงานมืออาชีพ', desc: 'ไกด์ผู้ชำนาญ ดูแลตลอด 24 ชั่วโมง ตั้งแต่ต้นทางถึงปลายทาง' },
-  { icon: 'check', title: 'ราคาโปร่งใส ไม่มีค่าใช้จ่ายแอบแฝง', desc: 'ระบุรายละเอียดชัดเจน ทำให้คุณวางแผนได้อย่างสบายใจ' },
+  { icon: 'plane',   title: 'ใบอนุญาตนำเที่ยว',                  titleEn: 'Licensed Agency',    desc: 'ได้รับใบอนุญาตประกอบธุรกิจนำเที่ยวจากกรมการท่องเที่ยว เลขที่ 11/06310', descEn: 'Licensed tour operator by the Tourism Department, no. 11/06310' },
+  { icon: 'shield',  title: 'ประกันภัยการเดินทาง',                 titleEn: 'Travel Insurance',   desc: 'ทุกทริปมีประกันภัยครบถ้วน คุ้มครองอุบัติเหตุและการเจ็บป่วย',           descEn: 'Every trip fully insured — accident & illness coverage included' },
+  { icon: 'headset', title: 'ทีมงานมืออาชีพ',                     titleEn: 'Professional Team',  desc: 'ไกด์ผู้ชำนาญ ดูแลตลอด 24 ชั่วโมง ตั้งแต่ต้นทางถึงปลายทาง',           descEn: 'Expert guides, 24/7 support from departure to return' },
+  { icon: 'check',   title: 'ราคาโปร่งใส ไม่มีค่าใช้จ่ายแอบแฝง', titleEn: 'Transparent Pricing', desc: 'ระบุรายละเอียดชัดเจน ทำให้คุณวางแผนได้อย่างสบายใจ',                    descEn: 'Clear itemised costs — no hidden charges, ever' },
 ];
 
-function WhyUsSection() {
+function WhyUsSection({ lang }) {
   return (
     <section style={{ background: '#fff', padding: '36px 0' }}>
       <div className="wrap">
-        <SectionHeader title="ทำไมต้องเลือกเรา?" emoji="💎" />
+        <SectionHeader title={lang === 'th' ? 'ทำไมต้องเลือกเรา?' : 'Why Choose Us?'} emoji="💎" />
         <div className="why-grid">
           {WHY_ITEMS.map((w, i) => (
             <div key={i} style={{
@@ -404,8 +406,8 @@ function WhyUsSection() {
               }}>
                 <Icon name={w.icon} size={26} color="var(--primary)" />
               </div>
-              <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>{w.title}</h3>
-              <p style={{ margin: 0, fontSize: 13, color: 'var(--muted)', lineHeight: 1.55 }}>{w.desc}</p>
+              <h3 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>{lang === 'en' ? w.titleEn : w.title}</h3>
+              <p style={{ margin: 0, fontSize: 13, color: 'var(--muted)', lineHeight: 1.55 }}>{lang === 'en' ? w.descEn : w.desc}</p>
             </div>
           ))}
         </div>
@@ -415,14 +417,14 @@ function WhyUsSection() {
 }
 
 // ─── PROMOTIONS BANNER ───────────────────────────────────────
-function PromoBanners({ promotions, navigate, t }) {
+function PromoBanners({ promotions, navigate, t, lang }) {
   const promos = promotions.slice(0, 3);
   if (!promos.length) return null;
 
   return (
     <section style={{ background: '#fff7f0', padding: '36px 0' }}>
       <div className="wrap">
-        <SectionHeader title="โปรโมชั่นพิเศษ" emoji="🎁" sub="ส่วนลดพิเศษ จำกัดจำนวน" onMore={() => navigate('promotions')} />
+        <SectionHeader title={lang === 'th' ? 'โปรโมชั่นพิเศษ' : 'Special Promotions'} emoji="🎁" sub={lang === 'th' ? 'ส่วนลดพิเศษ จำกัดจำนวน' : 'Limited time offers'} onMore={() => navigate('promotions')} moreLabel={lang === 'th' ? 'ดูทั้งหมด' : 'View all'} />
         <div className="grid-cols-3" style={{ gap: 16 }}>
           {promos.map((p, i) => (
             <div key={p.id} style={{
@@ -460,7 +462,7 @@ function PromoBanners({ promotions, navigate, t }) {
 }
 
 // ─── REVIEWS ─────────────────────────────────────────────────
-function ReviewsSection({ reviews }) {
+function ReviewsSection({ reviews, lang }) {
   const [idx, setIdx] = useState(0);
   const approved = reviews.filter(r => r.approved).slice(0, 6);
   if (!approved.length) return null;
@@ -468,7 +470,7 @@ function ReviewsSection({ reviews }) {
   return (
     <section style={{ background: 'var(--canvas-2)', padding: '36px 0' }}>
       <div className="wrap">
-        <SectionHeader title="รีวิวจากลูกค้าจริง" emoji="💬" sub={`${approved.length}+ รีวิว จากลูกค้าที่เดินทางกับเราจริง`} />
+        <SectionHeader title={lang === 'th' ? 'รีวิวจากลูกค้าจริง' : 'Customer Reviews'} emoji="💬" sub={lang === 'th' ? `${approved.length}+ รีวิว จากลูกค้าที่เดินทางกับเราจริง` : `${approved.length}+ reviews from real travellers`} />
         <div className="grid-cols-3" style={{ gap: 16 }}>
           {approved.slice(0, 3).map((r, i) => (
             <div key={i} style={{
@@ -510,14 +512,14 @@ function ReviewsSection({ reviews }) {
 }
 
 // ─── ARTICLES ────────────────────────────────────────────────
-function ArticlesSection({ articles, navigate, t }) {
+function ArticlesSection({ articles, navigate, t, lang }) {
   const list = articles.slice(0, 4);
   if (!list.length) return null;
 
   return (
     <section style={{ background: '#fff', padding: '36px 0' }}>
       <div className="wrap">
-        <SectionHeader title="บทความท่องเที่ยว" emoji="📝" sub="เคล็ดลับ ข้อมูล และแรงบันดาลใจในการเดินทาง" onMore={() => navigate('articles')} />
+        <SectionHeader title={lang === 'th' ? 'บทความท่องเที่ยว' : 'Travel Blog'} emoji="📝" sub={lang === 'th' ? 'เคล็ดลับ ข้อมูล และแรงบันดาลใจในการเดินทาง' : 'Tips, info & travel inspiration'} onMore={() => navigate('articles')} moreLabel={lang === 'th' ? 'ดูทั้งหมด' : 'View all'} />
         <div className="grid-cols-4" style={{ gap: 16 }}>
           {list.map(a => {
             const title = t ? t(a.title) : (a.title?.th || a.title?.en || a.title || '');
@@ -552,12 +554,12 @@ function ArticlesSection({ articles, navigate, t }) {
 }
 
 // ─── STATS STRIP ─────────────────────────────────────────────
-function StatsStrip() {
+function StatsStrip({ lang }) {
   const stats = [
-    { num: '50,000+', label: 'นักท่องเที่ยวที่ไว้ใจเรา' },
-    { num: '500+', label: 'โปรแกรมทัวร์' },
-    { num: '60+', label: 'ประเทศทั่วโลก' },
-    { num: '15 ปี', label: 'ประสบการณ์' },
+    { num: '50,000+', label: 'นักท่องเที่ยวที่ไว้ใจเรา', labelEn: 'Happy Travellers' },
+    { num: '500+',    label: 'โปรแกรมทัวร์',             labelEn: 'Tour Programs' },
+    { num: '60+',     label: 'ประเทศทั่วโลก',             labelEn: 'Countries Worldwide' },
+    { num: '15 ปี',   label: 'ประสบการณ์',               labelEn: 'Years Experience' },
   ];
   return (
     <div style={{
@@ -572,7 +574,7 @@ function StatsStrip() {
               borderRight: i < 3 ? '1px solid rgba(255,255,255,.2)' : 'none',
             }}>
               <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1 }}>{s.num}</div>
-              <div style={{ marginTop: 6, fontSize: 13, opacity: .9 }}>{s.label}</div>
+              <div style={{ marginTop: 6, fontSize: 13, opacity: .9 }}>{lang === 'en' ? s.labelEn : s.label}</div>
             </div>
           ))}
         </div>
@@ -582,7 +584,7 @@ function StatsStrip() {
 }
 
 // ─── CONTACT CTA ─────────────────────────────────────────────
-function ContactCta({ navigate }) {
+function ContactCta({ navigate, lang }) {
   return (
     <section style={{
       background: 'linear-gradient(135deg, #1a237e, #283593)',
@@ -590,11 +592,11 @@ function ContactCta({ navigate }) {
     }}>
       <div className="wrap" style={{ maxWidth: 700 }}>
         <h2 style={{ margin: '0 0 12px', fontSize: 28, fontWeight: 800 }}>
-          ยังไม่แน่ใจว่าจะไปที่ไหน? 🤔
+          {lang === 'th' ? 'ยังไม่แน่ใจว่าจะไปที่ไหน? 🤔' : "Not sure where to go? 🤔"}
         </h2>
         <p style={{ margin: '0 0 28px', fontSize: 16, opacity: .9 }}>
-          ทีมงานผู้เชี่ยวชาญพร้อมให้คำปรึกษา ฟรี! ไม่มีข้อผูกมัด<br />
-          โทรหาเรา หรือแอดไลน์ได้เลยทันที จ-ศ 09:00-18:00 น.
+          {lang === 'th' ? 'ทีมงานผู้เชี่ยวชาญพร้อมให้คำปรึกษา ฟรี! ไม่มีข้อผูกมัด' : 'Our experts are ready to advise — free, no obligation.'}<br />
+          {lang === 'th' ? 'โทรหาเรา หรือแอดไลน์ได้เลยทันที จ-ศ 09:00-18:00 น.' : 'Call or LINE us anytime — Mon–Fri 09:00–18:00.'}
         </p>
         <div className="cta-btns">
           <button
@@ -605,7 +607,7 @@ function ContactCta({ navigate }) {
               fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
             }}
           >
-            ติดต่อเรา
+            {lang === 'th' ? 'ติดต่อเรา' : 'Contact Us'}
           </button>
           <button
             style={{
@@ -635,30 +637,30 @@ export default function HomePage({ lang, t, navigate, tours, articles, promotion
       <div className="home-2col">
         {/* Left: sticky search */}
         <div className="home-sidebar">
-          <SearchSidebar navigate={navigate} />
+          <SearchSidebar navigate={navigate} lang={lang} />
         </div>
 
         {/* Right: hot deals + destinations */}
         <div className="home-2col-main">
           {featured.length > 0 && (
             <div style={{ background: '#fff7f0', borderRadius: 10, padding: '24px 20px', borderTop: '3px solid var(--primary)' }}>
-              <HotDealsSection tours={featured} navigate={navigate} t={t} compareList={compareList} toggleCompare={toggleCompare} inner />
+              <HotDealsSection tours={featured} navigate={navigate} t={t} compareList={compareList} toggleCompare={toggleCompare} inner lang={lang} />
             </div>
           )}
           <div style={{ background: 'var(--canvas-2)', borderRadius: 10, padding: '24px 20px' }}>
-            <DestinationsSection navigate={navigate} inner />
+            <DestinationsSection navigate={navigate} inner lang={lang} />
           </div>
         </div>
       </div>
 
       {/* Full-width sections below */}
-      <WhyUsSection />
-      <NewToursSection tours={tours} navigate={navigate} t={t} compareList={compareList} toggleCompare={toggleCompare} />
-      <StatsStrip />
-      <PromoBanners promotions={promotions} navigate={navigate} t={t} />
-      <ReviewsSection reviews={reviews} />
-      <ArticlesSection articles={articles} navigate={navigate} t={t} />
-      <ContactCta navigate={navigate} />
+      <WhyUsSection lang={lang} />
+      <NewToursSection tours={tours} navigate={navigate} t={t} compareList={compareList} toggleCompare={toggleCompare} lang={lang} />
+      <StatsStrip lang={lang} />
+      <PromoBanners promotions={promotions} navigate={navigate} t={t} lang={lang} />
+      <ReviewsSection reviews={reviews} lang={lang} />
+      <ArticlesSection articles={articles} navigate={navigate} t={t} lang={lang} />
+      <ContactCta navigate={navigate} lang={lang} />
     </main>
   );
 }

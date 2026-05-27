@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 
 const MENU = [
   {
-    label: 'ทัวร์ต่างประเทศ',
+    label: 'ทัวร์ต่างประเทศ', labelEn: 'International Tours',
     key: 'tours', tourType: 'international',
     mega: [
       { continent: 'ยุโรป', countries: ['ฝรั่งเศส','อิตาลี','สวิตเซอร์แลนด์','เยอรมัน','อังกฤษ','สเปน','โปรตุเกส','ออสเตรีย','เนเธอร์แลนด์','เบลเยียม','นอร์เวย์','สวีเดน','เดนมาร์ก'] },
@@ -14,7 +14,7 @@ const MENU = [
     ],
   },
   {
-    label: 'ทัวร์ในประเทศ',
+    label: 'ทัวร์ในประเทศ', labelEn: 'Domestic Tours',
     key: 'tours', tourType: 'domestic',
     mega: [
       { continent: 'ภาคเหนือ', countries: ['เชียงใหม่','เชียงราย','แม่ฮ่องสอน','น่าน','ลำปาง','พะเยา'] },
@@ -24,7 +24,7 @@ const MENU = [
     ],
   },
   {
-    label: 'ทัวร์พรีเมี่ยม',
+    label: 'ทัวร์พรีเมี่ยม', labelEn: 'Premium Tours',
     key: 'tours', tourType: 'premium',
     mega: [
       { continent: 'ยุโรปพรีเมี่ยม', countries: ['สวิตเซอร์แลนด์ VIP','อิตาลีหรูหรา','ฝรั่งเศสไฮเอนด์','นอร์เวย์ Fjord'] },
@@ -32,10 +32,10 @@ const MENU = [
       { continent: 'ไฟลท์ชั้นธุรกิจ', countries: ['ยุโรปธุรกิจ','ญี่ปุ่นธุรกิจ','อเมริกาธุรกิจ','ออสเตรเลียธุรกิจ'] },
     ],
   },
-  { label: 'ทัวร์โปรไฟไหม้ 🔥', key: 'tours', tourType: 'hotdeal', mega: null },
-  { label: 'ทัวร์โปรโมชั่น', key: 'promotions', mega: null },
+  { label: 'ทัวร์โปรไฟไหม้ 🔥', labelEn: '🔥 Hot Deals', key: 'tours', tourType: 'hotdeal', mega: null },
+  { label: 'ทัวร์โปรโมชั่น', labelEn: 'Promotions', key: 'promotions', mega: null },
   {
-    label: 'แพ็คเกจทัวร์',
+    label: 'แพ็คเกจทัวร์', labelEn: 'Tour Packages',
     key: 'tours', tourType: 'package',
     mega: [
       { continent: 'แพ็คเกจยอดนิยม', countries: ['แพ็คเกจฮันนีมูน','แพ็คเกจครอบครัว','แพ็คเกจกลุ่มใหญ่','แพ็คเกจวันเกิด'] },
@@ -43,14 +43,14 @@ const MENU = [
     ],
   },
   {
-    label: 'เรือสำราญ',
+    label: 'เรือสำราญ', labelEn: 'Cruise',
     key: 'tours', tourType: 'cruise',
     mega: [
       { continent: 'เส้นทางเรือสำราญ', countries: ['เมดิเตอร์เรเนียน','แคริบเบียน','สแกนดิเนเวีย','เอเชียตะวันออกเฉียงใต้','ญี่ปุ่น-เกาหลี'] },
     ],
   },
   {
-    label: 'บริการอื่นๆ',
+    label: 'บริการอื่นๆ', labelEn: 'Other Services',
     key: 'contact',
     mega: [
       { continent: 'บริการของเรา', countries: ['บริการยื่นวีซ่า','ประกันการเดินทาง','จองโรงแรม','เช่ารถต่างประเทศ','รับ-ส่งสนามบิน','SIM Card ต่างประเทศ'] },
@@ -60,13 +60,26 @@ const MENU = [
 
 // Quick links in teal top bar
 const QUICK_LINKS = [
-  { label: 'ขอราคากรุ๊ปเหมา', key: 'group-quote' },
-  { label: 'บริการยื่นวีซ่า',  key: 'visa' },
-  { label: 'บทความท่องเที่ยว', key: 'articles' },
-  { label: 'ผลงานที่ผ่านมา',   key: 'gallery' },
-  { label: 'เกี่ยวกับเรา',     key: 'about' },
-  { label: 'ติดต่อเรา',        key: 'contact' },
+  { label: 'ขอราคากรุ๊ปเหมา', labelEn: 'Group Quote',    key: 'group-quote' },
+  { label: 'บริการยื่นวีซ่า',  labelEn: 'Visa Service',   key: 'visa' },
+  { label: 'บทความท่องเที่ยว', labelEn: 'Travel Blog',    key: 'articles' },
+  { label: 'ผลงานที่ผ่านมา',   labelEn: 'Gallery',        key: 'gallery' },
+  { label: 'เกี่ยวกับเรา',     labelEn: 'About Us',       key: 'about' },
+  { label: 'ติดต่อเรา',        labelEn: 'Contact',        key: 'contact' },
 ];
+
+const CONTINENT_EN = {
+  'ยุโรป': 'Europe', 'เอเชียตะวันออก': 'East Asia',
+  'เอเชียตะวันออกเฉียงใต้': 'Southeast Asia',
+  'เอเชียใต้ / ตะวันออกกลาง': 'South Asia / Middle East',
+  'อเมริกา / แปซิฟิก': 'Americas / Pacific', 'แอฟริกา': 'Africa',
+  'ยุโรปพรีเมี่ยม': 'Premium Europe', 'เอเชียพรีเมี่ยม': 'Premium Asia',
+  'ไฟลท์ชั้นธุรกิจ': 'Business Class', 'ภาคเหนือ': 'Northern Thailand',
+  'ภาคกลาง / ตะวันออก': 'Central / Eastern', 'ภาคใต้': 'Southern Thailand',
+  'ภาคอีสาน': 'Northeastern Thailand', 'แพ็คเกจยอดนิยม': 'Popular Packages',
+  'แพ็คเกจตามธีม': 'Themed Packages', 'เส้นทางเรือสำราญ': 'Cruise Routes',
+  'บริการของเรา': 'Our Services',
+};
 
 function MenuIcon() {
   return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>;
@@ -78,7 +91,7 @@ function ChevronDown() {
   return <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>;
 }
 
-function MegaDropdown({ menu, navigate, onClose, topOffset }) {
+function MegaDropdown({ menu, navigate, onClose, topOffset, lang }) {
   if (!menu.mega) return null;
   return (
     <div
@@ -106,7 +119,7 @@ function MegaDropdown({ menu, navigate, onClose, topOffset }) {
               marginBottom: 10, paddingBottom: 8,
               borderBottom: '2px solid var(--primary-light)',
             }}>
-              {group.continent}
+              {lang === 'en' ? (CONTINENT_EN[group.continent] || group.continent) : group.continent}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {group.countries.map(c => (
@@ -190,7 +203,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
                   onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,.75)'}
                   onMouseLeave={e => e.currentTarget.style.color = '#fff'}
                 >
-                  {ql.label}
+                  {lang === 'en' ? (ql.labelEn || ql.label) : ql.label}
                 </button>
               </span>
             ))}
@@ -291,7 +304,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
               </svg>
             </a>
             <div>
-              <div style={{ fontSize: 12, color: '#888' }}>เราช่วยคุณได้</div>
+              <div style={{ fontSize: 12, color: '#888' }}>{lang === 'th' ? 'เราช่วยคุณได้' : 'We can help you'}</div>
               <a href="https://line.me/R/ti/p/@wecrafttravel" target="_blank" rel="noopener noreferrer"
                 style={{ fontWeight: 800, fontSize: 15, color: '#06c755', textDecoration: 'none' }}>
                 @wecrafttravel
@@ -343,12 +356,12 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
                     transition: 'color .12s, border-color .12s',
                   }}
                 >
-                  {m.label}
+                  {lang === 'en' ? (m.labelEn || m.label) : m.label}
                   {m.mega && <ChevronDown />}
                 </button>
                 {activeMenu === i && m.mega && (
                   <div onMouseEnter={keepMenu} onMouseLeave={closeMenu}>
-                    <MegaDropdown menu={m} navigate={navigate} onClose={() => setActiveMenu(null)} topOffset={headerH} />
+                    <MegaDropdown menu={m} navigate={navigate} onClose={() => setActiveMenu(null)} topOffset={headerH} lang={lang} />
                   </div>
                 )}
               </div>
@@ -367,7 +380,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
               cursor: 'pointer', fontFamily: 'inherit',
               whiteSpace: 'nowrap', flexShrink: 0,
             }}>
-            🎯 กรุ๊ปเหมา
+            {lang === 'en' ? '🎯 Group Quote' : '🎯 กรุ๊ปเหมา'}
           </button>
 
 
@@ -397,7 +410,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
                   fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                 }}
               >
-                {m.label}
+                {lang === 'en' ? (m.labelEn || m.label) : m.label}
               </button>
               {m.mega && (
                 <div style={{ background: '#fafafa', padding: '8px 20px 12px' }}>
@@ -433,7 +446,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
                 marginBottom: 10, textAlign: 'center',
                 boxShadow: '0 3px 10px rgba(0,0,0,0.15)',
               }}>
-              🎯 ขอราคากรุ๊ปเหมา
+              {lang === 'en' ? '🎯 Group Quote' : '🎯 ขอราคากรุ๊ปเหมา'}
             </button>
             {/* Other quick links */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 0' }}>
@@ -446,7 +459,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
                     cursor: 'pointer', fontFamily: 'inherit',
                     padding: '3px 10px 3px 0', fontWeight: 600,
                   }}>
-                  › {ql.label}
+                  › {lang === 'en' ? (ql.labelEn || ql.label) : ql.label}
                 </button>
               ))}
             </div>
