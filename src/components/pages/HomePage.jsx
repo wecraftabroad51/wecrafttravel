@@ -401,7 +401,7 @@ function WhyUsSection({ lang }) {
   return (
     <section style={{ background: '#fff', padding: '36px 0' }}>
       <div className="wrap">
-        <SectionHeader title={lang === 'th' ? 'ทำไมต้องเลือกเรา?' : 'Why Choose Us?'} emoji="💎" />
+        <SectionHeader title={lang === 'th' ? 'เหตุผลที่นักท่องเที่ยวมั่นใจให้เราดูแล' : 'Why Travellers Trust Us'} emoji="❤️" />
         <div className="why-grid">
           {WHY_ITEMS.map((w, i) => (
             <div key={i} style={{
