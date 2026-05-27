@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { insertMessage } from '../../lib/db.js';
 
-// ── Compress image before upload (max 1200px, quality 0.8) ────
-function compressImage(file, maxPx = 1200, quality = 0.8) {
+// ── Compress image before upload (max 800px, quality 0.6) ─────
+function compressImage(file, maxPx = 800, quality = 0.6) {
   return new Promise((resolve) => {
     if (!file.type.startsWith('image/')) return resolve(file); // PDF → ไม่ compress
     const img = new Image();
@@ -17,7 +17,7 @@ function compressImage(file, maxPx = 1200, quality = 0.8) {
       const canvas = document.createElement('canvas');
       canvas.width = width; canvas.height = height;
       canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-      canvas.toBlob(blob => resolve(new File([blob], file.name, { type: 'image/jpeg' })), 'image/jpeg', quality);
+      canvas.toBlob(blob => resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' })), 'image/jpeg', quality);
     };
     img.onerror = () => resolve(file);
     img.src = url;

@@ -29,43 +29,24 @@ module.exports = async function handler(req, res) {
     });
     const drive = google.drive({ version: 'v3', auth });
 
-    // ── Upload files first, then create folder only if upload succeeds ──
-    // Prepare all buffers
-    const fileBuffers = files.map(f => ({
-      name:     f.name,
-      mimeType: f.mimeType || 'application/octet-stream',
-      buffer:   Buffer.from(f.data, 'base64'),
-    }));
+    // ── Upload each file directly to main folder ─────────────────
+    // ใช้ prefix ชื่อไฟล์แทนการสร้าง subfolder เพื่อลด permission issues
+    const now = new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'short', timeStyle: 'short' }).replace(/[/:,\s]/g, '-');
+    const prefix = folderName ? `${folderName}_` : `${now}_`;
 
-    // ── Create sub-folder ────────────────────────────────────────
-    let targetFolderId = folderId || null;
-    if (folderId && folderName) {
-      const folderRes = await drive.files.create({
-        requestBody: {
-          name: folderName,
-          mimeType: 'application/vnd.google-apps.folder',
-          parents: [folderId],
-        },
-        fields: 'id',
-      });
-      targetFolderId = folderRes.data.id;
-      await drive.permissions.create({
-        fileId: targetFolderId,
-        requestBody: { role: 'reader', type: 'anyone' },
-      });
-    }
-
-    // ── Upload each file ─────────────────────────────────────────
     const results = [];
-    for (const file of fileBuffers) {
+    for (const file of files) {
+      const buffer = Buffer.from(file.data, 'base64');
+      const fileName = `${prefix}${file.name}`;
+
       const { data } = await drive.files.create({
         requestBody: {
-          name: file.name,
-          ...(targetFolderId ? { parents: [targetFolderId] } : {}),
+          name: fileName,
+          ...(folderId ? { parents: [folderId] } : {}),
         },
         media: {
-          mimeType: file.mimeType,
-          body: bufferToStream(file.buffer),
+          mimeType: file.mimeType || 'application/octet-stream',
+          body: bufferToStream(buffer),
         },
         fields: 'id, name, webViewLink',
       });
