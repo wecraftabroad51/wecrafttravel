@@ -7,8 +7,8 @@ import {
   upsertPromotion, deletePromotion, togglePromoActive,
   upsertFaq, deleteFaq,
   approveReview, deleteReview,
-  updateBookingStatus,
-  markMessageRead,
+  updateBookingStatus, deleteBooking,
+  markMessageRead, deleteMessage,
   updateSettings,
 } from '../../lib/db.js';
 import { seedDatabase } from '../../lib/seed.js';
@@ -922,7 +922,7 @@ function ReviewsSection({ reviews, setReviews, tours, t }) {
 }
 
 // ===== ARTICLES =====
-const EMPTY_ARTICLE = { title: { th: '', en: '' }, excerpt: { th: '', en: '' }, content: { th: '', en: '' }, image: '', category: { th: 'ท่องเที่ยว', en: 'Travel' }, author: 'Admin', readTime: 5, published: true };
+const EMPTY_ARTICLE = { title: { th: '', en: '' }, excerpt: { th: '', en: '' }, content: { th: '', en: '' }, image: '', category: 'ท่องเที่ยว', author: 'Admin', readTime: 5, published: true };
 
 function ArticlesSection({ articles, setArticles, t }) {
   const [modal, setModal]   = useState(null);
@@ -1135,6 +1135,13 @@ function BookingsSection({ bookings, setBookings, tours, t }) {
     setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm('ลบการจองนี้?')) return;
+    const { error } = await deleteBooking(id);
+    if (error) { alert('ลบไม่สำเร็จ'); return; }
+    setBookings(prev => prev.filter(b => b.id !== id));
+  };
+
   return (
     <div>
       <h2 className="text-2xl font-bold text-slate-800 mb-6">การจองทั้งหมด ({bookings.length})</h2>
@@ -1157,12 +1164,18 @@ function BookingsSection({ bookings, setBookings, tours, t }) {
                   <td className="px-4 py-3 font-semibold text-teal-700">฿{(b.total || b.totalPrice || 0).toLocaleString()}</td>
                   <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${statusColor[b.status] || 'bg-slate-100 text-slate-500'}`}>{b.status}</span></td>
                   <td className="px-4 py-3">
-                    <select value={b.status} onChange={e => handleStatus(b.id, e.target.value)}
-                      className="text-xs border border-slate-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-teal-500">
-                      <option value="pending">pending</option>
-                      <option value="confirmed">confirmed</option>
-                      <option value="cancelled">cancelled</option>
-                    </select>
+                    <div className="flex items-center gap-2">
+                      <select value={b.status} onChange={e => handleStatus(b.id, e.target.value)}
+                        className="text-xs border border-slate-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-teal-500">
+                        <option value="pending">pending</option>
+                        <option value="confirmed">confirmed</option>
+                        <option value="cancelled">cancelled</option>
+                      </select>
+                      <button onClick={() => handleDelete(b.id)}
+                        className="w-7 h-7 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg flex items-center justify-center transition-colors shrink-0">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );
@@ -1183,6 +1196,13 @@ function MessagesSection({ messages, setMessages }) {
     setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm('ลบข้อความนี้?')) return;
+    const { error } = await deleteMessage(id);
+    if (error) { alert('ลบไม่สำเร็จ'); return; }
+    setMessages(prev => prev.filter(m => m.id !== id));
+  };
+
   return (
     <div>
       <h2 className="text-2xl font-bold text-slate-800 mb-6">ข้อความ ({messages.filter(m => !m.read).length} ใหม่)</h2>
@@ -1198,12 +1218,18 @@ function MessagesSection({ messages, setMessages }) {
                 <p className="text-xs text-slate-400 mb-2">{msg.email} · {msg.phone}</p>
                 <p className="text-sm text-slate-600">{msg.body || msg.message}</p>
               </div>
-              {!msg.read && (
-                <button onClick={() => handleRead(msg.id)}
-                  className="ml-4 shrink-0 bg-teal-100 hover:bg-teal-200 text-teal-700 text-xs px-3 py-1.5 rounded-lg font-medium transition-colors">
-                  <Eye className="w-3.5 h-3.5 inline mr-1" />อ่านแล้ว
+              <div className="flex items-center gap-2 ml-4 shrink-0">
+                {!msg.read && (
+                  <button onClick={() => handleRead(msg.id)}
+                    className="bg-teal-100 hover:bg-teal-200 text-teal-700 text-xs px-3 py-1.5 rounded-lg font-medium transition-colors">
+                    <Eye className="w-3.5 h-3.5 inline mr-1" />อ่านแล้ว
+                  </button>
+                )}
+                <button onClick={() => handleDelete(msg.id)}
+                  className="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg flex items-center justify-center transition-colors">
+                  <Trash2 className="w-4 h-4" />
                 </button>
-              )}
+              </div>
             </div>
           </div>
         ))}

@@ -97,7 +97,7 @@ function AppInner() {
   const [dbError, setDbError] = useState(null);
 
   // Minimum splash duration
-  useState(() => { setTimeout(() => setMinDelay(false), 2800); });
+  useEffect(() => { const t = setTimeout(() => setMinDelay(false), 2800); return () => clearTimeout(t); }, []);
 
   const t = (obj) => (obj && (obj[lang] || obj['th'])) || '';
 
@@ -402,6 +402,7 @@ function AppInner() {
     reviews,      setReviews,
     bookings,     setBookings,
     messages,     setMessages,
+    chatSessions, setChatSessions,
     settings,     setSettings,
     onLogout: () => routerNav('/'),
   };

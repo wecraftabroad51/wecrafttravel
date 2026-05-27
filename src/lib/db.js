@@ -94,6 +94,7 @@ export const upsertTour = async (tour) => {
     pdf_url:        tour.pdfUrl         ?? tour.pdf_url        ?? '',
     pdf_label:      tour.pdfLabel       ?? tour.pdf_label      ?? {},
     pdf_updated:    tour.pdfUpdated     ?? tour.pdf_updated    ?? '',
+    discount:       tour.discount       ?? 0,
   }
   const { data, error } = await supabase
     .from('tours')
@@ -216,10 +217,10 @@ export const fetchReviews = async () => {
 
 export const insertReview = async (review) => {
   if (!supabase) return { data: null, error: 'offline' }
-  const { tourId, ...rest } = review
+  const { tourId, comment, ...rest } = review
   const { data, error } = await supabase
     .from('reviews')
-    .insert({ ...rest, tour_id: tourId })
+    .insert({ ...rest, tour_id: tourId, text: comment ?? rest.text })
     .select()
     .single()
   return { data: toCamel(data), error }
@@ -261,6 +262,11 @@ export const updateBookingStatus = async (id, status) => {
   return supabase.from('bookings').update({ status }).eq('id', id)
 }
 
+export const deleteBooking = async (id) => {
+  if (!supabase) return { error: 'offline' }
+  return supabase.from('bookings').delete().eq('id', id)
+}
+
 // ── MESSAGES ──────────────────────────────────────────────────
 export const fetchMessages = async () => {
   if (!supabase) return { data: null, error: 'offline' }
@@ -284,6 +290,11 @@ export const insertMessage = async (msg) => {
 export const markMessageRead = async (id) => {
   if (!supabase) return { error: 'offline' }
   return supabase.from('messages').update({ read: true }).eq('id', id)
+}
+
+export const deleteMessage = async (id) => {
+  if (!supabase) return { error: 'offline' }
+  return supabase.from('messages').delete().eq('id', id)
 }
 
 // ── CHAT REALTIME ──────────────────────────────────────────────

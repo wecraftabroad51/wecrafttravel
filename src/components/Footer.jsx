@@ -88,7 +88,7 @@ export default function Footer({ lang, t, navigate, settings }) {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20, fontSize: 13 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,.75)' }}>
-                <Icon name="phone" size={14} /> 061-868-6889
+                <Icon name="phone" size={14} /> {contact?.phone || '061-868-6889'}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,.75)' }}>
                 <Icon name="mail" size={14} /> {contact?.email || 'info@wecraft-travel.com'}
