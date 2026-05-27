@@ -1,19 +1,20 @@
+// code = ISO 3166-1 alpha-2 (lowercase) — used with flagcdn.com
 const VISA_LIST = [
-  { flag: '🇯🇵', country: 'ญี่ปุ่น',         note: 'ยื่นล่วงหน้า 2–4 สัปดาห์' },
-  { flag: '🇨🇳', country: 'จีน',              note: 'ยื่นล่วงหน้า 2–3 สัปดาห์' },
-  { flag: '🇬🇧', country: 'อังกฤษ',           note: 'ยื่นล่วงหน้า 4–6 สัปดาห์' },
-  { flag: '🇪🇺', country: 'กลุ่มเชงเก้น (ยุโรป)', note: 'ฝรั่งเศส, เยอรมัน, อิตาลี ฯลฯ' },
-  { flag: '🇺🇸', country: 'สหรัฐอเมริกา',     note: 'ยื่นล่วงหน้า 2–3 เดือน' },
-  { flag: '🇨🇦', country: 'แคนาดา',           note: 'ยื่นล่วงหน้า 4–8 สัปดาห์' },
-  { flag: '🇦🇺', country: 'ออสเตรเลีย',       note: 'ยื่นออนไลน์ 1–4 สัปดาห์' },
-  { flag: '🇳🇿', country: 'นิวซีแลนด์',       note: 'ยื่นออนไลน์ 1–3 สัปดาห์' },
-  { flag: '🇮🇳', country: 'อินเดีย',           note: 'e-Visa 3–5 วันทำการ' },
-  { flag: '🇦🇪', country: 'สหรัฐอาหรับเอมิเรตส์', note: 'e-Visa 3–5 วันทำการ' },
-  { flag: '🇸🇦', country: 'ซาอุดีอาระเบีย',   note: 'ยื่นล่วงหน้า 2–4 สัปดาห์' },
-  { flag: '🇷🇺', country: 'รัสเซีย',           note: 'ยื่นล่วงหน้า 2–4 สัปดาห์' },
-  { flag: '🇿🇦', country: 'แอฟริกาใต้',        note: 'ยื่นล่วงหน้า 4–6 สัปดาห์' },
-  { flag: '🇪🇬', country: 'อียิปต์',           note: 'e-Visa หรือยื่นที่ด่าน' },
-  { flag: '🇲🇦', country: 'โมร็อกโก',          note: 'ยื่นล่วงหน้า 2–3 สัปดาห์' },
+  { code: 'jp', country: 'ญี่ปุ่น',               note: 'ยื่นล่วงหน้า 2–4 สัปดาห์' },
+  { code: 'cn', country: 'จีน',                   note: 'ยื่นล่วงหน้า 2–3 สัปดาห์' },
+  { code: 'gb', country: 'อังกฤษ',                note: 'ยื่นล่วงหน้า 4–6 สัปดาห์' },
+  { code: 'eu', country: 'กลุ่มเชงเก้น (ยุโรป)', note: 'ฝรั่งเศส, เยอรมัน, อิตาลี ฯลฯ' },
+  { code: 'us', country: 'สหรัฐอเมริกา',          note: 'ยื่นล่วงหน้า 2–3 เดือน' },
+  { code: 'ca', country: 'แคนาดา',               note: 'ยื่นล่วงหน้า 4–8 สัปดาห์' },
+  { code: 'au', country: 'ออสเตรเลีย',            note: 'ยื่นออนไลน์ 1–4 สัปดาห์' },
+  { code: 'nz', country: 'นิวซีแลนด์',            note: 'ยื่นออนไลน์ 1–3 สัปดาห์' },
+  { code: 'in', country: 'อินเดีย',               note: 'e-Visa 3–5 วันทำการ' },
+  { code: 'ae', country: 'สหรัฐอาหรับเอมิเรตส์', note: 'e-Visa 3–5 วันทำการ' },
+  { code: 'sa', country: 'ซาอุดีอาระเบีย',        note: 'ยื่นล่วงหน้า 2–4 สัปดาห์' },
+  { code: 'ru', country: 'รัสเซีย',               note: 'ยื่นล่วงหน้า 2–4 สัปดาห์' },
+  { code: 'za', country: 'แอฟริกาใต้',            note: 'ยื่นล่วงหน้า 4–6 สัปดาห์' },
+  { code: 'eg', country: 'อียิปต์',               note: 'e-Visa หรือยื่นที่ด่าน' },
+  { code: 'ma', country: 'โมร็อกโก',              note: 'ยื่นล่วงหน้า 2–3 สัปดาห์' },
 ];
 
 const DOCS = [
@@ -26,6 +27,31 @@ const DOCS = [
   'ประกันการเดินทาง (บางประเทศบังคับ)',
 ];
 
+// Flag image from flagcdn.com — renders on all browsers/OS
+function FlagImg({ code }) {
+  return (
+    <img
+      src={`https://flagcdn.com/48x36/${code}.png`}
+      srcSet={`https://flagcdn.com/96x72/${code}.png 2x`}
+      alt={code.toUpperCase()}
+      width={48}
+      height={36}
+      style={{
+        borderRadius: 5,
+        objectFit: 'cover',
+        boxShadow: '0 1px 5px rgba(0,0,0,.18)',
+        display: 'block',
+        flexShrink: 0,
+      }}
+      onError={e => {
+        // fallback: show code text if image fails
+        e.currentTarget.style.display = 'none';
+        e.currentTarget.nextSibling && (e.currentTarget.nextSibling.style.display = 'flex');
+      }}
+    />
+  );
+}
+
 export default function VisaPage({ navigate }) {
   return (
     <div style={{ background: '#f8f9fa', minHeight: '100vh', paddingBottom: 60 }}>
@@ -33,13 +59,18 @@ export default function VisaPage({ navigate }) {
         .visa-wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
         .visa-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,.07); padding: 32px 36px; margin-bottom: 24px; }
         .visa-section-title { font-size: 20px; font-weight: 800; color: #222; border-bottom: 2px solid #e0e0e0; padding-bottom: 12px; margin-bottom: 20px; }
-        .visa-country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+        .visa-country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
         .visa-country-item {
           border: 1px solid #e8e8e8; border-radius: 10px;
-          padding: 12px 14px; display: flex; align-items: center; gap: 10px;
-          transition: border-color .2s, box-shadow .2s;
+          padding: 14px 16px; display: flex; align-items: center; gap: 14px;
+          transition: border-color .2s, box-shadow .2s, transform .15s;
+          cursor: default;
         }
-        .visa-country-item:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+        .visa-country-item:hover {
+          border-color: var(--primary);
+          box-shadow: 0 4px 14px rgba(0,0,0,.1);
+          transform: translateY(-2px);
+        }
         .visa-step { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 20px; }
         .visa-step-no {
           width: 36px; height: 36px; border-radius: 50%;
@@ -91,10 +122,21 @@ export default function VisaPage({ navigate }) {
           <div className="visa-country-grid">
             {VISA_LIST.map((v, i) => (
               <div key={i} className="visa-country-item">
-                <span style={{ fontSize: 24 }}>{v.flag}</span>
+                {/* Flag image — real PNG from flagcdn.com */}
+                <FlagImg code={v.code} />
+                {/* Fallback code badge (hidden unless image errors) */}
+                <div style={{
+                  display: 'none', width: 48, height: 36,
+                  background: '#e8eaf0', borderRadius: 5,
+                  alignItems: 'center', justifyContent: 'center',
+                  fontSize: 11, fontWeight: 700, color: '#555',
+                  flexShrink: 0,
+                }}>
+                  {v.code.toUpperCase()}
+                </div>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: '#222' }}>{v.country}</div>
-                  <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>{v.note}</div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: '#222', lineHeight: 1.3 }}>{v.country}</div>
+                  <div style={{ fontSize: 11, color: '#888', marginTop: 3 }}>{v.note}</div>
                 </div>
               </div>
             ))}
