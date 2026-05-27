@@ -62,6 +62,7 @@ const SOCIAL = [
 
 export default function Footer({ lang, t, navigate, settings }) {
   const { contact } = settings;
+  const th = lang !== 'en';
 
   const activeSocials = settings.social?.filter(s => s.enabled && s.url) || [];
 
@@ -70,6 +71,7 @@ export default function Footer({ lang, t, navigate, settings }) {
       {/* Main footer */}
       <div className="wrap" style={{ padding: '48px 20px 32px' }}>
         <div className="layout-footer" style={{ gap: 32, alignItems: 'start' }}>
+
           {/* Brand */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
@@ -80,10 +82,21 @@ export default function Footer({ lang, t, navigate, settings }) {
               </div>
             </div>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,.65)', lineHeight: 1.65, marginBottom: 20 }}>
-              บจก. วีคราฟท์ อะบรอด<br />
-              We craft happiness · We craft travel<br />
-              เลขประจำตัวผู้เสียภาษี: 0105560030634<br />
-              ใบอนุญาต ททท. 11/11550
+              {th ? (
+                <>
+                  บจก. วีคราฟท์ อะบรอด<br />
+                  We craft happiness · We craft travel<br />
+                  เลขประจำตัวผู้เสียภาษี: 0105560030634<br />
+                  ใบอนุญาต ททท. 11/11550
+                </>
+              ) : (
+                <>
+                  WeCraft Abroad Co., Ltd.<br />
+                  We craft happiness · We craft travel<br />
+                  Tax ID: 0105560030634<br />
+                  TAT Licence No. 11/11550
+                </>
+              )}
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20, fontSize: 13 }}>
@@ -94,13 +107,15 @@ export default function Footer({ lang, t, navigate, settings }) {
                 <Icon name="mail" size={14} /> {contact?.email || 'info@wecraft-travel.com'}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,.75)' }}>
-                <Icon name="clock" size={14} /> จ–ศ 09:00–18:00 น.
+                <Icon name="clock" size={14} />
+                {th ? 'จ–ศ 09:00–18:00 น.' : 'Mon–Fri 09:00–18:00'}
               </div>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, color: 'rgba(255,255,255,.75)' }}>
                 <span style={{ flexShrink: 0, marginTop: 2 }}><Icon name="map-pin" size={14} /></span>
                 <span>
-                  {contact?.address?.th ||
-                    'เลขที่ 99/548 อาคารบี ชั้น 14 ถ.รัชดาภิเษก(ท่าพระ-ตากสิน) แขวงตลาดพลู เขตธนบุรี กทม. 10600'}
+                  {th
+                    ? (contact?.address?.th || 'เลขที่ 99/548 อาคารบี ชั้น 14 ถ.รัชดาภิเษก(ท่าพระ-ตากสิน) แขวงตลาดพลู เขตธนบุรี กทม. 10600')
+                    : (contact?.address?.en || '99/548 Building B, 14th Floor, Ratchadaphisek Rd. (Tha Phra–Taksin), Talat Phlu, Thon Buri, Bangkok 10600')}
                 </span>
               </div>
             </div>
@@ -132,24 +147,24 @@ export default function Footer({ lang, t, navigate, settings }) {
           </div>
 
           {/* Explore */}
-          <FooterCol title="ทัวร์ต่างประเทศ">
-            <FooterLink onClick={() => navigate('tours')}>ทัวร์ยุโรป</FooterLink>
-            <FooterLink onClick={() => navigate('tours')}>ทัวร์ญี่ปุ่น</FooterLink>
-            <FooterLink onClick={() => navigate('tours')}>ทัวร์จีน</FooterLink>
-            <FooterLink onClick={() => navigate('tours')}>ทัวร์เกาหลีใต้</FooterLink>
-            <FooterLink onClick={() => navigate('tours')}>ทัวร์ไต้หวัน</FooterLink>
-            <FooterLink onClick={() => navigate('tours')}>ทัวร์สิงคโปร์</FooterLink>
-            <FooterLink onClick={() => navigate('tours')}>ทัวร์อเมริกา</FooterLink>
+          <FooterCol title={th ? 'ทัวร์ต่างประเทศ' : 'International Tours'}>
+            <FooterLink onClick={() => navigate('tours')}>{th ? 'ทัวร์ยุโรป'    : 'Europe Tours'}</FooterLink>
+            <FooterLink onClick={() => navigate('tours')}>{th ? 'ทัวร์ญี่ปุ่น'   : 'Japan Tours'}</FooterLink>
+            <FooterLink onClick={() => navigate('tours')}>{th ? 'ทัวร์จีน'       : 'China Tours'}</FooterLink>
+            <FooterLink onClick={() => navigate('tours')}>{th ? 'ทัวร์เกาหลีใต้' : 'South Korea Tours'}</FooterLink>
+            <FooterLink onClick={() => navigate('tours')}>{th ? 'ทัวร์ไต้หวัน'   : 'Taiwan Tours'}</FooterLink>
+            <FooterLink onClick={() => navigate('tours')}>{th ? 'ทัวร์สิงคโปร์'  : 'Singapore Tours'}</FooterLink>
+            <FooterLink onClick={() => navigate('tours')}>{th ? 'ทัวร์อเมริกา'   : 'America Tours'}</FooterLink>
           </FooterCol>
 
           {/* Services */}
-          <FooterCol title="บริการของเรา">
-            <FooterLink onClick={() => navigate('tours')}>ทัวร์ในประเทศ</FooterLink>
-            <FooterLink onClick={() => navigate('promotions')}>โปรโมชั่นพิเศษ</FooterLink>
-            <FooterLink onClick={() => navigate('gallery')}>แกลเลอรี่</FooterLink>
-            <FooterLink onClick={() => navigate('articles')}>บทความท่องเที่ยว</FooterLink>
-            <FooterLink onClick={() => navigate('faq')}>คำถามที่พบบ่อย</FooterLink>
-            <FooterLink onClick={() => navigate('contact')}>ติดต่อเรา</FooterLink>
+          <FooterCol title={th ? 'บริการของเรา' : 'Our Services'}>
+            <FooterLink onClick={() => navigate('tours')}>{th ? 'ทัวร์ในประเทศ'      : 'Domestic Tours'}</FooterLink>
+            <FooterLink onClick={() => navigate('promotions')}>{th ? 'โปรโมชั่นพิเศษ' : 'Special Promotions'}</FooterLink>
+            <FooterLink onClick={() => navigate('gallery')}>{th ? 'แกลเลอรี่'         : 'Gallery'}</FooterLink>
+            <FooterLink onClick={() => navigate('articles')}>{th ? 'บทความท่องเที่ยว' : 'Travel Articles'}</FooterLink>
+            <FooterLink onClick={() => navigate('faq')}>{th ? 'คำถามที่พบบ่อย'       : 'FAQ'}</FooterLink>
+            <FooterLink onClick={() => navigate('contact')}>{th ? 'ติดต่อเรา'         : 'Contact Us'}</FooterLink>
           </FooterCol>
 
           {/* Newsletter */}
@@ -159,15 +174,17 @@ export default function Footer({ lang, t, navigate, settings }) {
               borderBottom: '1px solid rgba(255,255,255,.15)',
               paddingBottom: 10, marginBottom: 14,
             }}>
-              รับข่าวสารและโปรโมชั่น
+              {th ? 'รับข่าวสารและโปรโมชั่น' : 'Newsletter & Promotions'}
             </div>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,.65)', lineHeight: 1.55, marginBottom: 14 }}>
-              สมัครรับข่าวสาร โปรโมชั่นพิเศษ และทริปใหม่ๆ ก่อนใคร!
+              {th
+                ? 'สมัครรับข่าวสาร โปรโมชั่นพิเศษ และทริปใหม่ๆ ก่อนใคร!'
+                : 'Subscribe for exclusive deals and new trip announcements!'}
             </p>
             <form onSubmit={e => e.preventDefault()} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <input
                 type="email"
-                placeholder="อีเมลของคุณ"
+                placeholder={th ? 'อีเมลของคุณ' : 'Your email address'}
                 style={{
                   background: 'rgba(255,255,255,.08)',
                   border: '1px solid rgba(255,255,255,.2)',
@@ -186,7 +203,8 @@ export default function Footer({ lang, t, navigate, settings }) {
                   alignItems: 'center', justifyContent: 'center', gap: 6,
                 }}
               >
-                <Icon name="arrow-r" size={14} /> สมัครรับข่าวสาร
+                <Icon name="arrow-r" size={14} />
+                {th ? 'สมัครรับข่าวสาร' : 'Subscribe'}
               </button>
             </form>
 
@@ -195,7 +213,9 @@ export default function Footer({ lang, t, navigate, settings }) {
               background: 'rgba(255,255,255,.05)',
               border: '1px solid rgba(255,255,255,.1)',
             }}>
-              <div style={{ fontSize: 12, color: 'rgba(255,255,255,.5)', marginBottom: 6 }}>ช่องทางติดต่อ LINE</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,.5)', marginBottom: 6 }}>
+                {th ? 'ช่องทางติดต่อ LINE' : 'Contact via LINE'}
+              </div>
               <div style={{ fontSize: 15, fontWeight: 700, color: '#4CAF50' }}>@wecrafttravel</div>
             </div>
           </div>
@@ -208,11 +228,21 @@ export default function Footer({ lang, t, navigate, settings }) {
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           fontSize: 13, color: 'rgba(255,255,255,.45)', flexWrap: 'wrap', gap: 10,
         }}>
-          <div>© 2026 บจก. วีคราฟท์ อะบรอด (We Craft Abroad Co.,Ltd) · wecraft-travel.com</div>
+          <div>
+            {th
+              ? '© 2026 บจก. วีคราฟท์ อะบรอด (We Craft Abroad Co.,Ltd) · wecraft-travel.com'
+              : '© 2026 WeCraft Abroad Co., Ltd. · wecraft-travel.com'}
+          </div>
           <div style={{ display: 'flex', gap: 20 }}>
-            <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>นโยบายความเป็นส่วนตัว</a>
-            <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>เงื่อนไขการใช้บริการ</a>
-            <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>เงื่อนไขการจอง</a>
+            <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>
+              {th ? 'นโยบายความเป็นส่วนตัว' : 'Privacy Policy'}
+            </a>
+            <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>
+              {th ? 'เงื่อนไขการใช้บริการ' : 'Terms of Service'}
+            </a>
+            <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>
+              {th ? 'เงื่อนไขการจอง' : 'Booking Terms'}
+            </a>
           </div>
         </div>
       </div>
