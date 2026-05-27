@@ -1,7 +1,7 @@
 {
   "rewrites": [{"source": "/((?!api/).*)", "destination": "/index.html"}],
   "functions": {
-    "api/upload-drive.js": { "maxDuration": 30 },
+    "api/upload-drive.js": { "maxDuration": 30, "memory": 1024 },
     "api/send-email.js":   { "maxDuration": 30 }
   }
 }

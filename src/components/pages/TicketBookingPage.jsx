@@ -153,30 +153,39 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
       // ── 1. อัพโหลดไฟล์พาสปอร์ตไปยัง Google Drive ──────────────
       let driveFiles = [];
       if (files.length > 0) {
-        const base64Files = await Promise.all(files.map(file => new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve({
-            name: file.name,
-            mimeType: file.type || 'application/octet-stream',
-            data: reader.result.split(',')[1], // base64 only
-          });
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        })));
+        try {
+          const base64Files = await Promise.all(files.map(file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve({
+              name: file.name,
+              mimeType: file.type || 'application/octet-stream',
+              data: reader.result.split(',')[1],
+            });
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          })));
 
-        const uploadRes = await fetch('/api/upload-drive', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            files: base64Files,
-            folderName: `[จองตั๋ว] ${form.fullName} ${form.outboundDate}`,
-          }),
-        });
-        const uploadData = await uploadRes.json();
-        if (uploadRes.ok && uploadData.files) {
-          driveFiles = uploadData.files; // [{ name, url }]
-        } else {
-          console.warn('Drive upload failed:', uploadData.error);
+          const uploadRes = await fetch('/api/upload-drive', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              files: base64Files,
+              folderName: `[จองตั๋ว] ${form.fullName} ${form.outboundDate}`,
+            }),
+          });
+          const text = await uploadRes.text();
+          try {
+            const uploadData = JSON.parse(text);
+            if (uploadRes.ok && uploadData.files) {
+              driveFiles = uploadData.files;
+            } else {
+              console.warn('Drive upload failed:', uploadData.error);
+            }
+          } catch {
+            console.warn('Drive upload response not JSON:', text.slice(0, 200));
+          }
+        } catch (uploadErr) {
+          console.warn('Drive upload error (continuing):', uploadErr.message);
         }
       }
 
