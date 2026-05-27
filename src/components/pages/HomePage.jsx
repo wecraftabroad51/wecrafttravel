@@ -154,7 +154,20 @@ function SearchSidebar({ navigate, lang }) {
   const [month, setMonth] = useState('');
   const zoneObj = ZONE_OPTIONS.find(z => z.value === zone);
   const countries = zoneObj ? zoneObj.countries : [];
-  const months = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  const MONTH_NAMES = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  const monthOptions = (() => {
+    const opts = [];
+    const now = new Date();
+    const startYear = now.getFullYear() + 543;
+    const startMonth = now.getMonth();
+    for (let y = startYear; y <= 2580; y++) {
+      const mStart = y === startYear ? startMonth : 0;
+      for (let m = mStart; m < 12; m++) {
+        opts.push(`${MONTH_NAMES[m]} ${y}`);
+      }
+    }
+    return opts;
+  })();
 
   const handleSearch = () => {
     const filters = {};
@@ -211,7 +224,7 @@ function SearchSidebar({ navigate, lang }) {
           <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'เดือนที่เดินทาง' : 'Travel Month'}</label>
           <select value={month} onChange={e => setMonth(e.target.value)}>
             <option value="">{lang === 'th' ? '-- ทุกเดือน --' : '-- Any Month --'}</option>
-            {months.map((m, i) => <option key={i} value={m}>{m} 2569</option>)}
+            {monthOptions.map((m, i) => <option key={i} value={m}>{m}</option>)}
           </select>
         </div>
         <button onClick={handleSearch} style={{
