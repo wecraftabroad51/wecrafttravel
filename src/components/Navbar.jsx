@@ -292,12 +292,17 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
               </svg>
             </span>
             <div>
-              <div style={{ fontWeight: 700, fontSize: 13, color: '#333' }}>{lang === 'th' ? 'สายด่วน' : 'Hotline'}</div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: '#333' }}>
+                {lang === 'th' ? 'สายด่วน' : 'Hotline'}{' '}
+                <span style={{ color: 'var(--primary)', fontWeight: 700 }}>
+                  {lang === 'th' ? 'Hot Line 24 ชม.' : 'Hot Line 24 hrs'}
+                </span>
+              </div>
               <a href="tel:0618686889" style={{ display: 'block', fontSize: 13, color: '#555', textDecoration: 'none', marginTop: 1 }}>
                 061-868-6889
               </a>
-              <a href="tel:0652398915" style={{ display: 'block', fontSize: 12, color: 'var(--primary)', textDecoration: 'none', fontWeight: 600, marginTop: 2 }}>
-                065-239-8915 ({lang === 'th' ? 'Hot Line 24 ชม.' : 'Hot Line 24 hrs'})
+              <a href="tel:0652398915" style={{ display: 'block', fontSize: 12, color: '#555', textDecoration: 'none', marginTop: 2 }}>
+                065-239-8915
               </a>
             </div>
           </div>
