@@ -347,3 +347,16 @@ export const updateSettings = async (settings) => {
     .from('site_settings')
     .upsert({ id: 1, ...settings }, { onConflict: 'id' })
 }
+
+// ── IMAGE UPLOAD (Supabase Storage) ───────────────────────────
+export const uploadImage = async (file, folder = 'tours') => {
+  if (!supabase) return { url: null, error: 'offline' }
+  const ext  = file.name.split('.').pop().toLowerCase()
+  const name = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+  const { error: upErr } = await supabase.storage
+    .from('tour-images')
+    .upload(name, file, { cacheControl: '31536000', upsert: false })
+  if (upErr) return { url: null, error: upErr }
+  const { data } = supabase.storage.from('tour-images').getPublicUrl(name)
+  return { url: data.publicUrl, error: null }
+}

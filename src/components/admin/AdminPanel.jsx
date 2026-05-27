@@ -9,7 +9,7 @@ import {
   approveReview, deleteReview,
   updateBookingStatus, deleteBooking,
   markMessageRead, deleteMessage,
-  updateSettings,
+  updateSettings, uploadImage,
 } from '../../lib/db.js';
 import { supabase } from '../../lib/supabase.js';
 
@@ -76,6 +76,62 @@ function Field({ label, children }) {
 }
 
 const inp = "w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500";
+
+// ── Image Upload Component ────────────────────────────────────
+function ImageUpload({ value, onChange, hint, folder = 'tours' }) {
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef();
+
+  const handleFile = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert('ไฟล์ใหญ่เกินไป (สูงสุด 5MB)'); return; }
+    setUploading(true);
+    const { url, error } = await uploadImage(file, folder);
+    setUploading(false);
+    if (error) { alert('อัพโหลดไม่สำเร็จ: ' + (error.message || JSON.stringify(error))); return; }
+    onChange(url);
+    // reset input so same file can be re-selected
+    e.target.value = '';
+  };
+
+  return (
+    <div>
+      <div className="flex gap-2">
+        <input
+          className={inp}
+          value={value || ''}
+          onChange={e => onChange(e.target.value)}
+          placeholder="วาง URL รูปภาพ หรือกดอัพโหลด →"
+        />
+        <button
+          type="button"
+          onClick={() => fileRef.current.click()}
+          disabled={uploading}
+          className="shrink-0 flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-colors whitespace-nowrap"
+        >
+          {uploading
+            ? <><span className="animate-spin">⏳</span> กำลังอัพโหลด...</>
+            : <><span>📁</span> อัพโหลดรูป</>
+          }
+        </button>
+        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} />
+      </div>
+      {hint && <p className="text-xs text-slate-400 mt-1.5">📐 {hint}</p>}
+      {value && (
+        <div className="mt-2 relative inline-block">
+          <img src={value} alt="" className="h-28 rounded-xl object-cover bg-slate-100 border border-slate-200" />
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center leading-none"
+            title="ลบรูป"
+          >×</button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ── Admin Panel ───────────────────────────────────────────────
 export default function AdminPanel(props) {
@@ -415,8 +471,13 @@ function ToursSection({ tours, setTours, t }) {
                   <textarea className={inp} rows={2} value={form.description.en} onChange={e => setF(['description','en'], e.target.value)} />
                 </Field>
               </div>
-              <Field label="URL รูปภาพหลัก">
-                <input className={inp} value={form.image} onChange={e => setF(['image'], e.target.value)} placeholder="https://..." />
+              <Field label="รูปภาพหลัก">
+                <ImageUpload
+                  value={form.image}
+                  onChange={val => setF(['image'], val)}
+                  hint="แนะนำ 1280×720 px (16:9) · JPG/PNG/WebP · ไม่เกิน 5MB"
+                  folder="tours/main"
+                />
               </Field>
               <div className="grid grid-cols-3 gap-3">
                 <Field label="ราคาเริ่มต้น (฿)">
@@ -661,19 +722,24 @@ function ToursSection({ tours, setTours, t }) {
                   <Plus className="w-3 h-3" /> เพิ่มรูป
                 </button>
               </div>
-              <div className="space-y-2">
+              <p className="text-xs text-slate-400 -mt-1 mb-3">📐 แนะนำ 1200×800 px (3:2) · JPG/PNG/WebP · ไม่เกิน 5MB ต่อรูป</p>
+              <div className="space-y-3">
                 {(form.gallery || []).map((url, i) => (
-                  <div key={i} className="flex gap-2 items-center">
-                    <input className={`${inp} flex-1`} value={url} placeholder="https://..."
-                      onChange={e => updateArr('gallery', i, e.target.value)} />
-                    {url && <img src={url} alt="" className="w-12 h-9 rounded-lg object-cover bg-slate-100 shrink-0" />}
+                  <div key={i} className="flex gap-2 items-start bg-slate-50 p-2 rounded-xl">
+                    <div className="flex-1">
+                      <ImageUpload
+                        value={url}
+                        onChange={val => updateArr('gallery', i, val)}
+                        folder="tours/gallery"
+                      />
+                    </div>
                     <button onClick={() => removeFromArr('gallery', i)}
-                      className="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg flex items-center justify-center shrink-0">
-                      <X className="w-3 h-3" />
+                      className="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                      <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ))}
-                {!(form.gallery || []).length && <p className="text-xs text-slate-400 text-center py-8">ยังไม่มีรูปภาพ</p>}
+                {!(form.gallery || []).length && <p className="text-xs text-slate-400 text-center py-8">ยังไม่มีรูปภาพ — กด "เพิ่มรูป" เพื่อเริ่มต้น</p>}
               </div>
             </div>
           )}
@@ -789,7 +855,14 @@ function PromotionsSection({ promotions, setPromotions, t }) {
               <Field label="Promo Code"><input className={inp} value={form.code} onChange={e => setF(['code'], e.target.value)} placeholder="SAVE10" /></Field>
               <Field label="Badge"><input className={inp} value={form.badge} onChange={e => setF(['badge'], e.target.value)} placeholder="🔥 Hot Deal" /></Field>
             </div>
-            <Field label="URL รูปภาพ"><input className={inp} value={form.image} onChange={e => setF(['image'], e.target.value)} placeholder="https://..." /></Field>
+            <Field label="รูปภาพโปรโมชั่น">
+              <ImageUpload
+                value={form.image}
+                onChange={val => setF(['image'], val)}
+                hint="แนะนำ 1200×630 px (สัดส่วน 1.9:1) · JPG/PNG · ไม่เกิน 5MB"
+                folder="promotions"
+              />
+            </Field>
             <div className="flex gap-3 pt-2">
               <button onClick={handleSave} disabled={saving} className="flex-1 bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white py-2.5 rounded-xl font-semibold text-sm transition-colors">
                 {saving ? 'กำลังบันทึก...' : 'บันทึก'}
@@ -941,7 +1014,14 @@ function ArticlesSection({ articles, setArticles, t }) {
               <Field label="เนื้อหา (ไทย)"><textarea className={inp} rows={4} value={form.content?.th || ''} onChange={e => setF(['content','th'], e.target.value)} /></Field>
               <Field label="เนื้อหา (English)"><textarea className={inp} rows={4} value={form.content?.en || ''} onChange={e => setF(['content','en'], e.target.value)} /></Field>
             </div>
-            <Field label="URL รูปภาพ"><input className={inp} value={form.image || form.coverImage || ''} onChange={e => setF(['image'], e.target.value)} /></Field>
+            <Field label="รูปภาพปก (Cover)">
+              <ImageUpload
+                value={form.image || form.coverImage || ''}
+                onChange={val => setF(['image'], val)}
+                hint="แนะนำ 1200×630 px (16:9) · JPG/PNG · ไม่เกิน 5MB"
+                folder="articles"
+              />
+            </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="หมวดหมู่">
                 <select className={inp} value={form.category || 'บทความท่องเที่ยว'} onChange={e => setF(['category'], e.target.value)}>
