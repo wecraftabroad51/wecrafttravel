@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { LogOut, LayoutDashboard, Globe, Tag, Star, FileText, HelpCircle,
-  Mail, Settings, Plane, Check, X, Eye, Trash2, Plus, Edit2, Upload, MessageSquare } from 'lucide-react';
+  Mail, Settings, Plane, Check, X, Eye, Trash2, Plus, Edit2, MessageSquare } from 'lucide-react';
 import {
   upsertTour, deleteTour, toggleTourFeatured, toggleTourActive,
   upsertArticle, deleteArticle,
@@ -11,11 +11,7 @@ import {
   markMessageRead, deleteMessage,
   updateSettings,
 } from '../../lib/db.js';
-import { seedDatabase } from '../../lib/seed.js';
 import { supabase } from '../../lib/supabase.js';
-import {
-  TOURS_DATA, ARTICLES_DATA, PROMOTIONS_DATA, FAQS_DATA, REVIEWS_DATA
-} from '../../data.js';
 
 const MENU = [
   { key: 'dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
@@ -182,7 +178,7 @@ export default function AdminPanel(props) {
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">
-          {section === 'dashboard'  && <DashboardSection tours={tours} articles={articles} bookings={bookings} messages={messages} reviews={reviews} setTours={setTours} setArticles={setArticles} setPromotions={setPromotions} setFaqs={setFaqs} setReviews={setReviews} />}
+          {section === 'dashboard'  && <DashboardSection tours={tours} articles={articles} bookings={bookings} messages={messages} reviews={reviews} />}
           {section === 'tours'      && <ToursSection tours={tours} setTours={setTours} t={t} />}
           {section === 'promotions' && <PromotionsSection promotions={promotions} setPromotions={setPromotions} t={t} />}
           {section === 'reviews'    && <ReviewsSection reviews={reviews} setReviews={setReviews} tours={tours} t={t} />}
@@ -198,79 +194,19 @@ export default function AdminPanel(props) {
 }
 
 // ===== DASHBOARD =====
-function DashboardSection({ tours, articles, bookings, messages, reviews, setTours, setArticles, setPromotions, setFaqs, setReviews }) {
-  const [seeding, setSeeding] = useState(false);
-  const [seedDone, setSeedDone] = useState(false);
-
-  const handleSeed = async () => {
-    if (!confirm('นำเข้าข้อมูลตัวอย่างทั้งหมด (ทัวร์, บทความ, FAQ) เข้า Supabase?\n\nข้อมูลเดิมที่มีอยู่จะไม่ถูกลบครับ')) return;
-    setSeeding(true);
-    try {
-      // Seed tours
-      const tourResults = await Promise.all(
-        TOURS_DATA.map(tour => upsertTour({ ...tour, id: undefined }))
-      );
-      const tourErrors = tourResults.filter(r => r.error);
-      const newTours = tourResults.map(r => r.data).filter(Boolean);
-      if (newTours.length) setTours(prev => [...newTours, ...prev]);
-
-      // Seed articles
-      const articleResults = await Promise.all(
-        ARTICLES_DATA.map(a => upsertArticle({ ...a, id: undefined }))
-      );
-      const articleErrors = articleResults.filter(r => r.error);
-      const newArticles = articleResults.map(r => r.data).filter(Boolean);
-      if (newArticles.length) setArticles(prev => [...newArticles, ...prev]);
-
-      // Seed faqs
-      const faqResults = await Promise.all(
-        FAQS_DATA.map(f => upsertFaq({ ...f, id: undefined }))
-      );
-      const faqErrors = faqResults.filter(r => r.error);
-      const newFaqs = faqResults.map(r => r.data).filter(Boolean);
-      if (newFaqs.length) setFaqs(prev => [...prev, ...newFaqs]);
-
-      const totalErrors = tourErrors.length + articleErrors.length + faqErrors.length;
-      if (totalErrors > 0) {
-        alert(`⚠️ นำเข้าบางส่วนสำเร็จ!\n- ทัวร์: ${newTours.length}/${TOURS_DATA.length}\n- บทความ: ${newArticles.length}/${ARTICLES_DATA.length}\n- FAQ: ${newFaqs.length}/${FAQS_DATA.length}\n\nมี ${totalErrors} รายการที่ล้มเหลว`);
-      } else {
-        setSeedDone(true);
-        alert(`✅ นำเข้าสำเร็จ!\n- ทัวร์: ${newTours.length} รายการ\n- บทความ: ${newArticles.length} รายการ\n- FAQ: ${newFaqs.length} รายการ`);
-      }
-    } catch (e) {
-      alert('เกิดข้อผิดพลาด: ' + e.message);
-    }
-    setSeeding(false);
-  };
-
+function DashboardSection({ tours, articles, bookings, messages, reviews }) {
   const stats = [
-    { label: 'ทัวร์ทั้งหมด',  value: tours.length,                                        color: 'bg-teal-500' },
-    { label: 'การจอง',         value: bookings.length,                                     color: 'bg-blue-500' },
-    { label: 'บทความ',         value: articles.length,                                     color: 'bg-purple-500' },
-    { label: 'รีวิวรอ',        value: reviews.filter(r => !r.approved).length,             color: 'bg-amber-500' },
-    { label: 'ข้อความใหม่',    value: messages.filter(m => !m.read).length,                color: 'bg-red-500' },
+    { label: 'ทัวร์ทั้งหมด',  value: tours.length,                             color: 'bg-teal-500' },
+    { label: 'การจอง',         value: bookings.length,                          color: 'bg-blue-500' },
+    { label: 'บทความ',         value: articles.length,                          color: 'bg-purple-500' },
+    { label: 'รีวิวรอ',        value: reviews.filter(r => !r.approved).length,  color: 'bg-amber-500' },
+    { label: 'ข้อความใหม่',    value: messages.filter(m => !m.read).length,     color: 'bg-red-500' },
   ];
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-slate-800">Dashboard</h2>
-        {!seedDone && (
-          <button onClick={handleSeed} disabled={seeding}
-            className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors">
-            <Upload className="w-4 h-4" />
-            {seeding ? 'กำลังนำเข้า...' : 'นำเข้าข้อมูลตัวอย่าง → Supabase'}
-          </button>
-        )}
-      </div>
-
-      {!seedDone && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-sm text-amber-800">
-          💡 กด <strong>"นำเข้าข้อมูลตัวอย่าง"</strong> เพื่อเพิ่มทัวร์ บทความ และ FAQ ตัวอย่างลง Supabase (ทำครั้งเดียวพอครับ)
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+      <h2 className="text-2xl font-bold text-slate-800 mb-6">Dashboard</h2>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
         {stats.map(s => (
           <div key={s.label} className="bg-white rounded-2xl p-4 shadow-sm text-center">
             <div className={`text-3xl font-bold text-white ${s.color} rounded-xl py-2 mb-2`}>{s.value}</div>
@@ -1255,11 +1191,8 @@ function MessagesSection({ messages, setMessages }) {
 
 // ===== SETTINGS =====
 function SettingsSection({ settings, setSettings, t }) {
-  const [tab, setTab]         = useState('contact');
-  const [saving, setSaving]   = useState(false);
-  const [seeding, setSeeding] = useState(false);
-  const [seedLog, setSeedLog] = useState([]);
-  const [seedDone, setSeedDone] = useState(null);
+  const [tab, setTab]       = useState('contact');
+  const [saving, setSaving] = useState(false);
 
   const update = (path, value) => {
     setSettings(prev => {
@@ -1348,55 +1281,13 @@ function SettingsSection({ settings, setSettings, t }) {
               </div>
             </div>
 
-            {/* Seed section */}
-            <div className="border border-amber-200 bg-amber-50 rounded-xl p-5">
-              <h3 className="font-bold text-amber-900 mb-1">🌱 Seed Mock Data</h3>
-              <p className="text-sm text-amber-700 mb-4">
-                นำข้อมูลตัวอย่าง (ทัวร์ 6 รายการ, บทความ, โปรโมชั่น, FAQ ฯลฯ) เข้า Supabase
-                <br /><span className="font-semibold">⚠️ ควร seed เฉพาะเมื่อตาราง DB ว่างเท่านั้น</span>
-              </p>
-              <button
-                disabled={seeding || !supabase}
-                onClick={async () => {
-                  if (!confirm('ต้องการ seed mock data เข้า Supabase ใช่ไหม?\n(ถ้ามีข้อมูลอยู่แล้วอาจเกิด duplicate)')) return;
-                  setSeeding(true);
-                  setSeedLog([]);
-                  setSeedDone(null);
-                  const { errors, success } = await seedDatabase((msg) =>
-                    setSeedLog(prev => [...prev, msg])
-                  );
-                  setSeedDone({ errors, success });
-                  setSeeding(false);
-                }}
-                className="bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition-colors"
-              >
-                {seeding ? '⏳ กำลัง seed...' : '🚀 Seed Database'}
-              </button>
-
-              {seedLog.length > 0 && (
-                <div className="mt-4 bg-slate-900 rounded-lg p-3 text-xs text-green-400 font-mono space-y-0.5 max-h-48 overflow-y-auto">
-                  {seedLog.map((line, i) => <div key={i}>{line}</div>)}
-                </div>
-              )}
-
-              {seedDone && (
-                <div className={`mt-3 p-3 rounded-lg text-sm font-semibold ${seedDone.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                  {seedDone.success
-                    ? '✅ Seed สำเร็จ! รีเฟรชหน้าเพื่อดูข้อมูลจาก DB'
-                    : `❌ เกิด error ${seedDone.errors.length} รายการ:\n${seedDone.errors.join('\n')}`}
-                </div>
-              )}
-            </div>
-
             {/* Schema instructions */}
             <div className="border border-slate-200 rounded-xl p-5">
-              <h3 className="font-bold text-slate-800 mb-2">📋 วิธีตั้งค่า Supabase</h3>
+              <h3 className="font-bold text-slate-800 mb-2">📋 ข้อมูลการเชื่อมต่อ Supabase</h3>
               <ol className="text-sm text-slate-600 space-y-1 list-decimal list-inside">
-                <li>ไปที่ <span className="font-mono bg-slate-100 px-1 rounded">supabase.com</span> → สร้าง Project ใหม่</li>
-                <li>ไปที่ SQL Editor → วาง SQL จากไฟล์ <span className="font-mono bg-slate-100 px-1 rounded">supabase-setup.sql</span> → Run</li>
-                <li>ไปที่ Project Settings → API → Copy URL + anon key</li>
-                <li>ใส่ใน <span className="font-mono bg-slate-100 px-1 rounded">.env.local</span> แล้ว restart dev server</li>
-                <li>กลับมากด "Seed Database" ด้านบน</li>
+                <li>ไปที่ <span className="font-mono bg-slate-100 px-1 rounded">supabase.com</span> → Project ของคุณ</li>
+                <li>Project Settings → API → Copy URL + anon key</li>
+                <li>ใส่ใน Environment Variables ของ Vercel แล้ว Redeploy</li>
               </ol>
             </div>
           </div>
