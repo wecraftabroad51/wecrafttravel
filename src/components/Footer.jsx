@@ -131,14 +131,15 @@ export default function Footer({ lang, t, navigate, settings }) {
                   rel="noopener noreferrer"
                   style={{
                     width: 36, height: 36, borderRadius: '50%',
-                    background: 'rgba(255,255,255,.1)',
-                    border: '1px solid rgba(255,255,255,.2)',
+                    background: s.color || 'var(--primary)',
+                    border: 'none',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     color: '#fff', textDecoration: 'none',
-                    transition: 'background .2s',
+                    transition: 'opacity .2s, transform .15s',
+                    opacity: 0.9,
                   }}
-                  onMouseEnter={e => e.currentTarget.style.background = s.color || 'var(--primary)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,.1)'}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1.12)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.transform = 'scale(1)'; }}
                 >
                   <Icon name={s.icon || s.platform} size={15} />
                 </a>
