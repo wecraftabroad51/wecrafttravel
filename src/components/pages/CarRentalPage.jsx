@@ -60,6 +60,21 @@ function RadioGroup({ options, value, onChange, lang }) {
   );
 }
 
+const sendNotifications = async (subject, html, formData) => {
+  try {
+    const res = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subject, html, formData }),
+    });
+    const data = await res.json();
+    if (!res.ok) console.error('Notification error:', data.error);
+    else console.log('Notifications:', data.results);
+  } catch (err) {
+    console.error('Notification fetch error:', err.message);
+  }
+};
+
 export default function CarRentalPage({ lang, t, navigate, setBookings }) {
   const [form, setForm] = useState({
     fullName: '',
@@ -101,6 +116,31 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
       const res = await insertBooking(payload);
       if (res.error && res.error !== 'offline') throw new Error(JSON.stringify(res.error));
       if (setBookings && res.data) setBookings(prev => [res.data, ...prev]);
+
+      const rentalLabel = RENTAL_TYPES.find(r => r.value === form.rentalType)?.th || form.rentalType;
+      const carLabel = CAR_TYPES.find(c => c.value === form.carType)?.th || form.carType;
+      const emailHtml = `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+          <div style="background:linear-gradient(135deg,#1a5276,#e65c00);color:#fff;padding:24px;border-radius:8px 8px 0 0;text-align:center">
+            <h2 style="margin:0;font-size:20px">🚗 คำขอเช่ารถ</h2>
+          </div>
+          <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 8px 8px">
+            <tr style="background:#fff3e0"><td colspan="2" style="padding:10px 16px;font-weight:700;color:#e65c00">ข้อมูลผู้ติดต่อ</td></tr>
+            <tr><td style="padding:8px 16px;color:#666;width:40%">ชื่อ-นามสกุล</td><td style="padding:8px 16px;font-weight:600">${form.fullName}</td></tr>
+            <tr style="background:#fafafa"><td style="padding:8px 16px;color:#666">เบอร์โทร</td><td style="padding:8px 16px;font-weight:600">${form.phone}</td></tr>
+            <tr><td style="padding:8px 16px;color:#666">อีเมล</td><td style="padding:8px 16px">${form.email || '-'}</td></tr>
+            <tr style="background:#fff3e0"><td colspan="2" style="padding:10px 16px;font-weight:700;color:#e65c00">รายละเอียดการเช่า</td></tr>
+            <tr><td style="padding:8px 16px;color:#666">ประเภทรถเช่า</td><td style="padding:8px 16px;font-weight:600">${rentalLabel}</td></tr>
+            <tr style="background:#fafafa"><td style="padding:8px 16px;color:#666">วันที่รับรถ</td><td style="padding:8px 16px;font-weight:600">${form.pickupDate}</td></tr>
+            ${form.returnDate ? `<tr><td style="padding:8px 16px;color:#666">วันที่คืนรถ</td><td style="padding:8px 16px">${form.returnDate}</td></tr>` : ''}
+            <tr style="background:#fafafa"><td style="padding:8px 16px;color:#666">สถานที่รับรถ</td><td style="padding:8px 16px">${form.pickupLocation}</td></tr>
+            <tr><td style="padding:8px 16px;color:#666">ประเภทรถ</td><td style="padding:8px 16px">${carLabel}</td></tr>
+            <tr style="background:#fafafa"><td style="padding:8px 16px;color:#666">จำนวนผู้โดยสาร</td><td style="padding:8px 16px;font-weight:700;color:#e65c00">${form.passengers} คน</td></tr>
+            ${form.note ? `<tr><td style="padding:8px 16px;color:#666">ข้อมูลเพิ่มเติม</td><td style="padding:8px 16px">${form.note}</td></tr>` : ''}
+          </table>
+          <p style="font-size:12px;color:#aaa;text-align:center;margin-top:12px">We Craft Travel · We Craft Happiness</p>
+        </div>`;
+      await sendNotifications(`[รถเช่า] ${form.fullName} — ${rentalLabel} ${form.pickupDate}`, emailHtml, form);
       setSuccess(true);
     } catch (err) {
       setError(lang === 'th' ? 'เกิดข้อผิดพลาด กรุณาลองใหม่' : 'An error occurred. Please try again.');

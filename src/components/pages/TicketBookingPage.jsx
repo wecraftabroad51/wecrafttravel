@@ -78,6 +78,21 @@ function PassengerCounter({ label, value, onChange, min = 0 }) {
   );
 }
 
+const sendNotifications = async (subject, html, formData) => {
+  try {
+    const res = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subject, html, formData }),
+    });
+    const data = await res.json();
+    if (!res.ok) console.error('Notification error:', data.error);
+    else console.log('Notifications:', data.results);
+  } catch (err) {
+    console.error('Notification fetch error:', err.message);
+  }
+};
+
 export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
   const [form, setForm] = useState({
     fullName: '',
@@ -126,6 +141,36 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
       const res = await insertBooking(payload);
       if (res.error && res.error !== 'offline') throw new Error(JSON.stringify(res.error));
       if (setBookings && res.data) setBookings(prev => [res.data, ...prev]);
+
+      const airlineLabel = AIRLINE_TYPES.find(a => a.value === form.airlineType)?.th || form.airlineType;
+      const seatLabel = SEAT_CLASSES.find(s => s.value === form.seatClass)?.th || form.seatClass;
+      const emailHtml = `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
+          <div style="background:linear-gradient(135deg,#1a5276,#e65c00);color:#fff;padding:24px;border-radius:8px 8px 0 0;text-align:center">
+            <h2 style="margin:0;font-size:20px">✈️ คำขอจองตั๋วเครื่องบิน</h2>
+          </div>
+          <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 8px 8px">
+            <tr style="background:#fff3e0"><td colspan="2" style="padding:10px 16px;font-weight:700;color:#e65c00">ข้อมูลผู้เดินทาง</td></tr>
+            <tr><td style="padding:8px 16px;color:#666;width:40%">ชื่อ-นามสกุล</td><td style="padding:8px 16px;font-weight:600">${form.fullName}</td></tr>
+            <tr style="background:#fafafa"><td style="padding:8px 16px;color:#666">เลขพาสปอร์ต</td><td style="padding:8px 16px;font-weight:600">${form.passportNo || '-'}</td></tr>
+            <tr><td style="padding:8px 16px;color:#666">วันหมดอายุพาสปอร์ต</td><td style="padding:8px 16px">${form.passportExpiry || '-'}</td></tr>
+            <tr style="background:#fff3e0"><td colspan="2" style="padding:10px 16px;font-weight:700;color:#e65c00">ช่วงเวลาเดินทาง</td></tr>
+            <tr><td style="padding:8px 16px;color:#666">ขาไป — วันที่</td><td style="padding:8px 16px;font-weight:600">${form.outboundDate}</td></tr>
+            <tr style="background:#fafafa"><td style="padding:8px 16px;color:#666">ขาไป — ช่วงเวลา</td><td style="padding:8px 16px">${form.outboundTime || '-'}</td></tr>
+            <tr><td style="padding:8px 16px;color:#666">ขากลับ — วันที่</td><td style="padding:8px 16px">${form.returnDate || '-'}</td></tr>
+            <tr style="background:#fafafa"><td style="padding:8px 16px;color:#666">ขากลับ — ช่วงเวลา</td><td style="padding:8px 16px">${form.returnTime || '-'}</td></tr>
+            <tr style="background:#fff3e0"><td colspan="2" style="padding:10px 16px;font-weight:700;color:#e65c00">รายละเอียดการเดินทาง</td></tr>
+            <tr><td style="padding:8px 16px;color:#666">สายการบิน</td><td style="padding:8px 16px">${airlineLabel}${form.airlineOther ? ` — ${form.airlineOther}` : ''}</td></tr>
+            <tr style="background:#fafafa"><td style="padding:8px 16px;color:#666">ประเภทที่นั่ง</td><td style="padding:8px 16px">${seatLabel}</td></tr>
+            <tr><td style="padding:8px 16px;color:#666">ผู้ใหญ่</td><td style="padding:8px 16px">${form.adults} คน</td></tr>
+            <tr style="background:#fafafa"><td style="padding:8px 16px;color:#666">เด็ก</td><td style="padding:8px 16px">${form.children} คน</td></tr>
+            <tr><td style="padding:8px 16px;color:#666">ทารก</td><td style="padding:8px 16px">${form.infants} คน</td></tr>
+            <tr style="background:#fafafa"><td style="padding:8px 16px;color:#666">รวมผู้โดยสาร</td><td style="padding:8px 16px;font-weight:700;color:#e65c00">${totalPax} คน</td></tr>
+            ${form.note ? `<tr><td style="padding:8px 16px;color:#666">ข้อมูลเพิ่มเติม</td><td style="padding:8px 16px">${form.note}</td></tr>` : ''}
+          </table>
+          <p style="font-size:12px;color:#aaa;text-align:center;margin-top:12px">We Craft Travel · We Craft Happiness</p>
+        </div>`;
+      await sendNotifications(`[จองตั๋ว] ${form.fullName} — ${form.outboundDate}`, emailHtml, form);
       setSuccess(true);
     } catch (err) {
       setError(lang === 'th' ? 'เกิดข้อผิดพลาด กรุณาลองใหม่' : 'An error occurred. Please try again.');
