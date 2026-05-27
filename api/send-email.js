@@ -311,8 +311,14 @@ module.exports = async function handler(req, res) {
         scopes: ['https://www.googleapis.com/auth/spreadsheets'],
       });
       sheetsClient = google.sheets({ version: 'v4', auth });
-      seqNo = await generateSeqNo(sheetsClient, sheetId, sheetName, formData._type);
-      console.log('SeqNo generated:', seqNo, '| worksheet:', sheetName);
+      // ถ้า client ส่ง seqNo มาแล้ว (gen-seqno ทำไปก่อน) ให้ใช้เลย
+      if (formData._seqNo) {
+        seqNo = formData._seqNo;
+        console.log('SeqNo from client:', seqNo, '| worksheet:', sheetName);
+      } else {
+        seqNo = await generateSeqNo(sheetsClient, sheetId, sheetName, formData._type);
+        console.log('SeqNo generated:', seqNo, '| worksheet:', sheetName);
+      }
     } catch (e) {
       console.error('SeqNo generation failed:', e.message);
     }

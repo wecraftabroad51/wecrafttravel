@@ -173,7 +173,21 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
     setSubmitting(true);
     setError('');
     try {
-      // ── 1. อัพโหลดไฟล์พาสปอร์ตไปยัง Google Drive ──────────────
+      // ── 1. Generate ลำดับที่ก่อน ────────────────────────────────
+      let seqNo = '';
+      try {
+        const seqRes = await fetch('/api/gen-seqno', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'ticket' }),
+        });
+        const seqData = await seqRes.json();
+        if (seqRes.ok && seqData.seqNo) seqNo = seqData.seqNo;
+      } catch (e) {
+        console.warn('gen-seqno failed:', e.message);
+      }
+
+      // ── 2. อัพโหลดไฟล์พาสปอร์ตไปยัง Google Drive ──────────────
       let driveFiles = [];
       if (files.length > 0) {
         try {
@@ -195,7 +209,7 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               files: base64Files,
-              folderName: `[จองตั๋ว] ${form.fullName} ${form.outboundDate}`,
+              folderName: seqNo || `[จองตั๋ว] ${form.fullName} ${form.outboundDate}`,
             }),
           });
           const text = await uploadRes.text();
@@ -277,7 +291,7 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
       await sendNotifications(
         `[จองตั๋ว] ${form.fullName} — ${form.outboundDate}`,
         emailHtml,
-        { ...form, _type: 'ticket', totalPax, driveFiles }
+        { ...form, _type: 'ticket', totalPax, driveFiles, _seqNo: seqNo || undefined }
       );
       setSuccess(true);
     } catch (err) {
