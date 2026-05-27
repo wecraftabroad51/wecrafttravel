@@ -1,161 +1,301 @@
 import { useState } from 'react';
 
-function Icon({ name, size = 16 }) {
-  const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round' };
-  switch (name) {
-    case 'arrow-right':    return <svg {...p}><path d="M5 12h14M13 6l6 6-6 6"/></svg>;
-    case 'arrow-up-right': return <svg {...p}><path d="M7 17 17 7M8 7h9v9"/></svg>;
-    default: return null;
-  }
+const ARTICLE_CATS = [
+  'บทความท่องเที่ยว',
+  'บทความอาหาร',
+  'บทความน่าอ่าน',
+  'เกี่ยวกับการเดินทาง',
+];
+
+const FOREIGN_CATS = [
+  { label: 'ท่องเที่ยวยุโรป',            key: 'Europe' },
+  { label: 'ท่องเที่ยวญี่ปุ่น',          key: 'Japan' },
+  { label: 'ท่องเที่ยวเกาหลีใต้',        key: 'Korea' },
+  { label: 'ท่องเที่ยวจีน',              key: 'China' },
+  { label: 'ท่องเที่ยวไต้หวัน',          key: 'Taiwan' },
+  { label: 'ท่องเที่ยวอเมริกา',          key: 'America' },
+];
+
+function EyeIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  );
 }
 
-export default function ArticlesPage({ lang, t, navigate, articles, promotions, faqs, reviews, settings, compareList, toggleCompare, setBookings, setReviews, setMessages }) {
-  const [cat, setCat] = useState('All');
+function ChevronRight() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 18l6-6-6-6"/>
+    </svg>
+  );
+}
 
-  // Build category list from data
-  const cats = ['All', ...Array.from(new Set(articles.map(a => a.category).filter(Boolean)))];
-  const list = articles.filter(a => cat === 'All' || a.category === cat);
+export default function ArticlesPage({ lang, t, navigate, articles }) {
+  const [activeCat, setActiveCat] = useState('ทั้งหมด');
 
-  const getTitle  = a => t ? t(a.title)       : (a.title?.en || a.title?.th || a.title || '');
-  const getExcerpt= a => t ? t(a.excerpt)     : (a.excerpt?.en || a.excerpt?.th || a.excerpt || '');
-  const getAuthor = a => a.author || '';
+  const getTitle   = a => t ? t(a.title)   : (a.title?.th   || a.title?.en   || a.title   || '');
+  const getExcerpt = a => t ? t(a.excerpt) : (a.excerpt?.th || a.excerpt?.en || a.excerpt || '');
+
+  const filtered = activeCat === 'ทั้งหมด'
+    ? articles
+    : articles.filter(a => a.category === activeCat);
+
+  const allCats = ['ทั้งหมด', ...ARTICLE_CATS];
 
   return (
-    <main className="page-enter">
-      {/* Header */}
-      <section style={{ padding: '48px 0 24px' }}>
-        <div className="wrap-wide">
-          <nav style={{ fontSize: 12, color: 'var(--muted)', display: 'flex', gap: 8, marginBottom: 24, alignItems: 'center' }}>
-            <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 12, padding: 0 }}>
-              {t ? t({ th: 'หน้าหลัก', en: 'Home' }) : 'Home'}
-            </button>
-            <span>/</span>
-            <span style={{ color: 'var(--ink)' }}>{t ? t({ th: 'บทความ', en: 'Journal' }) : 'Journal'}</span>
-          </nav>
-          <div className="layout-hero" style={{ gap: 64, alignItems: 'end' }}>
-            <h1 className="h-display">
-              The <span className="serif-accent" style={{ color: 'var(--accent)' }}>journal</span>.<br />
-              Field notes &<br />slow guides.
-            </h1>
-            <p style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.55, marginBottom: 12, maxWidth: 360 }}>
-              {t ? t({
-                th: 'เคล็ดลับที่ยั่งยืน ไม่มี clickbait ไม่มีบทความ "10 เหตุผล" แค่สิ่งที่เราอยากรู้ก่อนเดินทางครั้งแรก',
-                en: 'Tips that age well. No SEO clickbait. Just things we wish someone had told us before our first trip.'
-              }) : 'Tips that age well. No clickbait — just what we wish we knew.'}
-            </p>
-          </div>
-        </div>
-      </section>
+    <main style={{ background: '#f5f6fa', minHeight: '100vh' }}>
 
-      {/* Featured article */}
-      {list[0] && (
-        <section style={{ padding: '32px 0 48px' }}>
-          <div className="wrap-wide">
-            <div className="layout-feat" style={{
-              gap: 32, alignItems: 'center',
-              background: 'var(--card-alt)',
-              border: '1px solid var(--line)',
-              borderRadius: 'var(--r-xl)',
-              padding: 32,
-            }}>
-              <div style={{ aspectRatio: '16/10', borderRadius: 'var(--r-lg)', overflow: 'hidden', cursor: 'pointer' }}
-                onClick={() => navigate('article-detail', list[0].id)}>
-                {list[0].image
-                  ? <img src={list[0].image} alt={getTitle(list[0])} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--primary-deep), var(--ink-2))' }} />
-                }
-              </div>
-              <div>
-                <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-                  {list[0].category && <span className="chip chip-jade">{list[0].category}</span>}
-                  {list[0].readTime && <span className="chip">{list[0].readTime} min</span>}
-                  {list[0].date && <span className="chip">{list[0].date}</span>}
-                </div>
-                <h2 className="h-2">{getTitle(list[0])}</h2>
-                {list[0].excerpt && (
-                  <p style={{ marginTop: 16, color: 'var(--ink-2)', lineHeight: 1.6, fontSize: 15 }}>{getExcerpt(list[0])}</p>
-                )}
-                <div style={{ marginTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--canvas-2)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: 13 }}>
-                      {(getAuthor(list[0]) || 'A')[0]}
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 600 }}>{getAuthor(list[0])}</div>
-                      <div style={{ fontSize: 11, color: 'var(--muted)' }}>WeCraft Journal</div>
-                    </div>
-                  </div>
-                  <button onClick={() => navigate('article-detail', list[0].id)} className="btn btn-primary btn-sm">
-                    {t ? t({ th: 'อ่านต่อ', en: 'Read article' }) : 'Read article'} <Icon name="arrow-right" size={13} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Sticky category filter */}
-      <section style={{
-        position: 'sticky', top: 76, zIndex: 30,
-        background: 'var(--canvas)', borderBottom: '1px solid var(--line)',
-        padding: '16px 0',
+      {/* ── Page Header ─────────────────────────────── */}
+      <div style={{
+        background: '#fff',
+        borderBottom: '1px solid #e8eaf0',
+        padding: '32px 0 0',
       }}>
-        <div className="wrap-wide" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {cats.map(c => (
-            <button key={c} onClick={() => setCat(c)}
-              style={{
-                padding: '8px 14px', borderRadius: 999,
-                border: `1px solid ${cat === c ? 'var(--ink)' : 'var(--line)'}`,
-                background: cat === c ? 'var(--ink)' : 'var(--card)',
-                color: cat === c ? 'var(--canvas)' : 'var(--ink)',
-                fontSize: 12, fontWeight: 600, cursor: 'pointer',
-              }}>{c}</button>
-          ))}
+        <div className="wrap" style={{ textAlign: 'center', paddingBottom: 0 }}>
+          <h1 style={{
+            fontSize: 28, fontWeight: 800, color: '#1a6b5a',
+            marginBottom: 8, letterSpacing: '-0.01em',
+          }}>
+            เที่ยวบทความท่องเที่ยว
+          </h1>
+          {/* Wave underline */}
+          <svg viewBox="0 0 300 14" style={{ width: 300, display: 'block', margin: '0 auto 24px' }}>
+            <path d="M0 7 Q15 0 30 7 Q45 14 60 7 Q75 0 90 7 Q105 14 120 7 Q135 0 150 7 Q165 14 180 7 Q195 0 210 7 Q225 14 240 7 Q255 0 270 7 Q285 14 300 7"
+              fill="none" stroke="#4dd0b1" strokeWidth="2.5"/>
+          </svg>
         </div>
-      </section>
+      </div>
 
-      {/* Article grid */}
-      <section style={{ padding: '48px 0 80px' }}>
-        <div className="wrap-wide">
-          {list.length <= 1 && articles.length === 0 ? (
-            <div style={{ padding: 80, textAlign: 'center', border: '1px dashed var(--line)', borderRadius: 'var(--r-lg)', color: 'var(--muted)' }}>
-              {t ? t({ th: 'ยังไม่มีบทความ', en: 'No articles yet.' }) : 'No articles yet.'}
+      {/* ── Main Layout ─────────────────────────────── */}
+      <div className="wrap" style={{ padding: '28px 20px 60px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 28, alignItems: 'start' }}>
+
+          {/* ── LEFT: Article List ───────────────────── */}
+          <div>
+            {/* Mobile cat pills */}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }} className="mobile-cats">
+              {allCats.map(c => (
+                <button key={c} onClick={() => setActiveCat(c)} style={{
+                  padding: '6px 14px', borderRadius: 999, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  border: `1.5px solid ${activeCat === c ? '#1a6b5a' : '#dde1ea'}`,
+                  background: activeCat === c ? '#1a6b5a' : '#fff',
+                  color: activeCat === c ? '#fff' : '#555',
+                  transition: 'all .15s',
+                }}>{c}</button>
+              ))}
             </div>
-          ) : (
-            <div className="grid-cols-3" style={{ gap: 24 }}>
-              {list.slice(1).map(a => (
-                <article key={a.id} className="card"
-                  style={{ display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
-                  onClick={() => navigate('article-detail', a.id)}>
-                  <div style={{ aspectRatio: '4/3', overflow: 'hidden' }}>
+
+            {/* Article rows */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+              {filtered.length === 0 && (
+                <div style={{ padding: 60, textAlign: 'center', color: '#aaa', background: '#fff', borderRadius: 12 }}>
+                  ยังไม่มีบทความในหมวดนี้
+                </div>
+              )}
+              {filtered.map((a, idx) => (
+                <article key={a.id}
+                  onClick={() => navigate('article-detail', a.id)}
+                  style={{
+                    display: 'flex', gap: 0,
+                    background: '#fff',
+                    borderBottom: '1px solid #edf0f5',
+                    cursor: 'pointer',
+                    transition: 'background .15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+                >
+                  {/* Thumbnail */}
+                  <div style={{
+                    width: 200, minWidth: 200, height: 140,
+                    overflow: 'hidden', flexShrink: 0,
+                    background: '#e8eaf0',
+                  }}>
                     {a.image
                       ? <img src={a.image} alt={getTitle(a)}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .5s' }}
-                          onMouseOver={e => e.currentTarget.style.transform = 'scale(1.04)'}
-                          onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'} />
-                      : <div style={{ width: '100%', height: '100%', background: 'var(--canvas-2)' }} />
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block',
+                            transition: 'transform .4s' }}
+                          onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                          onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                        />
+                      : <div style={{ width: '100%', height: '100%',
+                          background: 'linear-gradient(135deg,#1a6b5a,#4dd0b1)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          color: '#fff', fontSize: 13, fontWeight: 600 }}>
+                          ✈ WeCraft
+                        </div>
                     }
                   </div>
-                  <div style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
-                    <div style={{ display: 'flex', gap: 8, fontSize: 11, color: 'var(--muted)', letterSpacing: '.08em', textTransform: 'uppercase' }}>
-                      {a.category && <span style={{ color: 'var(--primary)', fontWeight: 600 }}>{a.category}</span>}
-                      {a.readTime && <><span>·</span><span>{a.readTime} min</span></>}
-                      {a.date && <><span>·</span><span>{a.date}</span></>}
+
+                  {/* Content */}
+                  <div style={{ flex: 1, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {/* Title row */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                      <h2 style={{
+                        margin: 0, fontSize: 16, fontWeight: 700,
+                        color: '#1a1a2e', lineHeight: 1.35,
+                        flex: 1,
+                      }}>
+                        {getTitle(a)}
+                      </h2>
+                      {/* Views */}
+                      <div style={{
+                        display: 'flex', alignItems: 'center', gap: 4,
+                        color: '#7c8db5', fontSize: 13, flexShrink: 0, marginTop: 2,
+                      }}>
+                        <EyeIcon />
+                        <span>{a.views ?? Math.floor(Math.random() * 200 + 50)}</span>
+                      </div>
                     </div>
-                    <h3 style={{ margin: 0, fontSize: 19, fontWeight: 600, letterSpacing: '-0.01em', lineHeight: 1.25 }}>{getTitle(a)}</h3>
-                    {a.excerpt && <p style={{ margin: 0, fontSize: 13, color: 'var(--ink-2)', lineHeight: 1.55, flex: 1 }}>{getExcerpt(a)}</p>}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
-                      <div style={{ fontSize: 12, color: 'var(--muted)' }}>{getAuthor(a) ? `By ${getAuthor(a)}` : ''}</div>
-                      <Icon name="arrow-up-right" size={14} />
-                    </div>
+
+                    {/* Category + readTime */}
+                    {(a.category || a.readTime) && (
+                      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                        {a.category && (
+                          <span style={{
+                            fontSize: 11, fontWeight: 600,
+                            background: '#e6f7f3', color: '#1a6b5a',
+                            padding: '2px 10px', borderRadius: 999,
+                          }}>{a.category}</span>
+                        )}
+                        {a.readTime && (
+                          <span style={{ fontSize: 11, color: '#aaa' }}>อ่าน {a.readTime} นาที</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Excerpt */}
+                    {getExcerpt(a) && (
+                      <p style={{
+                        margin: 0, fontSize: 13, color: '#555',
+                        lineHeight: 1.65,
+                        display: '-webkit-box', WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                      }}>
+                        {getExcerpt(a)}
+                      </p>
+                    )}
                   </div>
                 </article>
               ))}
             </div>
-          )}
+          </div>
+
+          {/* ── RIGHT: Sidebar ───────────────────────── */}
+          <aside style={{ display: 'flex', flexDirection: 'column', gap: 20, position: 'sticky', top: 90 }}>
+
+            {/* Category block */}
+            <div style={{ background: '#fff', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,.06)' }}>
+              <div style={{
+                background: '#1a2744', color: '#fff',
+                padding: '13px 18px', fontSize: 15, fontWeight: 700,
+              }}>
+                ข้อมูลประเภทบทความ
+              </div>
+              <div style={{ padding: '8px 0' }}>
+                {allCats.filter(c => c !== 'ทั้งหมด').map(c => (
+                  <button key={c} onClick={() => setActiveCat(c)} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    width: '100%', padding: '10px 18px',
+                    background: activeCat === c ? '#e6f7f3' : 'transparent',
+                    border: 'none', cursor: 'pointer', textAlign: 'left',
+                    fontSize: 14, color: activeCat === c ? '#1a6b5a' : '#333',
+                    fontWeight: activeCat === c ? 700 : 400,
+                    transition: 'background .15s',
+                    borderLeft: activeCat === c ? '3px solid #1a6b5a' : '3px solid transparent',
+                  }}
+                    onMouseEnter={e => { if (activeCat !== c) e.currentTarget.style.background = '#f5faf8'; }}
+                    onMouseLeave={e => { if (activeCat !== c) e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    <span>{c}</span>
+                    <ChevronRight />
+                  </button>
+                ))}
+                <button onClick={() => setActiveCat('ทั้งหมด')} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  width: '100%', padding: '10px 18px',
+                  background: activeCat === 'ทั้งหมด' ? '#e6f7f3' : 'transparent',
+                  border: 'none', cursor: 'pointer', textAlign: 'left',
+                  fontSize: 14, color: activeCat === 'ทั้งหมด' ? '#1a6b5a' : '#333',
+                  fontWeight: activeCat === 'ทั้งหมด' ? 700 : 400,
+                  transition: 'background .15s',
+                  borderLeft: activeCat === 'ทั้งหมด' ? '3px solid #1a6b5a' : '3px solid transparent',
+                }}>
+                  <span>ทั้งหมด</span>
+                  <ChevronRight />
+                </button>
+              </div>
+            </div>
+
+            {/* Foreign travel block */}
+            <div style={{ background: '#fff', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,.06)' }}>
+              <div style={{
+                background: '#1a2744', color: '#fff',
+                padding: '13px 18px', fontSize: 15, fontWeight: 700,
+              }}>
+                ข้อมูลท่องเที่ยวต่างประเทศ
+              </div>
+              <div style={{ padding: '8px 0' }}>
+                {FOREIGN_CATS.map(fc => (
+                  <button key={fc.key} onClick={() => navigate('tours')} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    width: '100%', padding: '10px 18px',
+                    background: 'transparent', border: 'none',
+                    cursor: 'pointer', textAlign: 'left',
+                    fontSize: 14, color: '#333',
+                    transition: 'background .15s',
+                    borderLeft: '3px solid transparent',
+                  }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#f5faf8'; e.currentTarget.style.color = '#1a6b5a'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#333'; }}
+                  >
+                    <span>{fc.label}</span>
+                    <ChevronRight />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* CTA block */}
+            <div style={{
+              background: 'linear-gradient(135deg,#1a6b5a,#4dd0b1)',
+              borderRadius: 12, padding: '20px 18px', color: '#fff', textAlign: 'center',
+            }}>
+              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 8 }}>สนใจจองทัวร์?</div>
+              <p style={{ fontSize: 12, opacity: .85, lineHeight: 1.55, marginBottom: 14 }}>
+                เราพร้อมจัดทริปในฝันของคุณ<br/>ทั้งในและต่างประเทศ
+              </p>
+              <button onClick={() => navigate('contact')} style={{
+                background: '#fff', color: '#1a6b5a',
+                border: 'none', borderRadius: 8,
+                padding: '9px 20px', fontWeight: 700,
+                fontSize: 13, cursor: 'pointer', width: '100%',
+              }}>
+                ติดต่อเรา
+              </button>
+            </div>
+          </aside>
         </div>
-      </section>
+      </div>
+
+      {/* Mobile responsive */}
+      <style>{`
+        @media (max-width: 768px) {
+          .wrap > div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+          }
+          .wrap > div > aside {
+            position: static !important;
+          }
+          article > div:first-child {
+            width: 130px !important;
+            min-width: 130px !important;
+          }
+        }
+      `}</style>
     </main>
   );
 }

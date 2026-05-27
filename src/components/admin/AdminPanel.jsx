@@ -922,7 +922,8 @@ function ReviewsSection({ reviews, setReviews, tours, t }) {
 }
 
 // ===== ARTICLES =====
-const EMPTY_ARTICLE = { title: { th: '', en: '' }, excerpt: { th: '', en: '' }, content: { th: '', en: '' }, image: '', category: 'ท่องเที่ยว', author: 'Admin', readTime: 5, published: true };
+const ARTICLE_CATS = ['บทความท่องเที่ยว','บทความอาหาร','บทความน่าอ่าน','เกี่ยวกับการเดินทาง'];
+const EMPTY_ARTICLE = { title: { th: '', en: '' }, excerpt: { th: '', en: '' }, content: { th: '', en: '' }, image: '', category: 'บทความท่องเที่ยว', author: 'Admin', readTime: 5, views: 0, published: true };
 
 function ArticlesSection({ articles, setArticles, t }) {
   const [modal, setModal]   = useState(null);
@@ -968,7 +969,12 @@ function ArticlesSection({ articles, setArticles, t }) {
             <img src={article.image || article.coverImage} alt="" className="w-full h-32 object-cover bg-slate-100" />
             <div className="p-4">
               <h3 className="font-bold text-slate-800 text-sm mb-1">{t(article.title)}</h3>
-              <p className="text-xs text-slate-400 mb-3">{article.author} · {article.readTime || article.readingTime} นาที</p>
+              <div className="flex items-center gap-2 mb-2">
+                {article.category && (
+                  <span className="text-xs bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full font-medium">{article.category}</span>
+                )}
+                <span className="text-xs text-slate-400">{article.author} · {article.readTime || article.readingTime} นาที</span>
+              </div>
               <div className="flex gap-2">
                 <button onClick={() => { setForm(article); setModal({ mode: 'edit' }); }}
                   className="flex-1 bg-teal-50 hover:bg-teal-100 text-teal-700 py-1.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1">
@@ -1001,8 +1007,16 @@ function ArticlesSection({ articles, setArticles, t }) {
             </div>
             <Field label="URL รูปภาพ"><input className={inp} value={form.image || form.coverImage || ''} onChange={e => setF(['image'], e.target.value)} /></Field>
             <div className="grid grid-cols-2 gap-3">
+              <Field label="หมวดหมู่">
+                <select className={inp} value={form.category || 'บทความท่องเที่ยว'} onChange={e => setF(['category'], e.target.value)}>
+                  {ARTICLE_CATS.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </Field>
               <Field label="ผู้เขียน"><input className={inp} value={form.author} onChange={e => setF(['author'], e.target.value)} /></Field>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
               <Field label="เวลาอ่าน (นาที)"><input className={inp} type="number" value={form.readTime} onChange={e => setF(['readTime'], Number(e.target.value))} /></Field>
+              <Field label="จำนวนการดู (views)"><input className={inp} type="number" value={form.views || 0} onChange={e => setF(['views'], Number(e.target.value))} /></Field>
             </div>
             <div className="flex gap-3 pt-2">
               <button onClick={handleSave} disabled={saving} className="flex-1 bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white py-2.5 rounded-xl font-semibold text-sm transition-colors">
