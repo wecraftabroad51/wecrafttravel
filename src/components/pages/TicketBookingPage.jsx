@@ -137,6 +137,8 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
   });
   const [files, setFiles] = useState([]);
   const [filePreviews, setFilePreviews] = useState([]);
+  const [uploadStatus, setUploadStatus] = useState(null); // null | 'uploading' | 'ok' | 'warn'
+  const [uploadMsg, setUploadMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -192,6 +194,8 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
       // ── 2. อัพโหลดไฟล์พาสปอร์ตไปยัง Google Drive ──────────────
       let driveFiles = [];
       if (files.length > 0) {
+        setUploadStatus('uploading');
+        setUploadMsg('');
         try {
           // compress รูปก่อน → ลดขนาดให้อยู่ใน limit ของ Vercel
           const compressed = await Promise.all(files.map(f => compressImage(f)));
@@ -211,7 +215,7 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               files: base64Files,
-              folderName: seqNo || `[จองตั๋ว] ${form.fullName} ${form.outboundDate}`,
+              folderName: seqNo || `${form.fullName}_${form.outboundDate}`,
             }),
           });
           const text = await uploadRes.text();
@@ -219,14 +223,23 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
             const uploadData = JSON.parse(text);
             if (uploadRes.ok && uploadData.files) {
               driveFiles = uploadData.files;
+              setUploadStatus('ok');
+              setUploadMsg(`อัพโหลดสำเร็จ ${driveFiles.length} ไฟล์`);
             } else {
-              console.warn('Drive upload failed:', uploadData.error);
+              const errMsg = uploadData.error || `HTTP ${uploadRes.status}`;
+              console.warn('Drive upload failed:', errMsg);
+              setUploadStatus('warn');
+              setUploadMsg(`อัพโหลดไม่สำเร็จ: ${errMsg}`);
             }
           } catch {
             console.warn('Drive upload response not JSON:', text.slice(0, 200));
+            setUploadStatus('warn');
+            setUploadMsg(`อัพโหลดไม่สำเร็จ: ${text.slice(0, 120)}`);
           }
         } catch (uploadErr) {
           console.warn('Drive upload error (continuing):', uploadErr.message);
+          setUploadStatus('warn');
+          setUploadMsg(`อัพโหลดไม่สำเร็จ: ${uploadErr.message}`);
         }
       }
 
@@ -447,6 +460,11 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
                 onChange={e => {
                   const selected = Array.from(e.target.files);
                   setFiles(selected);
+                  setUploadStatus(null);
+                  setUploadMsg('');
+                  // Reset previews เสมอก่อน แล้วค่อย fill ใหม่
+                  const initPreviews = selected.map(f => ({ name: f.name, type: f.type, url: null }));
+                  setFilePreviews(initPreviews);
                   selected.forEach((f, i) => {
                     if (f.type.startsWith('image/')) {
                       const reader = new FileReader();
@@ -458,21 +476,30 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
                         });
                       };
                       reader.readAsDataURL(f);
-                    } else {
-                      setFilePreviews(prev => {
-                        const next = [...prev];
-                        next[i] = { name: f.name, type: f.type, url: null };
-                        return next;
-                      });
                     }
                   });
-                  if (selected.length === 0) setFilePreviews([]);
                 }}
                 style={{ display: 'block', margin: '0 auto', fontSize: 13 }} />
               <div style={{ fontSize: 12, color: '#aaa', marginTop: 8 }}>
                 {lang === 'th' ? 'รองรับ .PNG .JPG .PDF' : 'Accepts .PNG .JPG .PDF'}
               </div>
             </div>
+            {uploadStatus === 'uploading' && (
+              <div style={{ marginTop: 10, fontSize: 13, color: '#1a73e8' }}>
+                ⏳ กำลังอัพโหลดไปยัง Google Drive...
+              </div>
+            )}
+            {uploadStatus === 'ok' && (
+              <div style={{ marginTop: 10, fontSize: 13, color: '#2e7d32', fontWeight: 600 }}>
+                ✅ {uploadMsg}
+              </div>
+            )}
+            {uploadStatus === 'warn' && (
+              <div style={{ marginTop: 10, fontSize: 12, color: '#c62828', background: '#ffebee', borderRadius: 6, padding: '8px 12px', wordBreak: 'break-all' }}>
+                ⚠️ {uploadMsg}<br/>
+                <span style={{ color: '#888', fontWeight: 400 }}>(ยังสามารถส่งฟอร์มได้ — เจ้าหน้าที่จะติดต่อขอเอกสารภายหลัง)</span>
+              </div>
+            )}
             {filePreviews.length > 0 && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 14 }}>
                 {filePreviews.map((f, i) => (
