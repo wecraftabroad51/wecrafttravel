@@ -1,6 +1,29 @@
 import { useState } from 'react';
 import { insertMessage } from '../../lib/db.js';
 
+// ── Compress image before upload (max 1200px, quality 0.8) ────
+function compressImage(file, maxPx = 1200, quality = 0.8) {
+  return new Promise((resolve) => {
+    if (!file.type.startsWith('image/')) return resolve(file); // PDF → ไม่ compress
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxPx || height > maxPx) {
+        if (width > height) { height = Math.round(height * maxPx / width); width = maxPx; }
+        else                 { width = Math.round(width * maxPx / height); height = maxPx; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      canvas.toBlob(blob => resolve(new File([blob], file.name, { type: 'image/jpeg' })), 'image/jpeg', quality);
+    };
+    img.onerror = () => resolve(file);
+    img.src = url;
+  });
+}
+
 const TIME_SLOTS = ['00.01-06.00', '06.01-12.00', '12.01-18.00', '18.00-00.00'];
 const AIRLINE_TYPES = [
   { value: 'full',    th: 'Full Service',  en: 'Full Service' },
@@ -154,7 +177,9 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
       let driveFiles = [];
       if (files.length > 0) {
         try {
-          const base64Files = await Promise.all(files.map(file => new Promise((resolve, reject) => {
+          // compress รูปก่อน → ลดขนาดให้อยู่ใน limit ของ Vercel
+          const compressed = await Promise.all(files.map(f => compressImage(f)));
+          const base64Files = await Promise.all(compressed.map(file => new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => resolve({
               name: file.name,
