@@ -27,7 +27,7 @@ function httpsPost(hostname, path, headers, body) {
 function sheetNameFor(type) {
   if (type === 'ticket')     return 'จองตั๋ว';
   if (type === 'car-rental') return 'รถเช่า';
-  return null; // default sheet (Sheet1)
+  return 'กรุ๊ปเหมา';
 }
 
 // ── Generate sequence number: YYMMNN (พ.ศ.) ──────────────────
