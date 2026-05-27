@@ -5,12 +5,12 @@ import { insertMessage } from '../../lib/db.js';
 // Setup: เพิ่ม 2 ตัวแปรใน Vercel → Environment Variables:
 //   GMAIL_USER     = wecraftabroad51@gmail.com
 //   GMAIL_APP_PASS = (App Password 16 ตัว จาก Google Account → Security → App passwords)
-const sendNotifications = async (subject, html, formData) => {
+const sendNotifications = async (subject, html, formData, customerEmail) => {
   try {
     const res = await fetch('/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subject, html, formData }),
+      body: JSON.stringify({ subject, html, formData, customerEmail }),
     });
     const data = await res.json();
     if (!res.ok) console.error('Notification error:', data.error);
@@ -428,7 +428,8 @@ export default function GroupQuotePage({ lang, setMessages }) {
     await sendNotifications(
       `[กรุ๊ปเหมา] ${form.firstName} ${form.lastName} — ${form.destination}`,
       emailHtml,
-      { ...form, tourTypeLabel: tourTypeLabel }
+      { ...form, _type: 'group-quote', tourTypeLabel },
+      form.email || undefined
     );
 
     setSaving(false);

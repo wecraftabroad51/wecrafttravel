@@ -196,29 +196,137 @@ async function sendEmail(subject, html, seqNo, sheetUrl) {
 }
 
 // ── Send Customer Confirmation Email ──────────────────────────
-async function sendCustomerConfirmation(customerEmail, seqNo) {
+async function sendCustomerConfirmation(customerEmail, seqNo, formData) {
   const user = process.env.GMAIL_USER;
   const pass = process.env.GMAIL_APP_PASS;
   if (!user || !pass) { console.log('Customer email skipped: no credentials'); return; }
 
-  const seqDisplay = seqNo ? `<p style="font-size:18px;font-weight:bold;color:#e65c00;">หมายเลขอ้างอิง: ${seqNo}</p>` : '';
+  const f = formData || {};
+  const seqDisplay = seqNo
+    ? `<div style="background:#fff8f0;border:2px solid #e65c00;border-radius:8px;padding:12px 20px;margin:16px 0;text-align:center;">
+        <div style="font-size:11px;color:#888;margin-bottom:4px;letter-spacing:1px;">หมายเลขอ้างอิง</div>
+        <div style="font-size:22px;font-weight:900;color:#e65c00;letter-spacing:2px;">${seqNo}</div>
+       </div>`
+    : '';
+
+  // Build details table based on type
+  let detailRows = '';
+  if (f._type === 'ticket') {
+    const airlineMap = { full: 'Full Service', low: 'Low Cost', other: f.airlineOther || 'อื่นๆ' };
+    const seatMap    = { economy: 'Economy', business: 'Business', first: 'First Class', flatbed: 'Flatbed' };
+    const rows = [
+      ['ชื่อผู้โดยสาร',  f.fullName],
+      ['เลขพาสปอร์ต',    f.passportNo || '-'],
+      ['วันหมดอายุ',      f.passportExpiry || '-'],
+      ['วันเดินทางไป',    f.outboundDate],
+      ['ช่วงเวลา (ไป)',   f.outboundTime || '-'],
+      f.returnDate ? ['วันเดินทางกลับ', f.returnDate]  : null,
+      f.returnTime ? ['ช่วงเวลา (กลับ)', f.returnTime] : null,
+      ['สายการบิน',       airlineMap[f.airlineType] || f.airlineType || '-'],
+      ['ชั้นที่นั่ง',      seatMap[f.seatClass] || f.seatClass || '-'],
+      ['จำนวนผู้โดยสาร',  `ผู้ใหญ่ ${f.adults||0} / เด็ก ${f.children||0} / ทารก ${f.infants||0}`],
+      f.note ? ['หมายเหตุ', f.note] : null,
+    ].filter(Boolean);
+    detailRows = rows.map(([k, v]) =>
+      `<tr><td style="padding:8px 14px;color:#888;width:140px;vertical-align:top;font-size:13px;">${k}</td>
+           <td style="padding:8px 14px;color:#333;font-weight:600;font-size:13px;">${v}</td></tr>`
+    ).join('');
+
+  } else if (f._type === 'car-rental') {
+    const rows = [
+      ['ชื่อผู้เช่า',       f.fullName],
+      ['โทรศัพท์',          f.phone],
+      ['ประเภทรถเช่า',       f.rentalLabel || f.rentalType || '-'],
+      ['วันรับรถ',           f.pickupDate],
+      f.returnDate ? ['วันคืนรถ', f.returnDate] : null,
+      ['สถานที่รับรถ',       f.pickupLocation],
+      ['ประเภทรถ',           f.carLabel || f.carType || '-'],
+      ['จำนวนผู้โดยสาร',    `${f.passengers} คน`],
+      f.note ? ['หมายเหตุ', f.note] : null,
+    ].filter(Boolean);
+    detailRows = rows.map(([k, v]) =>
+      `<tr><td style="padding:8px 14px;color:#888;width:140px;vertical-align:top;font-size:13px;">${k}</td>
+           <td style="padding:8px 14px;color:#333;font-weight:600;font-size:13px;">${v}</td></tr>`
+    ).join('');
+
+  } else if (f._type === 'group-quote') {
+    const tourTypeLabel = (f.tourType === 'อื่นๆ' && f.tourTypeOther)
+      ? `อื่นๆ: ${f.tourTypeOther}` : (f.tourType || '-');
+    const rows = [
+      ['ชื่อผู้ติดต่อ',      `${f.firstName || ''} ${f.lastName || ''}`.trim()],
+      f.company    ? ['บริษัท/หน่วยงาน',     f.company]       : null,
+      f.pax        ? ['จำนวนผู้เดินทาง',     `${f.pax} คน`]   : null,
+      ['โทรศัพท์',            f.phone],
+      f.lineId     ? ['LINE ID',              f.lineId]         : null,
+      ['ปลายทาง',             f.destination],
+      ['วันเดินทาง',          f.travelDate],
+      ['ระยะเวลา',            f.duration],
+      ['รูปแบบทัวร์',         tourTypeLabel],
+      ['โรงแรม',              f.hotel],
+      f.airline    ? ['สายการบิน',            f.airline]        : null,
+      f.budget     ? ['งบประมาณ/ท่าน',        `฿${f.budget}`]   : null,
+      f.extraInfo  ? ['ข้อมูลเพิ่มเติม',      f.extraInfo]      : null,
+    ].filter(Boolean);
+    detailRows = rows.map(([k, v]) =>
+      `<tr><td style="padding:8px 14px;color:#888;width:140px;vertical-align:top;font-size:13px;">${k}</td>
+           <td style="padding:8px 14px;color:#333;font-weight:600;font-size:13px;">${v}</td></tr>`
+    ).join('');
+  }
+
+  const detailSection = detailRows ? `
+    <div style="margin-top:20px;text-align:left;">
+      <div style="font-size:13px;font-weight:700;color:#555;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #eee;">
+        📋 รายละเอียดคำขอของคุณ
+      </div>
+      <table style="width:100%;border-collapse:collapse;">
+        ${detailRows}
+      </table>
+    </div>` : '';
+
+  const isGroupQuote = f._type === 'group-quote';
+  const headerColor  = isGroupQuote ? 'linear-gradient(135deg,#e65c00,#ff8c00)' : 'linear-gradient(135deg,#1a5276,#1a8a6e)';
+  const headerTitle  = isGroupQuote ? '📋 ได้รับคำขอราคากรุ๊ปเหมาแล้ว!'
+                     : f._type === 'ticket' ? '🎫 ได้รับคำขอจองตั๋วแล้ว!'
+                     : f._type === 'car-rental' ? '🚗 ได้รับคำขอเช่ารถแล้ว!'
+                     : '✅ ได้รับคำขอของคุณแล้ว!';
+
   const html = `
-    <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
-      <div style="background:linear-gradient(135deg,#1a5276,#e65c00);color:#fff;padding:28px 24px;border-radius:8px 8px 0 0;text-align:center">
-        <h2 style="margin:0;font-size:22px">WeCraft Travel</h2>
-        <p style="margin:8px 0 0;opacity:.9;font-size:14px">We Craft Travel · We Craft Happiness</p>
+    <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:580px;margin:0 auto;background:#f7f7f7;padding:20px;">
+      <div style="background:${headerColor};color:#fff;padding:28px 24px;border-radius:10px 10px 0 0;text-align:center;">
+        <img src="https://www.wecraft-travel.com/logo.png" alt="WeCraft Travel"
+             style="width:56px;height:56px;object-fit:contain;margin-bottom:10px;display:block;margin-left:auto;margin-right:auto;" />
+        <h2 style="margin:0;font-size:20px;font-weight:900;">WeCraft Travel</h2>
+        <p style="margin:6px 0 0;opacity:.9;font-size:12px;letter-spacing:1px;">WE CRAFT TRAVEL · WE CRAFT HAPPINESS</p>
       </div>
-      <div style="background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 8px 8px;padding:28px 24px;text-align:center">
-        <div style="font-size:48px;margin-bottom:12px">✅</div>
-        <h3 style="margin:0 0 12px;font-size:20px;color:#333">เราได้รับคำขอของคุณแล้ว!</h3>
-        <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 16px">
-          ขอบคุณที่ไว้วางใจ WeCraft Travel<br>
-          ทีมงานของเราจะติดต่อกลับภายใน <strong>24 ชั่วโมง</strong> เพื่อยืนยันรายละเอียดและดำเนินการต่อไป
-        </p>
+
+      <div style="background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 10px 10px;padding:28px 24px;">
+        <div style="text-align:center;margin-bottom:16px;">
+          <div style="font-size:44px;margin-bottom:10px;">✅</div>
+          <h3 style="margin:0 0 8px;font-size:19px;color:#222;font-weight:800;">${headerTitle}</h3>
+          <p style="color:#555;font-size:14px;line-height:1.75;margin:0;">
+            ขอบคุณที่ไว้วางใจ <strong>WeCraft Travel</strong><br/>
+            ทีมงานจะติดต่อกลับภายใน <strong style="color:#e65c00;">24 ชั่วโมง</strong> ในวันทำการ (จันทร์–เสาร์)
+          </p>
+        </div>
+
         ${seqDisplay}
-        <p style="color:#888;font-size:12px;margin-top:20px">หากมีข้อสงสัย กรุณาติดต่อ wecraftabroad51@gmail.com</p>
+        ${detailSection}
+
+        <div style="margin-top:24px;padding:16px;background:#f0fff4;border-radius:8px;border:1px solid #c6f6d5;text-align:center;">
+          <div style="font-size:13px;color:#276749;font-weight:700;margin-bottom:8px;">📞 ติดต่อเราได้ที่</div>
+          <a href="tel:0618686889" style="display:inline-block;color:#276749;text-decoration:none;font-size:14px;font-weight:700;margin-right:12px;">
+            ☎️ 061-868-6889
+          </a>
+          <a href="https://line.me/R/ti/p/@wecrafttravel" style="display:inline-block;color:#06c755;text-decoration:none;font-size:14px;font-weight:700;">
+            💚 LINE: @wecrafttravel
+          </a>
+          <div style="font-size:11px;color:#888;margin-top:6px;">จันทร์–เสาร์ 09:00–18:00 น.</div>
+        </div>
+
+        <p style="color:#bbb;font-size:11px;text-align:center;margin-top:20px;margin-bottom:0;">
+          อีเมลนี้ส่งโดยอัตโนมัติจาก wecraft-travel.com — กรุณาอย่าตอบกลับอีเมลนี้
+        </p>
       </div>
-      <p style="font-size:11px;color:#aaa;text-align:center;margin-top:10px">We Craft Travel · We Craft Happiness</p>
     </div>`;
 
   const transporter = nodemailer.createTransport({
@@ -388,7 +496,7 @@ module.exports = async function handler(req, res) {
       : Promise.resolve(),
 
     customerEmail
-      ? sendCustomerConfirmation(customerEmail, seqNo)
+      ? sendCustomerConfirmation(customerEmail, seqNo, formData)
           .then(() => { results.customerEmail = 'ok'; })
           .catch(e => { results.customerEmail = e.message; console.error('CustomerEmail:', e.message); })
       : Promise.resolve(),
