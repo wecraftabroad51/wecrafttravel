@@ -684,8 +684,8 @@ export default function HomePage({ lang, t, navigate, tours, articles, promotion
       <NewToursSection tours={tours} navigate={navigate} t={t} compareList={compareList} toggleCompare={toggleCompare} lang={lang} />
       <StatsStrip lang={lang} />
       <PromoBanners promotions={promotions} navigate={navigate} t={t} lang={lang} />
-      <ReviewsSection reviews={reviews} lang={lang} />
       <ArticlesSection articles={articles} navigate={navigate} t={t} lang={lang} />
+      <ReviewsSection reviews={reviews} lang={lang} />
       <ContactCta navigate={navigate} lang={lang} />
     </main>
   );
