@@ -250,8 +250,8 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
               </svg>
             </span>
             <div>
-              <div style={{ fontWeight: 700, fontSize: 13, color: '#333' }}>เวลาทำการ</div>
-              <div style={{ fontSize: 12, color: '#666', marginTop: 1 }}>จันทร์-ศุกร์ : 09.00 - 18.00 น.</div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: '#333' }}>{lang === 'th' ? 'เวลาทำการ' : 'Office Hours'}</div>
+              <div style={{ fontSize: 12, color: '#666', marginTop: 1 }}>{lang === 'th' ? 'จันทร์-ศุกร์ : 09.00 - 18.00 น.' : 'Mon–Fri : 09:00 – 18:00'}</div>
             </div>
           </div>
 
@@ -267,7 +267,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
               </svg>
             </span>
             <div>
-              <div style={{ fontWeight: 700, fontSize: 13, color: '#333' }}>Hotline</div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: '#333' }}>{lang === 'th' ? 'สายด่วน' : 'Hotline'}</div>
               <a href="tel:0618686889" style={{ display: 'block', fontSize: 13, color: '#555', textDecoration: 'none', marginTop: 1 }}>
                 061-868-6889
               </a>
@@ -296,7 +296,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
                 style={{ fontWeight: 800, fontSize: 15, color: '#06c755', textDecoration: 'none' }}>
                 @wecrafttravel
               </a>
-              <div style={{ fontSize: 11, color: '#aaa', marginTop: 1 }}>Travel License : 11/11550</div>
+              <div style={{ fontSize: 11, color: '#aaa', marginTop: 1 }}>{lang === 'th' ? 'ใบอนุญาต ททท. 11/11550' : 'Travel License : 11/11550'}</div>
             </div>
           </div>
 

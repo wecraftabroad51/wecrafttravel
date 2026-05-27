@@ -21,30 +21,30 @@ function Icon({ name, size = 18, color }) {
 // ─── SLIDES DATA ─────────────────────────────────────────────
 const SLIDES = [
   {
-    tag: '🔥 Hot Deal',
-    title: 'ยุโรป 9 ประเทศ 15 วัน',
-    sub: 'ฝรั่งเศส · อิตาลี · สวิตเซอร์แลนด์ · เยอรมัน',
+    tag:   { th: '🔥 โปรพิเศษ',   en: '🔥 Hot Deal' },
+    title: { th: 'ยุโรป 9 ประเทศ 15 วัน', en: 'Europe 9 Countries 15 Days' },
+    sub:   { th: 'ฝรั่งเศส · อิตาลี · สวิตเซอร์แลนด์ · เยอรมัน', en: 'France · Italy · Switzerland · Germany' },
     price: '79,900',
     img: 'https://picsum.photos/seed/europe1/1400/520',
   },
   {
-    tag: '✨ มาใหม่',
-    title: 'ญี่ปุ่น โตเกียว โอซาก้า 7 วัน',
-    sub: 'นิกโก้ · ฟูจิ · เกียวโต · นารา · ยูนิเวอร์แซล',
+    tag:   { th: '✨ มาใหม่',      en: '✨ New' },
+    title: { th: 'ญี่ปุ่น โตเกียว โอซาก้า 7 วัน', en: 'Japan Tokyo Osaka 7 Days' },
+    sub:   { th: 'นิกโก้ · ฟูจิ · เกียวโต · นารา · ยูนิเวอร์แซล', en: 'Nikko · Fuji · Kyoto · Nara · Universal' },
     price: '39,900',
     img: 'https://picsum.photos/seed/japan1/1400/520',
   },
   {
-    tag: '⭐ แนะนำ',
-    title: 'จีน เซี่ยงไฮ้ ปักกิ่ง 8 วัน',
-    sub: 'กำแพงเมืองจีน · พระราชวังต้องห้าม · หยูหยวน',
+    tag:   { th: '⭐ แนะนำ',      en: '⭐ Featured' },
+    title: { th: 'จีน เซี่ยงไฮ้ ปักกิ่ง 8 วัน', en: 'China Shanghai Beijing 8 Days' },
+    sub:   { th: 'กำแพงเมืองจีน · พระราชวังต้องห้าม · หยูหยวน', en: 'Great Wall · Forbidden City · Yu Garden' },
     price: '29,900',
     img: 'https://picsum.photos/seed/china1/1400/520',
   },
 ];
 
 // ─── HERO (full-width carousel) ───────────────────────────────
-function HeroSection({ navigate }) {
+function HeroSection({ navigate, lang }) {
   const [idx, setIdx] = useState(0);
   const timerRef = useRef(null);
   const go = (n) => setIdx((n + SLIDES.length) % SLIDES.length);
@@ -55,6 +55,7 @@ function HeroSection({ navigate }) {
   }, []);
 
   const s = SLIDES[idx];
+  const L = lang || 'th';
   return (
     <div className="hero-wrap" style={{ position: 'relative', overflow: 'hidden' }}>
       {/* Slides */}
@@ -69,22 +70,22 @@ function HeroSection({ navigate }) {
         <div className="wrap" style={{ color: '#fff' }}>
           <div style={{ maxWidth: 580 }}>
             <div style={{ display: 'inline-block', background: 'var(--primary)', padding: '4px 16px', borderRadius: 4, fontSize: 13, fontWeight: 700, marginBottom: 14 }}>
-              {s.tag}
+              {s.tag[L] || s.tag.th}
             </div>
             <h1 style={{ margin: '0 0 10px', fontSize: 'clamp(28px,4vw,52px)', fontWeight: 800, lineHeight: 1.1, textShadow: '0 2px 10px rgba(0,0,0,.5)' }}>
-              {s.title}
+              {s.title[L] || s.title.th}
             </h1>
-            <p style={{ margin: '0 0 24px', fontSize: 16, opacity: .9, textShadow: '0 1px 4px rgba(0,0,0,.4)' }}>{s.sub}</p>
+            <p style={{ margin: '0 0 24px', fontSize: 16, opacity: .9, textShadow: '0 1px 4px rgba(0,0,0,.4)' }}>{s.sub[L] || s.sub.th}</p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
               <button onClick={() => navigate('tours')} style={{
                 background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 6,
                 padding: '13px 30px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                 boxShadow: '0 4px 16px rgba(230,92,0,.5)', display: 'flex', alignItems: 'center', gap: 8,
               }}>
-                ดูโปรแกรม <Icon name="arrow-r" size={15} color="#fff" />
+                {L === 'th' ? 'ดูโปรแกรม' : 'View Tours'} <Icon name="arrow-r" size={15} color="#fff" />
               </button>
               <div>
-                <div style={{ fontSize: 12, opacity: .8 }}>ราคาเริ่มต้น</div>
+                <div style={{ fontSize: 12, opacity: .8 }}>{L === 'th' ? 'ราคาเริ่มต้น' : 'Starting from'}</div>
                 <div style={{ fontSize: 32, fontWeight: 800, color: '#FFD54F', lineHeight: 1 }}>฿{s.price}</div>
               </div>
             </div>
@@ -628,7 +629,7 @@ export default function HomePage({ lang, t, navigate, tours, articles, promotion
   return (
     <main className="page-enter" style={{ background: 'var(--canvas-2)' }}>
       {/* Hero — full width */}
-      <HeroSection navigate={navigate} />
+      <HeroSection navigate={navigate} lang={lang} />
 
       {/* 2-column: search sidebar (left) + hot deals & categories (right) */}
       <div className="home-2col">

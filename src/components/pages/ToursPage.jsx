@@ -96,7 +96,10 @@ function TourRow({ tour, t, navigate, inCompare, onCompare }) {
             }}
           >
             <Icon name={inCompare ? 'check' : 'swap'} size={12} />
-            {inCompare ? 'Comparing' : 'Compare'}
+            {inCompare
+              ? (t ? t({ th: 'กำลังเปรียบ', en: 'Comparing' }) : 'Comparing')
+              : (t ? t({ th: 'เปรียบเทียบ', en: 'Compare' }) : 'Compare')
+            }
           </button>
           <button
             onClick={() => navigate('tour-detail', tour.id)}
@@ -176,10 +179,10 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
       <div className="wrap-wide" style={{ padding: '16px 0 0' }}>
         <nav style={{ fontSize: 12, color: 'var(--muted)', display: 'flex', gap: 8, alignItems: 'center' }}>
           <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 12, padding: 0 }}>
-            หน้าหลัก
+            {lang === 'th' ? 'หน้าหลัก' : 'Home'}
           </button>
           <span>/</span>
-          <span style={{ color: 'var(--ink)' }}>ทัวร์ทั้งหมด</span>
+          <span style={{ color: 'var(--ink)' }}>{lang === 'th' ? 'ทัวร์ทั้งหมด' : 'All Tours'}</span>
         </nav>
       </div>
 
@@ -223,7 +226,7 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
 
           {/* Budget */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--muted)' }}>
-            <span style={{ letterSpacing: '.08em', textTransform: 'uppercase', fontWeight: 600 }}>Budget</span>
+            <span style={{ letterSpacing: '.08em', textTransform: 'uppercase', fontWeight: 600 }}>{lang === 'th' ? 'งบประมาณ' : 'Budget'}</span>
             <input
               type="range" min={50000} max={300000} step={5000} value={priceMax}
               onChange={e => setPriceMax(+e.target.value)}
@@ -244,10 +247,10 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
                 cursor: 'pointer', width: 'auto',
               }}
             >
-              <option value="popular">Popular</option>
-              <option value="price-low">Price ↑</option>
-              <option value="price-high">Price ↓</option>
-              <option value="duration">Duration ↓</option>
+              <option value="popular">{lang === 'th' ? 'ยอดนิยม' : 'Popular'}</option>
+              <option value="price-low">{lang === 'th' ? 'ราคา (ต่ำ→สูง)' : 'Price ↑'}</option>
+              <option value="price-high">{lang === 'th' ? 'ราคา (สูง→ต่ำ)' : 'Price ↓'}</option>
+              <option value="duration">{lang === 'th' ? 'ระยะเวลา ↓' : 'Duration ↓'}</option>
             </select>
             <div style={{ display: 'flex', border: '1px solid var(--line)', borderRadius: 999, padding: 3, background: 'var(--card)' }}>
               {['grid', 'list'].map(v => (
@@ -274,7 +277,7 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
                 {t ? t({ th: 'ไม่พบทัวร์', en: 'No tours match these filters.' }) : 'No tours match.'}
               </div>
               <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 8 }}>
-                Try broadening continent or budget.
+                {lang === 'th' ? 'ลองเลือกทวีปหรือปรับงบประมาณใหม่' : 'Try broadening continent or budget.'}
               </div>
             </div>
           ) : view === 'grid' ? (
