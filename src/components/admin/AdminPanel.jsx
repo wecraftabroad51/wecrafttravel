@@ -133,6 +133,115 @@ function ImageUpload({ value, onChange, hint, folder = 'tours' }) {
   );
 }
 
+// ── Rich Text Editor ─────────────────────────────────────────
+const TOOLBAR = [
+  { group: 'format', items: [
+    { cmd: 'bold',      label: <b>B</b>,      title: 'ตัวหนา (Ctrl+B)' },
+    { cmd: 'italic',    label: <i>I</i>,       title: 'ตัวเอียง (Ctrl+I)' },
+    { cmd: 'underline', label: <u>U</u>,       title: 'ขีดเส้นใต้ (Ctrl+U)' },
+    { cmd: 'strikeThrough', label: <s>S</s>,   title: 'ขีดทับ' },
+  ]},
+  { group: 'heading', items: [
+    { cmd: 'formatBlock', val: 'h2', label: 'H2', title: 'หัวข้อใหญ่' },
+    { cmd: 'formatBlock', val: 'h3', label: 'H3', title: 'หัวข้อรอง' },
+    { cmd: 'formatBlock', val: 'p',  label: 'ปกติ', title: 'ข้อความปกติ' },
+  ]},
+  { group: 'align', items: [
+    { cmd: 'justifyLeft',   label: '⬛︎≡', title: 'ชิดซ้าย' },
+    { cmd: 'justifyCenter', label: '≡⬛︎≡', title: 'กึ่งกลาง' },
+    { cmd: 'justifyRight',  label: '≡⬛︎', title: 'ชิดขวา' },
+    { cmd: 'justifyFull',   label: '≡≡≡', title: 'กระจาย (Justify)' },
+  ]},
+  { group: 'list', items: [
+    { cmd: 'insertUnorderedList', label: '• ลิสต์', title: 'รายการแบบจุด' },
+    { cmd: 'insertOrderedList',   label: '1. ลิสต์', title: 'รายการแบบตัวเลข' },
+  ]},
+];
+
+function RichEditor({ value, onChange, placeholder, minHeight = 320 }) {
+  const ref = useRef(null);
+  const isInit = useRef(false);
+
+  useEffect(() => {
+    if (ref.current && !isInit.current) {
+      ref.current.innerHTML = value || '';
+      isInit.current = true;
+    }
+  }, [value]);
+
+  const exec = (cmd, val = null) => {
+    ref.current?.focus();
+    document.execCommand(cmd, false, val);
+    onChange(ref.current?.innerHTML || '');
+  };
+
+  const btnStyle = (active) => ({
+    padding: '3px 9px', borderRadius: 6, border: '1px solid #e2e8f0',
+    background: active ? '#0f766e' : '#fff',
+    color: active ? '#fff' : '#334155',
+    cursor: 'pointer', fontSize: 12, fontFamily: 'inherit',
+    lineHeight: 1.4, whiteSpace: 'nowrap',
+    transition: 'all .1s',
+  });
+
+  return (
+    <div style={{ border: '1px solid #e2e8f0', borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
+      {/* Toolbar */}
+      <div style={{
+        display: 'flex', gap: 6, padding: '8px 10px',
+        background: '#f8fafc', borderBottom: '1px solid #e2e8f0',
+        flexWrap: 'wrap', alignItems: 'center',
+      }}>
+        {TOOLBAR.map((group, gi) => (
+          <div key={gi} style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+            {gi > 0 && <div style={{ width: 1, height: 20, background: '#e2e8f0', margin: '0 2px' }} />}
+            {group.items.map((tool, ti) => (
+              <button
+                key={ti}
+                type="button"
+                title={tool.title}
+                onMouseDown={e => { e.preventDefault(); exec(tool.cmd, tool.val || null); }}
+                style={btnStyle(false)}
+                onMouseEnter={e => { e.currentTarget.style.background = '#e2e8f0'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#334155'; }}
+              >
+                {tool.label}
+              </button>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      {/* Editable area */}
+      <div
+        ref={ref}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={() => onChange(ref.current?.innerHTML || '')}
+        data-placeholder={placeholder}
+        style={{
+          minHeight, padding: '14px 16px',
+          outline: 'none', fontSize: 14, lineHeight: 1.75,
+          fontFamily: 'inherit', color: '#1e293b',
+          overflowY: 'auto',
+        }}
+      />
+
+      <style>{`
+        [contenteditable]:empty:before {
+          content: attr(data-placeholder);
+          color: #94a3b8; pointer-events: none;
+        }
+        [contenteditable] h2 { font-size: 1.3em; font-weight: 700; margin: .8em 0 .4em; }
+        [contenteditable] h3 { font-size: 1.1em; font-weight: 700; margin: .7em 0 .35em; }
+        [contenteditable] ul { list-style: disc; padding-left: 1.5em; margin: .5em 0; }
+        [contenteditable] ol { list-style: decimal; padding-left: 1.5em; margin: .5em 0; }
+        [contenteditable] p  { margin: 0 0 .6em; }
+      `}</style>
+    </div>
+  );
+}
+
 // ── Admin Panel ───────────────────────────────────────────────
 export default function AdminPanel(props) {
   const [loginForm, setLoginForm] = useState({ user: '', pass: '' });
@@ -1040,23 +1149,27 @@ function ArticlesSection({ articles, setArticles, t }) {
               </Field>
             </div>
 
-            {/* เนื้อหาบทความ — full width + tall */}
-            <div className="border-t border-slate-100 pt-4">
-              <p className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wide">📝 เนื้อหาบทความ</p>
+            {/* เนื้อหาบทความ — Rich Text Editor */}
+            <div className="border-t border-slate-100 pt-4 space-y-4">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                📝 เนื้อหาบทความ — รองรับ ตัวหนา / เอียง / ขีดเส้นใต้ / หัวข้อ / การจัดวาง / รายการ
+              </p>
               <Field label="เนื้อหา (ภาษาไทย)">
-                <textarea className={inp} rows={14} style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.7 }}
+                <RichEditor
                   value={form.content?.th || ''}
-                  onChange={e => setF(['content','th'], e.target.value)}
-                  placeholder="เขียนเนื้อหาบทความภาษาไทยที่นี่...&#10;&#10;รองรับ paragraph ปกติ สามารถ Enter เว้นบรรทัดได้" />
+                  onChange={val => setF(['content','th'], val)}
+                  placeholder="เขียนเนื้อหาบทความภาษาไทยที่นี่..."
+                  minHeight={340}
+                />
               </Field>
-              <div className="mt-3">
-                <Field label="เนื้อหา (English)">
-                  <textarea className={inp} rows={10} style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.7 }}
-                    value={form.content?.en || ''}
-                    onChange={e => setF(['content','en'], e.target.value)}
-                    placeholder="Write article content in English here..." />
-                </Field>
-              </div>
+              <Field label="เนื้อหา (English)">
+                <RichEditor
+                  value={form.content?.en || ''}
+                  onChange={val => setF(['content','en'], val)}
+                  placeholder="Write article content in English here..."
+                  minHeight={240}
+                />
+              </Field>
             </div>
 
             <div className="flex gap-3 pt-2">

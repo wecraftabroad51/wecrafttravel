@@ -25,7 +25,10 @@ export default function ArticleDetailPage({ lang, t, navigate, articles, article
 
   const title   = t ? t(article.title)   : (article.title?.en   || article.title?.th   || article.title   || '');
   const excerpt = t ? t(article.excerpt) : (article.excerpt?.en || article.excerpt?.th || article.excerpt || '');
-  const body    = t ? t(article.body)    : (article.body?.en    || article.body?.th    || article.body    || '');
+  // content field (rich HTML from editor); fall back to legacy body field
+  const rawContent = article.content || article.body || '';
+  const body = t ? t(rawContent) : (rawContent?.en || rawContent?.th || rawContent || '');
+  const isHtml = typeof body === 'string' && body.trim().startsWith('<');
 
   return (
     <main className="page-enter" style={{ background: 'var(--canvas)' }}>
@@ -117,27 +120,43 @@ export default function ArticleDetailPage({ lang, t, navigate, articles, article
                   {excerpt}
                 </p>
               )}
-              <div style={{ fontSize: 16, lineHeight: 1.75, color: 'var(--ink-2)' }}>
-                {body ? body.split('\n').map((line, i) => {
-                  if (!line.trim()) return <div key={i} style={{ height: 12 }} />;
-                  // Handle **bold** syntax
-                  const parts = line.split(/(\*\*[^*]+\*\*)/g);
-                  return (
-                    <p key={i} style={{ margin: '0 0 16px' }}>
-                      {parts.map((part, j) => {
-                        if (part.startsWith('**') && part.endsWith('**')) {
-                          return <strong key={j}>{part.slice(2, -2)}</strong>;
-                        }
-                        return part;
-                      })}
-                    </p>
-                  );
-                }) : (
+              <div style={{ fontSize: 16, lineHeight: 1.75, color: 'var(--ink-2)' }} className="article-body">
+                {body ? (
+                  isHtml
+                    /* Rich HTML from editor — render directly */
+                    ? <div dangerouslySetInnerHTML={{ __html: body }} />
+                    /* Legacy plain text — split by newline */
+                    : body.split('\n').map((line, i) => {
+                        if (!line.trim()) return <div key={i} style={{ height: 12 }} />;
+                        const parts = line.split(/(\*\*[^*]+\*\*)/g);
+                        return (
+                          <p key={i} style={{ margin: '0 0 16px' }}>
+                            {parts.map((part, j) =>
+                              part.startsWith('**') && part.endsWith('**')
+                                ? <strong key={j}>{part.slice(2, -2)}</strong>
+                                : part
+                            )}
+                          </p>
+                        );
+                      })
+                ) : (
                   <p style={{ color: 'var(--muted)' }}>
                     {lang === 'th' ? 'ยังไม่มีเนื้อหา' : 'No content yet.'}
                   </p>
                 )}
               </div>
+              <style>{`
+                .article-body h2 { font-size: 1.4em; font-weight: 800; margin: 1.4em 0 .5em; color: var(--ink); }
+                .article-body h3 { font-size: 1.15em; font-weight: 700; margin: 1.2em 0 .4em; color: var(--ink); }
+                .article-body ul { list-style: disc; padding-left: 1.6em; margin: .6em 0 1em; }
+                .article-body ol { list-style: decimal; padding-left: 1.6em; margin: .6em 0 1em; }
+                .article-body li { margin-bottom: .35em; }
+                .article-body strong { font-weight: 700; color: var(--ink); }
+                .article-body em { font-style: italic; }
+                .article-body u  { text-decoration: underline; }
+                .article-body s  { text-decoration: line-through; }
+                .article-body p  { margin-bottom: .9em; }
+              `}</style>
 
               {/* Back link */}
               <div style={{ marginTop: 56, paddingTop: 32, borderTop: '1px solid var(--line)' }}>
