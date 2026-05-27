@@ -250,7 +250,7 @@ export default function FloatingContact({ settings }) {
 
           {/* Hours */}
           <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11, textAlign: 'center', marginBottom: 2 }}>
-            จันทร์-ศุกร์ :
+            จันทร์-เสาร์ :
           </div>
           <div style={{ color: '#fff', fontSize: 12, fontWeight: 700, textAlign: 'center', marginBottom: 10 }}>
             09.00 - 18.00 น.

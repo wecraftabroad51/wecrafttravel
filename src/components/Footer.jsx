@@ -108,7 +108,7 @@ export default function Footer({ lang, t, navigate, settings }) {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,.75)' }}>
                 <Icon name="clock" size={14} />
-                {th ? 'จ–ศ 09:00–18:00 น.' : 'Mon–Fri 09:00–18:00'}
+                {th ? 'จ–ส 09:00–18:00 น.' : 'Mon–Sat 09:00–18:00'}
               </div>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, color: 'rgba(255,255,255,.75)' }}>
                 <span style={{ flexShrink: 0, marginTop: 2 }}><Icon name="map-pin" size={14} /></span>

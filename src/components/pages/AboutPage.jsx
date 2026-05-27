@@ -193,7 +193,7 @@ export default function AboutPage({ lang = 'th', navigate }) {
             {th ? 'ติดต่อเรา' : 'Contact Us'}
           </div>
           <p style={{ fontSize: 14, color: '#666', marginBottom: 20 }}>
-            {th ? 'พร้อมให้บริการ จันทร์–ศุกร์ 09.00–18.00 น.' : 'Available Mon–Fri, 09:00–18:00'}
+            {th ? 'พร้อมให้บริการ จันทร์–เสาร์ 09.00–18.00 น.' : 'Available Mon–Sat, 09:00–18:00'}
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="tel:0618686889" style={{

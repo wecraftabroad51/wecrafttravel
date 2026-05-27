@@ -609,7 +609,7 @@ function ContactCta({ navigate, lang }) {
         </h2>
         <p style={{ margin: '0 0 28px', fontSize: 16, opacity: .9 }}>
           {lang === 'th' ? 'ทีมงานผู้เชี่ยวชาญพร้อมให้คำปรึกษา ฟรี! ไม่มีข้อผูกมัด' : 'Our experts are ready to advise — free, no obligation.'}<br />
-          {lang === 'th' ? 'โทรหาเรา หรือแอดไลน์ได้เลยทันที จ-ศ 09:00-18:00 น.' : 'Call or LINE us anytime — Mon–Fri 09:00–18:00.'}
+          {lang === 'th' ? 'โทรหาเรา หรือแอดไลน์ได้เลยทันที จ-ส 09:00-18:00 น.' : 'Call or LINE us anytime — Mon–Sat 09:00–18:00.'}
         </p>
         <div className="cta-btns">
           <button
