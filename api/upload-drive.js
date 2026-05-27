@@ -1,5 +1,11 @@
 const { google } = require('googleapis');
-const { Readable } = require('stream');
+const { PassThrough } = require('stream');
+
+function bufferToStream(buffer) {
+  const stream = new PassThrough();
+  stream.end(buffer);
+  return stream;
+}
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -23,7 +29,15 @@ module.exports = async function handler(req, res) {
     });
     const drive = google.drive({ version: 'v3', auth });
 
-    // ── Create sub-folder per booking if folderName given ────────
+    // ── Upload files first, then create folder only if upload succeeds ──
+    // Prepare all buffers
+    const fileBuffers = files.map(f => ({
+      name:     f.name,
+      mimeType: f.mimeType || 'application/octet-stream',
+      buffer:   Buffer.from(f.data, 'base64'),
+    }));
+
+    // ── Create sub-folder ────────────────────────────────────────
     let targetFolderId = folderId || null;
     if (folderId && folderName) {
       const folderRes = await drive.files.create({
@@ -35,8 +49,6 @@ module.exports = async function handler(req, res) {
         fields: 'id',
       });
       targetFolderId = folderRes.data.id;
-
-      // Share sub-folder as reader (anyone with link)
       await drive.permissions.create({
         fileId: targetFolderId,
         requestBody: { role: 'reader', type: 'anyone' },
@@ -45,35 +57,25 @@ module.exports = async function handler(req, res) {
 
     // ── Upload each file ─────────────────────────────────────────
     const results = [];
-    for (const file of files) {
-      const buffer = Buffer.from(file.data, 'base64');
-      const stream = Readable.from(buffer);
-
-      const createParams = {
+    for (const file of fileBuffers) {
+      const { data } = await drive.files.create({
         requestBody: {
           name: file.name,
           ...(targetFolderId ? { parents: [targetFolderId] } : {}),
         },
         media: {
-          mimeType: file.mimeType || 'application/octet-stream',
-          body: stream,
+          mimeType: file.mimeType,
+          body: bufferToStream(file.buffer),
         },
         fields: 'id, name, webViewLink',
-      };
+      });
 
-      const { data } = await drive.files.create(createParams);
-
-      // Make file publicly viewable
       await drive.permissions.create({
         fileId: data.id,
         requestBody: { role: 'reader', type: 'anyone' },
       });
 
-      results.push({
-        name: data.name,
-        id:   data.id,
-        url:  data.webViewLink,
-      });
+      results.push({ name: data.name, id: data.id, url: data.webViewLink });
     }
 
     return res.status(200).json({ ok: true, files: results });
