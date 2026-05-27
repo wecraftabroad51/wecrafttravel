@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 
 const MENU = [
   {
-    label: 'ทัวร์ต่างประเทศ', labelEn: 'International Tours',
-    key: 'tours', tourType: 'international',
+    label: 'ทัวร์ต่างประเทศ', labelEn: 'Outbound Tours',
+    key: 'tours', tourType: 'outbound',
     mega: [
       { continent: 'ยุโรป', countries: ['ฝรั่งเศส','อิตาลี','สวิตเซอร์แลนด์','เยอรมัน','อังกฤษ','สเปน','โปรตุเกส','ออสเตรีย','เนเธอร์แลนด์','เบลเยียม','นอร์เวย์','สวีเดน','เดนมาร์ก'] },
       { continent: 'เอเชียตะวันออก', countries: ['ญี่ปุ่น','จีน','เกาหลีใต้','ไต้หวัน','ฮ่องกง','มาเก๊า'] },
@@ -14,8 +14,8 @@ const MENU = [
     ],
   },
   {
-    label: 'ทัวร์ในประเทศ', labelEn: 'Domestic Tours',
-    key: 'tours', tourType: 'domestic',
+    label: 'ทัวร์ในประเทศ', labelEn: 'Inbound Tours',
+    key: 'tours', tourType: 'inbound',
     mega: [
       { continent: 'ภาคเหนือ', countries: ['เชียงใหม่','เชียงราย','แม่ฮ่องสอน','น่าน','ลำปาง','พะเยา'] },
       { continent: 'ภาคกลาง / ตะวันออก', countries: ['กรุงเทพฯ','พัทยา','ระยอง','เกาะเสม็ด','เกาะช้าง','กาญจนบุรี'] },
@@ -25,28 +25,30 @@ const MENU = [
   },
   {
     label: 'ทัวร์พรีเมี่ยม', labelEn: 'Premium Tours',
-    key: 'tours', tourType: 'premium',
+    key: 'tours', tourType: 'premiumtour',
     mega: [
       { continent: 'ยุโรปพรีเมี่ยม', countries: ['สวิตเซอร์แลนด์ VIP','อิตาลีหรูหรา','ฝรั่งเศสไฮเอนด์','นอร์เวย์ Fjord'] },
       { continent: 'เอเชียพรีเมี่ยม', countries: ['ญี่ปุ่น Luxury','มัลดีฟส์ Overwater Villa','บาหลี Exclusive','สิงคโปร์ Fine Dining'] },
       { continent: 'ไฟลท์ชั้นธุรกิจ', countries: ['ยุโรปธุรกิจ','ญี่ปุ่นธุรกิจ','อเมริกาธุรกิจ','ออสเตรเลียธุรกิจ'] },
     ],
   },
-  { label: 'ทัวร์โปรไฟไหม้ 🔥', labelEn: '🔥 Hot Deals', key: 'tours', tourType: 'hotdeal', mega: null },
+  { label: 'ทัวร์โปรไฟไหม้ 🔥', labelEn: '🔥 Hot Tours', key: 'tours', tourType: 'hottour', mega: null },
   { label: 'ทัวร์โปรโมชั่น', labelEn: 'Promotions', key: 'promotions', mega: null },
   {
     label: 'แพ็คเกจทัวร์', labelEn: 'Tour Packages',
-    key: 'tours', tourType: 'package',
+    key: 'tours', tourType: 'tourpackage',
     mega: [
       { continent: 'แพ็คเกจยอดนิยม', countries: ['แพ็คเกจฮันนีมูน','แพ็คเกจครอบครัว','แพ็คเกจกลุ่มใหญ่','แพ็คเกจวันเกิด'] },
       { continent: 'แพ็คเกจตามธีม', countries: ['ทัวร์ซากุระ','ทัวร์ใบไม้เปลี่ยนสี','ทัวร์คริสต์มาส','ทัวร์ปีใหม่'] },
     ],
   },
   {
-    label: 'เรือสำราญ', labelEn: 'Cruise',
-    key: 'tours', tourType: 'cruise',
+    label: 'จองตั๋ว / บริการ', labelEn: 'Ticket & Services',
+    key: 'ticket-booking', tourType: null,
     mega: [
-      { continent: 'เส้นทางเรือสำราญ', countries: ['เมดิเตอร์เรเนียน','แคริบเบียน','สแกนดิเนเวีย','เอเชียตะวันออกเฉียงใต้','ญี่ปุ่น-เกาหลี'] },
+      { continent: 'จองตั๋ว', continentEn: 'Ticket Booking', countries: ['จองตั๋วเครื่องบิน','เรือสำราญ','บัตรเข้าชม'] },
+      { continent: 'รถเช่า', continentEn: 'Car Rental', countries: ['รถเช่าในประเทศ','รถเช่าต่างประเทศ','รับ-ส่งสนามบิน'] },
+      { continent: 'บริการอื่น', continentEn: 'Other Services', countries: ['ประกันเดินทาง','SIM Card ต่างประเทศ'] },
     ],
   },
   {
@@ -60,6 +62,7 @@ const MENU = [
 
 // Quick links in teal top bar
 const QUICK_LINKS = [
+  { label: 'หน้าหลัก',        labelEn: 'Home',           key: 'home' },
   { label: 'ขอราคากรุ๊ปเหมา', labelEn: 'Group Quote',    key: 'group-quote' },
   { label: 'บริการยื่นวีซ่า',  labelEn: 'Visa Service',   key: 'visa' },
   { label: 'บทความท่องเที่ยว', labelEn: 'Travel Blog',    key: 'articles' },
@@ -79,6 +82,7 @@ const CONTINENT_EN = {
   'ภาคอีสาน': 'Northeastern Thailand', 'แพ็คเกจยอดนิยม': 'Popular Packages',
   'แพ็คเกจตามธีม': 'Themed Packages', 'เส้นทางเรือสำราญ': 'Cruise Routes',
   'บริการของเรา': 'Our Services',
+  'จองตั๋ว': 'Ticket Booking', 'รถเช่า': 'Car Rental', 'บริการอื่น': 'Other Services',
 };
 
 function MenuIcon() {
@@ -124,7 +128,15 @@ function MegaDropdown({ menu, navigate, onClose, topOffset, lang }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {group.countries.map(c => (
                 <button key={c}
-                  onClick={() => { navigate(menu.key, null, menu.tourType ? { tourType: menu.tourType, country: c } : null); onClose(); }}
+                  onClick={() => {
+                    if (menu.key === 'ticket-booking') {
+                      if (group.continent === 'รถเช่า') { navigate('car-rental'); }
+                      else { navigate('ticket-booking'); }
+                    } else {
+                      navigate(menu.key, null, menu.tourType ? { tourType: menu.tourType, country: c } : null);
+                    }
+                    onClose();
+                  }}
                   style={{
                     background: 'none', border: 'none', textAlign: 'left',
                     padding: '5px 6px', fontSize: 13, color: 'var(--ink-2)',
@@ -264,7 +276,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
             </span>
             <div>
               <div style={{ fontWeight: 700, fontSize: 13, color: '#333' }}>{lang === 'th' ? 'เวลาทำการ' : 'Office Hours'}</div>
-              <div style={{ fontSize: 12, color: '#666', marginTop: 1 }}>{lang === 'th' ? 'จันทร์-ศุกร์ : 09.00 - 18.00 น.' : 'Mon–Fri : 09:00 – 18:00'}</div>
+              <div style={{ fontSize: 12, color: '#666', marginTop: 1 }}>{lang === 'th' ? 'จันทร์-เสาร์ : 09.00-18.00 น.' : 'Mon–Sat : 09:00–18:00'}</div>
             </div>
           </div>
 
@@ -283,6 +295,9 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
               <div style={{ fontWeight: 700, fontSize: 13, color: '#333' }}>{lang === 'th' ? 'สายด่วน' : 'Hotline'}</div>
               <a href="tel:0618686889" style={{ display: 'block', fontSize: 13, color: '#555', textDecoration: 'none', marginTop: 1 }}>
                 061-868-6889
+              </a>
+              <a href="tel:0652398915" style={{ display: 'block', fontSize: 12, color: 'var(--primary)', textDecoration: 'none', fontWeight: 600, marginTop: 2 }}>
+                065-239-8915 ({lang === 'th' ? 'Hot Line 24 ชม.' : 'Hot Line 24 hrs'})
               </a>
             </div>
           </div>
@@ -304,11 +319,11 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
               </svg>
             </a>
             <div>
-              <div style={{ fontSize: 12, color: '#888' }}>{lang === 'th' ? 'เราช่วยคุณได้' : 'We can help you'}</div>
               <a href="https://line.me/R/ti/p/@wecrafttravel" target="_blank" rel="noopener noreferrer"
                 style={{ fontWeight: 800, fontSize: 15, color: '#06c755', textDecoration: 'none' }}>
                 @wecrafttravel
               </a>
+              <div style={{ fontSize: 13, color: 'var(--ink)', marginTop: 1 }}>We Craft Travel · We Craft Happiness</div>
               <div style={{ fontSize: 11, color: '#aaa', marginTop: 1 }}>{lang === 'th' ? 'ใบอนุญาต ททท. 11/11550' : 'Travel License : 11/11550'}</div>
             </div>
           </div>

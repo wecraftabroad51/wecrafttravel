@@ -30,6 +30,8 @@ import GroupQuotePage from './components/pages/GroupQuotePage.jsx';
 import AboutPage from './components/pages/AboutPage.jsx';
 import VisaPage from './components/pages/VisaPage.jsx';
 import AdminPanel from './components/admin/AdminPanel.jsx';
+import TicketBookingPage from './components/pages/TicketBookingPage.jsx';
+import CarRentalPage from './components/pages/CarRentalPage.jsx';
 
 const SETTINGS_DEFAULT = {
   contact: { address: { th: '', en: '' }, phone: '', email: '', line: '' },
@@ -70,6 +72,8 @@ function getPageFromPath(pathname) {
   if (pathname === '/promotions')             return 'promotions';
   if (pathname === '/faq')                    return 'faq';
   if (pathname === '/contact')                return 'contact';
+  if (pathname === '/ticket-booking')         return 'ticket-booking';
+  if (pathname === '/car-rental')             return 'car-rental';
   return 'home';
 }
 
@@ -184,6 +188,8 @@ function AppInner() {
       'group-quote':    '/group-quote',
       about:            '/about',
       visa:             '/visa',
+      'ticket-booking': '/ticket-booking',
+      'car-rental':     '/car-rental',
     };
     let path = map[page] || '/';
     if (page === 'tours' && filters) {
@@ -432,8 +438,10 @@ function AppInner() {
           <Route path="/contact"      element={<ContactPage {...pageProps} />} />
           <Route path="/group-quote" element={<GroupQuotePage lang={pageProps.lang} setMessages={pageProps.setMessages} />} />
           <Route path="/about"       element={<AboutPage navigate={navigate} />} />
-          <Route path="/visa"        element={<VisaPage navigate={navigate} />} />
-          <Route path="*"            element={<Navigate to="/" replace />} />
+          <Route path="/visa"           element={<VisaPage navigate={navigate} />} />
+          <Route path="/ticket-booking" element={<TicketBookingPage {...pageProps} />} />
+          <Route path="/car-rental"     element={<CarRentalPage {...pageProps} />} />
+          <Route path="*"               element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       <Footer lang={lang} t={t} navigate={navigate} settings={settings} />

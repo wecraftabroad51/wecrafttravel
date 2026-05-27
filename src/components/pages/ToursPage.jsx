@@ -116,13 +116,17 @@ function TourRow({ tour, t, navigate, inCompare, onCompare }) {
 
 const TOUR_TYPE_TABS = [
   { value: 'all',           label: 'ทั้งหมด',         labelEn: 'All' },
-  { value: 'international', label: 'ทัวร์ต่างประเทศ', labelEn: 'International' },
-  { value: 'domestic',      label: 'ทัวร์ในประเทศ',   labelEn: 'Domestic' },
-  { value: 'premium',       label: 'ทัวร์พรีเมี่ยม',  labelEn: 'Premium' },
-  { value: 'hotdeal',       label: '🔥 โปรไฟไหม้',    labelEn: '🔥 Hot Deals' },
-  { value: 'package',       label: 'แพ็คเกจทัวร์',    labelEn: 'Packages' },
-  { value: 'cruise',        label: 'เรือสำราญ',        labelEn: 'Cruise' },
+  { value: 'outbound',      label: 'ทัวร์ต่างประเทศ', labelEn: 'Outbound' },
+  { value: 'inbound',       label: 'ทัวร์ในประเทศ',   labelEn: 'Inbound' },
+  { value: 'premiumtour',   label: 'ทัวร์พรีเมี่ยม',  labelEn: 'Premium' },
+  { value: 'hottour',       label: '🔥 โปรไฟไหม้',    labelEn: '🔥 Hot Tours' },
+  { value: 'tourpackage',   label: 'แพ็คเกจทัวร์',    labelEn: 'Packages' },
+  { value: 'ticketbooking', label: 'จองตั๋ว',          labelEn: 'Ticket Booking' },
 ];
+
+const INTERNATIONAL_CONTINENTS = ['Europe','Asia-East','Asia-SE','Asia-S-ME','Americas','Oceania','Africa'];
+const DOMESTIC_CONTINENTS = ['Dom-North','Dom-Central','Dom-South','Dom-NE'];
+const PREMIUM_CONTINENTS = ['Europe','Asia-East','Asia-S-ME','Americas','Oceania'];
 
 const CONTINENT_TH = {
   'Europe': 'ยุโรป', 'Asia': 'เอเชีย', 'Asia-East': 'เอเชียตะวันออก',
@@ -152,13 +156,18 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
   const [sort, setSort]           = useState('popular');
   const [priceMax, setPriceMax]   = useState(300000);
 
-  const continents = ['All', ...Array.from(new Set(tours.map(tr => tr.continent).filter(Boolean)))];
+  const allContinents = Array.from(new Set(tours.map(tr => tr.continent).filter(Boolean)));
+  const relevantContinents = tourType === 'outbound' ? allContinents.filter(c => INTERNATIONAL_CONTINENTS.includes(c))
+    : tourType === 'inbound' ? allContinents.filter(c => DOMESTIC_CONTINENTS.includes(c))
+    : tourType === 'premiumtour' ? allContinents.filter(c => PREMIUM_CONTINENTS.includes(c))
+    : allContinents;
+  const continents = ['All', ...relevantContinents];
 
   const filtered = useMemo(() => {
     let list = [...tours];
     if (tourType !== 'all') {
-      if (tourType === 'hotdeal') {
-        list = list.filter(tr => tr.tourType === 'hotdeal' || tr.featured);
+      if (tourType === 'hottour') {
+        list = list.filter(tr => tr.tourType === 'hottour' || tr.featured);
       } else {
         list = list.filter(tr => tr.tourType === tourType);
       }

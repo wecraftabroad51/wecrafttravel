@@ -113,12 +113,12 @@ function HeroSection({ navigate, lang }) {
 
 // ─── SEARCH BOX (left sidebar) ────────────────────────────────
 const TOUR_TYPE_OPTIONS = [
-  { value: 'international', label: 'ทัวร์ต่างประเทศ', labelEn: 'International' },
-  { value: 'domestic',      label: 'ทัวร์ในประเทศ',   labelEn: 'Domestic' },
-  { value: 'premium',       label: 'ทัวร์พรีเมี่ยม',  labelEn: 'Premium' },
-  { value: 'hotdeal',       label: '🔥 ทัวร์โปรไฟไหม้', labelEn: '🔥 Hot Deals' },
-  { value: 'package',       label: 'แพ็คเกจทัวร์',    labelEn: 'Packages' },
-  { value: 'cruise',        label: 'เรือสำราญ',        labelEn: 'Cruise' },
+  { value: 'outbound',      label: 'ทัวร์ต่างประเทศ',  labelEn: 'Outbound' },
+  { value: 'inbound',       label: 'ทัวร์ในประเทศ',    labelEn: 'Inbound' },
+  { value: 'premiumtour',   label: 'ทัวร์พรีเมี่ยม',   labelEn: 'Premium' },
+  { value: 'hottour',       label: '🔥 ทัวร์โปรไฟไหม้', labelEn: '🔥 Hot Tours' },
+  { value: 'tourpackage',   label: 'แพ็คเกจทัวร์',     labelEn: 'Packages' },
+  { value: 'ticketbooking', label: 'จองตั๋ว',           labelEn: 'Ticket Booking' },
 ];
 const ZONE_OPTIONS = [
   { value: 'Europe',      label: 'ยุโรป',                        labelEn: 'Europe',                   countries: ['ฝรั่งเศส','อิตาลี','สวิตเซอร์แลนด์','เยอรมัน','อังกฤษ','สเปน','โปรตุเกส','ออสเตรีย','นอร์เวย์','สวีเดน','กรีซ','ตุรกี'] },
@@ -136,14 +136,14 @@ const ZONE_OPTIONS = [
 const AIRLINES = ['การบินไทย', 'Thai Airways', 'AirAsia', 'Nok Air', 'Emirates', 'Qatar Airways', 'Singapore Airlines', 'Korean Air', 'Japan Airlines', 'Cathay Pacific'];
 
 const QUICK_LINKS = [
-  { label: 'ญี่ปุ่น',   labelEn: 'Japan',     country: 'ญี่ปุ่น',   continent: 'Asia-East',  tourType: 'international' },
-  { label: 'เกาหลี',   labelEn: 'Korea',     country: 'เกาหลีใต้', continent: 'Asia-East',  tourType: 'international' },
-  { label: 'จีน',      labelEn: 'China',     country: 'จีน',       continent: 'Asia-East',  tourType: 'international' },
-  { label: 'ยุโรป',    labelEn: 'Europe',    country: '',          continent: 'Europe',     tourType: 'international' },
-  { label: 'มัลดีฟส์', labelEn: 'Maldives',  country: 'มัลดีฟส์',  continent: 'Asia-S-ME',  tourType: 'international' },
-  { label: 'สิงคโปร์', labelEn: 'Singapore', country: 'สิงคโปร์',  continent: 'Asia-SE',    tourType: 'international' },
-  { label: 'เวียดนาม', labelEn: 'Vietnam',   country: 'เวียดนาม',  continent: 'Asia-SE',    tourType: 'international' },
-  { label: 'ไต้หวัน',  labelEn: 'Taiwan',    country: 'ไต้หวัน',   continent: 'Asia-East',  tourType: 'international' },
+  { label: 'ญี่ปุ่น',   labelEn: 'Japan',     country: 'ญี่ปุ่น',   continent: 'Asia-East',  tourType: 'outbound'},
+  { label: 'เกาหลี',   labelEn: 'Korea',     country: 'เกาหลีใต้', continent: 'Asia-East',  tourType: 'outbound'},
+  { label: 'จีน',      labelEn: 'China',     country: 'จีน',       continent: 'Asia-East',  tourType: 'outbound'},
+  { label: 'ยุโรป',    labelEn: 'Europe',    country: '',          continent: 'Europe',     tourType: 'outbound'},
+  { label: 'มัลดีฟส์', labelEn: 'Maldives',  country: 'มัลดีฟส์',  continent: 'Asia-S-ME',  tourType: 'outbound'},
+  { label: 'สิงคโปร์', labelEn: 'Singapore', country: 'สิงคโปร์',  continent: 'Asia-SE',    tourType: 'outbound'},
+  { label: 'เวียดนาม', labelEn: 'Vietnam',   country: 'เวียดนาม',  continent: 'Asia-SE',    tourType: 'outbound'},
+  { label: 'ไต้หวัน',  labelEn: 'Taiwan',    country: 'ไต้หวัน',   continent: 'Asia-East',  tourType: 'outbound'},
 ];
 
 function SearchSidebar({ navigate, lang }) {
@@ -335,18 +335,18 @@ function NewToursSection({ tours, navigate, t, compareList, toggleCompare, lang 
 
 // ─── DESTINATION CATEGORIES ──────────────────────────────────
 const DESTINATIONS = [
-  { name: 'ทัวร์จีน',        nameEn: 'China Tours',        count: 120, emoji: '🇨🇳', img: 'https://picsum.photos/seed/china1/400/300',     country: 'จีน',         continent: 'Asia-East',  tourType: 'international' },
-  { name: 'ทัวร์ญี่ปุ่น',    nameEn: 'Japan Tours',        count: 98,  emoji: '🇯🇵', img: 'https://picsum.photos/seed/japan1/400/300',     country: 'ญี่ปุ่น',     continent: 'Asia-East',  tourType: 'international' },
-  { name: 'ทัวร์เกาหลี',     nameEn: 'Korea Tours',        count: 64,  emoji: '🇰🇷', img: 'https://picsum.photos/seed/korea1/400/300',     country: 'เกาหลีใต้',   continent: 'Asia-East',  tourType: 'international' },
-  { name: 'ทัวร์ยุโรป',      nameEn: 'Europe Tours',       count: 85,  emoji: '🏰',  img: 'https://picsum.photos/seed/europe1/400/300',    country: '',             continent: 'Europe',     tourType: 'international' },
-  { name: 'ทัวร์ไต้หวัน',    nameEn: 'Taiwan Tours',       count: 42,  emoji: '🇹🇼', img: 'https://picsum.photos/seed/taiwan1/400/300',    country: 'ไต้หวัน',     continent: 'Asia-East',  tourType: 'international' },
-  { name: 'ทัวร์สิงคโปร์',   nameEn: 'Singapore Tours',    count: 38,  emoji: '🇸🇬', img: 'https://picsum.photos/seed/singapore1/400/300', country: 'สิงคโปร์',    continent: 'Asia-SE',    tourType: 'international' },
-  { name: 'ทัวร์ฮ่องกง',     nameEn: 'Hong Kong Tours',    count: 55,  emoji: '🏙️', img: 'https://picsum.photos/seed/hongkong1/400/300',  country: 'ฮ่องกง',      continent: 'Asia-East',  tourType: 'international' },
-  { name: 'ทัวร์อเมริกา',    nameEn: 'USA Tours',          count: 29,  emoji: '🗽',  img: 'https://picsum.photos/seed/america1/400/300',   country: 'สหรัฐอเมริกา', continent: 'Americas',  tourType: 'international' },
-  { name: 'ทัวร์เวียดนาม',   nameEn: 'Vietnam Tours',      count: 47,  emoji: '🇻🇳', img: 'https://picsum.photos/seed/vietnam1/400/300',   country: 'เวียดนาม',    continent: 'Asia-SE',    tourType: 'international' },
-  { name: 'ทัวร์อินเดีย',    nameEn: 'India Tours',        count: 31,  emoji: '🇮🇳', img: 'https://picsum.photos/seed/india1/400/300',     country: 'อินเดีย',     continent: 'Asia-S-ME',  tourType: 'international' },
-  { name: 'ทัวร์สหรัฐอาหรับ', nameEn: 'UAE Tours',         count: 22,  emoji: '🕌',  img: 'https://picsum.photos/seed/dubai1/400/300',     country: 'สหรัฐอาหรับเอมิเรตส์', continent: 'Asia-S-ME', tourType: 'international' },
-  { name: 'ทัวร์มัลดีฟส์',   nameEn: 'Maldives Tours',     count: 18,  emoji: '🏝️', img: 'https://picsum.photos/seed/maldives1/400/300',  country: 'มัลดีฟส์',    continent: 'Asia-S-ME',  tourType: 'international' },
+  { name: 'ทัวร์จีน',        nameEn: 'China Tours',        count: 120, emoji: '🇨🇳', img: 'https://picsum.photos/seed/china1/400/300',     country: 'จีน',         continent: 'Asia-East',  tourType: 'outbound'},
+  { name: 'ทัวร์ญี่ปุ่น',    nameEn: 'Japan Tours',        count: 98,  emoji: '🇯🇵', img: 'https://picsum.photos/seed/japan1/400/300',     country: 'ญี่ปุ่น',     continent: 'Asia-East',  tourType: 'outbound'},
+  { name: 'ทัวร์เกาหลี',     nameEn: 'Korea Tours',        count: 64,  emoji: '🇰🇷', img: 'https://picsum.photos/seed/korea1/400/300',     country: 'เกาหลีใต้',   continent: 'Asia-East',  tourType: 'outbound'},
+  { name: 'ทัวร์ยุโรป',      nameEn: 'Europe Tours',       count: 85,  emoji: '🏰',  img: 'https://picsum.photos/seed/europe1/400/300',    country: '',             continent: 'Europe',     tourType: 'outbound'},
+  { name: 'ทัวร์ไต้หวัน',    nameEn: 'Taiwan Tours',       count: 42,  emoji: '🇹🇼', img: 'https://picsum.photos/seed/taiwan1/400/300',    country: 'ไต้หวัน',     continent: 'Asia-East',  tourType: 'outbound'},
+  { name: 'ทัวร์สิงคโปร์',   nameEn: 'Singapore Tours',    count: 38,  emoji: '🇸🇬', img: 'https://picsum.photos/seed/singapore1/400/300', country: 'สิงคโปร์',    continent: 'Asia-SE',    tourType: 'outbound'},
+  { name: 'ทัวร์ฮ่องกง',     nameEn: 'Hong Kong Tours',    count: 55,  emoji: '🏙️', img: 'https://picsum.photos/seed/hongkong1/400/300',  country: 'ฮ่องกง',      continent: 'Asia-East',  tourType: 'outbound'},
+  { name: 'ทัวร์อเมริกา',    nameEn: 'USA Tours',          count: 29,  emoji: '🗽',  img: 'https://picsum.photos/seed/america1/400/300',   country: 'สหรัฐอเมริกา', continent: 'Americas',  tourType: 'outbound'},
+  { name: 'ทัวร์เวียดนาม',   nameEn: 'Vietnam Tours',      count: 47,  emoji: '🇻🇳', img: 'https://picsum.photos/seed/vietnam1/400/300',   country: 'เวียดนาม',    continent: 'Asia-SE',    tourType: 'outbound'},
+  { name: 'ทัวร์อินเดีย',    nameEn: 'India Tours',        count: 31,  emoji: '🇮🇳', img: 'https://picsum.photos/seed/india1/400/300',     country: 'อินเดีย',     continent: 'Asia-S-ME',  tourType: 'outbound'},
+  { name: 'ทัวร์สหรัฐอาหรับ', nameEn: 'UAE Tours',         count: 22,  emoji: '🕌',  img: 'https://picsum.photos/seed/dubai1/400/300',     country: 'สหรัฐอาหรับเอมิเรตส์', continent: 'Asia-S-ME', tourType: 'outbound'},
+  { name: 'ทัวร์มัลดีฟส์',   nameEn: 'Maldives Tours',     count: 18,  emoji: '🏝️', img: 'https://picsum.photos/seed/maldives1/400/300',  country: 'มัลดีฟส์',    continent: 'Asia-S-ME',  tourType: 'outbound'},
 ];
 
 function DestinationsSection({ navigate, inner, lang }) {
@@ -632,6 +632,19 @@ export default function HomePage({ lang, t, navigate, tours, articles, promotion
     <main className="page-enter" style={{ background: 'var(--canvas-2)' }}>
       {/* Hero — full width */}
       <HeroSection navigate={navigate} lang={lang} />
+
+      {/* Tagline Banner */}
+      <div style={{
+        background: 'linear-gradient(90deg, var(--primary-deep, #1a5276), var(--primary, #e65c00))',
+        color: '#fff', textAlign: 'center', padding: '14px 20px',
+      }}>
+        <span style={{ fontSize: 18, fontWeight: 800, letterSpacing: '0.04em' }}>
+          WE CRAFT TRAVEL · WE CRAFT HAPPINESS
+        </span>
+        <span style={{ fontSize: 14, marginLeft: 16, opacity: 0.9 }}>
+          {lang === 'th' ? 'ดีไซน์ความสุข ให้สนุกทุกโลเคชั่น' : 'Designing happiness for every journey'}
+        </span>
+      </div>
 
       {/* 2-column: search sidebar (left) + hot deals & categories (right) */}
       <div className="home-2col">
