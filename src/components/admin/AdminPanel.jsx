@@ -49,11 +49,11 @@ const CONTINENT_OPTIONS = [
 ];
 
 // ── Reusable Modal Shell ──────────────────────────────────────
-function Modal({ title, onClose, children, wide }) {
+function Modal({ title, onClose, children, wide, xl }) {
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div
-        className={`bg-white rounded-2xl shadow-2xl w-full ${wide ? 'max-w-2xl' : 'max-w-lg'} max-h-[90vh] overflow-y-auto`}
+        className={`bg-white rounded-2xl shadow-2xl w-full ${xl ? 'max-w-4xl' : wide ? 'max-w-2xl' : 'max-w-lg'} max-h-[92vh] overflow-y-auto`}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-5 border-b border-slate-100">
@@ -463,14 +463,12 @@ function ToursSection({ tours, setTours, t }) {
                   <input className={inp} value={form.destination.en} onChange={e => setF(['destination','en'], e.target.value)} placeholder="Tokyo, Osaka, Kyoto" />
                 </Field>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="คำอธิบาย (ไทย)">
-                  <textarea className={inp} rows={2} value={form.description.th} onChange={e => setF(['description','th'], e.target.value)} />
-                </Field>
-                <Field label="คำอธิบาย (English)">
-                  <textarea className={inp} rows={2} value={form.description.en} onChange={e => setF(['description','en'], e.target.value)} />
-                </Field>
-              </div>
+              <Field label="คำอธิบายทัวร์ (ไทย)">
+                <textarea className={inp} rows={4} style={{ resize: 'vertical' }} value={form.description.th} onChange={e => setF(['description','th'], e.target.value)} placeholder="อธิบายไฮไลท์ของทัวร์ สถานที่น่าสนใจ ประสบการณ์ที่จะได้รับ..." />
+              </Field>
+              <Field label="คำอธิบายทัวร์ (English)">
+                <textarea className={inp} rows={3} style={{ resize: 'vertical' }} value={form.description.en} onChange={e => setF(['description','en'], e.target.value)} placeholder="Tour highlights, key attractions and experiences..." />
+              </Field>
               <Field label="รูปภาพหลัก">
                 <ImageUpload
                   value={form.image}
@@ -479,25 +477,23 @@ function ToursSection({ tours, setTours, t }) {
                   folder="tours/main"
                 />
               </Field>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-4 gap-3">
                 <Field label="ราคาเริ่มต้น (฿)">
-                  <input className={inp} type="number" value={form.price} onChange={e => setF(['price'], Number(e.target.value))} />
+                  <input className={inp} type="number" style={{ textAlign: 'right' }} value={form.price} onChange={e => setF(['price'], Number(e.target.value))} />
                 </Field>
                 <Field label="ระยะเวลา (วัน)">
-                  <input className={inp} type="number" value={form.duration} onChange={e => setF(['duration'], Number(e.target.value))} />
+                  <input className={inp} type="number" style={{ textAlign: 'center' }} value={form.duration} onChange={e => setF(['duration'], Number(e.target.value))} />
                 </Field>
                 <Field label="จำนวนคน (สูงสุด)">
-                  <input className={inp} type="number" value={form.groupSize} onChange={e => setF(['groupSize'], Number(e.target.value))} />
-                </Field>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="สายการบิน">
-                  <input className={inp} value={form.flight?.outbound?.airline || ''} onChange={e => setF(['flight','outbound','airline'], e.target.value)} placeholder="Thai Airways" />
+                  <input className={inp} type="number" style={{ textAlign: 'center' }} value={form.groupSize} onChange={e => setF(['groupSize'], Number(e.target.value))} />
                 </Field>
                 <Field label="ส่วนลด (%)">
-                  <input className={inp} type="number" min={0} max={99} value={form.discount || 0} onChange={e => setF(['discount'], Number(e.target.value))} placeholder="0" />
+                  <input className={inp} type="number" min={0} max={99} style={{ textAlign: 'center' }} value={form.discount || 0} onChange={e => setF(['discount'], Number(e.target.value))} placeholder="0" />
                 </Field>
               </div>
+              <Field label="สายการบิน">
+                <input className={inp} value={form.flight?.outbound?.airline || ''} onChange={e => setF(['flight','outbound','airline'], e.target.value)} placeholder="เช่น Thai Airways (TG), AirAsia (FD)" />
+              </Field>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={form.featured} onChange={e => setF(['featured'], e.target.checked)} className="w-4 h-4 accent-teal-600" />
@@ -597,7 +593,7 @@ function ToursSection({ tours, setTours, t }) {
                     </div>
                     <input className={inp} placeholder="หัวข้อวัน (เช่น เดินทางถึงโตเกียว)" value={day.title}
                       onChange={e => updateArr('itinerary', i, { ...day, title: e.target.value })} />
-                    <textarea className={inp} rows={2} placeholder="คำอธิบายกิจกรรม" value={day.description}
+                    <textarea className={inp} rows={4} style={{ resize: 'vertical' }} placeholder="อธิบายกิจกรรมของวันนี้ สถานที่ที่จะไป ประสบการณ์ที่จะได้รับ..." value={day.description}
                       onChange={e => updateArr('itinerary', i, { ...day, description: e.target.value })} />
                     <div className="flex items-center gap-4 flex-wrap">
                       <span className="text-xs text-slate-500 shrink-0">มื้ออาหาร:</span>
@@ -653,7 +649,7 @@ function ToursSection({ tours, setTours, t }) {
                         <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                    <textarea className={inp} rows={2} placeholder="คำอธิบายโรงแรม" value={hotel.description || ''}
+                    <textarea className={inp} rows={3} style={{ resize: 'vertical' }} placeholder="ที่ตั้ง สิ่งอำนวยความสะดวก ระดับของโรงแรม..." value={hotel.description || ''}
                       onChange={e => updateArr('hotels', i, { ...hotel, description: e.target.value })} />
                   </div>
                 ))}
@@ -846,14 +842,18 @@ function PromotionsSection({ promotions, setPromotions, t }) {
               <Field label="ชื่อ (ไทย) *"><input className={inp} value={form.title.th} onChange={e => setF(['title','th'], e.target.value)} /></Field>
               <Field label="ชื่อ (English)"><input className={inp} value={form.title.en} onChange={e => setF(['title','en'], e.target.value)} /></Field>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="คำอธิบาย (ไทย)"><textarea className={inp} rows={2} value={form.description.th} onChange={e => setF(['description','th'], e.target.value)} /></Field>
-              <Field label="คำอธิบาย (English)"><textarea className={inp} rows={2} value={form.description.en} onChange={e => setF(['description','en'], e.target.value)} /></Field>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              <Field label="ส่วนลด (%)"><input className={inp} type="number" value={form.discount} onChange={e => setF(['discount'], Number(e.target.value))} /></Field>
+            <Field label="คำอธิบาย (ไทย)">
+              <textarea className={inp} rows={3} style={{ resize: 'vertical' }} value={form.description.th} onChange={e => setF(['description','th'], e.target.value)} placeholder="รายละเอียดโปรโมชั่น เงื่อนไข และสิทธิพิเศษ..." />
+            </Field>
+            <Field label="คำอธิบาย (English)">
+              <textarea className={inp} rows={2} style={{ resize: 'vertical' }} value={form.description.en} onChange={e => setF(['description','en'], e.target.value)} placeholder="Promotion details, conditions and benefits..." />
+            </Field>
+            <div className="grid gap-3" style={{ gridTemplateColumns: '80px 1fr 1fr' }}>
+              <Field label="ส่วนลด (%)">
+                <input className={inp} type="number" style={{ textAlign: 'center' }} value={form.discount} onChange={e => setF(['discount'], Number(e.target.value))} />
+              </Field>
               <Field label="Promo Code"><input className={inp} value={form.code} onChange={e => setF(['code'], e.target.value)} placeholder="SAVE10" /></Field>
-              <Field label="Badge"><input className={inp} value={form.badge} onChange={e => setF(['badge'], e.target.value)} placeholder="🔥 Hot Deal" /></Field>
+              <Field label="Badge / ป้ายกำกับ"><input className={inp} value={form.badge} onChange={e => setF(['badge'], e.target.value)} placeholder="🔥 Hot Deal" /></Field>
             </div>
             <Field label="รูปภาพโปรโมชั่น">
               <ImageUpload
@@ -1000,20 +1000,27 @@ function ArticlesSection({ articles, setArticles, t }) {
       </div>
 
       {modal && (
-        <Modal title={modal.mode === 'add' ? 'เพิ่มบทความ' : 'แก้ไขบทความ'} onClose={() => setModal(null)} wide>
+        <Modal title={modal.mode === 'add' ? 'เพิ่มบทความ' : 'แก้ไขบทความ'} onClose={() => setModal(null)} xl>
           <div className="space-y-4">
+            {/* ชื่อบทความ */}
             <div className="grid grid-cols-2 gap-3">
-              <Field label="ชื่อบทความ (ไทย) *"><input className={inp} value={form.title.th} onChange={e => setF(['title','th'], e.target.value)} /></Field>
-              <Field label="ชื่อบทความ (English)"><input className={inp} value={form.title.en} onChange={e => setF(['title','en'], e.target.value)} /></Field>
+              <Field label="ชื่อบทความ (ไทย) *"><input className={inp} value={form.title.th} onChange={e => setF(['title','th'], e.target.value)} placeholder="หัวข้อบทความภาษาไทย" /></Field>
+              <Field label="ชื่อบทความ (English)"><input className={inp} value={form.title.en} onChange={e => setF(['title','en'], e.target.value)} placeholder="Article title in English" /></Field>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="คำอธิบายย่อ (ไทย)"><textarea className={inp} rows={2} value={form.excerpt?.th || ''} onChange={e => setF(['excerpt','th'], e.target.value)} /></Field>
-              <Field label="คำอธิบายย่อ (English)"><textarea className={inp} rows={2} value={form.excerpt?.en || ''} onChange={e => setF(['excerpt','en'], e.target.value)} /></Field>
+
+            {/* Meta */}
+            <div className="grid gap-3" style={{ gridTemplateColumns: '1fr 140px 90px 90px' }}>
+              <Field label="หมวดหมู่">
+                <select className={inp} value={form.category || 'บทความท่องเที่ยว'} onChange={e => setF(['category'], e.target.value)}>
+                  {ARTICLE_CATS.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </Field>
+              <Field label="ผู้เขียน"><input className={inp} value={form.author} onChange={e => setF(['author'], e.target.value)} /></Field>
+              <Field label="อ่าน (นาที)"><input className={inp} type="number" style={{ textAlign: 'center' }} value={form.readTime} onChange={e => setF(['readTime'], Number(e.target.value))} /></Field>
+              <Field label="ยอดดู"><input className={inp} type="number" style={{ textAlign: 'center' }} value={form.views || 0} onChange={e => setF(['views'], Number(e.target.value))} /></Field>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="เนื้อหา (ไทย)"><textarea className={inp} rows={4} value={form.content?.th || ''} onChange={e => setF(['content','th'], e.target.value)} /></Field>
-              <Field label="เนื้อหา (English)"><textarea className={inp} rows={4} value={form.content?.en || ''} onChange={e => setF(['content','en'], e.target.value)} /></Field>
-            </div>
+
+            {/* รูปภาพ */}
             <Field label="รูปภาพปก (Cover)">
               <ImageUpload
                 value={form.image || form.coverImage || ''}
@@ -1022,18 +1029,36 @@ function ArticlesSection({ articles, setArticles, t }) {
                 folder="articles"
               />
             </Field>
+
+            {/* คำอธิบายย่อ */}
             <div className="grid grid-cols-2 gap-3">
-              <Field label="หมวดหมู่">
-                <select className={inp} value={form.category || 'บทความท่องเที่ยว'} onChange={e => setF(['category'], e.target.value)}>
-                  {ARTICLE_CATS.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+              <Field label="คำอธิบายย่อ (ไทย) — แสดงในหน้ารายการ">
+                <textarea className={inp} rows={3} style={{ resize: 'vertical' }} value={form.excerpt?.th || ''} onChange={e => setF(['excerpt','th'], e.target.value)} placeholder="สรุปเนื้อหาสั้นๆ 1-2 ประโยค เพื่อดึงดูดผู้อ่าน..." />
               </Field>
-              <Field label="ผู้เขียน"><input className={inp} value={form.author} onChange={e => setF(['author'], e.target.value)} /></Field>
+              <Field label="คำอธิบายย่อ (English)">
+                <textarea className={inp} rows={3} style={{ resize: 'vertical' }} value={form.excerpt?.en || ''} onChange={e => setF(['excerpt','en'], e.target.value)} placeholder="Brief summary to attract readers..." />
+              </Field>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="เวลาอ่าน (นาที)"><input className={inp} type="number" value={form.readTime} onChange={e => setF(['readTime'], Number(e.target.value))} /></Field>
-              <Field label="จำนวนการดู (views)"><input className={inp} type="number" value={form.views || 0} onChange={e => setF(['views'], Number(e.target.value))} /></Field>
+
+            {/* เนื้อหาบทความ — full width + tall */}
+            <div className="border-t border-slate-100 pt-4">
+              <p className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wide">📝 เนื้อหาบทความ</p>
+              <Field label="เนื้อหา (ภาษาไทย)">
+                <textarea className={inp} rows={14} style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.7 }}
+                  value={form.content?.th || ''}
+                  onChange={e => setF(['content','th'], e.target.value)}
+                  placeholder="เขียนเนื้อหาบทความภาษาไทยที่นี่...&#10;&#10;รองรับ paragraph ปกติ สามารถ Enter เว้นบรรทัดได้" />
+              </Field>
+              <div className="mt-3">
+                <Field label="เนื้อหา (English)">
+                  <textarea className={inp} rows={10} style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.7 }}
+                    value={form.content?.en || ''}
+                    onChange={e => setF(['content','en'], e.target.value)}
+                    placeholder="Write article content in English here..." />
+                </Field>
+              </div>
             </div>
+
             <div className="flex gap-3 pt-2">
               <button onClick={handleSave} disabled={saving} className="flex-1 bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white py-2.5 rounded-xl font-semibold text-sm transition-colors">
                 {saving ? 'กำลังบันทึก...' : 'บันทึก'}
@@ -1125,21 +1150,29 @@ function FaqsSection({ faqs, setFaqs, t }) {
         <Modal title={modal.mode === 'add' ? 'เพิ่ม FAQ' : 'แก้ไข FAQ'} onClose={() => setModal(null)} wide>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <Field label="คำถาม (ไทย) *"><input className={inp} value={form.question.th} onChange={e => setF(['question','th'], e.target.value)} /></Field>
-              <Field label="คำถาม (English)"><input className={inp} value={form.question.en} onChange={e => setF(['question','en'], e.target.value)} /></Field>
+              <Field label="คำถาม (ไทย) *">
+                <textarea className={inp} rows={2} style={{ resize: 'vertical' }} value={form.question.th} onChange={e => setF(['question','th'], e.target.value)} placeholder="คำถามที่ลูกค้าถามบ่อย..." />
+              </Field>
+              <Field label="คำถาม (English)">
+                <textarea className={inp} rows={2} style={{ resize: 'vertical' }} value={form.question.en} onChange={e => setF(['question','en'], e.target.value)} placeholder="Frequently asked question..." />
+              </Field>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="คำตอบ (ไทย)"><textarea className={inp} rows={3} value={form.answer.th} onChange={e => setF(['answer','th'], e.target.value)} /></Field>
-              <Field label="คำตอบ (English)"><textarea className={inp} rows={3} value={form.answer.en} onChange={e => setF(['answer','en'], e.target.value)} /></Field>
+              <Field label="คำตอบ (ไทย)">
+                <textarea className={inp} rows={6} style={{ resize: 'vertical' }} value={form.answer.th} onChange={e => setF(['answer','th'], e.target.value)} placeholder="คำตอบที่ชัดเจน ครบถ้วน..." />
+              </Field>
+              <Field label="คำตอบ (English)">
+                <textarea className={inp} rows={6} style={{ resize: 'vertical' }} value={form.answer.en} onChange={e => setF(['answer','en'], e.target.value)} placeholder="Clear and complete answer..." />
+              </Field>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-3" style={{ gridTemplateColumns: '1fr 100px' }}>
               <Field label="หมวดหมู่">
                 <select className={inp} value={form.category} onChange={e => setF(['category'], e.target.value)}>
                   {['general','booking','payment','visa','flight','hotel'].map(c => <option key={c}>{c}</option>)}
                 </select>
               </Field>
               <Field label="ลำดับ">
-                <input className={inp} type="number" value={form.sortOrder} onChange={e => setF(['sortOrder'], Number(e.target.value))} />
+                <input className={inp} type="number" style={{ textAlign: 'center' }} value={form.sortOrder} onChange={e => setF(['sortOrder'], Number(e.target.value))} />
               </Field>
             </div>
             <div className="flex gap-3 pt-2">
