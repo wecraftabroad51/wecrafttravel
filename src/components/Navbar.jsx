@@ -278,7 +278,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
             <img src="/logo.png" alt="WeCraft Travel" style={{ width: 52, height: 52, objectFit: 'contain' }} />
             <div style={{ lineHeight: 1.25 }}>
               <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--primary)' }}>WeCraft Travel</div>
-              <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '.04em' }}>WE CRAFT ABROAD · ททท. 11/11550</div>
+              <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '.04em' }}>WE CRAFT ABROAD</div>
             </div>
           </button>
 
@@ -348,7 +348,6 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
                 @wecrafttravel
               </a>
               <div style={{ fontSize: 13, color: 'var(--ink)', marginTop: 1 }}>We Craft Travel · We Craft Happiness</div>
-              <div style={{ fontSize: 11, color: '#aaa', marginTop: 1 }}>{lang === 'th' ? 'ใบอนุญาต ททท. 11/11550' : 'Travel License : 11/11550'}</div>
             </div>
           </div>
 
