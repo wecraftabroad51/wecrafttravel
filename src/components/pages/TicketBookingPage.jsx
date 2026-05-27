@@ -250,7 +250,7 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
       const airlineLabel = AIRLINE_TYPES.find(a => a.value === form.airlineType)?.th || form.airlineType;
       const seatLabel = SEAT_CLASSES.find(s => s.value === form.seatClass)?.th || form.seatClass;
       const driveSection = driveFiles.length > 0
-        ? `<tr style="background:#fff3e0"><td colspan="2" style="padding:10px 16px;font-weight:700;color:#e65c00">📎 ไฟล์พาสปอร์ต (Google Drive)</td></tr>
+        ? `<tr style="background:#fff3e0"><td colspan="2" style="padding:10px 16px;font-weight:700;color:#e65c00">📎 ไฟล์พาสปอร์ต</td></tr>
            ${driveFiles.map((f, i) => `<tr${i%2===1?' style="background:#fafafa"':''}><td style="padding:8px 16px;color:#666">${f.name}</td><td style="padding:8px 16px"><a href="${f.url}" target="_blank" style="color:#1a73e8;text-decoration:none;font-weight:600">🔗 เปิดไฟล์</a></td></tr>`).join('')}`
         : '';
       const emailHtml = `
