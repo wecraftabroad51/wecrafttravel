@@ -151,7 +151,7 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
           </table>
           <p style="font-size:12px;color:#aaa;text-align:center;margin-top:12px">We Craft Travel · We Craft Happiness</p>
         </div>`;
-      await sendNotifications(`[รถเช่า] ${form.fullName} — ${rentalLabel} ${form.pickupDate}`, emailHtml, form);
+      await sendNotifications(`[รถเช่า] ${form.fullName} — ${rentalLabel} ${form.pickupDate}`, emailHtml, { ...form, _type: 'car-rental', rentalLabel, carLabel });
       setSuccess(true);
     } catch (err) {
       setError(lang === 'th' ? 'เกิดข้อผิดพลาด กรุณาลองใหม่' : 'An error occurred. Please try again.');

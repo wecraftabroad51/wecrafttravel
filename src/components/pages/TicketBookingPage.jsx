@@ -179,7 +179,7 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
           </table>
           <p style="font-size:12px;color:#aaa;text-align:center;margin-top:12px">We Craft Travel · We Craft Happiness</p>
         </div>`;
-      await sendNotifications(`[จองตั๋ว] ${form.fullName} — ${form.outboundDate}`, emailHtml, form);
+      await sendNotifications(`[จองตั๋ว] ${form.fullName} — ${form.outboundDate}`, emailHtml, { ...form, _type: 'ticket', totalPax });
       setSuccess(true);
     } catch (err) {
       setError(lang === 'th' ? 'เกิดข้อผิดพลาด กรุณาลองใหม่' : 'An error occurred. Please try again.');

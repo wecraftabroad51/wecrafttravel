@@ -23,16 +23,24 @@ function httpsPost(hostname, path, headers, body) {
   });
 }
 
+// ── Worksheet name per type ────────────────────────────────────
+function sheetNameFor(type) {
+  if (type === 'ticket')     return 'จองตั๋ว';
+  if (type === 'car-rental') return 'รถเช่า';
+  return null; // default sheet (Sheet1)
+}
+
 // ── Generate sequence number: YYMMNN (พ.ศ.) ──────────────────
-async function generateSeqNo(sheets, sheetId) {
+async function generateSeqNo(sheets, sheetId, sheetName) {
   const nowDate     = new Date();
   const buddhistYear = (nowDate.getFullYear() + 543).toString().slice(-2); // e.g. "69"
   const month        = String(nowDate.getMonth() + 1).padStart(2, '0');    // e.g. "05"
   const prefix       = `${buddhistYear}${month}`;                          // e.g. "6905"
 
+  const range = sheetName ? `${sheetName}!A:A` : 'A:A';
   const meta = await sheets.spreadsheets.values.get({
     spreadsheetId: sheetId,
-    range: 'A:A',
+    range,
   });
   const allValues = meta.data.values || [];
   const countThisMonth = allValues.filter(r => r[0] && String(r[0]).startsWith(prefix)).length;
@@ -47,34 +55,78 @@ async function sendLine(formData, seqNo) {
   if (!token || !userId) { console.log('LINE skipped: env vars not set'); return; }
 
   const f = formData;
-  const tourTypeLabel = (f.tourType === 'อื่นๆ' && f.tourTypeOther)
-    ? `อื่นๆ: ${f.tourTypeOther}` : (f.tourType || '-');
+  let text;
 
-  const text = [
-    '🎉🎊 มาแล้วๆๆ!!! งานเหมา มาแล้ว!! ✈️',
-    seqNo ? `🔢 ลำดับที่: ${seqNo}` : null,
-    '━━━━━━━━━━━━━━━━━━',
-    '👤 ข้อมูลผู้ติดต่อ',
-    `ชื่อ: ${f.firstName} ${f.lastName}`,
-    f.company   ? `บริษัท: ${f.company}`           : null,
-    `โทร: ${f.phone}`,
-    f.lineId    ? `LINE ID: ${f.lineId}`            : null,
-    `อีเมล: ${f.email}`,
-    f.emailAlt  ? `อีเมลสำรอง: ${f.emailAlt}`      : null,
-    '━━━━━━━━━━━━━━━━━━',
-    '✈️ รายละเอียดทัวร์',
-    `📍 ปลายทาง: ${f.destination}`,
-    f.pax       ? `👥 จำนวน: ${f.pax} คน`          : null,
-    `📅 วันเดินทาง: ${f.travelDate}`,
-    `⏱️ ระยะเวลา: ${f.duration}`,
-    `🎒 รูปแบบ: ${tourTypeLabel}`,
-    `🏨 โรงแรม: ${f.hotel}`,
-    f.airline   ? `✈️ สายการบิน: ${f.airline}`     : null,
-    f.budget    ? `💰 งบ/ท่าน: ${f.budget}`        : null,
-    f.extraInfo ? `💬 เพิ่มเติม: ${f.extraInfo}`   : null,
-    '━━━━━━━━━━━━━━━━━━',
-    '⚡ รีบตอบกลับภายใน 24 ชั่วโมง!',
-  ].filter(Boolean).join('\n');
+  if (f._type === 'ticket') {
+    const airlineMap = { full: 'Full Service', low: 'Low Cost', other: f.airlineOther || 'อื่นๆ' };
+    const seatMap = { economy: 'Economy', business: 'Business', first: 'First Class', flatbed: 'Flatbed' };
+    text = [
+      '🎫✈️ มาแล้วๆ!! คำขอจองตั๋ว!!',
+      seqNo ? `🔢 ลำดับที่: ${seqNo}` : null,
+      '━━━━━━━━━━━━━━━━━━',
+      `👤 ชื่อ: ${f.fullName}`,
+      '━━━━━━━━━━━━━━━━━━',
+      `🛂 พาสปอร์ต: ${f.passportNo || '-'}  (หมดอายุ: ${f.passportExpiry || '-'})`,
+      `📅 ขาไป: ${f.outboundDate}  ช่วงเวลา: ${f.outboundTime || '-'}`,
+      f.returnDate ? `📅 ขากลับ: ${f.returnDate}  ช่วงเวลา: ${f.returnTime || '-'}` : null,
+      `✈️ สายการบิน: ${airlineMap[f.airlineType] || f.airlineType}`,
+      `💺 ที่นั่ง: ${seatMap[f.seatClass] || f.seatClass}`,
+      `👥 ผู้โดยสาร: ผู้ใหญ่ ${f.adults} / เด็ก ${f.children} / ทารก ${f.infants} (รวม ${f.totalPax} คน)`,
+      f.note ? `💬 หมายเหตุ: ${f.note}` : null,
+      '━━━━━━━━━━━━━━━━━━',
+      '⚡ รีบตอบกลับภายใน 24 ชั่วโมง!',
+    ].filter(Boolean).join('\n');
+
+  } else if (f._type === 'car-rental') {
+    text = [
+      '🚗 มาแล้วๆ!! คำขอเช่ารถ!!',
+      seqNo ? `🔢 ลำดับที่: ${seqNo}` : null,
+      '━━━━━━━━━━━━━━━━━━',
+      `👤 ชื่อ: ${f.fullName}`,
+      `📞 โทร: ${f.phone}`,
+      f.email ? `📧 อีเมล: ${f.email}` : null,
+      '━━━━━━━━━━━━━━━━━━',
+      `🚙 ประเภทรถเช่า: ${f.rentalLabel || f.rentalType}`,
+      `📅 วันรับรถ: ${f.pickupDate}`,
+      f.returnDate ? `📅 วันคืนรถ: ${f.returnDate}` : null,
+      `📍 สถานที่รับ: ${f.pickupLocation}`,
+      `🚗 ประเภทรถ: ${f.carLabel || f.carType}`,
+      `👥 จำนวนผู้โดยสาร: ${f.passengers} คน`,
+      f.note ? `💬 หมายเหตุ: ${f.note}` : null,
+      '━━━━━━━━━━━━━━━━━━',
+      '⚡ รีบตอบกลับภายใน 24 ชั่วโมง!',
+    ].filter(Boolean).join('\n');
+
+  } else {
+    // Group quote (default)
+    const tourTypeLabel = (f.tourType === 'อื่นๆ' && f.tourTypeOther)
+      ? `อื่นๆ: ${f.tourTypeOther}` : (f.tourType || '-');
+    text = [
+      '🎉🎊 มาแล้วๆๆ!!! งานเหมา มาแล้ว!! ✈️',
+      seqNo ? `🔢 ลำดับที่: ${seqNo}` : null,
+      '━━━━━━━━━━━━━━━━━━',
+      '👤 ข้อมูลผู้ติดต่อ',
+      `ชื่อ: ${f.firstName} ${f.lastName}`,
+      f.company   ? `บริษัท: ${f.company}`           : null,
+      `โทร: ${f.phone}`,
+      f.lineId    ? `LINE ID: ${f.lineId}`            : null,
+      `อีเมล: ${f.email}`,
+      f.emailAlt  ? `อีเมลสำรอง: ${f.emailAlt}`      : null,
+      '━━━━━━━━━━━━━━━━━━',
+      '✈️ รายละเอียดทัวร์',
+      `📍 ปลายทาง: ${f.destination}`,
+      f.pax       ? `👥 จำนวน: ${f.pax} คน`          : null,
+      `📅 วันเดินทาง: ${f.travelDate}`,
+      `⏱️ ระยะเวลา: ${f.duration}`,
+      `🎒 รูปแบบ: ${tourTypeLabel}`,
+      `🏨 โรงแรม: ${f.hotel}`,
+      f.airline   ? `✈️ สายการบิน: ${f.airline}`     : null,
+      f.budget    ? `💰 งบ/ท่าน: ${f.budget}`        : null,
+      f.extraInfo ? `💬 เพิ่มเติม: ${f.extraInfo}`   : null,
+      '━━━━━━━━━━━━━━━━━━',
+      '⚡ รีบตอบกลับภายใน 24 ชั่วโมง!',
+    ].filter(Boolean).join('\n');
+  }
 
   const body = JSON.stringify({
     to: userId,
@@ -120,46 +172,89 @@ async function sendEmail(subject, html, seqNo) {
 }
 
 // ── Append row to Google Sheet ────────────────────────────────
-async function appendToSheet(formData, seqNo, sheets, sheetId) {
+async function appendToSheet(formData, seqNo, sheets, sheetId, sheetName) {
   const f = formData;
-  const tourTypeLabel = (f.tourType === 'อื่นๆ' && f.tourTypeOther)
-    ? `อื่นๆ: ${f.tourTypeOther}` : (f.tourType || '-');
-
   const now = new Date().toLocaleString('th-TH', {
     timeZone: 'Asia/Bangkok',
     dateStyle: 'short',
     timeStyle: 'short',
   });
 
-  const row = [
-    seqNo,
-    now,
-    `${f.firstName} ${f.lastName}`,
-    f.company    || '',
-    f.phone      || '',
-    f.lineId     || '',
-    f.email      || '',
-    f.emailAlt   || '',
-    f.destination|| '',
-    f.pax        || '',
-    f.travelDate || '',
-    f.duration   || '',
-    tourTypeLabel,
-    f.hotel      || '',
-    f.airline    || '',
-    f.budget     || '',
-    f.extraInfo  || '',
-  ];
+  let row;
 
+  if (f._type === 'ticket') {
+    const airlineMap = { full: 'Full Service', low: 'Low Cost', other: f.airlineOther || 'อื่นๆ' };
+    const seatMap = { economy: 'Economy', business: 'Business', first: 'First Class', flatbed: 'Flatbed' };
+    row = [
+      seqNo,
+      now,
+      f.fullName        || '',
+      f.passportNo      || '',
+      f.passportExpiry  || '',
+      f.outboundDate    || '',
+      f.outboundTime    || '',
+      f.returnDate      || '',
+      f.returnTime      || '',
+      airlineMap[f.airlineType] || f.airlineType || '',
+      seatMap[f.seatClass] || f.seatClass || '',
+      f.adults          || 0,
+      f.children        || 0,
+      f.infants         || 0,
+      f.totalPax        || (Number(f.adults||0) + Number(f.children||0) + Number(f.infants||0)),
+      f.note            || '',
+    ];
+
+  } else if (f._type === 'car-rental') {
+    row = [
+      seqNo,
+      now,
+      f.fullName        || '',
+      f.phone           || '',
+      f.email           || '',
+      f.rentalLabel || f.rentalType || '',
+      f.pickupDate      || '',
+      f.returnDate      || '',
+      f.pickupLocation  || '',
+      f.carLabel || f.carType || '',
+      f.passengers      || '',
+      f.note            || '',
+    ];
+
+  } else {
+    // Group quote (default)
+    const tourTypeLabel = (f.tourType === 'อื่นๆ' && f.tourTypeOther)
+      ? `อื่นๆ: ${f.tourTypeOther}` : (f.tourType || '-');
+    row = [
+      seqNo,
+      now,
+      `${f.firstName} ${f.lastName}`,
+      f.company    || '',
+      f.phone      || '',
+      f.lineId     || '',
+      f.email      || '',
+      f.emailAlt   || '',
+      f.destination|| '',
+      f.pax        || '',
+      f.travelDate || '',
+      f.duration   || '',
+      tourTypeLabel,
+      f.hotel      || '',
+      f.airline    || '',
+      f.budget     || '',
+      f.extraInfo  || '',
+    ];
+  }
+
+  const range = sheetName ? `${sheetName}!A1` : 'A1';
   await sheets.spreadsheets.values.append({
     spreadsheetId: sheetId,
-    range: 'A1',
+    range,
     valueInputOption: 'USER_ENTERED',
     insertDataOption: 'INSERT_ROWS',
     requestBody: { values: [row] },
   });
 
-  console.log('Google Sheet row appended OK');
+  console.log(`Google Sheet row appended OK → ${sheetName || 'Sheet1'}`);
 }
 
 // ── Handler ────────────────────────────────────────────────────
@@ -181,6 +276,8 @@ module.exports = async function handler(req, res) {
   const sheetId  = process.env.GOOGLE_SHEET_ID;
   const credJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
 
+  const sheetName = formData ? sheetNameFor(formData._type) : null;
+
   if (formData && sheetId && credJson) {
     try {
       const credentials = JSON.parse(credJson);
@@ -189,8 +286,8 @@ module.exports = async function handler(req, res) {
         scopes: ['https://www.googleapis.com/auth/spreadsheets'],
       });
       sheetsClient = google.sheets({ version: 'v4', auth });
-      seqNo = await generateSeqNo(sheetsClient, sheetId);
-      console.log('SeqNo generated:', seqNo);
+      seqNo = await generateSeqNo(sheetsClient, sheetId, sheetName);
+      console.log('SeqNo generated:', seqNo, '| worksheet:', sheetName || 'Sheet1');
     } catch (e) {
       console.error('SeqNo generation failed:', e.message);
     }
@@ -209,7 +306,7 @@ module.exports = async function handler(req, res) {
       : Promise.resolve(),
 
     (formData && sheetsClient && sheetId)
-      ? appendToSheet(formData, seqNo, sheetsClient, sheetId)
+      ? appendToSheet(formData, seqNo, sheetsClient, sheetId, sheetName)
           .then(() => { results.sheet = 'ok'; })
           .catch(e => { results.sheet = e.message; console.error('Sheet:', e.message); })
       : Promise.resolve(),
