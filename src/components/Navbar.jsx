@@ -204,19 +204,38 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
             {QUICK_LINKS.map((ql, i) => (
               <span key={i} style={{ display: 'flex', alignItems: 'center' }}>
                 {i > 0 && <span style={{ color: 'rgba(255,255,255,.4)', padding: '0 8px' }}>|</span>}
-                <button
-                  onClick={() => navigate(ql.key)}
-                  style={{
-                    background: 'none', border: 'none', color: '#fff',
-                    fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
-                    padding: '2px 0',
-                    transition: 'color .15s',
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,.75)'}
-                  onMouseLeave={e => e.currentTarget.style.color = '#fff'}
-                >
-                  {lang === 'en' ? (ql.labelEn || ql.label) : ql.label}
-                </button>
+                {ql.key === 'group-quote' ? (
+                  <button
+                    onClick={() => navigate(ql.key)}
+                    style={{
+                      background: 'linear-gradient(135deg, #ff8c00, #e65c00)',
+                      border: 'none', color: '#fff',
+                      fontSize: 12, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
+                      padding: '3px 10px', borderRadius: 12,
+                      boxShadow: '0 2px 8px rgba(230,92,0,0.5)',
+                      transition: 'opacity .15s, transform .15s',
+                      letterSpacing: 0.3,
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1)'; }}
+                  >
+                    🎯 {lang === 'en' ? (ql.labelEn || ql.label) : ql.label}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => navigate(ql.key)}
+                    style={{
+                      background: 'none', border: 'none', color: '#fff',
+                      fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
+                      padding: '2px 0',
+                      transition: 'color .15s',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,.75)'}
+                    onMouseLeave={e => e.currentTarget.style.color = '#fff'}
+                  >
+                    {lang === 'en' ? (ql.labelEn || ql.label) : ql.label}
+                  </button>
+                )}
               </span>
             ))}
           </div>

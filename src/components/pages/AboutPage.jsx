@@ -45,6 +45,11 @@ export default function AboutPage({ lang = 'th', navigate }) {
         }
         .about-bullet { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 14px; color: #444; }
         .about-bullet::before { content: "•"; color: var(--primary); font-weight: 900; margin-top: 1px; flex-shrink: 0; }
+        @keyframes pulse-glow {
+          0%, 100% { box-shadow: 0 4px 16px rgba(230,92,0,0.45); }
+          50% { box-shadow: 0 6px 28px rgba(230,92,0,0.75), 0 0 0 6px rgba(255,140,0,0.15); }
+        }
+        .btn-group-quote { animation: pulse-glow 2.2s ease-in-out infinite; }
         @media (max-width: 640px) {
           .about-card { padding: 24px 18px; }
           .about-top-grid { flex-direction: column !important; }
@@ -207,11 +212,17 @@ export default function AboutPage({ lang = 'th', navigate }) {
               fontWeight: 700, fontSize: 14,
             }}>💚 LINE: @wecrafttravel</a>
             <button onClick={() => navigate('group-quote')} style={{
-              background: '#fff', color: 'var(--primary)',
-              border: '2px solid var(--primary)',
-              padding: '10px 24px', borderRadius: 8, cursor: 'pointer',
-              fontWeight: 700, fontSize: 14, fontFamily: 'inherit',
-            }}>🎯 {th ? 'ขอราคากรุ๊ปเหมา' : 'Group Tour Quote'}</button>
+              background: 'linear-gradient(135deg, #ff8c00, #e65c00)',
+              color: '#fff', border: 'none',
+              padding: '12px 28px', borderRadius: 10, cursor: 'pointer',
+              fontWeight: 800, fontSize: 15, fontFamily: 'inherit',
+              boxShadow: '0 4px 16px rgba(230,92,0,0.45)',
+              transition: 'opacity .15s, transform .15s',
+            }}
+            className="btn-group-quote"
+            onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.transform = 'scale(1.04)'; e.currentTarget.style.animation = 'none'; }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.animation = 'pulse-glow 2.2s ease-in-out infinite'; }}
+            >🎯 {th ? 'ขอราคากรุ๊ปเหมา' : 'Group Tour Quote'}</button>
           </div>
         </div>
 
