@@ -71,7 +71,7 @@ async function sendLine(formData, seqNo, sheetUrl) {
     const seatMap = { economy: 'Economy', business: 'Business', first: 'First Class', flatbed: 'Flatbed' };
     text = [
       '🎫✈️ มาแล้วๆ!! คำขอจองตั๋ว!!',
-      seqNo ? `🔢 ลำดับที่: ${seqNo}` : null,
+      seqNo ? `🔢 หมายเลขอ้างอิง: ${seqNo}` : null,
       '━━━━━━━━━━━━━━━━━━',
       `👤 ชื่อ: ${f.fullName}`,
       '━━━━━━━━━━━━━━━━━━',
@@ -92,7 +92,7 @@ async function sendLine(formData, seqNo, sheetUrl) {
   } else if (f._type === 'car-rental') {
     text = [
       '🚗 มาแล้วๆ!! คำขอเช่ารถ!!',
-      seqNo ? `🔢 ลำดับที่: ${seqNo}` : null,
+      seqNo ? `🔢 หมายเลขอ้างอิง: ${seqNo}` : null,
       '━━━━━━━━━━━━━━━━━━',
       `👤 ชื่อ: ${f.fullName}`,
       `📞 โทร: ${f.phone}`,
@@ -115,7 +115,7 @@ async function sendLine(formData, seqNo, sheetUrl) {
       ? `อื่นๆ: ${f.tourTypeOther}` : (f.tourType || '-');
     text = [
       '🎉🎊 มาแล้วๆๆ!!! งานเหมา มาแล้ว!! ✈️',
-      seqNo ? `🔢 ลำดับที่: ${seqNo}` : null,
+      seqNo ? `🔢 หมายเลขอ้างอิง: ${seqNo}` : null,
       '━━━━━━━━━━━━━━━━━━',
       '👤 ข้อมูลผู้ติดต่อ',
       `ชื่อ: ${f.firstName} ${f.lastName}`,
@@ -167,7 +167,7 @@ async function sendEmail(subject, html, seqNo, sheetUrl) {
   // Inject seqNo banner at top of email HTML
   const seqBanner = seqNo
     ? `<div style="background:#1a1a2e;color:#FFD700;text-align:center;padding:10px 16px;font-size:15px;font-weight:bold;letter-spacing:1px;border-radius:8px 8px 0 0;">
-        🔢 ลำดับที่ &nbsp;<span style="font-size:20px;color:#fff;">${seqNo}</span>
+        🔢 หมายเลขอ้างอิง &nbsp;<span style="font-size:20px;color:#fff;">${seqNo}</span>
        </div>`
     : '';
   const sheetFooter = sheetUrl
