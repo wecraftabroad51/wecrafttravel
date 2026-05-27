@@ -382,11 +382,26 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
                 onChange={e => {
                   const selected = Array.from(e.target.files);
                   setFiles(selected);
-                  setFilePreviews(selected.map(f => ({
-                    name: f.name,
-                    type: f.type,
-                    url: f.type.startsWith('image/') ? URL.createObjectURL(f) : null,
-                  })));
+                  selected.forEach((f, i) => {
+                    if (f.type.startsWith('image/')) {
+                      const reader = new FileReader();
+                      reader.onload = ev => {
+                        setFilePreviews(prev => {
+                          const next = [...prev];
+                          next[i] = { name: f.name, type: f.type, url: ev.target.result };
+                          return next;
+                        });
+                      };
+                      reader.readAsDataURL(f);
+                    } else {
+                      setFilePreviews(prev => {
+                        const next = [...prev];
+                        next[i] = { name: f.name, type: f.type, url: null };
+                        return next;
+                      });
+                    }
+                  });
+                  if (selected.length === 0) setFilePreviews([]);
                 }}
                 style={{ display: 'block', margin: '0 auto', fontSize: 13 }} />
               <div style={{ fontSize: 12, color: '#aaa', marginTop: 8 }}>
