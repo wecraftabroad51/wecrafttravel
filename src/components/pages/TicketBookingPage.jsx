@@ -111,6 +111,7 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
     note: '',
   });
   const [files, setFiles] = useState([]);
+  const [filePreviews, setFilePreviews] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -124,6 +125,27 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
     if (!form.fullName || !form.passportNo || !form.outboundDate) {
       setError(lang === 'th' ? 'กรุณากรอกข้อมูลที่จำเป็น' : 'Please fill in required fields.');
       return;
+    }
+    // วันขาไปต้องมาก่อนวันขากลับ
+    if (form.returnDate && form.outboundDate >= form.returnDate) {
+      setError(lang === 'th' ? 'วันขาไปต้องมาก่อนวันขากลับ' : 'Outbound date must be before return date.');
+      return;
+    }
+    // พาสปอร์ตต้องเหลืออย่างน้อย 6 เดือนหลังวันขากลับ (หรือขาไปถ้าไม่มีขากลับ)
+    if (form.passportExpiry) {
+      const refDate = form.returnDate || form.outboundDate;
+      if (refDate) {
+        const expiry = new Date(form.passportExpiry);
+        const minExpiry = new Date(refDate);
+        minExpiry.setMonth(minExpiry.getMonth() + 6);
+        if (expiry < minExpiry) {
+          const d = minExpiry.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+          setError(lang === 'th'
+            ? `พาสปอร์ตต้องมีอายุเหลืออย่างน้อย 6 เดือนหลังวันเดินทาง (หมดอายุหลัง ${d})`
+            : `Passport must be valid for at least 6 months after travel date (expires after ${d})`);
+          return;
+        }
+      }
     }
     setSubmitting(true);
     setError('');
@@ -357,17 +379,45 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
             <Label th={`สำเนาพาสปอร์ต (${totalPax} คน)`} en={`Passport Copies (${totalPax} passenger${totalPax !== 1 ? 's' : ''})`} lang={lang} />
             <div style={{ border: '2px dashed #ddd', borderRadius: 8, padding: '20px', textAlign: 'center', background: '#fafafa' }}>
               <input type="file" multiple accept=".png,.jpg,.jpeg,.pdf"
-                onChange={e => setFiles(Array.from(e.target.files))}
+                onChange={e => {
+                  const selected = Array.from(e.target.files);
+                  setFiles(selected);
+                  setFilePreviews(selected.map(f => ({
+                    name: f.name,
+                    type: f.type,
+                    url: f.type.startsWith('image/') ? URL.createObjectURL(f) : null,
+                  })));
+                }}
                 style={{ display: 'block', margin: '0 auto', fontSize: 13 }} />
               <div style={{ fontSize: 12, color: '#aaa', marginTop: 8 }}>
                 {lang === 'th' ? 'รองรับ .PNG .JPG .PDF' : 'Accepts .PNG .JPG .PDF'}
               </div>
-              {files.length > 0 && (
-                <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
-                  {files.map(f => f.name).join(', ')}
-                </div>
-              )}
             </div>
+            {filePreviews.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 14 }}>
+                {filePreviews.map((f, i) => (
+                  <div key={i} style={{ position: 'relative', width: 90, height: 90, borderRadius: 8, overflow: 'hidden', border: '1px solid #ddd', background: '#f5f5f5', flexShrink: 0 }}>
+                    {f.url
+                      ? <img src={f.url} alt={f.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                          <span style={{ fontSize: 28 }}>📄</span>
+                          <span style={{ fontSize: 10, color: '#888', textAlign: 'center', padding: '0 6px', wordBreak: 'break-all', lineHeight: 1.3 }}>{f.name}</span>
+                        </div>
+                    }
+                    <button type="button"
+                      onClick={() => {
+                        const newFiles = files.filter((_, idx) => idx !== i);
+                        const newPrev = filePreviews.filter((_, idx) => idx !== i);
+                        setFiles(newFiles);
+                        setFilePreviews(newPrev);
+                      }}
+                      style={{ position: 'absolute', top: 3, right: 3, width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,.55)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             <div style={{ marginTop: 16 }}>
               <Label th="ข้อมูลเพิ่มเติม" en="Additional Notes" lang={lang} />
               <textarea value={form.note} onChange={e => set('note', e.target.value)}
