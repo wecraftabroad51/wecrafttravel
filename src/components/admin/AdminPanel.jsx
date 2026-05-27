@@ -134,33 +134,27 @@ function ImageUpload({ value, onChange, hint, folder = 'tours' }) {
 }
 
 // ── Rich Text Editor ─────────────────────────────────────────
-const TOOLBAR = [
-  { group: 'format', items: [
-    { cmd: 'bold',      label: <b>B</b>,      title: 'ตัวหนา (Ctrl+B)' },
-    { cmd: 'italic',    label: <i>I</i>,       title: 'ตัวเอียง (Ctrl+I)' },
-    { cmd: 'underline', label: <u>U</u>,       title: 'ขีดเส้นใต้ (Ctrl+U)' },
-    { cmd: 'strikeThrough', label: <s>S</s>,   title: 'ขีดทับ' },
-  ]},
-  { group: 'heading', items: [
-    { cmd: 'formatBlock', val: 'h2', label: 'H2', title: 'หัวข้อใหญ่' },
-    { cmd: 'formatBlock', val: 'h3', label: 'H3', title: 'หัวข้อรอง' },
-    { cmd: 'formatBlock', val: 'p',  label: 'ปกติ', title: 'ข้อความปกติ' },
-  ]},
-  { group: 'align', items: [
-    { cmd: 'justifyLeft',   label: '⬛︎≡', title: 'ชิดซ้าย' },
-    { cmd: 'justifyCenter', label: '≡⬛︎≡', title: 'กึ่งกลาง' },
-    { cmd: 'justifyRight',  label: '≡⬛︎', title: 'ชิดขวา' },
-    { cmd: 'justifyFull',   label: '≡≡≡', title: 'กระจาย (Justify)' },
-  ]},
-  { group: 'list', items: [
-    { cmd: 'insertUnorderedList', label: '• ลิสต์', title: 'รายการแบบจุด' },
-    { cmd: 'insertOrderedList',   label: '1. ลิสต์', title: 'รายการแบบตัวเลข' },
-  ]},
+const SEP = 'sep';
+const FONT_SIZES = [
+  { label: 'เล็กมาก', val: '1' }, { label: 'เล็ก', val: '2' },
+  { label: 'ปกติ',    val: '3' }, { label: 'ใหญ่',   val: '4' },
+  { label: 'ใหญ่มาก', val: '5' }, { label: 'ใหญ่พิเศษ', val: '6' },
+];
+const PRESET_COLORS = [
+  '#000000','#374151','#6b7280','#ef4444','#f97316',
+  '#eab308','#22c55e','#14b8a6','#3b82f6','#8b5cf6',
+  '#ec4899','#ffffff',
 ];
 
 function RichEditor({ value, onChange, placeholder, minHeight = 320 }) {
-  const ref = useRef(null);
-  const isInit = useRef(false);
+  const ref      = useRef(null);
+  const isInit   = useRef(false);
+  const fgRef    = useRef(null);
+  const bgRef    = useRef(null);
+  const [showFgPalette, setShowFgPalette] = useState(false);
+  const [showBgPalette, setShowBgPalette] = useState(false);
+  const [fgColor, setFgColor] = useState('#000000');
+  const [bgColor, setBgColor] = useState('#ffff00');
 
   useEffect(() => {
     if (ref.current && !isInit.current) {
@@ -169,47 +163,193 @@ function RichEditor({ value, onChange, placeholder, minHeight = 320 }) {
     }
   }, [value]);
 
+  // Close palettes on outside click
+  useEffect(() => {
+    const close = () => { setShowFgPalette(false); setShowBgPalette(false); };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, []);
+
   const exec = (cmd, val = null) => {
     ref.current?.focus();
     document.execCommand(cmd, false, val);
     onChange(ref.current?.innerHTML || '');
   };
 
-  const btnStyle = (active) => ({
-    padding: '3px 9px', borderRadius: 6, border: '1px solid #e2e8f0',
-    background: active ? '#0f766e' : '#fff',
-    color: active ? '#fff' : '#334155',
-    cursor: 'pointer', fontSize: 12, fontFamily: 'inherit',
-    lineHeight: 1.4, whiteSpace: 'nowrap',
-    transition: 'all .1s',
-  });
+  const insertLink = () => {
+    const url = window.prompt('ใส่ URL ลิงก์:', 'https://');
+    if (url) exec('createLink', url);
+  };
+
+  const insertImage = () => {
+    const url = window.prompt('ใส่ URL รูปภาพ:', 'https://');
+    if (url) exec('insertImage', url);
+  };
+
+  const btn = (label, title, action, extra = {}) => (
+    <button
+      type="button" title={title}
+      onMouseDown={e => { e.preventDefault(); action(); }}
+      style={{
+        padding: '3px 8px', borderRadius: 5,
+        border: '1px solid #e2e8f0', background: '#fff',
+        color: '#334155', cursor: 'pointer',
+        fontSize: 12, fontFamily: 'inherit',
+        lineHeight: 1.5, whiteSpace: 'nowrap',
+        transition: 'background .1s',
+        ...extra,
+      }}
+      onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+      onMouseLeave={e => e.currentTarget.style.background = extra.background || '#fff'}
+    >{label}</button>
+  );
+
+  const sep = () => <div style={{ width: 1, height: 20, background: '#e2e8f0', margin: '0 3px', flexShrink: 0 }} />;
 
   return (
-    <div style={{ border: '1px solid #e2e8f0', borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
-      {/* Toolbar */}
+    <div style={{ border: '1px solid #cbd5e1', borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
+
+      {/* ── ROW 1: History · Format · Script · Size · Color ── */}
       <div style={{
-        display: 'flex', gap: 6, padding: '8px 10px',
-        background: '#f8fafc', borderBottom: '1px solid #e2e8f0',
-        flexWrap: 'wrap', alignItems: 'center',
+        display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'center',
+        padding: '7px 10px', background: '#f8fafc',
+        borderBottom: '1px solid #e9ecef',
       }}>
-        {TOOLBAR.map((group, gi) => (
-          <div key={gi} style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
-            {gi > 0 && <div style={{ width: 1, height: 20, background: '#e2e8f0', margin: '0 2px' }} />}
-            {group.items.map((tool, ti) => (
-              <button
-                key={ti}
-                type="button"
-                title={tool.title}
-                onMouseDown={e => { e.preventDefault(); exec(tool.cmd, tool.val || null); }}
-                style={btnStyle(false)}
-                onMouseEnter={e => { e.currentTarget.style.background = '#e2e8f0'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#334155'; }}
-              >
-                {tool.label}
-              </button>
-            ))}
-          </div>
-        ))}
+        {/* Undo / Redo */}
+        {btn('↩ Undo', 'เลิกทำ (Ctrl+Z)',   () => exec('undo'))}
+        {btn('↪ Redo', 'ทำซ้ำ (Ctrl+Y)',    () => exec('redo'))}
+        {sep()}
+
+        {/* Text Format */}
+        {btn(<b style={{fontWeight:900}}>B</b>,      'ตัวหนา (Ctrl+B)',        () => exec('bold'))}
+        {btn(<i>I</i>,                               'ตัวเอียง (Ctrl+I)',       () => exec('italic'))}
+        {btn(<u>U</u>,                               'ขีดเส้นใต้ (Ctrl+U)',    () => exec('underline'))}
+        {btn(<s>S</s>,                               'ขีดทับ',                 () => exec('strikeThrough'))}
+        {sep()}
+
+        {/* Superscript / Subscript */}
+        {btn('x²', 'ตัวยก (Superscript)', () => exec('superscript'))}
+        {btn('x₂', 'ตัวห้อย (Subscript)', () => exec('subscript'))}
+        {sep()}
+
+        {/* Font Size */}
+        <select
+          title="ขนาดตัวอักษร"
+          defaultValue="3"
+          onChange={e => exec('fontSize', e.target.value)}
+          style={{
+            padding: '3px 6px', borderRadius: 5, border: '1px solid #e2e8f0',
+            fontSize: 12, cursor: 'pointer', background: '#fff', color: '#334155',
+          }}
+        >
+          {FONT_SIZES.map(f => <option key={f.val} value={f.val}>{f.label}</option>)}
+        </select>
+        {sep()}
+
+        {/* Text Color */}
+        <div style={{ position: 'relative' }} onMouseDown={e => e.stopPropagation()}>
+          <button type="button" title="สีตัวอักษร"
+            onMouseDown={e => { e.preventDefault(); setShowFgPalette(v => !v); setShowBgPalette(false); }}
+            style={{
+              padding: '3px 8px', borderRadius: 5, border: '1px solid #e2e8f0',
+              background: '#fff', cursor: 'pointer', fontSize: 12,
+              display: 'flex', alignItems: 'center', gap: 4,
+            }}>
+            <span style={{ fontWeight: 700, color: fgColor, textShadow: fgColor === '#ffffff' ? '0 0 1px #aaa' : 'none' }}>A</span>
+            <span style={{ width: 16, height: 4, borderRadius: 2, background: fgColor, border: '1px solid #e2e8f0' }} />
+          </button>
+          {showFgPalette && (
+            <div style={{
+              position: 'absolute', top: '110%', left: 0, zIndex: 99,
+              background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8,
+              padding: 8, display: 'grid', gridTemplateColumns: 'repeat(6,20px)', gap: 4,
+              boxShadow: '0 4px 16px rgba(0,0,0,.12)',
+            }}>
+              {PRESET_COLORS.map(c => (
+                <button key={c} type="button"
+                  onMouseDown={e => { e.preventDefault(); setFgColor(c); exec('foreColor', c); setShowFgPalette(false); }}
+                  style={{ width: 20, height: 20, borderRadius: 4, background: c, border: c === '#ffffff' ? '1px solid #ccc' : '1px solid transparent', cursor: 'pointer' }}
+                />
+              ))}
+              <input type="color" value={fgColor} title="สีอื่น"
+                onChange={e => { setFgColor(e.target.value); exec('foreColor', e.target.value); }}
+                style={{ width: 20, height: 20, padding: 0, border: 'none', cursor: 'pointer', borderRadius: 4 }} />
+            </div>
+          )}
+        </div>
+
+        {/* Highlight Color */}
+        <div style={{ position: 'relative' }} onMouseDown={e => e.stopPropagation()}>
+          <button type="button" title="สีไฮไลต์ (พื้นหลัง)"
+            onMouseDown={e => { e.preventDefault(); setShowBgPalette(v => !v); setShowFgPalette(false); }}
+            style={{
+              padding: '3px 8px', borderRadius: 5, border: '1px solid #e2e8f0',
+              background: '#fff', cursor: 'pointer', fontSize: 12,
+              display: 'flex', alignItems: 'center', gap: 4,
+            }}>
+            <span style={{ fontSize: 13 }}>🖊</span>
+            <span style={{ width: 16, height: 4, borderRadius: 2, background: bgColor, border: '1px solid #e2e8f0' }} />
+          </button>
+          {showBgPalette && (
+            <div style={{
+              position: 'absolute', top: '110%', left: 0, zIndex: 99,
+              background: '#fff', border: '1px solid #e2e8f0', borderRadius: 8,
+              padding: 8, display: 'grid', gridTemplateColumns: 'repeat(6,20px)', gap: 4,
+              boxShadow: '0 4px 16px rgba(0,0,0,.12)',
+            }}>
+              {PRESET_COLORS.map(c => (
+                <button key={c} type="button"
+                  onMouseDown={e => { e.preventDefault(); setBgColor(c); exec('backColor', c); setShowBgPalette(false); }}
+                  style={{ width: 20, height: 20, borderRadius: 4, background: c, border: c === '#ffffff' ? '1px solid #ccc' : '1px solid transparent', cursor: 'pointer' }} />
+              ))}
+              <input type="color" value={bgColor} title="สีอื่น"
+                onChange={e => { setBgColor(e.target.value); exec('backColor', e.target.value); }}
+                style={{ width: 20, height: 20, padding: 0, border: 'none', cursor: 'pointer', borderRadius: 4 }} />
+            </div>
+          )}
+        </div>
+        {sep()}
+
+        {/* Remove Format */}
+        {btn('✕ ล้าง', 'ล้างการจัดรูปแบบทั้งหมด', () => exec('removeFormat'), { color: '#ef4444' })}
+      </div>
+
+      {/* ── ROW 2: Block · Align · List · Insert ── */}
+      <div style={{
+        display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'center',
+        padding: '6px 10px', background: '#f1f5f9',
+        borderBottom: '1px solid #e9ecef',
+      }}>
+        {/* Headings */}
+        {btn('H1', 'หัวข้อ 1 (ใหญ่สุด)',  () => exec('formatBlock','h1'))}
+        {btn('H2', 'หัวข้อ 2',             () => exec('formatBlock','h2'))}
+        {btn('H3', 'หัวข้อ 3',             () => exec('formatBlock','h3'))}
+        {btn('¶ ปกติ', 'ข้อความปกติ',     () => exec('formatBlock','p'))}
+        {btn('" " Quote', 'อ้างอิง/Blockquote', () => exec('formatBlock','blockquote'))}
+        {btn('── เส้นคั่น', 'แทรกเส้นแบ่ง', () => exec('insertHorizontalRule'))}
+        {sep()}
+
+        {/* Align */}
+        {btn('⫷ ซ้าย',  'ชิดซ้าย',   () => exec('justifyLeft'))}
+        {btn('⊟ กลาง',  'กึ่งกลาง',  () => exec('justifyCenter'))}
+        {btn('⫸ ขวา',   'ชิดขวา',    () => exec('justifyRight'))}
+        {btn('≡ เต็ม',   'กระจาย',    () => exec('justifyFull'))}
+        {sep()}
+
+        {/* Indent */}
+        {btn('→ ร่น',  'เพิ่มการย่อหน้า',  () => exec('indent'))}
+        {btn('← ชิด', 'ลดการย่อหน้า',     () => exec('outdent'))}
+        {sep()}
+
+        {/* Lists */}
+        {btn('• ลิสต์จุด',   'รายการแบบจุด',   () => exec('insertUnorderedList'))}
+        {btn('1. ลิสต์เลข',  'รายการแบบตัวเลข', () => exec('insertOrderedList'))}
+        {sep()}
+
+        {/* Insert */}
+        {btn('🔗 ลิงก์',    'แทรกลิงก์',      insertLink)}
+        {btn('🔗✕ ลบลิงก์', 'ลบลิงก์',         () => exec('unlink'))}
+        {btn('🖼 รูปภาพ',   'แทรกรูปจาก URL',  insertImage)}
       </div>
 
       {/* Editable area */}
@@ -220,23 +360,32 @@ function RichEditor({ value, onChange, placeholder, minHeight = 320 }) {
         onInput={() => onChange(ref.current?.innerHTML || '')}
         data-placeholder={placeholder}
         style={{
-          minHeight, padding: '14px 16px',
-          outline: 'none', fontSize: 14, lineHeight: 1.75,
+          minHeight, padding: '16px 18px',
+          outline: 'none', fontSize: 14, lineHeight: 1.8,
           fontFamily: 'inherit', color: '#1e293b',
           overflowY: 'auto',
         }}
       />
 
       <style>{`
-        [contenteditable]:empty:before {
+        [contenteditable][data-placeholder]:empty:before {
           content: attr(data-placeholder);
           color: #94a3b8; pointer-events: none;
         }
-        [contenteditable] h2 { font-size: 1.3em; font-weight: 700; margin: .8em 0 .4em; }
-        [contenteditable] h3 { font-size: 1.1em; font-weight: 700; margin: .7em 0 .35em; }
-        [contenteditable] ul { list-style: disc; padding-left: 1.5em; margin: .5em 0; }
-        [contenteditable] ol { list-style: decimal; padding-left: 1.5em; margin: .5em 0; }
-        [contenteditable] p  { margin: 0 0 .6em; }
+        [contenteditable] h1 { font-size:1.6em;font-weight:800;margin:.9em 0 .45em;color:#0f172a }
+        [contenteditable] h2 { font-size:1.35em;font-weight:700;margin:.8em 0 .4em;color:#1e293b }
+        [contenteditable] h3 { font-size:1.1em;font-weight:700;margin:.7em 0 .35em;color:#334155 }
+        [contenteditable] blockquote {
+          border-left:3px solid #14b8a6;margin:.7em 0;padding:.5em 1em;
+          background:#f0fdfa;color:#0f766e;font-style:italic;border-radius:0 6px 6px 0;
+        }
+        [contenteditable] hr { border:none;border-top:2px solid #e2e8f0;margin:1em 0; }
+        [contenteditable] ul { list-style:disc;padding-left:1.6em;margin:.5em 0; }
+        [contenteditable] ol { list-style:decimal;padding-left:1.6em;margin:.5em 0; }
+        [contenteditable] li { margin-bottom:.3em; }
+        [contenteditable] p  { margin:0 0 .7em; }
+        [contenteditable] a  { color:#0d9488;text-decoration:underline; }
+        [contenteditable] img { max-width:100%;height:auto;border-radius:6px;margin:.5em 0; }
       `}</style>
     </div>
   );

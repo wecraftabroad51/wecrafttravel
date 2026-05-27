@@ -146,16 +146,27 @@ export default function ArticleDetailPage({ lang, t, navigate, articles, article
                 )}
               </div>
               <style>{`
-                .article-body h2 { font-size: 1.4em; font-weight: 800; margin: 1.4em 0 .5em; color: var(--ink); }
-                .article-body h3 { font-size: 1.15em; font-weight: 700; margin: 1.2em 0 .4em; color: var(--ink); }
-                .article-body ul { list-style: disc; padding-left: 1.6em; margin: .6em 0 1em; }
-                .article-body ol { list-style: decimal; padding-left: 1.6em; margin: .6em 0 1em; }
-                .article-body li { margin-bottom: .35em; }
-                .article-body strong { font-weight: 700; color: var(--ink); }
-                .article-body em { font-style: italic; }
-                .article-body u  { text-decoration: underline; }
-                .article-body s  { text-decoration: line-through; }
-                .article-body p  { margin-bottom: .9em; }
+                .article-body h1 { font-size:1.8em;font-weight:900;margin:1.4em 0 .5em;color:var(--ink);line-height:1.2 }
+                .article-body h2 { font-size:1.45em;font-weight:800;margin:1.3em 0 .45em;color:var(--ink);line-height:1.25 }
+                .article-body h3 { font-size:1.15em;font-weight:700;margin:1.1em 0 .4em;color:var(--ink) }
+                .article-body blockquote {
+                  border-left:4px solid var(--primary);margin:1.2em 0;padding:.7em 1.2em;
+                  background:#f0fdfa;color:#0f766e;font-style:italic;border-radius:0 8px 8px 0;
+                }
+                .article-body hr { border:none;border-top:2px solid var(--line);margin:1.5em 0; }
+                .article-body ul { list-style:disc;padding-left:1.8em;margin:.7em 0 1.1em; }
+                .article-body ol { list-style:decimal;padding-left:1.8em;margin:.7em 0 1.1em; }
+                .article-body li { margin-bottom:.4em; }
+                .article-body strong { font-weight:700;color:var(--ink); }
+                .article-body em { font-style:italic; }
+                .article-body u  { text-decoration:underline; }
+                .article-body s  { text-decoration:line-through; }
+                .article-body p  { margin-bottom:.9em; }
+                .article-body a  { color:var(--primary);text-decoration:underline; }
+                .article-body a:hover { opacity:.8; }
+                .article-body img { max-width:100%;height:auto;border-radius:10px;margin:1em 0;display:block; }
+                .article-body sup { vertical-align:super;font-size:.75em; }
+                .article-body sub { vertical-align:sub;font-size:.75em; }
               `}</style>
 
               {/* Back link */}
