@@ -437,7 +437,7 @@ function AppInner() {
           <Route path="/faq"         element={<FAQPage {...pageProps} />} />
           <Route path="/contact"      element={<ContactPage {...pageProps} />} />
           <Route path="/group-quote" element={<GroupQuotePage lang={pageProps.lang} setMessages={pageProps.setMessages} />} />
-          <Route path="/about"       element={<AboutPage navigate={navigate} />} />
+          <Route path="/about"       element={<AboutPage lang={pageProps.lang} navigate={navigate} />} />
           <Route path="/visa"           element={<VisaPage lang={pageProps.lang} navigate={navigate} />} />
           <Route path="/ticket-booking" element={<TicketBookingPage {...pageProps} />} />
           <Route path="/car-rental"     element={<CarRentalPage {...pageProps} />} />

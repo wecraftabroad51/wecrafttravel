@@ -1,4 +1,38 @@
-export default function AboutPage({ navigate }) {
+export default function AboutPage({ lang = 'th', navigate }) {
+  const th = lang === 'th';
+
+  const companyBullets = th ? [
+    'ทุนจดทะเบียน 2,000,000 บาท ชำระเต็มมูลค่า',
+    'ใบอนุญาตประกอบกิจการท่องเที่ยว เลขที่ 11/11550 จากสำนักทะเบียนธุรกิจนำเที่ยวและมัคคุเทศก์',
+    'สมาชิกสมาคมธุรกิจท่องเที่ยวภายในประเทศ (สทน.)',
+    'ธุรกิจนำเที่ยวประเภทเที่ยวทั่วไป',
+  ] : [
+    'Registered capital 2,000,000 THB, fully paid-up',
+    'Tourism Business Licence No. 11/11550 issued by the Tourism Business and Guide Registration Office',
+    'Member of the Domestic Tourism Business Association (DTBA)',
+    'General tourism business operator',
+  ];
+
+  const services = th ? [
+    'จัดกรุ๊ปทัวร์ท่องเที่ยว สัมมนา ศึกษาดูงาน ทั้งในประเทศ และต่างประเทศ',
+    'จองแพ็คเกจทัวร์',
+    'รับจองห้องพัก ทุกประเภท ทั้งในและต่างประเทศ',
+    'จองแพ็คเกจและจัดกรุ๊ปเรือสำราญ',
+    'จองตั๋วเครื่องบินทั้งในประเทศ และต่างประเทศ',
+    'บริการยื่นวีซ่าทุกประเทศ',
+    'ประกันการเดินทางต่างประเทศ',
+    'บริการรถรับ-ส่งสนามบิน',
+  ] : [
+    'Group tours — leisure, seminars, study trips, domestic & international',
+    'Tour package reservations',
+    'Hotel bookings of all types, domestic & international',
+    'Cruise packages and group cruise bookings',
+    'Domestic and international flight ticket reservations',
+    'Visa application services for all countries',
+    'International travel insurance',
+    'Airport transfer services',
+  ];
+
   return (
     <div style={{ background: '#f8f9fa', minHeight: '100vh', paddingBottom: 60 }}>
       <style>{`
@@ -22,7 +56,9 @@ export default function AboutPage({ navigate }) {
       <div style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #0d7a55 100%)', padding: '40px 20px', marginBottom: 32 }}>
         <div className="about-wrap" style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,.75)', letterSpacing: 3, marginBottom: 8 }}>ABOUT US</div>
-          <h1 style={{ fontSize: 30, fontWeight: 900, color: '#fff', margin: 0 }}>เกี่ยวกับเรา</h1>
+          <h1 style={{ fontSize: 30, fontWeight: 900, color: '#fff', margin: 0 }}>
+            {th ? 'เกี่ยวกับเรา' : 'About Us'}
+          </h1>
           <p style={{ color: 'rgba(255,255,255,.8)', marginTop: 8, fontSize: 15 }}>WeCraft Travel — WE CRAFT ABROAD</p>
         </div>
       </div>
@@ -52,26 +88,28 @@ export default function AboutPage({ navigate }) {
             {/* Company details */}
             <div style={{ flex: 1 }}>
               <h2 style={{ fontSize: 24, fontWeight: 900, color: '#222', margin: '0 0 6px' }}>
-                🏛️ บริษัท วีคราฟท์ อะบรอด จำกัด
+                {th ? '🏛️ บริษัท วีคราฟท์ อะบรอด จำกัด' : '🏛️ WeCraft Abroad Co., Ltd.'}
               </h2>
               <div style={{ marginBottom: 16 }}>
                 <p style={{ fontSize: 14, color: '#444', margin: '0 0 6px' }}>
-                  <strong>ชื่อ WeCraft Travel :</strong> ดีไซน์ความสุข ให้สนุกทุกโลเคชั่น
+                  {th
+                    ? <><strong>ชื่อ WeCraft Travel :</strong> ดีไซน์ความสุข ให้สนุกทุกโลเคชั่น</>
+                    : <><strong>WeCraft Travel :</strong> Designing happiness — fun at every location</>}
                 </p>
                 <p style={{ fontSize: 14, color: '#444', lineHeight: 1.7 }}>
-                  <strong>WeCraft Travel :</strong> ก่อตั้งขึ้นเพื่อให้บริการด้านการท่องเที่ยวอย่างครบวงจร
-                  ถูกต้องตามกฎหมายประกอบธุรกิจท่องเที่ยวตามมาตรา 15 แห่งพระราชบัญญัติธุรกิจนำเที่ยวและมัคคุเทศก์ พ.ศ. 2551
+                  {th
+                    ? <><strong>WeCraft Travel :</strong> ก่อตั้งขึ้นเพื่อให้บริการด้านการท่องเที่ยวอย่างครบวงจร
+                        ถูกต้องตามกฎหมายประกอบธุรกิจท่องเที่ยวตามมาตรา 15 แห่งพระราชบัญญัติธุรกิจนำเที่ยวและมัคคุเทศก์ พ.ศ. 2551</>
+                    : <><strong>WeCraft Travel</strong> was established to provide comprehensive travel services,
+                        fully compliant with Section 15 of the Tourism Business and Tourist Guide Act B.E. 2551.</>}
                 </p>
               </div>
 
               <div style={{ background: '#f8f9fa', borderRadius: 10, padding: '16px 20px' }}>
-                <div style={{ fontWeight: 800, fontSize: 14, color: '#333', marginBottom: 12 }}>ข้อมูลบริษัท</div>
-                {[
-                  'ทุนจดทะเบียน 2,000,000 บาท ชำระเต็มมูลค่า',
-                  'ใบอนุญาตประกอบกิจการท่องเที่ยว เลขที่ 11/11550 จากสำนักทะเบียนธุรกิจนำเที่ยวและมัคคุเทศก์',
-                  'สมาชิกสมาคมธุรกิจท่องเที่ยวภายในประเทศ (สทน.)',
-                  'ธุรกิจนำเที่ยวประเภทเที่ยวทั่วไป',
-                ].map((item, i) => (
+                <div style={{ fontWeight: 800, fontSize: 14, color: '#333', marginBottom: 12 }}>
+                  {th ? 'ข้อมูลบริษัท' : 'Company Information'}
+                </div>
+                {companyBullets.map((item, i) => (
                   <div key={i} className="about-bullet">{item}</div>
                 ))}
               </div>
@@ -80,41 +118,52 @@ export default function AboutPage({ navigate }) {
 
           {/* Description */}
           <div style={{ marginTop: 28, borderTop: '1px solid #eee', paddingTop: 24 }}>
-            <p style={{ fontSize: 14, color: '#444', lineHeight: 1.9, marginBottom: 14 }}>
-              &nbsp;&nbsp;&nbsp;&nbsp;<strong>บริษัท วีคราฟท์ อะบรอด จำกัด</strong> คือ Travel Agency
-              ประกอบธุรกิจให้บริการนำเที่ยว ทั้งภายในประเทศ และต่างประเทศในภูมิภาคต่างๆ ทั่วโลก
-              รับจัดกรุ๊ปทัวร์ เพื่อการท่องเที่ยวพักผ่อน การประชุม สัมมนา ศึกษาดูงาน ท่องเที่ยวประจำปีของบริษัท
-              การศึกษาด้านแหล่งท่องเที่ยวชุมชน โครงการพระราชดำริ จำหน่ายตั๋วเครื่องบิน จองห้องพัก รถรับ-ส่ง
-              แพ็คเกจทัวร์แบบส่วนตัว
-            </p>
-            <p style={{ fontSize: 14, color: '#444', lineHeight: 1.9, marginBottom: 0 }}>
-              &nbsp;&nbsp;&nbsp;&nbsp;ให้บริการด้านงานท่องเที่ยว ดำเนินธุรกิจด้วยหัวใจของคนทำทัวร์
-              การท่องเที่ยวคือการคืนกำไรให้กับชีวิตการแสวงหาความสุขเพื่อสร้างแรงบันดาลใจ
-              เพื่อเพิ่มพลังกายพลังใจให้กับการดำเนินชีวิตในวันต่อๆ ไป ไปอย่างมีพลัง
-              การเดินทางท่องเที่ยวต้องเดินทางด้วยความสุข ความพร้อม ทั้งร่างกายและจิตใจ
-              ถึงจะเรียกว่า "ความสุข" และนั่นคือ ความหมายของการท่องเที่ยว
-              และเป็นเป้าหมายหลักของความสำเร็จในการดำเนินธุรกิจของ WeCraft Travel
-            </p>
+            {th ? (
+              <>
+                <p style={{ fontSize: 14, color: '#444', lineHeight: 1.9, marginBottom: 14 }}>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<strong>บริษัท วีคราฟท์ อะบรอด จำกัด</strong> คือ Travel Agency
+                  ประกอบธุรกิจให้บริการนำเที่ยว ทั้งภายในประเทศ และต่างประเทศในภูมิภาคต่างๆ ทั่วโลก
+                  รับจัดกรุ๊ปทัวร์ เพื่อการท่องเที่ยวพักผ่อน การประชุม สัมมนา ศึกษาดูงาน ท่องเที่ยวประจำปีของบริษัท
+                  การศึกษาด้านแหล่งท่องเที่ยวชุมชน โครงการพระราชดำริ จำหน่ายตั๋วเครื่องบิน จองห้องพัก รถรับ-ส่ง
+                  แพ็คเกจทัวร์แบบส่วนตัว
+                </p>
+                <p style={{ fontSize: 14, color: '#444', lineHeight: 1.9, marginBottom: 0 }}>
+                  &nbsp;&nbsp;&nbsp;&nbsp;ให้บริการด้านงานท่องเที่ยว ดำเนินธุรกิจด้วยหัวใจของคนทำทัวร์
+                  การท่องเที่ยวคือการคืนกำไรให้กับชีวิตการแสวงหาความสุขเพื่อสร้างแรงบันดาลใจ
+                  เพื่อเพิ่มพลังกายพลังใจให้กับการดำเนินชีวิตในวันต่อๆ ไป ไปอย่างมีพลัง
+                  การเดินทางท่องเที่ยวต้องเดินทางด้วยความสุข ความพร้อม ทั้งร่างกายและจิตใจ
+                  ถึงจะเรียกว่า "ความสุข" และนั่นคือ ความหมายของการท่องเที่ยว
+                  และเป็นเป้าหมายหลักของความสำเร็จในการดำเนินธุรกิจของ WeCraft Travel
+                </p>
+              </>
+            ) : (
+              <>
+                <p style={{ fontSize: 14, color: '#444', lineHeight: 1.9, marginBottom: 14 }}>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<strong>WeCraft Abroad Co., Ltd.</strong> is a full-service travel agency
+                  operating both domestic and international tours across all regions of the world.
+                  We organise group tours for leisure travel, meetings, seminars, study trips, annual company outings,
+                  community tourism, royal-initiative projects, and also offer flight tickets, hotel reservations,
+                  airport transfers, and private tour packages.
+                </p>
+                <p style={{ fontSize: 14, color: '#444', lineHeight: 1.9, marginBottom: 0 }}>
+                  &nbsp;&nbsp;&nbsp;&nbsp;We run our business with the heart of true travel professionals.
+                  Travel is the reward of life — a pursuit of happiness that inspires and recharges both body and mind
+                  for the days ahead. Every journey should be made with joy and full readiness.
+                  That is what "happiness" truly means, and it is the core mission of WeCraft Travel.
+                </p>
+              </>
+            )}
           </div>
         </div>
 
         {/* Services + License */}
         <div className="about-card">
           <div className="about-section-title">
-            <span>ℹ️</span> บริการหลักของเรา
+            <span>ℹ️</span> {th ? 'บริการหลักของเรา' : 'Our Core Services'}
           </div>
           <div className="about-services-grid" style={{ display: 'flex', gap: 32, alignItems: 'flex-start' }}>
             <div style={{ flex: 1 }}>
-              {[
-                'จัดกรุ๊ปทัวร์ท่องเที่ยว สัมมนา ศึกษาดูงาน ทั้งในประเทศ และต่างประเทศ',
-                'จองแพ็คเกจทัวร์',
-                'รับจองห้องพัก ทุกประเภท ทั้งในและต่างประเทศ',
-                'จองแพ็คเกจและจัดกรุ๊ปเรือสำราญ',
-                'จองตั๋วเครื่องบินทั้งในประเทศ และต่างประเทศ',
-                'บริการยื่นวีซ่าทุกประเทศ',
-                'ประกันการเดินทางต่างประเทศ',
-                'บริการรถรับ-ส่งสนามบิน',
-              ].map((item, i) => (
+              {services.map((item, i) => (
                 <div key={i} className="about-bullet">{item}</div>
               ))}
             </div>
@@ -123,7 +172,7 @@ export default function AboutPage({ navigate }) {
             <div style={{ flexShrink: 0, textAlign: 'center' }}>
               <img
                 src="/license.jpg"
-                alt="ใบอนุญาตประกอบธุรกิจนำเที่ยว 11/11550"
+                alt="Tourism Business Licence 11/11550"
                 style={{
                   width: 240,
                   borderRadius: 8,
@@ -131,15 +180,21 @@ export default function AboutPage({ navigate }) {
                   border: '1px solid #ddd',
                 }}
               />
-              <div style={{ marginTop: 8, fontSize: 11, color: '#888' }}>ใบอนุญาต ททท. เลขที่ 11/11550</div>
+              <div style={{ marginTop: 8, fontSize: 11, color: '#888' }}>
+                {th ? 'ใบอนุญาต ททท. เลขที่ 11/11550' : 'TAT Licence No. 11/11550'}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Contact CTA */}
         <div className="about-card" style={{ textAlign: 'center', background: 'linear-gradient(135deg, #e8f8f0, #fff)' }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: '#222', marginBottom: 8 }}>ติดต่อเรา</div>
-          <p style={{ fontSize: 14, color: '#666', marginBottom: 20 }}>พร้อมให้บริการ จันทร์–ศุกร์ 09.00–18.00 น.</p>
+          <div style={{ fontSize: 20, fontWeight: 800, color: '#222', marginBottom: 8 }}>
+            {th ? 'ติดต่อเรา' : 'Contact Us'}
+          </div>
+          <p style={{ fontSize: 14, color: '#666', marginBottom: 20 }}>
+            {th ? 'พร้อมให้บริการ จันทร์–ศุกร์ 09.00–18.00 น.' : 'Available Mon–Fri, 09:00–18:00'}
+          </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="tel:0618686889" style={{
               background: 'var(--primary)', color: '#fff',
@@ -156,7 +211,7 @@ export default function AboutPage({ navigate }) {
               border: '2px solid var(--primary)',
               padding: '10px 24px', borderRadius: 8, cursor: 'pointer',
               fontWeight: 700, fontSize: 14, fontFamily: 'inherit',
-            }}>🎯 ขอราคากรุ๊ปเหมา</button>
+            }}>🎯 {th ? 'ขอราคากรุ๊ปเหมา' : 'Group Tour Quote'}</button>
           </div>
         </div>
 
