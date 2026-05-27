@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { insertBooking } from '../../lib/db.js';
+import { insertMessage } from '../../lib/db.js';
 
 const TIME_SLOTS = ['00.01-06.00', '06.01-12.00', '12.01-18.00', '18.00-00.00'];
 const AIRLINE_TYPES = [
@@ -128,19 +128,28 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
     setSubmitting(true);
     setError('');
     try {
-      const payload = {
-        type: 'ticket-booking',
-        name: form.fullName,
-        data: JSON.stringify({
-          ...form,
-          totalPax,
-          requestType: 'ticket-booking',
-        }),
-        status: 'pending',
-      };
-      const res = await insertBooking(payload);
+      const airlineLabelMsg = AIRLINE_TYPES.find(a => a.value === form.airlineType)?.th || form.airlineType;
+      const seatLabelMsg = SEAT_CLASSES.find(s => s.value === form.seatClass)?.th || form.seatClass;
+      const messageBody = [
+        `ประเภท: จองตั๋วเครื่องบิน`,
+        `เลขพาสปอร์ต: ${form.passportNo || '-'}`,
+        `วันหมดอายุพาสปอร์ต: ${form.passportExpiry || '-'}`,
+        `ขาไป: ${form.outboundDate} ช่วงเวลา ${form.outboundTime || '-'}`,
+        `ขากลับ: ${form.returnDate || '-'} ช่วงเวลา ${form.returnTime || '-'}`,
+        `สายการบิน: ${airlineLabelMsg}${form.airlineOther ? ` — ${form.airlineOther}` : ''}`,
+        `ประเภทที่นั่ง: ${seatLabelMsg}`,
+        `ผู้ใหญ่: ${form.adults} / เด็ก: ${form.children} / ทารก: ${form.infants} (รวม ${totalPax} คน)`,
+        form.note ? `หมายเหตุ: ${form.note}` : null,
+      ].filter(Boolean).join('\n');
+
+      const res = await insertMessage({
+        name:          form.fullName,
+        email:         '',
+        phone:         '',
+        tour_interest: 'จองตั๋วเครื่องบิน',
+        message:       messageBody,
+      });
       if (res.error && res.error !== 'offline') throw new Error(JSON.stringify(res.error));
-      if (setBookings && res.data) setBookings(prev => [res.data, ...prev]);
 
       const airlineLabel = AIRLINE_TYPES.find(a => a.value === form.airlineType)?.th || form.airlineType;
       const seatLabel = SEAT_CLASSES.find(s => s.value === form.seatClass)?.th || form.seatClass;

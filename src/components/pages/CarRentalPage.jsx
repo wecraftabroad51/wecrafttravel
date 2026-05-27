@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { insertBooking } from '../../lib/db.js';
+import { insertMessage } from '../../lib/db.js';
 
 const RENTAL_TYPES = [
   { value: 'domestic',  th: 'ในประเทศ',       en: 'Domestic' },
@@ -104,18 +104,29 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
     setSubmitting(true);
     setError('');
     try {
-      const payload = {
-        type: 'car-rental',
-        name: form.fullName,
-        data: JSON.stringify({
-          ...form,
-          requestType: 'car-rental',
-        }),
-        status: 'pending',
-      };
-      const res = await insertBooking(payload);
+      const rentalLabelMsg = RENTAL_TYPES.find(r => r.value === form.rentalType)?.th || form.rentalType;
+      const carLabelMsg = CAR_TYPES.find(c => c.value === form.carType)?.th || form.carType;
+      const messageBody = [
+        `ประเภท: รถเช่า`,
+        `เบอร์โทร: ${form.phone}`,
+        `อีเมล: ${form.email || '-'}`,
+        `ประเภทรถเช่า: ${rentalLabelMsg}`,
+        `วันที่รับรถ: ${form.pickupDate}`,
+        form.returnDate ? `วันที่คืนรถ: ${form.returnDate}` : null,
+        `สถานที่รับรถ: ${form.pickupLocation}`,
+        `ประเภทรถ: ${carLabelMsg}`,
+        `จำนวนผู้โดยสาร: ${form.passengers} คน`,
+        form.note ? `หมายเหตุ: ${form.note}` : null,
+      ].filter(Boolean).join('\n');
+
+      const res = await insertMessage({
+        name:          form.fullName,
+        email:         form.email || '',
+        phone:         form.phone,
+        tour_interest: `รถเช่า — ${rentalLabelMsg}`,
+        message:       messageBody,
+      });
       if (res.error && res.error !== 'offline') throw new Error(JSON.stringify(res.error));
-      if (setBookings && res.data) setBookings(prev => [res.data, ...prev]);
 
       const rentalLabel = RENTAL_TYPES.find(r => r.value === form.rentalType)?.th || form.rentalType;
       const carLabel = CAR_TYPES.find(c => c.value === form.carType)?.th || form.carType;
