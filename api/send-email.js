@@ -195,6 +195,46 @@ async function sendEmail(subject, html, seqNo, sheetUrl) {
   console.log('Email sent:', info.messageId);
 }
 
+// ── Send Customer Confirmation Email ──────────────────────────
+async function sendCustomerConfirmation(customerEmail, seqNo) {
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASS;
+  if (!user || !pass) { console.log('Customer email skipped: no credentials'); return; }
+
+  const seqDisplay = seqNo ? `<p style="font-size:18px;font-weight:bold;color:#e65c00;">หมายเลขอ้างอิง: ${seqNo}</p>` : '';
+  const html = `
+    <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
+      <div style="background:linear-gradient(135deg,#1a5276,#e65c00);color:#fff;padding:28px 24px;border-radius:8px 8px 0 0;text-align:center">
+        <h2 style="margin:0;font-size:22px">WeCraft Travel</h2>
+        <p style="margin:8px 0 0;opacity:.9;font-size:14px">We Craft Travel · We Craft Happiness</p>
+      </div>
+      <div style="background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 8px 8px;padding:28px 24px;text-align:center">
+        <div style="font-size:48px;margin-bottom:12px">✅</div>
+        <h3 style="margin:0 0 12px;font-size:20px;color:#333">เราได้รับคำขอของคุณแล้ว!</h3>
+        <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 16px">
+          ขอบคุณที่ไว้วางใจ WeCraft Travel<br>
+          ทีมงานของเราจะติดต่อกลับภายใน <strong>24 ชั่วโมง</strong> เพื่อยืนยันรายละเอียดและดำเนินการต่อไป
+        </p>
+        ${seqDisplay}
+        <p style="color:#888;font-size:12px;margin-top:20px">หากมีข้อสงสัย กรุณาติดต่อ wecraftabroad51@gmail.com</p>
+      </div>
+      <p style="font-size:11px;color:#aaa;text-align:center;margin-top:10px">We Craft Travel · We Craft Happiness</p>
+    </div>`;
+
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com', port: 465, secure: true,
+    auth: { user, pass },
+    tls: { rejectUnauthorized: false },
+  });
+  const info = await transporter.sendMail({
+    from: `"WeCraft Travel" <${user}>`,
+    to: customerEmail,
+    subject: seqNo ? `[${seqNo}] WeCraft Travel — ได้รับคำขอของคุณแล้ว` : 'WeCraft Travel — ได้รับคำขอของคุณแล้ว',
+    html,
+  });
+  console.log('Customer confirmation email sent:', info.messageId);
+}
+
 // ── Append row to Google Sheet ────────────────────────────────
 async function appendToSheet(formData, seqNo, sheets, sheetId, sheetName) {
   const f = formData;
@@ -290,7 +330,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { subject, html, formData } = req.body || {};
+  const { subject, html, formData, customerEmail } = req.body || {};
   if (!subject || !html) return res.status(400).json({ error: 'missing fields' });
 
   const results = {};
@@ -345,6 +385,12 @@ module.exports = async function handler(req, res) {
       ? appendToSheet(formData, seqNo, sheetsClient, sheetId, sheetName)
           .then(() => { results.sheet = 'ok'; })
           .catch(e => { results.sheet = e.message; console.error('Sheet:', e.message); })
+      : Promise.resolve(),
+
+    customerEmail
+      ? sendCustomerConfirmation(customerEmail, seqNo)
+          .then(() => { results.customerEmail = 'ok'; })
+          .catch(e => { results.customerEmail = e.message; console.error('CustomerEmail:', e.message); })
       : Promise.resolve(),
   ]);
 

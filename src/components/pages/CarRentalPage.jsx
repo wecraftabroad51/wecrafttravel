@@ -60,12 +60,12 @@ function RadioGroup({ options, value, onChange, lang }) {
   );
 }
 
-const sendNotifications = async (subject, html, formData) => {
+const sendNotifications = async (subject, html, formData, customerEmail) => {
   try {
     const res = await fetch('/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subject, html, formData }),
+      body: JSON.stringify({ subject, html, formData, customerEmail }),
     });
     const data = await res.json();
     if (!res.ok) console.error('Notification error:', data.error);
@@ -101,9 +101,29 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
       setError(lang === 'th' ? 'กรุณากรอกข้อมูลที่จำเป็น' : 'Please fill in required fields.');
       return;
     }
+    // Phone format validation: Thai 10 digits starting with 0
+    const phoneClean = form.phone.replace(/[\s\-]/g, '');
+    if (!/^0[0-9]{9}$/.test(phoneClean)) {
+      setError('เบอร์โทรศัพท์ไม่ถูกต้อง กรุณากรอกเบอร์ 10 หลัก');
+      return;
+    }
     setSubmitting(true);
     setError('');
     try {
+      // ── 1. Generate sequence number ─────────────────────────────
+      let seqNo = '';
+      try {
+        const seqRes = await fetch('/api/gen-seqno', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'car-rental' }),
+        });
+        const seqData = await seqRes.json();
+        if (seqRes.ok && seqData.seqNo) seqNo = seqData.seqNo;
+      } catch (e) {
+        console.warn('gen-seqno failed:', e.message);
+      }
+
       const rentalLabelMsg = RENTAL_TYPES.find(r => r.value === form.rentalType)?.th || form.rentalType;
       const carLabelMsg = CAR_TYPES.find(c => c.value === form.carType)?.th || form.carType;
       const messageBody = [
@@ -151,7 +171,12 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
           </table>
           <p style="font-size:12px;color:#aaa;text-align:center;margin-top:12px">We Craft Travel · We Craft Happiness</p>
         </div>`;
-      await sendNotifications(`[รถเช่า] ${form.fullName} — ${rentalLabel} ${form.pickupDate}`, emailHtml, { ...form, _type: 'car-rental', rentalLabel, carLabel });
+      await sendNotifications(
+        `[รถเช่า] ${form.fullName} — ${rentalLabel} ${form.pickupDate}`,
+        emailHtml,
+        { ...form, _type: 'car-rental', rentalLabel, carLabel, _seqNo: seqNo || undefined },
+        form.email || undefined
+      );
       setSuccess(true);
     } catch (err) {
       setError(lang === 'th' ? 'เกิดข้อผิดพลาด กรุณาลองใหม่' : 'An error occurred. Please try again.');

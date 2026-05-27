@@ -101,12 +101,12 @@ function PassengerCounter({ label, value, onChange, min = 0 }) {
   );
 }
 
-const sendNotifications = async (subject, html, formData) => {
+const sendNotifications = async (subject, html, formData, customerEmail) => {
   try {
     const res = await fetch('/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subject, html, formData }),
+      body: JSON.stringify({ subject, html, formData, customerEmail }),
     });
     const data = await res.json();
     if (!res.ok) console.error('Notification error:', data.error);
@@ -119,6 +119,8 @@ const sendNotifications = async (subject, html, formData) => {
 export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
   const [form, setForm] = useState({
     fullName: '',
+    phone: '',
+    email: '',
     passportNo: '',
     passportExpiry: '',
     outboundDate: '',
@@ -234,6 +236,8 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
       const driveLinks = driveFiles.map(f => f.url).join(', ');
       const messageBody = [
         `ประเภท: จองตั๋วเครื่องบิน`,
+        `เบอร์โทร: ${form.phone || '-'}`,
+        `อีเมล: ${form.email || '-'}`,
         `เลขพาสปอร์ต: ${form.passportNo || '-'}`,
         `วันหมดอายุพาสปอร์ต: ${form.passportExpiry || '-'}`,
         `ขาไป: ${form.outboundDate} ช่วงเวลา ${form.outboundTime || '-'}`,
@@ -247,8 +251,8 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
 
       const res = await insertMessage({
         name:          form.fullName,
-        email:         '',
-        phone:         '',
+        email:         form.email || '',
+        phone:         form.phone || '',
         tour_interest: 'จองตั๋วเครื่องบิน',
         message:       messageBody,
       });
@@ -269,6 +273,8 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
           <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #eee;border-top:none;border-radius:0 0 8px 8px">
             <tr style="background:#fff3e0"><td colspan="2" style="padding:10px 16px;font-weight:700;color:#e65c00">ข้อมูลผู้เดินทาง</td></tr>
             <tr><td style="padding:8px 16px;color:#666;width:40%">ชื่อ-นามสกุล</td><td style="padding:8px 16px;font-weight:600">${form.fullName}</td></tr>
+            <tr style="background:#fafafa"><td style="padding:8px 16px;color:#666">เบอร์โทรติดต่อ</td><td style="padding:8px 16px;font-weight:600">${form.phone || '-'}</td></tr>
+            <tr><td style="padding:8px 16px;color:#666">อีเมล</td><td style="padding:8px 16px">${form.email || '-'}</td></tr>
             <tr style="background:#fafafa"><td style="padding:8px 16px;color:#666">เลขพาสปอร์ต</td><td style="padding:8px 16px;font-weight:600">${form.passportNo || '-'}</td></tr>
             <tr><td style="padding:8px 16px;color:#666">วันหมดอายุพาสปอร์ต</td><td style="padding:8px 16px">${form.passportExpiry || '-'}</td></tr>
             <tr style="background:#fff3e0"><td colspan="2" style="padding:10px 16px;font-weight:700;color:#e65c00">ช่วงเวลาเดินทาง</td></tr>
@@ -291,7 +297,8 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
       await sendNotifications(
         `[จองตั๋ว] ${form.fullName} — ${form.outboundDate}`,
         emailHtml,
-        { ...form, _type: 'ticket', totalPax, driveFiles, _seqNo: seqNo || undefined }
+        { ...form, _type: 'ticket', totalPax, driveFiles, _seqNo: seqNo || undefined },
+        form.email || undefined
       );
       setSuccess(true);
     } catch (err) {
@@ -357,6 +364,16 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
               <div>
                 <Label th="วันหมดอายุพาสปอร์ต" en="Passport Expiry" lang={lang} />
                 <Input type="date" value={form.passportExpiry} onChange={e => set('passportExpiry', e.target.value)} />
+              </div>
+              <div>
+                <Label th="เบอร์โทรติดต่อ" en="Phone Number" lang={lang} required />
+                <Input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)}
+                  placeholder="08X-XXX-XXXX" required />
+              </div>
+              <div>
+                <Label th="อีเมล (สำหรับรับการยืนยัน)" en="Email (for confirmation)" lang={lang} />
+                <Input type="email" value={form.email} onChange={e => set('email', e.target.value)}
+                  placeholder="email@example.com" />
               </div>
             </div>
           </div>
