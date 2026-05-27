@@ -360,3 +360,17 @@ export const uploadImage = async (file, folder = 'tours') => {
   const { data } = supabase.storage.from('tour-images').getPublicUrl(name)
   return { url: data.publicUrl, error: null }
 }
+
+// ── PASSPORT UPLOAD (Supabase Storage → passports bucket) ────
+export const uploadPassport = async (file, prefix = '') => {
+  if (!supabase) return { url: null, name: file.name, error: 'offline' }
+  const ext      = file.name.split('.').pop().toLowerCase()
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+  const path     = `${prefix ? prefix + '_' : ''}${Date.now()}-${safeName}`
+  const { error: upErr } = await supabase.storage
+    .from('passports')
+    .upload(path, file, { cacheControl: '3600', upsert: false })
+  if (upErr) return { url: null, name: file.name, error: upErr.message || String(upErr) }
+  const { data } = supabase.storage.from('passports').getPublicUrl(path)
+  return { url: data.publicUrl, name: safeName, error: null }
+}

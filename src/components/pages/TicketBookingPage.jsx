@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { insertMessage } from '../../lib/db.js';
+import { insertMessage, uploadPassport } from '../../lib/db.js';
 
 // ── Compress image before upload (max 800px, quality 0.6) ─────
 function compressImage(file, maxPx = 800, quality = 0.6) {
@@ -191,53 +191,28 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
         console.warn('gen-seqno failed:', e.message);
       }
 
-      // ── 2. อัพโหลดไฟล์พาสปอร์ตไปยัง Google Drive ──────────────
+      // ── 2. อัพโหลดไฟล์พาสปอร์ตไปยัง Supabase Storage ──────────
       let driveFiles = [];
       if (files.length > 0) {
         setUploadStatus('uploading');
         setUploadMsg('');
         try {
-          // compress รูปก่อน → ลดขนาดให้อยู่ใน limit ของ Vercel
           const compressed = await Promise.all(files.map(f => compressImage(f)));
-          const base64Files = await Promise.all(compressed.map(file => new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve({
-              name: file.name,
-              mimeType: file.type || 'application/octet-stream',
-              data: reader.result.split(',')[1],
-            });
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          })));
-
-          const uploadRes = await fetch('/api/upload-drive', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              files: base64Files,
-              folderName: seqNo || `${form.fullName}_${form.outboundDate}`,
-            }),
-          });
-          const text = await uploadRes.text();
-          try {
-            const uploadData = JSON.parse(text);
-            if (uploadRes.ok && uploadData.files) {
-              driveFiles = uploadData.files;
-              setUploadStatus('ok');
-              setUploadMsg(`อัพโหลดสำเร็จ ${driveFiles.length} ไฟล์`);
-            } else {
-              const errMsg = uploadData.error || `HTTP ${uploadRes.status}`;
-              console.warn('Drive upload failed:', errMsg);
-              setUploadStatus('warn');
-              setUploadMsg(`อัพโหลดไม่สำเร็จ: ${errMsg}`);
-            }
-          } catch {
-            console.warn('Drive upload response not JSON:', text.slice(0, 200));
+          const results = await Promise.all(
+            compressed.map(f => uploadPassport(f, seqNo || form.fullName))
+          );
+          const failed = results.filter(r => r.error);
+          const succeeded = results.filter(r => !r.error);
+          driveFiles = succeeded.map(r => ({ name: r.name, url: r.url }));
+          if (failed.length > 0) {
             setUploadStatus('warn');
-            setUploadMsg(`อัพโหลดไม่สำเร็จ: ${text.slice(0, 120)}`);
+            setUploadMsg(`อัพโหลดสำเร็จ ${succeeded.length}/${results.length} ไฟล์ — ${failed[0].error}`);
+          } else {
+            setUploadStatus('ok');
+            setUploadMsg(`อัพโหลดสำเร็จ ${driveFiles.length} ไฟล์`);
           }
         } catch (uploadErr) {
-          console.warn('Drive upload error (continuing):', uploadErr.message);
+          console.warn('Upload error (continuing):', uploadErr.message);
           setUploadStatus('warn');
           setUploadMsg(`อัพโหลดไม่สำเร็จ: ${uploadErr.message}`);
         }
