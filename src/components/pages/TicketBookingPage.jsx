@@ -128,8 +128,40 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
     setSubmitting(true);
     setError('');
     try {
+      // ── 1. อัพโหลดไฟล์พาสปอร์ตไปยัง Google Drive ──────────────
+      let driveFiles = [];
+      if (files.length > 0) {
+        const base64Files = await Promise.all(files.map(file => new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve({
+            name: file.name,
+            mimeType: file.type || 'application/octet-stream',
+            data: reader.result.split(',')[1], // base64 only
+          });
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        })));
+
+        const uploadRes = await fetch('/api/upload-drive', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            files: base64Files,
+            folderName: `[จองตั๋ว] ${form.fullName} ${form.outboundDate}`,
+          }),
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadRes.ok && uploadData.files) {
+          driveFiles = uploadData.files; // [{ name, url }]
+        } else {
+          console.warn('Drive upload failed:', uploadData.error);
+        }
+      }
+
+      // ── 2. บันทึกลง Supabase ────────────────────────────────────
       const airlineLabelMsg = AIRLINE_TYPES.find(a => a.value === form.airlineType)?.th || form.airlineType;
       const seatLabelMsg = SEAT_CLASSES.find(s => s.value === form.seatClass)?.th || form.seatClass;
+      const driveLinks = driveFiles.map(f => f.url).join(', ');
       const messageBody = [
         `ประเภท: จองตั๋วเครื่องบิน`,
         `เลขพาสปอร์ต: ${form.passportNo || '-'}`,
@@ -140,6 +172,7 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
         `ประเภทที่นั่ง: ${seatLabelMsg}`,
         `ผู้ใหญ่: ${form.adults} / เด็ก: ${form.children} / ทารก: ${form.infants} (รวม ${totalPax} คน)`,
         form.note ? `หมายเหตุ: ${form.note}` : null,
+        driveLinks ? `ไฟล์พาสปอร์ต: ${driveLinks}` : null,
       ].filter(Boolean).join('\n');
 
       const res = await insertMessage({
@@ -151,8 +184,13 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
       });
       if (res.error && res.error !== 'offline') throw new Error(JSON.stringify(res.error));
 
+      // ── 3. ส่ง Email + LINE ──────────────────────────────────────
       const airlineLabel = AIRLINE_TYPES.find(a => a.value === form.airlineType)?.th || form.airlineType;
       const seatLabel = SEAT_CLASSES.find(s => s.value === form.seatClass)?.th || form.seatClass;
+      const driveSection = driveFiles.length > 0
+        ? `<tr style="background:#fff3e0"><td colspan="2" style="padding:10px 16px;font-weight:700;color:#e65c00">📎 ไฟล์พาสปอร์ต (Google Drive)</td></tr>
+           ${driveFiles.map((f, i) => `<tr${i%2===1?' style="background:#fafafa"':''}><td style="padding:8px 16px;color:#666">${f.name}</td><td style="padding:8px 16px"><a href="${f.url}" target="_blank" style="color:#1a73e8;text-decoration:none;font-weight:600">🔗 เปิดไฟล์</a></td></tr>`).join('')}`
+        : '';
       const emailHtml = `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
           <div style="background:linear-gradient(135deg,#1a5276,#e65c00);color:#fff;padding:24px;border-radius:8px 8px 0 0;text-align:center">
@@ -176,10 +214,15 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
             <tr><td style="padding:8px 16px;color:#666">ทารก</td><td style="padding:8px 16px">${form.infants} คน</td></tr>
             <tr style="background:#fafafa"><td style="padding:8px 16px;color:#666">รวมผู้โดยสาร</td><td style="padding:8px 16px;font-weight:700;color:#e65c00">${totalPax} คน</td></tr>
             ${form.note ? `<tr><td style="padding:8px 16px;color:#666">ข้อมูลเพิ่มเติม</td><td style="padding:8px 16px">${form.note}</td></tr>` : ''}
+            ${driveSection}
           </table>
           <p style="font-size:12px;color:#aaa;text-align:center;margin-top:12px">We Craft Travel · We Craft Happiness</p>
         </div>`;
-      await sendNotifications(`[จองตั๋ว] ${form.fullName} — ${form.outboundDate}`, emailHtml, { ...form, _type: 'ticket', totalPax });
+      await sendNotifications(
+        `[จองตั๋ว] ${form.fullName} — ${form.outboundDate}`,
+        emailHtml,
+        { ...form, _type: 'ticket', totalPax, driveFiles }
+      );
       setSuccess(true);
     } catch (err) {
       setError(lang === 'th' ? 'เกิดข้อผิดพลาด กรุณาลองใหม่' : 'An error occurred. Please try again.');

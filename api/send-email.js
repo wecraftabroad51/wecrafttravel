@@ -73,6 +73,9 @@ async function sendLine(formData, seqNo, sheetUrl) {
       `💺 ที่นั่ง: ${seatMap[f.seatClass] || f.seatClass}`,
       `👥 ผู้โดยสาร: ผู้ใหญ่ ${f.adults} / เด็ก ${f.children} / ทารก ${f.infants} (รวม ${f.totalPax} คน)`,
       f.note ? `💬 หมายเหตุ: ${f.note}` : null,
+      ...(f.driveFiles?.length
+        ? ['━━━━━━━━━━━━━━━━━━', '📎 ไฟล์พาสปอร์ต:', ...f.driveFiles.map(d => `• ${d.name}\n  ${d.url}`)]
+        : []),
       '━━━━━━━━━━━━━━━━━━',
       '⚡ รีบตอบกลับภายใน 24 ชั่วโมง!',
     ].filter(Boolean).join('\n');
@@ -214,6 +217,7 @@ async function appendToSheet(formData, seqNo, sheets, sheetId, sheetName) {
       f.infants         || 0,
       f.totalPax        || (Number(f.adults||0) + Number(f.children||0) + Number(f.infants||0)),
       f.note            || '',
+      (f.driveFiles || []).map(d => d.url).join('\n') || '',
     ];
 
   } else if (f._type === 'car-rental') {
