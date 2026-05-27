@@ -43,7 +43,7 @@ const MENU = [
     ],
   },
   {
-    label: 'จองตั๋ว / บริการ', labelEn: 'Ticket & Services',
+    label: 'จองตั๋ว', labelEn: 'Ticket & Services',
     key: 'ticket-booking', tourType: null,
     mega: [
       { continent: 'จองตั๋ว', continentEn: 'Ticket Booking', countries: ['จองตั๋วเครื่องบิน','เรือสำราญ','บัตรเข้าชม'] },
