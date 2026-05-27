@@ -391,7 +391,7 @@ function DestinationsSection({ navigate, inner, lang }) {
 
 // ─── WHY US ──────────────────────────────────────────────────
 const WHY_ITEMS = [
-  { icon: 'plane',   title: 'ใบอนุญาตนำเที่ยว',                  titleEn: 'Licensed Agency',    desc: 'ได้รับใบอนุญาตประกอบธุรกิจนำเที่ยวจากกรมการท่องเที่ยว เลขที่ 11/06310', descEn: 'Licensed tour operator by the Tourism Department, no. 11/06310' },
+  { icon: 'plane',   title: 'ใบอนุญาตนำเที่ยว',                  titleEn: 'Licensed Agency',    desc: 'ได้รับใบอนุญาตประกอบธุรกิจนำเที่ยวจากกรมการท่องเที่ยว เลขที่ 11/11550', descEn: 'Licensed tour operator by the Tourism Department, no. 11/11550' },
   { icon: 'shield',  title: 'ประกันภัยการเดินทาง',                 titleEn: 'Travel Insurance',   desc: 'ทุกทริปมีประกันภัยครบถ้วน คุ้มครองอุบัติเหตุและการเจ็บป่วย',           descEn: 'Every trip fully insured — accident & illness coverage included' },
   { icon: 'headset', title: 'ทีมงานมืออาชีพ',                     titleEn: 'Professional Team',  desc: 'ไกด์ผู้ชำนาญ ดูแลตลอด 24 ชั่วโมง ตั้งแต่ต้นทางถึงปลายทาง',           descEn: 'Expert guides, 24/7 support from departure to return' },
   { icon: 'check',   title: 'ราคาโปร่งใส ไม่มีค่าใช้จ่ายแอบแฝง', titleEn: 'Transparent Pricing', desc: 'ระบุรายละเอียดชัดเจน ทำให้คุณวางแผนได้อย่างสบายใจ',                    descEn: 'Clear itemised costs — no hidden charges, ever' },
