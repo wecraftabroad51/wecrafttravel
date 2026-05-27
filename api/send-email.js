@@ -49,7 +49,7 @@ async function generateSeqNo(sheets, sheetId, sheetName) {
 }
 
 // ── Send LINE push (plain text) ────────────────────────────────
-async function sendLine(formData, seqNo) {
+async function sendLine(formData, seqNo, sheetUrl) {
   const token  = process.env.LINE_CHANNEL_ACCESS_TOKEN;
   const userId = process.env.LINE_OWNER_USER_ID;
   if (!token || !userId) { console.log('LINE skipped: env vars not set'); return; }
@@ -128,6 +128,10 @@ async function sendLine(formData, seqNo) {
     ].filter(Boolean).join('\n');
   }
 
+  if (sheetUrl) {
+    text += `\n━━━━━━━━━━━━━━━━━━\n📊 ดูข้อมูลใน Google Sheet:\n${sheetUrl}`;
+  }
+
   const body = JSON.stringify({
     to: userId,
     messages: [{ type: 'text', text }],
@@ -143,7 +147,7 @@ async function sendLine(formData, seqNo) {
 }
 
 // ── Send Email ─────────────────────────────────────────────────
-async function sendEmail(subject, html, seqNo) {
+async function sendEmail(subject, html, seqNo, sheetUrl) {
   const user = process.env.GMAIL_USER;
   const pass = process.env.GMAIL_APP_PASS;
   if (!user || !pass) { console.log('Email skipped: no credentials'); return; }
@@ -154,7 +158,15 @@ async function sendEmail(subject, html, seqNo) {
         🔢 ลำดับที่ &nbsp;<span style="font-size:20px;color:#fff;">${seqNo}</span>
        </div>`
     : '';
-  const finalHtml = seqBanner + html;
+  const sheetFooter = sheetUrl
+    ? `<div style="text-align:center;padding:14px;background:#f0f4ff;border-top:1px solid #dde6ff;margin-top:8px;border-radius:0 0 8px 8px;">
+        <a href="${sheetUrl}" target="_blank"
+           style="display:inline-block;background:#1a73e8;color:#fff;text-decoration:none;padding:10px 22px;border-radius:6px;font-size:14px;font-weight:700;">
+          📊 เปิด Google Sheet
+        </a>
+       </div>`
+    : '';
+  const finalHtml = seqBanner + html + sheetFooter;
   const finalSubject = seqNo ? `[${seqNo}] ${subject}` : subject;
 
   const transporter = nodemailer.createTransport({
@@ -293,14 +305,19 @@ module.exports = async function handler(req, res) {
     }
   }
 
+  // ── Build Google Sheet URL ────────────────────────────────────
+  const sheetUrl = sheetId
+    ? `https://docs.google.com/spreadsheets/d/${sheetId}`
+    : null;
+
   // ── Run email + LINE + Google Sheet in parallel ───────────────
   await Promise.allSettled([
-    sendEmail(subject, html, seqNo)
+    sendEmail(subject, html, seqNo, sheetUrl)
       .then(() => { results.email = 'ok'; })
       .catch(e => { results.email = e.message; console.error('Email:', e.message); }),
 
     formData
-      ? sendLine(formData, seqNo)
+      ? sendLine(formData, seqNo, sheetUrl)
           .then(() => { results.line = 'ok'; })
           .catch(e => { results.line = e.message; console.error('LINE:', e.message); })
       : Promise.resolve(),
