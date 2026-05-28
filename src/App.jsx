@@ -32,11 +32,13 @@ import VisaPage from './components/pages/VisaPage.jsx';
 import AdminPanel from './components/admin/AdminPanel.jsx';
 import TicketBookingPage from './components/pages/TicketBookingPage.jsx';
 import CarRentalPage from './components/pages/CarRentalPage.jsx';
+import LegalPage from './components/pages/LegalPage.jsx';
 
 const SETTINGS_DEFAULT = {
   contact: { address: { th: '', en: '' }, phone: '', email: '', line: '' },
   social: [],
   popup: { enabled: false },
+  legal: { privacy: { th: '', en: '' }, terms: { th: '', en: '' }, booking: { th: '', en: '' } },
 };
 
 // ── Route wrappers that inject URL params ─────────────────────
@@ -384,6 +386,7 @@ function AppInner() {
             contact: settingsRes.data.contact || prev.contact,
             social:  mergedSocial,
             popup:   settingsRes.data.popup   || prev.popup,
+            legal:   settingsRes.data.legal   || prev.legal,
           }));
         } else {
           setSettings(SITE_SETTINGS_DEFAULT);
@@ -414,6 +417,9 @@ function AppInner() {
       visa:             '/visa',
       'ticket-booking': '/ticket-booking',
       'car-rental':     '/car-rental',
+      'legal-privacy':  '/privacy',
+      'legal-terms':    '/terms',
+      'legal-booking':  '/booking-terms',
     };
     let path = map[page] || '/';
     if (page === 'tours' && filters) {
@@ -665,6 +671,9 @@ function AppInner() {
           <Route path="/visa"           element={<VisaPage lang={pageProps.lang} navigate={navigate} />} />
           <Route path="/ticket-booking" element={<TicketBookingPage {...pageProps} />} />
           <Route path="/car-rental"     element={<CarRentalPage {...pageProps} />} />
+          <Route path="/privacy"        element={<LegalPage lang={lang} navigate={navigate} settings={settings} type="privacy" />} />
+          <Route path="/terms"          element={<LegalPage lang={lang} navigate={navigate} settings={settings} type="terms" />} />
+          <Route path="/booking-terms"  element={<LegalPage lang={lang} navigate={navigate} settings={settings} type="booking" />} />
           <Route path="*"               element={<Navigate to="/" replace />} />
         </Routes>
       </main>

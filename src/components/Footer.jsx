@@ -235,15 +235,17 @@ export default function Footer({ lang, t, navigate, settings }) {
               : '© 2026 WeCraft Abroad Co., Ltd. · wecraft-travel.com'}
           </div>
           <div style={{ display: 'flex', gap: 20 }}>
-            <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>
-              {th ? 'นโยบายความเป็นส่วนตัว' : 'Privacy Policy'}
-            </a>
-            <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>
-              {th ? 'เงื่อนไขการใช้บริการ' : 'Terms of Service'}
-            </a>
-            <a href="#" onClick={e => e.preventDefault()} style={{ color: 'inherit', textDecoration: 'none' }}>
-              {th ? 'เงื่อนไขการจอง' : 'Booking Terms'}
-            </a>
+            {[
+              { key: 'legal-privacy', labelTh: 'นโยบายความเป็นส่วนตัว', labelEn: 'Privacy Policy' },
+              { key: 'legal-terms',   labelTh: 'เงื่อนไขการใช้บริการ',  labelEn: 'Terms of Service' },
+              { key: 'legal-booking', labelTh: 'เงื่อนไขการจอง',        labelEn: 'Booking Terms' },
+            ].map(link => (
+              <button key={link.key}
+                onClick={() => navigate(link.key)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', fontSize: 'inherit', fontFamily: 'inherit', padding: 0 }}>
+                {th ? link.labelTh : link.labelEn}
+              </button>
+            ))}
           </div>
         </div>
       </div>

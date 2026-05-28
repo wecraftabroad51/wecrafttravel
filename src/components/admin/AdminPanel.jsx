@@ -1732,20 +1732,27 @@ function SettingsSection({ settings, setSettings, t }) {
 
   const handleSave = async () => {
     setSaving(true);
-    const { error } = await updateSettings({ contact: settings.contact, social: settings.social, popup: settings.popup });
+    const { error } = await updateSettings({ contact: settings.contact, social: settings.social, popup: settings.popup, legal: settings.legal });
     setSaving(false);
     if (error) { alert('บันทึกไม่สำเร็จ: ' + JSON.stringify(error)); return; }
     alert('บันทึกเรียบร้อย ✅');
   };
 
+  const TABS = [
+    { key: 'contact',  label: '📞 ติดต่อ' },
+    { key: 'social',   label: '🔗 โซเชียล' },
+    { key: 'legal',    label: '📄 นโยบาย' },
+    { key: 'database', label: '🗄 Database' },
+  ];
+
   return (
     <div>
       <h2 className="text-2xl font-bold text-slate-800 mb-6">Site Settings</h2>
-      <div className="flex gap-2 mb-6">
-        {['contact','social','database'].map(tb => (
-          <button key={tb} onClick={() => setTab(tb)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${tab === tb ? 'bg-teal-700 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
-            {tb === 'database' ? '🗄 Database' : tb}
+      <div className="flex gap-2 mb-6 flex-wrap">
+        {TABS.map(tb => (
+          <button key={tb.key} onClick={() => setTab(tb.key)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab === tb.key ? 'bg-teal-700 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+            {tb.label}
           </button>
         ))}
       </div>
@@ -1787,6 +1794,45 @@ function SettingsSection({ settings, setSettings, t }) {
                   className={`px-3 py-2 rounded-lg text-xs font-semibold ${s.enabled ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
                   {s.enabled ? 'On' : 'Off'}
                 </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tab === 'legal' && (
+          <div className="space-y-6">
+            <p style={{ fontSize: 13, color: '#64748b', marginBottom: 4 }}>
+              แก้ไขเนื้อหาหน้านโยบาย — รองรับ HTML (h2, h3, p, ul, li, strong)
+            </p>
+            {[
+              { key: 'privacy', labelTh: '🔒 นโยบายความเป็นส่วนตัว', labelEn: 'Privacy Policy' },
+              { key: 'terms',   labelTh: '📋 เงื่อนไขการใช้บริการ',  labelEn: 'Terms of Service' },
+              { key: 'booking', labelTh: '✈️ เงื่อนไขการจอง',        labelEn: 'Booking Terms' },
+            ].map(({ key, labelTh, labelEn }) => (
+              <div key={key} style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 20 }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, color: '#1e293b', marginBottom: 14 }}>{labelTh} — {labelEn}</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#64748b', display: 'block', marginBottom: 6 }}>ภาษาไทย</label>
+                    <textarea
+                      rows={10}
+                      style={{ width: '100%', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 10px', fontSize: 12, fontFamily: 'monospace', resize: 'vertical', outline: 'none' }}
+                      value={settings.legal?.[key]?.th || ''}
+                      placeholder="<h2>หัวข้อ</h2><p>เนื้อหา...</p>"
+                      onChange={e => update(['legal', key, 'th'], e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#64748b', display: 'block', marginBottom: 6 }}>English</label>
+                    <textarea
+                      rows={10}
+                      style={{ width: '100%', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 10px', fontSize: 12, fontFamily: 'monospace', resize: 'vertical', outline: 'none' }}
+                      value={settings.legal?.[key]?.en || ''}
+                      placeholder="<h2>Title</h2><p>Content...</p>"
+                      onChange={e => update(['legal', key, 'en'], e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
             ))}
           </div>
