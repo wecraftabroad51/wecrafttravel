@@ -1,23 +1,22 @@
 import { useState } from 'react';
 import TourCard from '../TourCard.jsx';
 
-/* ── Icons ───────────────────────────────────────────────────── */
 function Icon({ name, size = 16 }) {
   const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' };
   switch (name) {
-    case 'arrow-left':  return <svg {...p}><path d="M19 12H5M11 6l-6 6 6 6"/></svg>;
-    case 'arrow-right': return <svg {...p}><path d="M5 12h14M13 6l6 6-6 6"/></svg>;
-    case 'phone':       return <svg {...p}><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>;
-    case 'line':        return <svg {...p}><path d="M21 11c0 4.4-4 8-9 8-1 0-2-.1-3-.4L4 20l1.5-3.6A8.4 8.4 0 0 1 3 11c0-4.4 4-8 9-8s9 3.6 9 8z"/></svg>;
-    case 'file':        return <svg {...p}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>;
-    case 'bookmark':    return <svg {...p}><path d="M6 3h12v18l-6-4-6 4z"/></svg>;
-    case 'chevron-down':return <svg {...p}><path d="m6 9 6 6 6-6"/></svg>;
-    case 'chevron-up':  return <svg {...p}><path d="m18 15-6-6-6 6"/></svg>;
-    case 'check':       return <svg {...p}><path d="m5 13 4 4 10-10"/></svg>;
-    case 'close':       return <svg {...p}><path d="M6 6l12 12M18 6 6 18"/></svg>;
-    case 'star':        return <svg {...p} fill="currentColor" stroke="none"><path d="m12 2 2.9 6.2 6.8.8-5 4.7 1.3 6.8L12 17.3 6 20.5l1.3-6.8-5-4.7 6.8-.8z"/></svg>;
-    case 'calendar':    return <svg {...p}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>;
-    case 'users':       return <svg {...p}><circle cx="9" cy="9" r="3.5"/><path d="M2 20c.8-3.5 3.8-5.5 7-5.5s6.2 2 7 5.5"/><circle cx="17" cy="7" r="2.5"/><path d="M17 13c3 0 5 1.6 5.5 4"/></svg>;
+    case 'arrow-left':   return <svg {...p}><path d="M19 12H5M11 6l-6 6 6 6"/></svg>;
+    case 'phone':        return <svg {...p}><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>;
+    case 'line':         return <svg {...p}><path d="M21 11c0 4.4-4 8-9 8-1 0-2-.1-3-.4L4 20l1.5-3.6A8.4 8.4 0 0 1 3 11c0-4.4 4-8 9-8s9 3.6 9 8z"/></svg>;
+    case 'file-text':    return <svg {...p}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>;
+    case 'bookmark':     return <svg {...p}><path d="M6 3h12v18l-6-4-6 4z"/></svg>;
+    case 'bookmark-fill':return <svg {...p} fill="currentColor"><path d="M6 3h12v18l-6-4-6 4z"/></svg>;
+    case 'chevron-down': return <svg {...p}><path d="m6 9 6 6 6-6"/></svg>;
+    case 'chevron-up':   return <svg {...p}><path d="m18 15-6-6-6 6"/></svg>;
+    case 'check':        return <svg {...p}><path d="m5 13 4 4 10-10"/></svg>;
+    case 'x':            return <svg {...p}><path d="M6 6l12 12M18 6 6 18"/></svg>;
+    case 'star':         return <svg {...p} fill="currentColor" stroke="none"><path d="m12 2 2.9 6.2 6.8.8-5 4.7 1.3 6.8L12 17.3 6 20.5l1.3-6.8-5-4.7 6.8-.8z"/></svg>;
+    case 'download':     return <svg {...p}><path d="M12 3v13M7 11l5 5 5-5M3 20h18"/></svg>;
+    case 'tag':          return <svg {...p}><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM12 12m-1 0a1 1 0 1 0 2 0 1 1 0 0 0-2 0"/></svg>;
     default: return null;
   }
 }
@@ -35,45 +34,35 @@ function Stars({ value = 5, size = 13 }) {
   );
 }
 
-/* ── Accordion ───────────────────────────────────────────────── */
-function Accordion({ title, icon, defaultOpen = false, children }) {
+function Accordion({ title, icon, badge, defaultOpen = false, children }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div style={{ border: '1px solid #e2e8f0', borderRadius: 10, overflow: 'hidden', marginBottom: 10 }}>
-      <button
-        onClick={() => setOpen(!open)}
-        style={{
-          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '14px 20px', background: '#f8fafc', border: 'none', cursor: 'pointer',
-          fontSize: 14, fontWeight: 700, color: '#1e293b', fontFamily: 'inherit',
-        }}
-      >
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>{icon && <span>{icon}</span>}{title}</span>
-        <Icon name={open ? 'chevron-up' : 'chevron-down'} size={16} />
+    <div style={{ border: '1px solid #e2e8f0', borderRadius: 12, overflow: 'hidden', marginBottom: 8, boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
+      <button onClick={() => setOpen(!open)} style={{
+        width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '15px 20px', background: open ? '#f0f9ff' : '#f8fafc',
+        border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+        borderBottom: open ? '1px solid #bae6fd' : 'none',
+        transition: 'background .15s',
+      }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, fontWeight: 700, color: '#0f172a' }}>
+          {icon && <span style={{ fontSize: 16 }}>{icon}</span>}
+          {title}
+          {badge && (
+            <span style={{ background: '#0f3460', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>
+              {badge}
+            </span>
+          )}
+        </span>
+        <span style={{ color: open ? '#0369a1' : '#94a3b8', transition: 'transform .2s', transform: open ? 'rotate(0)' : 'rotate(0)' }}>
+          <Icon name={open ? 'chevron-up' : 'chevron-down'} size={16} />
+        </span>
       </button>
-      {open && (
-        <div style={{ padding: '16px 20px', background: '#fff', borderTop: '1px solid #e2e8f0' }}>
-          {children}
-        </div>
-      )}
+      {open && <div style={{ padding: '20px', background: '#fff' }}>{children}</div>}
     </div>
   );
 }
 
-/* ── Info cell ───────────────────────────────────────────────── */
-function InfoCell({ label, value, icon }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 0' }}>
-      {icon && <span style={{ color: '#2db04b', marginTop: 1, flexShrink: 0 }}>{icon}</span>}
-      <div>
-        <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.05em' }}>{label}</div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: '#1e293b', marginTop: 2 }}>{value || '-'}</div>
-      </div>
-    </div>
-  );
-}
-
-/* ── Main component ──────────────────────────────────────────── */
 export default function TourDetailPage({ lang, t, navigate, tours, reviews, setBookings, setReviews, tourId, compareList, toggleCompare }) {
   const tour = tours.find(tr => String(tr.id) === String(tourId));
   const [saved, setSaved]           = useState(false);
@@ -99,12 +88,13 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
   const tourName    = tv(tour.name);
   const airline     = tour.flight?.outbound?.airline || tour.airline || '';
   const basePrice   = tour.priceTiers?.[0]?.price || tour.price || 0;
+  const tourCode    = tour.code || `TW${String(tour.id).padStart(4,'0')}`;
 
-  /* departure status helper */
   const depStatus = (dep) => {
     if (!dep.totalSeats) return 'open';
-    if (dep.bookedSeats >= dep.totalSeats) return 'full';
-    if ((dep.totalSeats - dep.bookedSeats) <= 5) return 'hurry';
+    const avail = dep.totalSeats - (dep.bookedSeats || 0);
+    if (avail <= 0) return 'full';
+    if (avail <= 5) return 'hurry';
     return 'open';
   };
 
@@ -113,207 +103,252 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
     setReviews(prev => [...prev, {
       id: Date.now(), tourId: tour.id, ...reviewForm,
       approved: false, date: new Date().toISOString().split('T')[0],
-      text: { th: reviewForm.text, en: reviewForm.text }
+      text: { th: reviewForm.text, en: reviewForm.text },
     }]);
     setReviewSent(true);
   };
 
+  const th = lang === 'th';
+
   return (
-    <main className="page-enter" style={{ background: '#f8fafc', minHeight: '80vh' }}>
+    <main className="page-enter" style={{ background: '#f0f4f8', minHeight: '80vh' }}>
       <style>{`
-        .td-back-btn { display:inline-flex;align-items:center;gap:6px;background:#1e293b;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s; }
-        .td-back-btn:hover { background:#0f172a; }
-        .td-action-btn { display:inline-flex;align-items:center;justify-content:center;gap:7px;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .15s; }
-        .td-action-btn:hover { opacity:.88; }
-        .td-table { width:100%;border-collapse:collapse;font-size:13px; }
-        .td-table th { background:#0f3460;color:#fff;padding:10px 12px;text-align:center;font-size:12px;font-weight:600;white-space:nowrap; }
-        .td-table td { padding:9px 12px;text-align:center;border-bottom:1px solid #e2e8f0;white-space:nowrap; }
+        @keyframes tdFadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+        .td-card { background:#fff; border-radius:16px; border:1px solid #e2e8f0; box-shadow:0 2px 12px rgba(0,0,0,.06); animation:tdFadeIn .4s ease both; }
+        .td-back { display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s; }
+        .td-back:hover { background:rgba(255,255,255,.25); }
+        .td-btn { display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:10px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;letter-spacing:.01em; }
+        .td-btn:hover { filter:brightness(1.08); transform:translateY(-1px); box-shadow:0 4px 14px rgba(0,0,0,.15); }
+        .td-save { display:inline-flex;align-items:center;gap:7px;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;color:#64748b;cursor:pointer;font-family:inherit;transition:all .2s; }
+        .td-save:hover,.td-save.active { border-color:#2db04b;color:#16a34a;background:#f0fdf4; }
+        .td-table { width:100%;border-collapse:collapse; }
+        .td-table th { background:linear-gradient(135deg,#0f3460,#1e4a7a);color:#fff;padding:11px 14px;text-align:center;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap; }
+        .td-table th:first-child { text-align:left;border-radius:0; }
+        .td-table td { padding:10px 14px;text-align:center;border-bottom:1px solid #f1f5f9;font-size:13px;white-space:nowrap; }
+        .td-table td:first-child { text-align:left; }
         .td-table tr:last-child td { border-bottom:none; }
-        .td-table tr:nth-child(even) td { background:#f8fafc; }
-        .td-table tr:hover td { background:#f0fdf4; }
-        .td-status-full   { display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;background:#fee2e2;color:#dc2626; }
-        .td-status-hurry  { display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;background:#dcfce7;color:#16a34a;cursor:pointer; }
-        .td-status-open   { display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;background:#dcfce7;color:#16a34a;cursor:pointer; }
-        .td-save-btn { display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid #e2e8f0;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;color:#64748b;cursor:pointer;transition:all .15s;font-family:inherit; }
-        .td-save-btn:hover { border-color:#2db04b;color:#2db04b; }
-        .td-save-btn.saved { border-color:#2db04b;color:#2db04b;background:#f0fdf4; }
+        .td-table tbody tr:hover td { background:#f8fafc; }
+        .td-full   { display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;background:#fee2e2;color:#dc2626; }
+        .td-hurry  { display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(22,163,74,.3);transition:all .15s; }
+        .td-hurry:hover { transform:scale(1.05); }
+        .td-open   { display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(22,163,74,.3);transition:all .15s; }
+        .td-open:hover { transform:scale(1.05); }
+        .info-cell { display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9; }
+        .info-cell:last-child { border-bottom:none; }
+        .info-label { font-size:10.5px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px; }
+        .info-value { font-size:13.5px;font-weight:700;color:#1e293b;line-height:1.3; }
+        .chip-cont { display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.02em; }
       `}</style>
 
-      {/* ── Back button bar ───────────────────────────────────── */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', padding: '10px 0' }}>
-        <div className="wrap-wide">
-          <button className="td-back-btn" onClick={() => navigate('tours')}>
+      {/* ── Hero banner ────────────────────────────────────────── */}
+      <div style={{
+        background: 'linear-gradient(135deg,#0f3460 0%,#1e4a7a 50%,#0f3460 100%)',
+        padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,.1)',
+      }}>
+        <div className="wrap-wide" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <button className="td-back" onClick={() => navigate('tours')}>
             <Icon name="arrow-left" size={14} />
-            {lang === 'th' ? 'ย้อนกลับ' : 'Back'}
+            {th ? 'ย้อนกลับ' : 'Back'}
           </button>
+          <div style={{ color: 'rgba(255,255,255,.55)', fontSize: 12, display: 'flex', gap: 6, alignItems: 'center' }}>
+            <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 12 }}>
+              {th ? 'หน้าหลัก' : 'Home'}
+            </button>
+            <span>/</span>
+            <button onClick={() => navigate('tours')} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 12 }}>
+              {th ? 'ทัวร์' : 'Tours'}
+            </button>
+            <span>/</span>
+            <span style={{ color: 'rgba(255,255,255,.85)' }}>{tourName}</span>
+          </div>
         </div>
       </div>
 
-      {/* ── Main card ─────────────────────────────────────────── */}
-      <div className="wrap-wide" style={{ paddingTop: 20, paddingBottom: 8 }}>
-        <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', padding: 24, marginBottom: 12 }}>
+      {/* ── Main content ───────────────────────────────────────── */}
+      <div className="wrap-wide" style={{ padding: '20px 0 60px' }}>
 
-          {/* Image + Info row */}
-          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+        {/* ── Card: Image + Info ──────────────────────────────── */}
+        <div className="td-card" style={{ marginBottom: 12, overflow: 'hidden' }}>
+          <div style={{ display: 'flex', gap: 0, flexWrap: 'wrap' }}>
 
-            {/* Tour image */}
-            <div style={{ flexShrink: 0, width: 220, minWidth: 180 }}>
-              <div style={{ borderRadius: 10, overflow: 'hidden', aspectRatio: '3/4', background: '#e2e8f0' }}>
-                <img
-                  src={tour.image}
-                  alt={tourName}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                />
+            {/* Image */}
+            <div style={{ width: 240, minWidth: 200, flexShrink: 0, position: 'relative' }}>
+              <div style={{ height: '100%', minHeight: 300 }}>
+                <img src={tour.image} alt={tourName}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', minHeight: 300 }} />
+              </div>
+              {/* Overlay badges */}
+              <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {tour.featured && (
+                  <span className="chip-cont" style={{ background: '#fef3c7', color: '#b45309' }}>⭐ แนะนำ</span>
+                )}
+                {tour.discount > 0 && (
+                  <span className="chip-cont" style={{ background: '#fee2e2', color: '#dc2626' }}>-{tour.discount}%</span>
+                )}
               </div>
             </div>
 
-            {/* Tour info */}
-            <div style={{ flex: 1, minWidth: 260 }}>
-              {/* Chips */}
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+            {/* Info panel */}
+            <div style={{ flex: 1, minWidth: 280, padding: '24px 28px', display: 'flex', flexDirection: 'column' }}>
+
+              {/* Type chips */}
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
                 {tour.continent && (
-                  <span style={{ background: '#e0f2fe', color: '#0369a1', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20 }}>
-                    {tour.continent}
-                  </span>
+                  <span className="chip-cont" style={{ background: '#e0f2fe', color: '#0369a1' }}>{tour.continent}</span>
                 )}
                 {tour.tourType && (
-                  <span style={{ background: '#f0fdf4', color: '#16a34a', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20 }}>
-                    {tour.tourType}
-                  </span>
+                  <span className="chip-cont" style={{ background: '#f0fdf4', color: '#16a34a' }}>{tour.tourType}</span>
                 )}
-                {tour.featured && (
-                  <span style={{ background: '#fef3c7', color: '#d97706', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20 }}>
-                    ⭐ แนะนำ
-                  </span>
+                {tour.country && (
+                  <span className="chip-cont" style={{ background: '#faf5ff', color: '#7c3aed' }}>📍 {tv(tour.destination) || tour.country}</span>
                 )}
               </div>
 
               {/* Title */}
-              <h1 style={{ fontSize: 'clamp(16px,2vw,22px)', fontWeight: 800, color: '#1e293b', margin: '0 0 8px', lineHeight: 1.3 }}>
+              <h1 style={{
+                fontSize: 'clamp(15px,1.8vw,21px)', fontWeight: 800,
+                color: '#0f172a', margin: '0 0 10px', lineHeight: 1.35,
+                borderLeft: '4px solid #0f3460', paddingLeft: 12,
+              }}>
                 {tourName}
               </h1>
 
               {/* Description */}
               {tour.description && (
-                <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 14px', lineHeight: 1.6 }}>
+                <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 16px', lineHeight: 1.65, maxWidth: 560 }}>
                   {tv(tour.description)}
                 </p>
               )}
 
-              {/* Info grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px', marginBottom: 16, borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9', padding: '8px 0' }}>
-                <InfoCell label={lang === 'th' ? 'รหัสทัวร์' : 'Tour Code'}
-                  value={tour.code || `TW${String(tour.id).padStart(4,'0')}`}
-                  icon={<Icon name="file" size={14} />} />
-                <InfoCell label={lang === 'th' ? 'ประเภท' : 'Type'}
-                  value={lang === 'th' ? (tour.tourType || 'ทัวร์') : (tour.tourType || 'Tour')}
-                  icon={<Icon name="star" size={14} />} />
-                <InfoCell label={lang === 'th' ? 'กำหนดการเดินทาง' : 'Travel Dates'}
-                  value={tour.departures?.length > 0
-                    ? `${tour.departures[0].date} - ${tour.departures[tour.departures.length-1].date}`
-                    : (lang === 'th' ? 'ติดต่อสอบถาม' : 'Contact us')}
-                  icon={<Icon name="calendar" size={14} />} />
-                <InfoCell label={lang === 'th' ? 'จำนวนวัน' : 'Duration'}
-                  value={tour.duration ? `${tour.duration} ${lang === 'th' ? 'วัน' : 'days'}` : '-'}
-                  icon={<Icon name="calendar" size={14} />} />
-                <InfoCell label={lang === 'th' ? 'ราคาเริ่มต้น' : 'Starting Price'}
-                  value={<span style={{ color: '#dc2626', fontWeight: 800, fontSize: 16 }}>
-                    {basePrice.toLocaleString()} {lang === 'th' ? 'บาท/ท่าน' : 'THB/person'}
-                  </span>}
-                  icon={<span style={{ color: '#dc2626', fontSize: 14 }}>฿</span>} />
-                <InfoCell label={lang === 'th' ? 'เดินทางโดย' : 'Airline'}
-                  value={airline || (lang === 'th' ? 'ติดต่อสอบถาม' : 'TBA')}
-                  icon={<span style={{ fontSize: 14 }}>✈️</span>} />
+              {/* Info grid — 2 columns */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 32px', flex: 1, alignContent: 'start' }}>
+                {[
+                  { icon: '🔖', label: th ? 'รหัสทัวร์' : 'Tour Code',    val: <span style={{ fontFamily: 'monospace', background: '#f1f5f9', padding: '2px 8px', borderRadius: 6, fontSize: 12 }}>{tourCode}</span> },
+                  { icon: '🏷️', label: th ? 'ประเภท' : 'Type',            val: tour.tourType || '-' },
+                  { icon: '📅', label: th ? 'กำหนดการเดินทาง' : 'Travel Period',
+                    val: tour.departures?.length > 0
+                      ? `${tour.departures[0].date} – ${tour.departures[tour.departures.length-1].returnDate || tour.departures[tour.departures.length-1].date}`
+                      : (th ? 'ติดต่อสอบถาม' : 'Contact us') },
+                  { icon: '⏱️', label: th ? 'จำนวนวัน' : 'Duration',       val: tour.duration ? `${tour.duration} ${th ? 'วัน' : 'days'}` : '-' },
+                  { icon: '💰', label: th ? 'ราคาเริ่มต้น' : 'Starting Price',
+                    val: <span style={{ color: '#dc2626', fontWeight: 800, fontSize: 17 }}>
+                      {basePrice.toLocaleString()} <span style={{ fontSize: 12, fontWeight: 600 }}>{th ? 'บาท/ท่าน' : 'THB/pax'}</span>
+                    </span> },
+                  { icon: '✈️', label: th ? 'เดินทางโดย' : 'Airline',      val: airline || (th ? 'ติดต่อสอบถาม' : 'TBA') },
+                ].map(({ icon, label, val }) => (
+                  <div key={label} className="info-cell">
+                    <span style={{ fontSize: 17, lineHeight: 1, flexShrink: 0, marginTop: 2 }}>{icon}</span>
+                    <div>
+                      <div className="info-label">{label}</div>
+                      <div className="info-value">{val}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
+
+              {/* Divider */}
+              <div style={{ height: 1, background: '#f1f5f9', margin: '16px 0' }} />
 
               {/* Action buttons */}
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
                 <a href="tel:0618686889" style={{ textDecoration: 'none' }}>
-                  <button className="td-action-btn" style={{ background: '#0f3460', color: '#fff' }}>
-                    <Icon name="phone" size={14} />
-                    {lang === 'th' ? 'โทรจอง' : 'Call'}
+                  <button className="td-btn" style={{ background: 'linear-gradient(135deg,#0f3460,#1e4a7a)', color: '#fff' }}>
+                    <Icon name="phone" size={15} />
+                    {th ? 'โทรจอง' : 'Call to Book'}
                   </button>
                 </a>
                 <a href="https://line.me/R/ti/p/@wecrafttravel" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                  <button className="td-action-btn" style={{ background: '#06c755', color: '#fff' }}>
-                    <Icon name="line" size={14} />
-                    {lang === 'th' ? 'จองไลน์' : 'LINE'}
+                  <button className="td-btn" style={{ background: 'linear-gradient(135deg,#06c755,#04a845)', color: '#fff' }}>
+                    <Icon name="line" size={15} />
+                    {th ? 'จองไลน์' : 'LINE'}
                   </button>
                 </a>
                 {tour.pdfUrl && (
                   <a href={tour.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                    <button className="td-action-btn" style={{ background: '#e65c00', color: '#fff' }}>
-                      <Icon name="file" size={14} />
-                      {lang === 'th' ? 'ดูโปรแกรมทั้งวัน' : 'Full Program'}
+                    <button className="td-btn" style={{ background: 'linear-gradient(135deg,#e65c00,#c74b00)', color: '#fff' }}>
+                      <Icon name="file-text" size={15} />
+                      {th ? 'ดูโปรแกรมทั้งวัน' : 'Full Program'}
                     </button>
                   </a>
                 )}
-                <button
-                  className={`td-save-btn${saved ? ' saved' : ''}`}
-                  onClick={() => setSaved(!saved)}
-                >
-                  <Icon name="bookmark" size={13} />
-                  {saved
-                    ? (lang === 'th' ? 'บันทึกแล้ว' : 'Saved')
-                    : (lang === 'th' ? 'กาวตรา' : 'Save')}
+                <button className={`td-save${saved ? ' active' : ''}`} onClick={() => setSaved(!saved)}>
+                  <Icon name={saved ? 'bookmark-fill' : 'bookmark'} size={14} />
+                  {saved ? (th ? 'บันทึกแล้ว ✓' : 'Saved ✓') : (th ? 'กาวตรา' : 'Save')}
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── Departure & Price table ────────────────────────── */}
+        {/* ── Card: Departure & Price Table ───────────────────── */}
         {tour.departures?.length > 0 && (
-          <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', marginBottom: 12, overflow: 'hidden' }}>
-            <div style={{ background: '#0f3460', padding: '12px 20px' }}>
-              <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#fff' }}>
-                📅 {lang === 'th' ? 'วันเดินทางและราคา' : 'Departure Dates & Prices'}
+          <div className="td-card" style={{ marginBottom: 12, overflow: 'hidden' }}>
+            {/* Table header */}
+            <div style={{
+              background: 'linear-gradient(135deg,#0f3460,#1e4a7a)',
+              padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 10
+            }}>
+              <span style={{ fontSize: 18 }}>📅</span>
+              <h2 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#fff', letterSpacing: '.01em' }}>
+                {th ? 'วันเดินทางและราคา' : 'Departure Dates & Prices'}
               </h2>
+              <span style={{ background: 'rgba(255,255,255,.2)', color: '#fff', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20, marginLeft: 'auto' }}>
+                {tour.departures.length} {th ? 'รอบ' : 'dates'}
+              </span>
             </div>
+
             <div style={{ overflowX: 'auto' }}>
               <table className="td-table">
                 <thead>
                   <tr>
-                    <th style={{ textAlign: 'left' }}>{lang === 'th' ? 'วันเดินทางไป-กลับ' : 'Travel Dates'}</th>
-                    <th>{lang === 'th' ? 'ผู้ใหญ่' : 'Adult'}</th>
-                    <th>{lang === 'th' ? 'เด็กเดี่ยว' : 'Child (solo)'}</th>
-                    <th>{lang === 'th' ? 'พักเดี่ยว' : 'Single supp.'}</th>
-                    <th>{lang === 'th' ? 'จอยแลนด์' : 'Joyland'}</th>
+                    <th>{th ? 'วันเดินทางไป-กลับ' : 'Travel Dates'}</th>
+                    <th>{th ? 'ผู้ใหญ่ (฿)' : 'Adult (฿)'}</th>
+                    <th>{th ? 'เด็กเดี่ยว (฿)' : 'Child (฿)'}</th>
+                    <th>{th ? 'พักเดี่ยว (฿)' : 'Single Supp.'}</th>
+                    <th>{th ? 'จอยแลนด์' : 'Joyland'}</th>
                     <th>Group Size</th>
-                    <th>{lang === 'th' ? 'รับได้' : 'Available'}</th>
-                    <th>{lang === 'th' ? 'สถานะ' : 'Status'}</th>
+                    <th>{th ? 'รับได้' : 'Avail.'}</th>
+                    <th>{th ? 'สถานะ' : 'Status'}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {tour.departures.map((dep, i) => {
-                    const st       = depStatus(dep);
-                    const adultP   = dep.price || tour.priceTiers?.[0]?.price || basePrice;
-                    const childP   = dep.childPrice || tour.priceTiers?.find(p => p.tier === 'Child')?.price || null;
-                    const singleP  = dep.singleSupplement || tour.priceTiers?.find(p => p.tier === 'Single')?.price || null;
-                    const avail    = dep.totalSeats ? (dep.totalSeats - (dep.bookedSeats || 0)) : dep.groupSize || tour.groupSize || '-';
+                    const st     = depStatus(dep);
+                    const adultP = dep.price || basePrice;
+                    const childP = dep.childPrice || null;
+                    const singleP = dep.singleSupplement || null;
+                    const total  = dep.totalSeats || tour.groupSize || '-';
+                    const avail  = dep.totalSeats ? Math.max(0, dep.totalSeats - (dep.bookedSeats || 0)) : (dep.available ?? total);
+                    const fmt    = (n) => n ? n.toLocaleString() : '-';
                     return (
                       <tr key={dep.id || i}>
-                        <td style={{ textAlign: 'left', fontWeight: 600, color: '#0f3460' }}>
-                          {dep.date}{dep.returnDate ? ` - ${dep.returnDate}` : ''}
-                        </td>
-                        <td style={{ fontWeight: 700, color: '#1e293b' }}>
-                          {adultP ? adultP.toLocaleString() : '-'}
-                        </td>
-                        <td>{childP ? childP.toLocaleString() : '-'}</td>
-                        <td>{singleP ? singleP.toLocaleString() : '-'}</td>
-                        <td>-</td>
                         <td>
-                          {dep.groupSize || tour.groupSize
-                            ? <span style={{ fontWeight: 700, color: '#0369a1' }}>{dep.groupSize || tour.groupSize}</span>
+                          <div style={{ fontWeight: 700, color: '#0f3460', fontSize: 13 }}>
+                            {dep.date}{dep.returnDate ? ` — ${dep.returnDate}` : ''}
+                          </div>
+                        </td>
+                        <td>
+                          <span style={{ fontWeight: 800, color: '#dc2626', fontSize: 14 }}>{fmt(adultP)}</span>
+                        </td>
+                        <td style={{ color: '#475569' }}>{fmt(childP)}</td>
+                        <td style={{ color: '#475569' }}>{singleP ? `+${fmt(singleP)}` : '-'}</td>
+                        <td style={{ color: '#94a3b8' }}>-</td>
+                        <td>
+                          {total !== '-'
+                            ? <span style={{ fontWeight: 700, color: '#0369a1', background: '#e0f2fe', padding: '3px 10px', borderRadius: 20, fontSize: 12 }}>{total}</span>
                             : '-'}
                         </td>
-                        <td style={{ fontWeight: 600 }}>{typeof avail === 'number' ? avail : avail}</td>
+                        <td>
+                          {typeof avail === 'number'
+                            ? <span style={{ fontWeight: 700, color: avail <= 5 ? '#dc2626' : '#16a34a' }}>{avail}</span>
+                            : avail}
+                        </td>
                         <td>
                           {st === 'full'
-                            ? <span className="td-status-full">{lang === 'th' ? 'ปิดรับ' : 'Full'}</span>
+                            ? <span className="td-full">🔴 {th ? 'ปิดรับ' : 'Full'}</span>
                             : st === 'hurry'
-                            ? <span className="td-status-hurry" onClick={() => navigate('contact')}>{lang === 'th' ? 'จองด่วน!' : 'Book fast!'}</span>
-                            : <span className="td-status-open" onClick={() => navigate('contact')}>{lang === 'th' ? 'จองด่วน' : 'Book now'}</span>
+                            ? <span className="td-hurry" onClick={() => navigate('contact')}>⚡ {th ? 'จองด่วน!' : 'Book fast!'}</span>
+                            : <span className="td-open" onClick={() => navigate('contact')}>✓ {th ? 'จองด่วน' : 'Book now'}</span>
                           }
                         </td>
                       </tr>
@@ -322,188 +357,211 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                 </tbody>
               </table>
             </div>
+
+            {/* Table footer note */}
+            <div style={{ padding: '10px 20px', background: '#f8fafc', borderTop: '1px solid #f1f5f9', fontSize: 11.5, color: '#94a3b8', display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+              <span>💡 {th ? 'ราคาต่อท่าน รวม VAT แล้ว' : 'Price per person, VAT included'}</span>
+              <span>📞 {th ? 'โทรจอง: 061-868-6889' : 'Book: 061-868-6889'}</span>
+            </div>
           </div>
         )}
 
-        {/* ── Accordions ────────────────────────────────────── */}
-        {/* Program detail */}
-        {(tour.itinerary?.length > 0 || tour.includes?.length > 0) && (
-          <Accordion title={lang === 'th' ? 'รายละเอียดโปรแกรม' : 'Program Details'} icon="📋" defaultOpen={false}>
-            {/* Timeline */}
-            {tour.itinerary?.length > 0 && (
-              <div style={{ position: 'relative', paddingLeft: 32 }}>
-                <div style={{ position: 'absolute', left: 10, top: 8, bottom: 8, width: 2, background: '#e2e8f0' }} />
-                {tour.itinerary.map((day, idx) => (
-                  <div key={idx} style={{ position: 'relative', paddingBottom: 20 }}>
-                    <div style={{
-                      position: 'absolute', left: -32, top: 2,
-                      width: 22, height: 22, borderRadius: '50%',
-                      background: '#0f3460', color: '#fff',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 10, fontWeight: 700, zIndex: 1,
-                    }}>
-                      {day.day || idx + 1}
-                    </div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: '#1e293b', marginBottom: 4 }}>
-                      {tv(day.title)}
-                    </div>
-                    <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>
-                      {tv(day.description)}
-                    </div>
-                    {day.meals?.length > 0 && (
-                      <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-                        {day.meals.map(m => (
-                          <span key={m} style={{ fontSize: 11, background: '#f0fdf4', color: '#16a34a', padding: '2px 8px', borderRadius: 20, border: '1px solid #bbf7d0' }}>
-                            {m === 'breakfast' ? '☕ เช้า' : m === 'lunch' ? '🍱 กลางวัน' : '🍽️ เย็น'}
-                          </span>
-                        ))}
+        {/* ── Accordions ──────────────────────────────────────── */}
+        <div style={{ marginBottom: 4 }}>
+
+          {/* Program detail */}
+          {(tour.itinerary?.length > 0 || tour.includes?.length > 0 || tour.excludes?.length > 0) && (
+            <Accordion title={th ? 'รายละเอียดโปรแกรม' : 'Program Details'} icon="📋" badge={tour.itinerary?.length ? `${tour.itinerary.length} วัน` : null}>
+              {/* Timeline */}
+              {tour.itinerary?.length > 0 && (
+                <div style={{ position: 'relative', paddingLeft: 40, marginBottom: tour.includes?.length ? 24 : 0 }}>
+                  <div style={{ position: 'absolute', left: 14, top: 4, bottom: 4, width: 2, background: 'linear-gradient(to bottom,#0f3460,#e2e8f0)', borderRadius: 2 }} />
+                  {tour.itinerary.map((day, idx) => (
+                    <div key={idx} style={{ position: 'relative', marginBottom: 20 }}>
+                      <div style={{
+                        position: 'absolute', left: -40, top: 0,
+                        width: 28, height: 28, borderRadius: '50%',
+                        background: 'linear-gradient(135deg,#0f3460,#1e4a7a)', color: '#fff',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 11, fontWeight: 800, boxShadow: '0 2px 8px rgba(15,52,96,.3)',
+                      }}>
+                        D{day.day || idx + 1}
                       </div>
-                    )}
+                      <div style={{ background: '#f8fafc', borderRadius: 10, padding: '12px 16px', border: '1px solid #f1f5f9' }}>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>
+                          {tv(day.title)}
+                        </div>
+                        {day.description && (
+                          <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.65 }}>
+                            {tv(day.description)}
+                          </div>
+                        )}
+                        <div style={{ display: 'flex', gap: 6, marginTop: day.description ? 8 : 0, flexWrap: 'wrap' }}>
+                          {(day.meals || []).map(m => (
+                            <span key={m} style={{ fontSize: 11, background: '#fff', color: '#16a34a', padding: '2px 9px', borderRadius: 20, border: '1px solid #bbf7d0', fontWeight: 600 }}>
+                              {m === 'breakfast' ? '☕ เช้า' : m === 'lunch' ? '🍱 กลางวัน' : '🍽️ เย็น'}
+                            </span>
+                          ))}
+                          {day.hotel && (
+                            <span style={{ fontSize: 11, background: '#fff', color: '#0369a1', padding: '2px 9px', borderRadius: 20, border: '1px solid #bae6fd', fontWeight: 600 }}>
+                              🏨 {day.hotel}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Includes / Excludes */}
+              {(tour.includes?.length > 0 || tour.excludes?.length > 0) && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                  {tour.includes?.length > 0 && (
+                    <div style={{ background: '#f0fdf4', borderRadius: 10, padding: '14px 16px', border: '1px solid #bbf7d0' }}>
+                      <div style={{ fontWeight: 800, fontSize: 13, color: '#16a34a', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        ✅ {th ? 'รวมในราคา' : 'Included'}
+                      </div>
+                      {tour.includes.map((item, i) => (
+                        <div key={i} style={{ fontSize: 12.5, color: '#374151', padding: '3px 0', display: 'flex', gap: 7, alignItems: 'flex-start' }}>
+                          <span style={{ color: '#16a34a', flexShrink: 0, marginTop: 2 }}>•</span> {tv(item)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {tour.excludes?.length > 0 && (
+                    <div style={{ background: '#fff7f7', borderRadius: 10, padding: '14px 16px', border: '1px solid #fecaca' }}>
+                      <div style={{ fontWeight: 800, fontSize: 13, color: '#dc2626', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        ❌ {th ? 'ไม่รวมในราคา' : 'Not included'}
+                      </div>
+                      {tour.excludes.map((item, i) => (
+                        <div key={i} style={{ fontSize: 12.5, color: '#374151', padding: '3px 0', display: 'flex', gap: 7, alignItems: 'flex-start' }}>
+                          <span style={{ color: '#dc2626', flexShrink: 0, marginTop: 2 }}>•</span> {tv(item)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </Accordion>
+          )}
+
+          {/* PDF */}
+          {tour.pdfUrl && (
+            <Accordion title={th ? 'ไฟล์โปรแกรมทัวร์ (PDF)' : 'Tour Program PDF'} icon="📄">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
+                <a href={tour.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                  <button className="td-btn" style={{ background: 'linear-gradient(135deg,#0f3460,#1e4a7a)', color: '#fff' }}>
+                    <Icon name="download" size={14} />
+                    {th ? 'ดาวน์โหลด PDF' : 'Download PDF'}
+                  </button>
+                </a>
+                <span style={{ fontSize: 12, color: '#94a3b8' }}>{th ? 'รายละเอียดโปรแกรมทัวร์ฉบับเต็ม' : 'Full tour program details'}</span>
+              </div>
+              <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid #e2e8f0', height: 520 }}>
+                <iframe src={tour.pdfUrl} style={{ width: '100%', height: '100%', border: 'none' }} title="Tour PDF" />
+              </div>
+            </Accordion>
+          )}
+
+          {/* Reviews */}
+          {tourReviews.length > 0 && (
+            <Accordion title={th ? 'รีวิวจากนักท่องเที่ยว' : 'Traveler Reviews'} icon="⭐" badge={`${tourReviews.length}`}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {tourReviews.map(r => (
+                  <div key={r.id} style={{ padding: '14px 18px', background: '#fafafa', borderRadius: 10, border: '1px solid #f1f5f9' }}>
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                      <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg,#0f3460,#1e4a7a)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, flexShrink: 0 }}>
+                        {(r.name || '?')[0].toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                          <span style={{ fontWeight: 700, fontSize: 13 }}>{r.name}</span>
+                          <Stars value={r.rating} />
+                          <span style={{ fontSize: 11, color: '#94a3b8' }}>{r.date}</span>
+                        </div>
+                        <p style={{ margin: '7px 0 0', fontSize: 13, color: '#475569', lineHeight: 1.65 }}>
+                          {tv(r.text)}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
-            )}
+            </Accordion>
+          )}
 
-            {/* Includes / Excludes */}
-            {(tour.includes?.length > 0 || tour.excludes?.length > 0) && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 16 }}>
-                {tour.includes?.length > 0 && (
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 13, color: '#16a34a', marginBottom: 8 }}>✅ {lang === 'th' ? 'รวมในราคา' : 'Included'}</div>
-                    {tour.includes.map((item, i) => (
-                      <div key={i} style={{ fontSize: 12, color: '#374151', padding: '3px 0', display: 'flex', gap: 6, alignItems: 'flex-start' }}>
-                        <span style={{ color: '#16a34a', flexShrink: 0 }}>•</span> {tv(item)}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {tour.excludes?.length > 0 && (
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 13, color: '#dc2626', marginBottom: 8 }}>❌ {lang === 'th' ? 'ไม่รวมในราคา' : 'Not included'}</div>
-                    {tour.excludes.map((item, i) => (
-                      <div key={i} style={{ fontSize: 12, color: '#374151', padding: '3px 0', display: 'flex', gap: 6, alignItems: 'flex-start' }}>
-                        <span style={{ color: '#dc2626', flexShrink: 0 }}>•</span> {tv(item)}
-                      </div>
-                    ))}
-                  </div>
-                )}
+          {/* Write review */}
+          <Accordion title={th ? 'เขียนรีวิว' : 'Write a Review'} icon="✍️">
+            {reviewSent ? (
+              <div style={{ padding: '14px 18px', background: '#f0fdf4', borderRadius: 10, border: '1px solid #bbf7d0', color: '#16a34a', fontWeight: 700, fontSize: 13 }}>
+                ✅ {th ? 'ขอบคุณ! รีวิวของคุณรอการอนุมัติ' : 'Thank you! Your review is pending approval.'}
               </div>
-            )}
-          </Accordion>
-        )}
-
-        {/* PDF program */}
-        {tour.pdfUrl && (
-          <Accordion title={lang === 'th' ? 'ไฟล์โปรแกรม' : 'Program File'} icon="📄" defaultOpen={false}>
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-              <a href={tour.pdfUrl} target="_blank" rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 8,
-                  background: '#0f3460', color: '#fff', borderRadius: 8,
-                  padding: '10px 20px', fontSize: 13, fontWeight: 700, textDecoration: 'none',
-                }}>
-                <Icon name="file" size={14} />
-                {lang === 'th' ? 'ดาวน์โหลดโปรแกรมทัวร์ (PDF)' : 'Download Tour Program (PDF)'}
-              </a>
-              <span style={{ fontSize: 12, color: '#94a3b8' }}>
-                {lang === 'th' ? 'ไฟล์ PDF รายละเอียดโปรแกรม' : 'Full program PDF'}
-              </span>
-            </div>
-            {/* Embed PDF if possible */}
-            <div style={{ marginTop: 14, borderRadius: 8, overflow: 'hidden', border: '1px solid #e2e8f0', height: 500 }}>
-              <iframe src={tour.pdfUrl} style={{ width: '100%', height: '100%', border: 'none' }} title="Tour Program PDF" />
-            </div>
-          </Accordion>
-        )}
-
-        {/* Reviews accordion */}
-        {tourReviews.length > 0 && (
-          <Accordion title={`${lang === 'th' ? 'รีวิวจากนักท่องเที่ยว' : 'Traveler Reviews'} (${tourReviews.length})`} icon="⭐" defaultOpen={false}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {tourReviews.map(r => (
-                <div key={r.id} style={{ padding: '14px 16px', background: '#f8fafc', borderRadius: 10, border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#0f3460', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13, flexShrink: 0 }}>
-                      {(r.name || '?')[0]}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                        <span style={{ fontWeight: 700, fontSize: 13 }}>{r.name}</span>
-                        <Stars value={r.rating} />
-                        <span style={{ fontSize: 11, color: '#94a3b8' }}>{r.date}</span>
-                      </div>
-                      <p style={{ margin: '6px 0 0', fontSize: 13, color: '#475569', lineHeight: 1.55 }}>
-                        {tv(r.text)}
-                      </p>
-                    </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 560 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#64748b', display: 'block', marginBottom: 5 }}>{th ? 'ชื่อ *' : 'Name *'}</label>
+                    <input style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: 8, padding: '9px 12px', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
+                      value={reviewForm.name} onChange={e => setReviewForm(p => ({ ...p, name: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#64748b', display: 'block', marginBottom: 5 }}>Email</label>
+                    <input style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: 8, padding: '9px 12px', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
+                      value={reviewForm.email} onChange={e => setReviewForm(p => ({ ...p, email: e.target.value }))} />
                   </div>
                 </div>
-              ))}
-            </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>Rating:</span>
+                  {[1,2,3,4,5].map(s => (
+                    <button key={s} onClick={() => setReviewForm(p => ({ ...p, rating: s }))}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: s <= reviewForm.rating ? '#f59e0b' : '#e2e8f0', padding: 2, transition: 'color .15s' }}>
+                      <Icon name="star" size={22} />
+                    </button>
+                  ))}
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#64748b', display: 'block', marginBottom: 5 }}>{th ? 'ความคิดเห็น *' : 'Review *'}</label>
+                  <textarea rows={4} style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: 8, padding: '9px 12px', fontSize: 13, resize: 'vertical', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}
+                    placeholder={th ? 'แชร์ประสบการณ์การเดินทางของคุณ...' : 'Share your travel experience…'}
+                    value={reviewForm.text} onChange={e => setReviewForm(p => ({ ...p, text: e.target.value }))} />
+                </div>
+                <button onClick={submitReview}
+                  style={{ alignSelf: 'flex-start', background: 'linear-gradient(135deg,#0f3460,#1e4a7a)', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 24px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .2s' }}>
+                  {th ? '✈️ ส่งรีวิว' : '✈️ Submit Review'}
+                </button>
+              </div>
+            )}
           </Accordion>
-        )}
+        </div>
 
-        {/* Write review accordion */}
-        <Accordion title={lang === 'th' ? 'เขียนรีวิว' : 'Write a Review'} icon="✍️" defaultOpen={false}>
-          {reviewSent ? (
-            <div style={{ padding: 14, background: '#f0fdf4', borderRadius: 8, color: '#16a34a', fontWeight: 600, fontSize: 13 }}>
-              ✅ {lang === 'th' ? 'ขอบคุณ! รีวิวของคุณรอการอนุมัติ' : 'Thank you! Your review is pending approval.'}
+        {/* ── Related tours ────────────────────────────────────── */}
+        {tours.filter(tr => tr.id !== tour.id).length > 0 && (
+          <div className="td-card" style={{ padding: '24px 28px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+              <span style={{ fontSize: 20 }}>🗺️</span>
+              <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>
+                {th ? 'ทัวร์ที่น่าสนใจอื่นๆ' : 'You may also like'}
+              </h2>
             </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 560 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                <input placeholder={lang === 'th' ? 'ชื่อ *' : 'Name *'} style={{ border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 12px', fontSize: 13 }}
-                  value={reviewForm.name} onChange={e => setReviewForm(p => ({ ...p, name: e.target.value }))} />
-                <input placeholder="Email" style={{ border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 12px', fontSize: 13 }}
-                  value={reviewForm.email} onChange={e => setReviewForm(p => ({ ...p, email: e.target.value }))} />
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 12, fontWeight: 600 }}>Rating:</span>
-                {[1,2,3,4,5].map(s => (
-                  <button key={s} onClick={() => setReviewForm(p => ({ ...p, rating: s }))}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: s <= reviewForm.rating ? '#f59e0b' : '#e2e8f0', padding: 2 }}>
-                    <Icon name="star" size={20} />
-                  </button>
-                ))}
-              </div>
-              <textarea rows={4} placeholder={lang === 'th' ? 'เขียนรีวิวของคุณ...' : 'Write your review…'}
-                style={{ border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 12px', fontSize: 13, resize: 'vertical', fontFamily: 'inherit' }}
-                value={reviewForm.text} onChange={e => setReviewForm(p => ({ ...p, text: e.target.value }))} />
-              <button onClick={submitReview}
-                style={{ alignSelf: 'flex-start', background: '#0f3460', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 20px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-                {lang === 'th' ? 'ส่งรีวิว' : 'Submit Review'}
-              </button>
-            </div>
-          )}
-        </Accordion>
-      </div>
-
-      {/* ── Related tours ─────────────────────────────────────── */}
-      {tours.filter(tr => tr.id !== tour.id).length > 0 && (
-        <div className="wrap-wide" style={{ paddingBottom: 60 }}>
-          <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', padding: 24 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 800, color: '#1e293b', margin: '0 0 18px' }}>
-              {lang === 'th' ? '🗺️ ทัวร์ที่น่าสนใจอื่นๆ' : '🗺️ You may also like'}
-            </h2>
             <div className="grid-cols-4" style={{ gap: 14 }}>
               {tours.filter(tr => tr.id !== tour.id).slice(0, 4).map(tr => (
                 <TourCard key={tr.id} tour={tr} t={t} navigate={navigate}
                   inCompare={compareList?.includes(tr.id)}
-                  onCompare={() => toggleCompare?.(tr.id)}
-                />
+                  onCompare={() => toggleCompare?.(tr.id)} />
               ))}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* ── Lightbox ──────────────────────────────────────────── */}
+      {/* Lightbox */}
       {lightbox !== null && tour.gallery && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.9)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.92)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
           onClick={() => setLightbox(null)}>
-          <img src={tour.gallery[lightbox]} alt="" style={{ maxHeight: '85vh', maxWidth: '90vw', borderRadius: 10 }} onClick={e => e.stopPropagation()} />
-          <button onClick={() => setLightbox(null)} style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,.2)', border: 'none', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Icon name="close" size={18} />
+          <img src={tour.gallery[lightbox]} alt="" style={{ maxHeight: '86vh', maxWidth: '90vw', borderRadius: 12, boxShadow: '0 24px 80px rgba(0,0,0,.5)' }} onClick={e => e.stopPropagation()} />
+          <button onClick={() => setLightbox(null)} style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,.15)', border: '1px solid rgba(255,255,255,.2)', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="x" size={18} />
           </button>
         </div>
       )}

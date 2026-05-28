@@ -535,7 +535,9 @@ function DashboardSection({ tours, articles, bookings, messages, reviews }) {
 // ===== TOURS =====
 const EMPTY_TOUR = {
   name: { th: '', en: '' }, destination: { th: '', en: '' }, description: { th: '', en: '' },
-  image: '', tourType: 'international', continent: 'Asia-East', country: '', duration: 7, groupSize: 20, price: 0, featured: false, active: true,
+  image: '', tourType: 'international', continent: 'Asia-East', country: '',
+  code: '', duration: 7, groupSize: 20, price: 0, featured: false, active: true,
+  pdfUrl: '',
   flight: { outbound: { airline: '', flightNo: '', departure: '', arrival: '' }, return: { airline: '', flightNo: '', departure: '', arrival: '' } },
   hotels: [], itinerary: [], includes: [], excludes: [], priceTiers: [], departures: [], gallery: [],
 };
@@ -749,8 +751,16 @@ function ToursSection({ tours, setTours, t }) {
                   <input className={inp} type="number" min={0} max={99} style={{ textAlign: 'center' }} value={form.discount || 0} onChange={e => setF(['discount'], Number(e.target.value))} placeholder="0" />
                 </Field>
               </div>
-              <Field label="สายการบิน">
-                <input className={inp} value={form.flight?.outbound?.airline || ''} onChange={e => setF(['flight','outbound','airline'], e.target.value)} placeholder="เช่น Thai Airways (TG), AirAsia (FD)" />
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="รหัสทัวร์ (Tour Code)">
+                  <input className={inp} value={form.code || ''} onChange={e => setF(['code'], e.target.value)} placeholder="เช่น CANAQ0326, JPNTOK001" />
+                </Field>
+                <Field label="สายการบิน">
+                  <input className={inp} value={form.flight?.outbound?.airline || ''} onChange={e => setF(['flight','outbound','airline'], e.target.value)} placeholder="เช่น Thai Airways (TG), AirAsia (FD)" />
+                </Field>
+              </div>
+              <Field label="PDF โปรแกรม (URL)">
+                <input className={inp} value={form.pdfUrl || ''} onChange={e => setF(['pdfUrl'], e.target.value)} placeholder="https://... หรือ /files/program.pdf" />
               </Field>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -772,20 +782,20 @@ function ToursSection({ tours, setTours, t }) {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-semibold text-slate-700 text-sm">ระดับราคา (Price Tiers)</h4>
-                  <button onClick={() => addToArr('priceTiers', { name: '', description: '', price: 0 })}
+                  <button onClick={() => addToArr('priceTiers', { tier: '', description: '', price: 0 })}
                     className="flex items-center gap-1 bg-teal-50 hover:bg-teal-100 text-teal-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
                     <Plus className="w-3 h-3" /> เพิ่มระดับ
                   </button>
                 </div>
                 <div className="space-y-2">
-                  {(form.priceTiers || []).map((tier, i) => (
+                  {(form.priceTiers || []).map((pt, i) => (
                     <div key={i} className="grid grid-cols-7 gap-2 items-center bg-slate-50 p-2 rounded-xl">
-                      <input className={`${inp} col-span-2`} placeholder="ชื่อ (Standard)" value={tier.name}
-                        onChange={e => updateArr('priceTiers', i, { ...tier, name: e.target.value })} />
-                      <input className={`${inp} col-span-2`} placeholder="รายละเอียด (Water Villa)" value={tier.description}
-                        onChange={e => updateArr('priceTiers', i, { ...tier, description: e.target.value })} />
-                      <input className={`${inp} col-span-2`} type="number" placeholder="ราคา (฿)" value={tier.price}
-                        onChange={e => updateArr('priceTiers', i, { ...tier, price: Number(e.target.value) })} />
+                      <input className={`${inp} col-span-2`} placeholder="ชื่อระดับ (ผู้ใหญ่, เด็ก, Single)" value={pt.tier || pt.name || ''}
+                        onChange={e => updateArr('priceTiers', i, { ...pt, tier: e.target.value, name: e.target.value })} />
+                      <input className={`${inp} col-span-2`} placeholder="รายละเอียด" value={pt.description || ''}
+                        onChange={e => updateArr('priceTiers', i, { ...pt, description: e.target.value })} />
+                      <input className={`${inp} col-span-2`} type="number" placeholder="ราคา (฿)" value={pt.price || ''}
+                        onChange={e => updateArr('priceTiers', i, { ...pt, price: Number(e.target.value) })} />
                       <button onClick={() => removeFromArr('priceTiers', i)}
                         className="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg flex items-center justify-center">
                         <X className="w-3.5 h-3.5" />
@@ -800,29 +810,65 @@ function ToursSection({ tours, setTours, t }) {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-semibold text-slate-700 text-sm">วันเดินทาง (Departures)</h4>
-                  <button onClick={() => addToArr('departures', { date: '', available: 10, priceAdjust: 0 })}
+                  <button onClick={() => addToArr('departures', { date: '', returnDate: '', totalSeats: 20, bookedSeats: 0, price: 0, childPrice: 0, singleSupplement: 0 })}
                     className="flex items-center gap-1 bg-teal-50 hover:bg-teal-100 text-teal-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
                     <Plus className="w-3 h-3" /> เพิ่มวัน
                   </button>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {(form.departures || []).map((dep, i) => (
-                    <div key={i} className="grid grid-cols-7 gap-2 items-center bg-slate-50 p-2 rounded-xl">
-                      <input className={`${inp} col-span-3`} type="date" value={dep.date}
-                        onChange={e => updateArr('departures', i, { ...dep, date: e.target.value })} />
-                      <input className={`${inp} col-span-1`} type="number" placeholder="ที่ว่าง" value={dep.available}
-                        onChange={e => updateArr('departures', i, { ...dep, available: Number(e.target.value) })} />
-                      <input className={`${inp} col-span-2`} type="number" placeholder="ปรับราคา ±฿" value={dep.priceAdjust}
-                        onChange={e => updateArr('departures', i, { ...dep, priceAdjust: Number(e.target.value) })} />
-                      <button onClick={() => removeFromArr('departures', i)}
-                        className="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg flex items-center justify-center">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
+                    <div key={i} className="bg-slate-50 border border-slate-200 p-3 rounded-xl space-y-2">
+                      <div className="grid grid-cols-3 gap-2 items-center">
+                        <div>
+                          <label className="text-xs text-slate-500 font-semibold block mb-1">วันไป</label>
+                          <input className={inp} type="date" value={dep.date || ''}
+                            onChange={e => updateArr('departures', i, { ...dep, date: e.target.value })} />
+                        </div>
+                        <div>
+                          <label className="text-xs text-slate-500 font-semibold block mb-1">วันกลับ</label>
+                          <input className={inp} type="date" value={dep.returnDate || ''}
+                            onChange={e => updateArr('departures', i, { ...dep, returnDate: e.target.value })} />
+                        </div>
+                        <div className="flex gap-2 items-end">
+                          <div className="flex-1">
+                            <label className="text-xs text-slate-500 font-semibold block mb-1">ที่นั่งทั้งหมด</label>
+                            <input className={inp} type="number" min={0} value={dep.totalSeats ?? 20}
+                              onChange={e => updateArr('departures', i, { ...dep, totalSeats: Number(e.target.value) })} />
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-xs text-slate-500 font-semibold block mb-1">จองแล้ว</label>
+                            <input className={inp} type="number" min={0} value={dep.bookedSeats ?? 0}
+                              onChange={e => updateArr('departures', i, { ...dep, bookedSeats: Number(e.target.value) })} />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-4 gap-2 items-end">
+                        <div>
+                          <label className="text-xs text-slate-500 font-semibold block mb-1">ราคาผู้ใหญ่ (฿)</label>
+                          <input className={inp} type="number" min={0} placeholder="0" value={dep.price || ''}
+                            onChange={e => updateArr('departures', i, { ...dep, price: Number(e.target.value) })} />
+                        </div>
+                        <div>
+                          <label className="text-xs text-slate-500 font-semibold block mb-1">ราคาเด็ก (฿)</label>
+                          <input className={inp} type="number" min={0} placeholder="0" value={dep.childPrice || ''}
+                            onChange={e => updateArr('departures', i, { ...dep, childPrice: Number(e.target.value) })} />
+                        </div>
+                        <div>
+                          <label className="text-xs text-slate-500 font-semibold block mb-1">พักเดี่ยว +฿</label>
+                          <input className={inp} type="number" min={0} placeholder="0" value={dep.singleSupplement || ''}
+                            onChange={e => updateArr('departures', i, { ...dep, singleSupplement: Number(e.target.value) })} />
+                        </div>
+                        <div className="flex items-end">
+                          <button onClick={() => removeFromArr('departures', i)}
+                            className="w-full h-9 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg flex items-center justify-center gap-1 text-xs font-semibold">
+                            <X className="w-3.5 h-3.5" /> ลบ
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ))}
                   {!(form.departures || []).length && <p className="text-xs text-slate-400 text-center py-4">ยังไม่มีวันเดินทาง</p>}
                 </div>
-                <p className="text-xs text-slate-400 mt-2">* ปรับราคา: ใส่บวก (+) หรือลบ (-) เพื่อปรับจากราคาเริ่มต้น เช่น +5000 หรือ -3000</p>
               </div>
             </div>
           )}
