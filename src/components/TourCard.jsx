@@ -151,7 +151,7 @@ export default function TourCard({ tour, t, navigate, inCompare, onCompare }) {
           </div>
         )}
 
-        <div style={{ height: 1, background: 'var(--line)', margin: '4px 0' }} />
+        <div style={{ height: 1, background: 'var(--line)', margin: '4px 0', marginTop: 'auto' }} />
 
         {/* Price + CTA */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
