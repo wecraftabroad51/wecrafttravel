@@ -376,6 +376,19 @@ export const uploadImage = async (file, folder = 'tours') => {
   return { url: data.publicUrl, error: null }
 }
 
+// ── FILE UPLOAD – PDF / documents (Supabase Storage) ──────────
+export const uploadFile = async (file, folder = 'pdfs') => {
+  if (!supabase) return { url: null, error: 'offline' }
+  const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80)
+  const name = `${folder}/${Date.now()}-${safe}`
+  const { error: upErr } = await supabase.storage
+    .from('tour-files')
+    .upload(name, file, { cacheControl: '31536000', upsert: false, contentType: file.type || 'application/pdf' })
+  if (upErr) return { url: null, error: upErr }
+  const { data } = supabase.storage.from('tour-files').getPublicUrl(name)
+  return { url: data.publicUrl, error: null }
+}
+
 // ── PASSPORT UPLOAD (Supabase Storage → passports bucket) ────
 export const uploadPassport = async (file, prefix = '') => {
   if (!supabase) return { url: null, name: file.name, error: 'offline' }

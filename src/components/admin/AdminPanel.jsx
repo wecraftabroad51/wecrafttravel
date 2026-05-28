@@ -9,7 +9,7 @@ import {
   approveReview, deleteReview,
   updateBookingStatus, deleteBooking,
   markMessageRead, deleteMessage,
-  updateSettings, uploadImage,
+  updateSettings, uploadImage, uploadFile,
 } from '../../lib/db.js';
 import { supabase } from '../../lib/supabase.js';
 import { LEGAL_DEFAULTS } from '../../lib/legalDefaults.js';
@@ -127,6 +127,69 @@ function ImageUpload({ value, onChange, hint, folder = 'tours' }) {
             onClick={() => onChange('')}
             className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center leading-none"
             title="ลบรูป"
+          >×</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── PDF Upload Component ──────────────────────────────────────
+function PdfUpload({ value, onChange }) {
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef();
+
+  const handleFile = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.pdf')) { alert('กรุณาเลือกไฟล์ PDF เท่านั้น'); return; }
+    if (file.size > 20 * 1024 * 1024) { alert('ไฟล์ใหญ่เกินไป (สูงสุด 20MB)'); return; }
+    setUploading(true);
+    const { url, error } = await uploadFile(file, 'pdfs');
+    setUploading(false);
+    if (error) { alert('อัพโหลดไม่สำเร็จ: ' + (error.message || JSON.stringify(error))); return; }
+    onChange(url);
+    e.target.value = '';
+  };
+
+  const fileName = value ? value.split('/').pop().split('?')[0] : '';
+
+  return (
+    <div>
+      <div className="flex gap-2">
+        <input
+          className={inp}
+          value={value || ''}
+          onChange={e => onChange(e.target.value)}
+          placeholder="วาง URL ไฟล์ PDF หรือกดอัพโหลด →"
+        />
+        <button
+          type="button"
+          onClick={() => fileRef.current.click()}
+          disabled={uploading}
+          className="shrink-0 flex items-center gap-1.5 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white px-3 py-2 rounded-xl text-xs font-semibold transition-colors whitespace-nowrap"
+        >
+          {uploading
+            ? <><span className="animate-spin">⏳</span> กำลังอัพโหลด...</>
+            : <><span>📄</span> อัพโหลด PDF</>
+          }
+        </button>
+        <input ref={fileRef} type="file" accept="application/pdf,.pdf" className="hidden" onChange={handleFile} />
+      </div>
+      {value && (
+        <div className="mt-2 flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-xl px-3 py-2">
+          <span className="text-orange-600 text-lg">📄</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-orange-800 truncate">{fileName || 'ไฟล์ PDF'}</p>
+            <a href={value} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline">
+              คลิกดูไฟล์ →
+            </a>
+          </div>
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            className="shrink-0 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center"
+            title="ลบไฟล์ PDF"
           >×</button>
         </div>
       )}
@@ -760,8 +823,8 @@ function ToursSection({ tours, setTours, t }) {
                   <input className={inp} value={form.flight?.outbound?.airline || ''} onChange={e => setF(['flight','outbound','airline'], e.target.value)} placeholder="เช่น Thai Airways (TG), AirAsia (FD)" />
                 </Field>
               </div>
-              <Field label="PDF โปรแกรม (URL)">
-                <input className={inp} value={form.pdfUrl || ''} onChange={e => setF(['pdfUrl'], e.target.value)} placeholder="https://... หรือ /files/program.pdf" />
+              <Field label="📄 PDF โปรแกรมทัวร์">
+                <PdfUpload value={form.pdfUrl || ''} onChange={url => setF(['pdfUrl'], url)} />
               </Field>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">

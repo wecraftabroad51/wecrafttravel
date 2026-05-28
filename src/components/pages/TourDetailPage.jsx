@@ -172,11 +172,15 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
           <div style={{ display: 'flex', gap: 0, flexWrap: 'wrap' }}>
 
             {/* Image */}
-            <div style={{ width: 240, minWidth: 200, flexShrink: 0, position: 'relative' }}>
-              <div style={{ height: '100%', minHeight: 300 }}>
+            <div style={{ width: 280, minWidth: 220, flexShrink: 0, position: 'relative', background: '#f0f4f8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {tour.image ? (
                 <img src={tour.image} alt={tourName}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', minHeight: 300 }} />
-              </div>
+                  style={{ width: '100%', height: 'auto', maxHeight: 420, objectFit: 'contain', display: 'block' }} />
+              ) : (
+                <div style={{ width: '100%', height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 48 }}>
+                  🗺️
+                </div>
+              )}
               {/* Overlay badges */}
               <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {tour.featured && (
@@ -248,6 +252,32 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
 
               {/* Divider */}
               <div style={{ height: 1, background: '#f1f5f9', margin: '16px 0' }} />
+
+              {/* PDF Banner (prominent) */}
+              {tour.pdfUrl && (
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  background: 'linear-gradient(135deg,#fff7ed,#ffedd5)',
+                  border: '1.5px solid #fed7aa', borderRadius: 10,
+                  padding: '10px 16px', marginBottom: 14,
+                }}>
+                  <span style={{ fontSize: 28, lineHeight: 1 }}>📄</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: '#9a3412', marginBottom: 2 }}>
+                      {th ? 'ไฟล์โปรแกรมทัวร์' : 'Tour Program PDF'}
+                    </div>
+                    <div style={{ fontSize: 11, color: '#c2410c' }}>
+                      {th ? 'ดาวน์โหลดรายละเอียดโปรแกรมฉบับเต็ม' : 'Download the full tour program details'}
+                    </div>
+                  </div>
+                  <a href={tour.pdfUrl} download target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', flexShrink: 0 }}>
+                    <button className="td-btn" style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)', color: '#fff', padding: '8px 16px', fontSize: 12 }}>
+                      <Icon name="download" size={14} />
+                      {th ? 'ดาวน์โหลด' : 'Download'}
+                    </button>
+                  </a>
+                </div>
+              )}
 
               {/* Action buttons */}
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
