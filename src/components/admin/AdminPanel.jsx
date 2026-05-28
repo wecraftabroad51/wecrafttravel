@@ -14,15 +14,15 @@ import {
 import { supabase } from '../../lib/supabase.js';
 
 const MENU = [
-  { key: 'dashboard',   label: 'Dashboard',   icon: LayoutDashboard },
-  { key: 'tours',       label: 'Tours',        icon: Globe },
-  { key: 'promotions',  label: 'Promotions',   icon: Tag },
-  { key: 'reviews',     label: 'Reviews',      icon: Star },
-  { key: 'articles',    label: 'Articles',     icon: FileText },
-  { key: 'faqs',        label: 'FAQs',         icon: HelpCircle },
-  { key: 'bookings',    label: 'Bookings',     icon: Plane },
-  { key: 'messages',    label: 'Messages',     icon: Mail },
-  { key: 'settings',    label: 'Settings',     icon: Settings },
+  { key: 'dashboard',   label: 'Dashboard',   labelTh: 'ภาพรวม',       icon: LayoutDashboard },
+  { key: 'tours',       label: 'Tours',        labelTh: 'ทัวร์',         icon: Globe },
+  { key: 'promotions',  label: 'Promotions',   labelTh: 'โปรโมชั่น',    icon: Tag },
+  { key: 'reviews',     label: 'Reviews',      labelTh: 'รีวิว',         icon: Star },
+  { key: 'articles',    label: 'Articles',     labelTh: 'บทความ',        icon: FileText },
+  { key: 'faqs',        label: 'FAQs',         labelTh: 'คำถามที่พบบ่อย', icon: HelpCircle },
+  { key: 'bookings',    label: 'Bookings',     labelTh: 'การจอง',        icon: Plane },
+  { key: 'messages',    label: 'Messages',     labelTh: 'ข้อความ',       icon: Mail },
+  { key: 'settings',    label: 'Settings',     labelTh: 'ตั้งค่า',       icon: Settings },
 ];
 
 const TOUR_TYPES = [
@@ -452,14 +452,14 @@ export default function AdminPanel(props) {
           {sideOpen && <span className="font-bold text-sm truncate">WeCraftTravel Admin</span>}
         </div>
         <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
-          {MENU.map(({ key, label, icon: Icon }) => (
+          {MENU.map(({ key, label, labelTh, icon: Icon }) => (
             <button key={key} onClick={() => setSection(key)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
                 section === key ? 'bg-teal-700 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
               }`}>
               <Icon className="w-4 h-4 shrink-0" />
               {sideOpen && (
-                <span className="truncate">{label}
+                <span className="truncate">{lang === 'th' ? labelTh : label}
                   {key === 'messages' && unreadMsg > 0      && <span className="ml-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">{unreadMsg}</span>}
                   {key === 'reviews'  && pendingReviews > 0 && <span className="ml-1 bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded-full">{pendingReviews}</span>}
                 </span>
