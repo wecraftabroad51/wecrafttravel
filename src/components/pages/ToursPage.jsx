@@ -163,13 +163,23 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
     : allContinents;
   const continents = ['All', ...relevantContinents];
 
+  // Legacy value map — รองรับค่าเก่าที่บันทึกด้วย Admin version เดิม
+  const LEGACY = {
+    outbound:    ['outbound',    'international'],
+    inbound:     ['inbound',     'domestic'],
+    premiumtour: ['premiumtour', 'premium'],
+    hottour:     ['hottour',     'hotdeal'],
+    tourpackage: ['tourpackage', 'package'],
+  };
+
   const filtered = useMemo(() => {
     let list = [...tours];
     if (tourType !== 'all') {
+      const accepted = LEGACY[tourType] || [tourType];
       if (tourType === 'hottour') {
-        list = list.filter(tr => tr.tourType === 'hottour' || tr.featured);
+        list = list.filter(tr => accepted.includes(tr.tourType) || tr.featured);
       } else {
-        list = list.filter(tr => tr.tourType === tourType);
+        list = list.filter(tr => accepted.includes(tr.tourType));
       }
     }
     if (continent !== 'All') list = list.filter(tr => tr.continent === continent);

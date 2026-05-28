@@ -25,12 +25,13 @@ const MENU = [
   { key: 'settings',    label: 'Settings',     labelTh: 'ตั้งค่า',       icon: Settings },
 ];
 
+// ⚠️ ค่าต้องตรงกับ TOUR_TYPE_TABS ใน ToursPage.jsx เสมอ
 const TOUR_TYPES = [
-  { value: 'international', label: 'ทัวร์ต่างประเทศ' },
-  { value: 'domestic',      label: 'ทัวร์ในประเทศ' },
-  { value: 'premium',       label: 'ทัวร์พรีเมี่ยม' },
-  { value: 'hotdeal',       label: 'ทัวร์โปรไฟไหม้ 🔥' },
-  { value: 'package',       label: 'แพ็คเกจทัวร์' },
+  { value: 'outbound',      label: 'ทัวร์ต่างประเทศ' },
+  { value: 'inbound',       label: 'ทัวร์ในประเทศ' },
+  { value: 'premiumtour',   label: 'ทัวร์พรีเมี่ยม' },
+  { value: 'hottour',       label: 'ทัวร์โปรไฟไหม้ 🔥' },
+  { value: 'tourpackage',   label: 'แพ็คเกจทัวร์' },
   { value: 'cruise',        label: 'เรือสำราญ' },
 ];
 
@@ -535,7 +536,7 @@ function DashboardSection({ tours, articles, bookings, messages, reviews }) {
 // ===== TOURS =====
 const EMPTY_TOUR = {
   name: { th: '', en: '' }, destination: { th: '', en: '' }, description: { th: '', en: '' },
-  image: '', tourType: 'international', continent: 'Asia-East', country: '',
+  image: '', tourType: 'outbound', continent: 'Asia-East', country: '',
   code: '', duration: 7, groupSize: 20, price: 0, featured: false, active: true,
   pdfUrl: '',
   flight: { outbound: { airline: '', flightNo: '', departure: '', arrival: '' }, return: { airline: '', flightNo: '', departure: '', arrival: '' } },
