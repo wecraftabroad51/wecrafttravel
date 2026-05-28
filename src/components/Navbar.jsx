@@ -43,19 +43,12 @@ const MENU = [
     ],
   },
   {
-    label: 'จองตั๋ว', labelEn: 'Ticket & Services',
+    label: 'จองตั๋ว & บริการ', labelEn: 'Tickets & Services',
     key: 'ticket-booking', tourType: null,
     mega: [
-      { continent: 'จองตั๋ว', continentEn: 'Ticket Booking', countries: ['จองตั๋วเครื่องบิน','เรือสำราญ','บัตรเข้าชม'] },
-      { continent: 'รถเช่า', continentEn: 'Car Rental', countries: ['รถเช่าในประเทศ','รถเช่าต่างประเทศ','รับ-ส่งสนามบิน'] },
-      { continent: 'บริการอื่น', continentEn: 'Other Services', countries: ['ประกันเดินทาง','SIM Card ต่างประเทศ'] },
-    ],
-  },
-  {
-    label: 'บริการอื่นๆ', labelEn: 'Other Services',
-    key: 'contact',
-    mega: [
-      { continent: 'บริการของเรา', countries: ['บริการยื่นวีซ่า','ประกันการเดินทาง','จองโรงแรม','เช่ารถต่างประเทศ','รับ-ส่งสนามบิน','SIM Card ต่างประเทศ'] },
+      { continent: '🎫 จองตั๋ว', continentEn: '🎫 Ticket Booking', countries: ['จองตั๋วเครื่องบิน','เรือสำราญ','บัตรเข้าชม'] },
+      { continent: '🚗 รถเช่า',  continentEn: '🚗 Car Rental',     countries: ['รถเช่าในประเทศ','รถเช่าต่างประเทศ','รับ-ส่งสนามบิน'] },
+      { continent: '🛎 บริการเสริม', continentEn: '🛎 Extra Services', countries: ['บริการยื่นวีซ่า','ประกันการเดินทาง','จองโรงแรม','SIM Card ต่างประเทศ'] },
     ],
   },
 ];
