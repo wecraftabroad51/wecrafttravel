@@ -13,6 +13,7 @@ import {
   TOURS_DATA, ARTICLES_DATA, PROMOTIONS_DATA, FAQS_DATA,
   REVIEWS_DATA, SITE_SETTINGS_DEFAULT, BOOKINGS_DATA, MESSAGES_DATA, CHAT_SESSIONS_DEFAULT,
 } from './data.js';
+import { LEGAL_DEFAULTS } from './lib/legalDefaults.js';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
 import FloatingContact from './components/FloatingContact.jsx';
@@ -38,7 +39,7 @@ const SETTINGS_DEFAULT = {
   contact: { address: { th: '', en: '' }, phone: '', email: '', line: '' },
   social: [],
   popup: { enabled: false },
-  legal: { privacy: { th: '', en: '' }, terms: { th: '', en: '' }, booking: { th: '', en: '' } },
+  legal: LEGAL_DEFAULTS,
 };
 
 // ── Route wrappers that inject URL params ─────────────────────
@@ -386,7 +387,18 @@ function AppInner() {
             contact: settingsRes.data.contact || prev.contact,
             social:  mergedSocial,
             popup:   settingsRes.data.popup   || prev.popup,
-            legal:   settingsRes.data.legal   || prev.legal,
+            legal:   (() => {
+              const saved = settingsRes.data.legal || {};
+              // Deep-merge: ถ้า saved field เป็น empty string ให้ใช้ default
+              const merged = {};
+              ['privacy','terms','booking'].forEach(k => {
+                merged[k] = {
+                  th: saved[k]?.th || LEGAL_DEFAULTS[k].th,
+                  en: saved[k]?.en || LEGAL_DEFAULTS[k].en,
+                };
+              });
+              return merged;
+            })(),
           }));
         } else {
           setSettings(SITE_SETTINGS_DEFAULT);

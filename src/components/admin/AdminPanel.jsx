@@ -12,6 +12,7 @@ import {
   updateSettings, uploadImage,
 } from '../../lib/db.js';
 import { supabase } from '../../lib/supabase.js';
+import { LEGAL_DEFAULTS } from '../../lib/legalDefaults.js';
 
 const MENU = [
   { key: 'dashboard',   label: 'Dashboard',   labelTh: 'ภาพรวม',       icon: LayoutDashboard },
@@ -1817,8 +1818,7 @@ function SettingsSection({ settings, setSettings, t }) {
                     <textarea
                       rows={10}
                       style={{ width: '100%', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 10px', fontSize: 12, fontFamily: 'monospace', resize: 'vertical', outline: 'none' }}
-                      value={settings.legal?.[key]?.th || ''}
-                      placeholder="<h2>หัวข้อ</h2><p>เนื้อหา...</p>"
+                      value={settings.legal?.[key]?.th || LEGAL_DEFAULTS[key].th}
                       onChange={e => update(['legal', key, 'th'], e.target.value)}
                     />
                   </div>
@@ -1827,8 +1827,7 @@ function SettingsSection({ settings, setSettings, t }) {
                     <textarea
                       rows={10}
                       style={{ width: '100%', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 10px', fontSize: 12, fontFamily: 'monospace', resize: 'vertical', outline: 'none' }}
-                      value={settings.legal?.[key]?.en || ''}
-                      placeholder="<h2>Title</h2><p>Content...</p>"
+                      value={settings.legal?.[key]?.en || LEGAL_DEFAULTS[key].en}
                       onChange={e => update(['legal', key, 'en'], e.target.value)}
                     />
                   </div>
