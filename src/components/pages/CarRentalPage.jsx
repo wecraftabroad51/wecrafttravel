@@ -144,6 +144,7 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
       const rentalLabelMsg = RENTAL_TYPES.find(r => r.value === form.rentalType)?.th || form.rentalType;
       const carLabelMsg = CAR_TYPES.find(c => c.value === form.carType)?.th || form.carType;
       const messageBody = [
+        seqNo ? `หมายเลขอ้างอิง: ${seqNo}` : null,
         `ประเภท: รถเช่า`,
         `เบอร์โทร: ${form.phone}`,
         `อีเมล: ${form.email || '-'}`,
@@ -162,6 +163,7 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
         phone:         form.phone,
         tour_interest: `รถเช่า — ${rentalLabelMsg}`,
         message:       messageBody,
+        date:          new Date().toISOString().split('T')[0],
       });
       if (res.error && res.error !== 'offline') throw new Error(JSON.stringify(res.error));
 

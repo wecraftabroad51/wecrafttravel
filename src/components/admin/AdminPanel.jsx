@@ -1611,11 +1611,12 @@ function MessagesSection({ messages, setMessages }) {
       {/* Cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {filtered.map(msg => {
-          const type  = getMsgType(msg);
-          const cfg   = MSG_TYPES[type];
-          const body  = msg.message || msg.body || '';
-          const pairs = parseMsg(body);
-          const open  = expanded === msg.id;
+          const type   = getMsgType(msg);
+          const cfg    = MSG_TYPES[type];
+          const body   = msg.message || msg.body || '';
+          const pairs  = parseMsg(body);
+          const open   = expanded === msg.id;
+          const seqNo  = pairs.find(p => p.k === 'หมายเลขอ้างอิง')?.v || '';
 
           return (
             <div key={msg.id} style={{
@@ -1645,11 +1646,18 @@ function MessagesSection({ messages, setMessages }) {
                     <span style={{ fontWeight: 700, fontSize: 14, color: '#1e293b' }}>{msg.name}</span>
                     <span style={{ background: cfg.bg, color: cfg.color, fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>{cfg.label}</span>
                     {!msg.read && <span style={{ background: '#e65c00', color: '#fff', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>ใหม่</span>}
+                    {seqNo && (
+                      <span style={{ background: '#0f172a', color: '#f8fafc', fontSize: 11, fontWeight: 800, padding: '2px 10px', borderRadius: 20, letterSpacing: '.02em', fontFamily: 'monospace' }}>
+                        # {seqNo}
+                      </span>
+                    )}
                   </div>
                   <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 3, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                     {msg.email && <span>✉ {msg.email}</span>}
                     {msg.phone && <span>☎ {msg.phone}</span>}
-                    {msg.date  && <span>📅 {msg.date}</span>}
+                    {(msg.createdAt || msg.date) && (
+                      <span>📅 {new Date(msg.createdAt || msg.date).toLocaleString('th-TH', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                    )}
                   </div>
                 </div>
 

@@ -382,8 +382,23 @@ export default function GroupQuotePage({ lang, setMessages }) {
       ? `อื่นๆ: ${form.tourTypeOther}`
       : form.tourType;
 
+    // ── 0. Generate sequence number ────────────────────────
+    let seqNo = '';
+    try {
+      const seqRes = await fetch('/api/gen-seqno', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'group' }),
+      });
+      const seqData = await seqRes.json();
+      if (seqRes.ok && seqData.seqNo) seqNo = seqData.seqNo;
+    } catch (e) {
+      console.warn('gen-seqno failed:', e.message);
+    }
+
     // Format message for Supabase
     const messageBody = [
+      seqNo ? `หมายเลขอ้างอิง: ${seqNo}` : null,
       `=== ขอราคากรุ๊ปเหมา ===`,
       `ชื่อ-นามสกุล: ${form.firstName} ${form.lastName}`,
       form.company    ? `บริษัท/หน่วยงาน: ${form.company}` : null,

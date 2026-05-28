@@ -243,6 +243,7 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
       const seatLabelMsg = SEAT_CLASSES.find(s => s.value === form.seatClass)?.th || form.seatClass;
       const driveLinks = driveFiles.map(f => f.url).join(', ');
       const messageBody = [
+        seqNo ? `หมายเลขอ้างอิง: ${seqNo}` : null,
         `ประเภท: จองตั๋วเครื่องบิน`,
         `เบอร์โทร: ${form.phone || '-'}`,
         `อีเมล: ${form.email || '-'}`,
@@ -263,6 +264,7 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
         phone:         form.phone || '',
         tour_interest: 'จองตั๋วเครื่องบิน',
         message:       messageBody,
+        date:          new Date().toISOString().split('T')[0],
       });
       if (res.error && res.error !== 'offline') throw new Error(JSON.stringify(res.error));
 
