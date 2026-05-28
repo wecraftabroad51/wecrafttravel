@@ -1522,11 +1522,18 @@ const MSG_TYPES = {
 };
 
 function getMsgType(msg) {
-  const body = (msg.message || msg.body || '').toLowerCase();
-  const ti   = (msg.tour_interest || '').toLowerCase();
-  if (body.includes('กรุ๊ปเหมา') || ti.includes('กรุ๊ป')) return 'group';
-  if (body.includes('จองตั๋ว') || ti.includes('จองตั๋ว'))  return 'ticket';
-  if (body.includes('รถเช่า')  || ti.includes('รถเช่า'))   return 'car';
+  const body = (msg.message || msg.body || '');
+  const ti   = (msg.tourInterest || msg.tour_interest || '');
+
+  // 1. ตรวจจาก tour_interest ที่แต่ละ form ตั้งค่าไว้ชัดเจน
+  if (ti.startsWith('รถเช่า') || ti.includes('รถเช่า'))          return 'car';
+  if (ti === 'จองตั๋วเครื่องบิน' || ti.startsWith('จองตั๋ว'))     return 'ticket';
+
+  // 2. ตรวจจาก body ด้วย pattern เจาะจง (ป้องกัน false positive)
+  if (body.includes('=== ขอราคากรุ๊ปเหมา') || body.includes('หมายเลขอ้างอิง: GI')) return 'group';
+  if (body.includes('ประเภท: จองตั๋วเครื่องบิน') || body.includes('หมายเลขอ้างอิง: TK')) return 'ticket';
+  if (body.includes('ประเภท: รถเช่า') || body.includes('หมายเลขอ้างอิง: RC'))          return 'car';
+
   return 'contact';
 }
 
