@@ -48,20 +48,6 @@ export default function FAQPage({ lang, t, faqs, settings }) {
             <span>Home</span><span>/</span>
             <span style={{ color: 'var(--ink)' }}>FAQ</span>
           </nav>
-          <div className="layout-hero" style={{ gap: 64, alignItems: 'end' }}>
-            <h1 className="h-display">
-              {lang === 'th' ? (
-                <>คำตอบที่<br /><span className="serif-accent" style={{ color: 'var(--primary)' }}>ตรงไปตรงมา</span>.</>
-              ) : (
-                <>Honest<br /><span className="serif-accent" style={{ color: 'var(--primary)' }}>answers</span>.</>
-              )}
-            </h1>
-            <p style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.55, marginBottom: 12, maxWidth: 360 }}>
-              {lang === 'th'
-                ? 'หาคำตอบไม่เจอ? ส่งข้อความหาเราผ่าน LINE หรืออีเมล — ตอบภายใน 1 ชั่วโมงในเวลาทำการ'
-                : "Can't find what you're looking for? Message us on LINE or send a note — replies usually within an hour."}
-            </p>
-          </div>
         </div>
       </section>
 
