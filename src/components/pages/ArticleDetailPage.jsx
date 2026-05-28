@@ -58,7 +58,15 @@ export default function ArticleDetailPage({ lang, t, navigate, articles, article
           )}
 
           {/* Title */}
-          <h1 className="h-1" style={{ maxWidth: 800, margin: '0 0 20px' }}>{title}</h1>
+          <h1 style={{
+            maxWidth: 800,
+            margin: '0 0 24px',
+            fontSize: 'clamp(24px, 3vw, 40px)',
+            lineHeight: 1.2,
+            fontWeight: 700,
+            color: 'var(--ink)',
+            display: 'block',
+          }}>{title}</h1>
 
           {/* Author + meta row */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}>
