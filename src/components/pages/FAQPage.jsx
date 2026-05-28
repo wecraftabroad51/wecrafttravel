@@ -51,9 +51,9 @@ export default function FAQPage({ lang, t, faqs, settings }) {
           <div className="layout-hero" style={{ gap: 64, alignItems: 'end' }}>
             <h1 className="h-display">
               {lang === 'th' ? (
-                <>คำตอบที่<br /><span className="serif-accent" style={{ color: 'var(--primary)' }}>ตรงไปตรงมา</span>.<br />ไม่มีตัวหนังสือเล็ก.</>
+                <>คำตอบที่<br /><span className="serif-accent" style={{ color: 'var(--primary)' }}>ตรงไปตรงมา</span>.</>
               ) : (
-                <>Honest<br /><span className="serif-accent" style={{ color: 'var(--primary)' }}>answers</span>.<br />No fine print.</>
+                <>Honest<br /><span className="serif-accent" style={{ color: 'var(--primary)' }}>answers</span>.</>
               )}
             </h1>
             <p style={{ fontSize: 14, color: 'var(--ink-2)', lineHeight: 1.55, marginBottom: 12, maxWidth: 360 }}>
