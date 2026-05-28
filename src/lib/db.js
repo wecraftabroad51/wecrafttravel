@@ -146,6 +146,21 @@ export const deleteArticle = async (id) => {
   return supabase.from('articles').delete().eq('id', id)
 }
 
+export const incrementArticleViews = async (id) => {
+  if (!supabase) return { error: 'offline' }
+  // Fetch current views then increment atomically
+  const { data } = await supabase
+    .from('articles')
+    .select('views')
+    .eq('id', id)
+    .single()
+  const views = (data?.views ?? 0) + 1
+  return supabase
+    .from('articles')
+    .update({ views })
+    .eq('id', id)
+}
+
 // ── PROMOTIONS ────────────────────────────────────────────────
 export const fetchPromotions = async () => {
   if (!supabase) return { data: null, error: 'offline' }

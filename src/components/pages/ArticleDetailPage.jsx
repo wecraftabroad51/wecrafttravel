@@ -1,3 +1,6 @@
+import { useEffect } from 'react';
+import { incrementArticleViews } from '../../lib/db.js';
+
 function Icon({ name, size = 16 }) {
   const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round' };
   switch (name) {
@@ -10,8 +13,24 @@ function Icon({ name, size = 16 }) {
   }
 }
 
-export default function ArticleDetailPage({ lang, t, navigate, articles, articleId }) {
+export default function ArticleDetailPage({ lang, t, navigate, articles, articleId, setArticles }) {
   const article = articles.find(a => String(a.id) === String(articleId));
+
+  // Increment view count when article is opened
+  useEffect(() => {
+    if (!article) return;
+    incrementArticleViews(article.id).then(() => {
+      // Update local state so list shows updated count immediately
+      if (setArticles) {
+        setArticles(prev => prev.map(a =>
+          String(a.id) === String(article.id)
+            ? { ...a, views: (a.views ?? 0) + 1 }
+            : a
+        ));
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [article?.id]);
 
   if (!article) {
     return (

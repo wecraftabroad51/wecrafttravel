@@ -620,7 +620,7 @@ function AppInner() {
   const pageProps = {
     lang, t, navigate, tours, articles, promotions, faqs,
     reviews, settings, compareList, toggleCompare,
-    setBookings, setReviews, setMessages,
+    setBookings, setReviews, setMessages, setArticles,
   };
 
   const adminProps = {
