@@ -22,7 +22,8 @@ function StarRating({ rating = 5 }) {
 }
 
 export default function TourCard({ tour, t, navigate, inCompare, onCompare }) {
-  const availDep = tour.departures?.find(d => d.bookedSeats < d.totalSeats);
+  // ถ้า totalSeats ไม่ได้ตั้ง (null/0) = ไม่มีข้อจำกัด = ยังว่างอยู่เสมอ
+  const availDep = tour.departures?.find(d => !d.totalSeats || d.bookedSeats < d.totalSeats);
   const name = t ? t(tour.name) : (tour.name?.en || tour.name?.th || tour.name || '');
   const destination = t ? t(tour.destination) : (tour.destination?.en || tour.destination?.th || tour.destination || '');
   const airline = tour.flight?.outbound?.airline || tour.airline || '';

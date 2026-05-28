@@ -176,11 +176,7 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
     let list = [...tours];
     if (tourType !== 'all') {
       const accepted = LEGACY[tourType] || [tourType];
-      if (tourType === 'hottour') {
-        list = list.filter(tr => accepted.includes(tr.tourType) || tr.featured);
-      } else {
-        list = list.filter(tr => accepted.includes(tr.tourType));
-      }
+      list = list.filter(tr => accepted.includes(tr.tourType));
     }
     if (continent !== 'All') list = list.filter(tr => tr.continent === continent);
     if (country) list = list.filter(tr => tr.country === country || t(tr.destination)?.includes(country));
