@@ -20,8 +20,7 @@ const MENU = [
   { key: 'reviews',     label: 'Reviews',      labelTh: 'รีวิว',         icon: Star },
   { key: 'articles',    label: 'Articles',     labelTh: 'บทความ',        icon: FileText },
   { key: 'faqs',        label: 'FAQs',         labelTh: 'คำถามที่พบบ่อย', icon: HelpCircle },
-  { key: 'bookings',    label: 'Bookings',     labelTh: 'การจอง',        icon: Plane },
-  { key: 'messages',    label: 'Messages',     labelTh: 'ข้อความ',       icon: Mail },
+  { key: 'messages',    label: 'Bookings',     labelTh: 'การจอง',        icon: Plane },
   { key: 'settings',    label: 'Settings',     labelTh: 'ตั้งค่า',       icon: Settings },
 ];
 
@@ -511,10 +510,10 @@ export default function AdminPanel(props) {
 function DashboardSection({ tours, articles, bookings, messages, reviews }) {
   const stats = [
     { label: 'ทัวร์ทั้งหมด',  value: tours.length,                             color: 'bg-teal-500' },
-    { label: 'การจอง',         value: bookings.length,                          color: 'bg-blue-500' },
+    { label: 'การจองทั้งหมด',  value: messages.length,                          color: 'bg-blue-500' },
     { label: 'บทความ',         value: articles.length,                          color: 'bg-purple-500' },
     { label: 'รีวิวรอ',        value: reviews.filter(r => !r.approved).length,  color: 'bg-amber-500' },
-    { label: 'ข้อความใหม่',    value: messages.filter(m => !m.read).length,     color: 'bg-red-500' },
+    { label: 'การจองใหม่',     value: messages.filter(m => !m.read).length,     color: 'bg-red-500' },
   ];
 
   return (
@@ -1578,7 +1577,7 @@ function MessagesSection({ messages, setMessages }) {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: '#1e293b', margin: 0 }}>
-          ข้อความ{' '}
+          การจอง{' '}
           {unread > 0 && (
             <span style={{ background: '#e65c00', color: '#fff', fontSize: 13, fontWeight: 700, padding: '2px 10px', borderRadius: 20, marginLeft: 6 }}>
               {unread} ใหม่
