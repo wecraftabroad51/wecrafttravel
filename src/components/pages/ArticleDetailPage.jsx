@@ -50,41 +50,48 @@ export default function ArticleDetailPage({ lang, t, navigate, articles, article
             <span style={{ color: 'var(--ink)' }}>{title}</span>
           </nav>
 
-          {/* Meta */}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-            {article.category && <span className="chip chip-jade">{article.category}</span>}
-            {article.readTime && (
-              <span className="chip" style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                <Icon name="clock" size={11} /> {article.readTime} min read
-              </span>
-            )}
-            {article.date && (
-              <span className="chip" style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                <Icon name="calendar" size={11} /> {article.date}
-              </span>
-            )}
-          </div>
-
-          {/* Title */}
-          <h1 className="h-1" style={{ maxWidth: 800, marginBottom: 24 }}>{title}</h1>
-
-          {/* Author row */}
-          {article.author && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 40 }}>
-              <div style={{
-                width: 44, height: 44, borderRadius: '50%',
-                background: 'var(--primary)', color: 'var(--canvas)',
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 600, fontSize: 16,
-              }}>
-                {article.author[0]}
-              </div>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)' }}>{article.author}</div>
-                <div style={{ fontSize: 12, color: 'var(--muted)' }}>WeCraft Journal</div>
-              </div>
+          {/* Category chip */}
+          {article.category && (
+            <div style={{ marginBottom: 14 }}>
+              <span className="chip chip-jade">{article.category}</span>
             </div>
           )}
+
+          {/* Title */}
+          <h1 className="h-1" style={{ maxWidth: 800, margin: '0 0 20px' }}>{title}</h1>
+
+          {/* Author + meta row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}>
+            {article.author && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                  background: 'var(--primary)', color: 'var(--canvas)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontWeight: 700, fontSize: 15,
+                }}>
+                  {article.author[0]}
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>{article.author}</div>
+                  <div style={{ fontSize: 11, color: 'var(--muted)' }}>WeCraft Journal</div>
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+              {article.readTime && (
+                <span className="chip" style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                  <Icon name="clock" size={11} /> {article.readTime} min read
+                </span>
+              )}
+              {article.date && (
+                <span className="chip" style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                  <Icon name="calendar" size={11} /> {article.date}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </section>
 

@@ -61,6 +61,230 @@ function ArticleDetailRoute(props) {
   return <ArticleDetailPage {...props} articleId={id} />;
 }
 
+// ── Sticky Group Quote Float Button ───────────────────────────
+function GroupQuoteFloat({ navigate, lang }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 300);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  return (
+    <>
+      <style>{`
+        @keyframes gqFloat {
+          0%,100% { transform: translateY(0); }
+          50%      { transform: translateY(-6px); }
+        }
+        @keyframes gqPing {
+          0%   { transform: scale(1);   opacity: .8; }
+          100% { transform: scale(2.2); opacity: 0; }
+        }
+        .gq-float-btn {
+          position: fixed;
+          right: 24px;
+          bottom: 100px;
+          z-index: 900;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: linear-gradient(135deg, #0f3460, #16213e);
+          color: #fff;
+          border: none;
+          border-radius: 50px;
+          padding: 13px 20px 13px 16px;
+          cursor: pointer;
+          font-weight: 700;
+          font-size: 14px;
+          box-shadow: 0 6px 28px rgba(15,52,96,.45), 0 2px 8px rgba(0,0,0,.2);
+          transition: opacity .35s, transform .25s;
+          animation: gqFloat 3s ease-in-out infinite;
+          white-space: nowrap;
+        }
+        .gq-float-btn:hover {
+          background: linear-gradient(135deg, #1a4a7a, #0f3460);
+          box-shadow: 0 10px 36px rgba(15,52,96,.6);
+        }
+        .gq-float-btn .gq-icon {
+          width: 34px; height: 34px; border-radius: 50%;
+          background: linear-gradient(135deg, #2db04b, #16a34a);
+          display: flex; align-items: center; justify-content: center;
+          font-size: 17px; flex-shrink: 0; position: relative;
+        }
+        .gq-float-btn .gq-ping {
+          position: absolute; inset: 0; border-radius: 50%;
+          background: rgba(45,176,75,.5);
+          animation: gqPing 1.8s ease-out infinite;
+        }
+        .gq-float-btn-hidden { opacity: 0; pointer-events: none; }
+      `}</style>
+      <button
+        className={`gq-float-btn${visible ? '' : ' gq-float-btn-hidden'}`}
+        onClick={() => navigate('group-quote')}
+        aria-label="ขอราคากรุ๊ปเหมา"
+      >
+        <span className="gq-icon">
+          <span className="gq-ping" />
+          🚌
+        </span>
+        <span>{lang === 'th' ? 'ขอราคากรุ๊ปเหมา' : 'Group Quote'}</span>
+      </button>
+    </>
+  );
+}
+
+// ── Welcome Popup (show once per session) ─────────────────────
+function GroupQuotePopup({ navigate, lang }) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (sessionStorage.getItem('gq-popup-shown')) return;
+    const t = setTimeout(() => {
+      setOpen(true);
+      sessionStorage.setItem('gq-popup-shown', '1');
+    }, 3000);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (!open) return null;
+
+  return (
+    <>
+      <style>{`
+        @keyframes gqPopIn {
+          0%   { opacity: 0; transform: translateY(40px) scale(.92); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .gq-overlay {
+          position: fixed; inset: 0; z-index: 1100;
+          background: rgba(10,20,40,.6);
+          display: flex; align-items: center; justify-content: center;
+          padding: 20px;
+        }
+        .gq-popup {
+          background: #fff;
+          border-radius: 20px;
+          max-width: 440px; width: 100%;
+          overflow: hidden;
+          box-shadow: 0 24px 80px rgba(0,0,0,.35);
+          animation: gqPopIn .45s cubic-bezier(.34,1.56,.64,1) forwards;
+          position: relative;
+        }
+        .gq-popup-header {
+          background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+          padding: 28px 28px 22px;
+          text-align: center;
+          color: #fff;
+        }
+        .gq-popup-badge {
+          display: inline-block;
+          background: rgba(45,176,75,.25);
+          border: 1px solid rgba(45,176,75,.5);
+          color: #4ade80;
+          font-size: 11px; font-weight: 700; letter-spacing: .06em;
+          padding: 4px 12px; border-radius: 20px; margin-bottom: 14px;
+          text-transform: uppercase;
+        }
+        .gq-popup-title {
+          font-size: 22px; font-weight: 900; margin: 0 0 8px;
+          line-height: 1.25;
+        }
+        .gq-popup-sub {
+          font-size: 13px; opacity: .75; margin: 0; line-height: 1.5;
+        }
+        .gq-popup-body {
+          padding: 22px 28px 26px;
+        }
+        .gq-popup-features {
+          display: grid; grid-template-columns: 1fr 1fr;
+          gap: 10px; margin-bottom: 20px;
+        }
+        .gq-popup-feat {
+          background: #f0fdf4;
+          border: 1px solid #bbf7d0;
+          border-radius: 10px;
+          padding: 10px 12px;
+          font-size: 12.5px;
+          color: #166534;
+          display: flex; align-items: center; gap: 7px;
+          font-weight: 600;
+        }
+        .gq-popup-cta {
+          width: 100%;
+          background: linear-gradient(135deg, #2db04b, #16a34a);
+          color: #fff;
+          border: none;
+          border-radius: 12px;
+          padding: 14px;
+          font-size: 15px; font-weight: 800;
+          cursor: pointer;
+          transition: opacity .2s;
+          letter-spacing: .01em;
+        }
+        .gq-popup-cta:hover { opacity: .9; }
+        .gq-popup-skip {
+          display: block; text-align: center; margin-top: 12px;
+          font-size: 12px; color: #94a3b8; cursor: pointer;
+          background: none; border: none; width: 100%;
+        }
+        .gq-popup-skip:hover { color: #64748b; }
+        .gq-popup-close {
+          position: absolute; top: 14px; right: 16px;
+          background: rgba(255,255,255,.15); border: none;
+          color: #fff; width: 28px; height: 28px;
+          border-radius: 50%; cursor: pointer;
+          font-size: 16px; display: flex; align-items: center; justify-content: center;
+          transition: background .2s;
+        }
+        .gq-popup-close:hover { background: rgba(255,255,255,.3); }
+      `}</style>
+      <div className="gq-overlay" onClick={() => setOpen(false)}>
+        <div className="gq-popup" onClick={e => e.stopPropagation()}>
+          <button className="gq-popup-close" onClick={() => setOpen(false)}>✕</button>
+          <div className="gq-popup-header">
+            <div className="gq-popup-badge">
+              {lang === 'th' ? '🏆 บริการเด่นของเรา' : '🏆 Our Specialty'}
+            </div>
+            <h2 className="gq-popup-title">
+              {lang === 'th' ? 'กรุ๊ปเหมาทัวร์' : 'Group Charter Tours'}
+            </h2>
+            <p className="gq-popup-sub">
+              {lang === 'th'
+                ? 'ออกแบบทริปสุดพิเศษสำหรับทีมของคุณ\nรับใบเสนอราคาฟรีภายใน 24 ชั่วโมง'
+                : 'Custom trips for your team\nFree quote within 24 hours'}
+            </p>
+          </div>
+          <div className="gq-popup-body">
+            <div className="gq-popup-features">
+              {[
+                ['✈️', lang === 'th' ? 'ออกแบบเส้นทางได้เอง' : 'Custom itinerary'],
+                ['💰', lang === 'th' ? 'ราคาพิเศษกรุ๊ป' : 'Group pricing'],
+                ['🎯', lang === 'th' ? 'ดูแลครบวงจร' : 'Full service'],
+                ['⚡', lang === 'th' ? 'ใบเสนอราคา 24 ชม.' : '24h quote'],
+              ].map(([icon, label]) => (
+                <div key={label} className="gq-popup-feat">
+                  <span style={{ fontSize: 16 }}>{icon}</span> {label}
+                </div>
+              ))}
+            </div>
+            <button
+              className="gq-popup-cta"
+              onClick={() => { setOpen(false); navigate('group-quote'); }}
+            >
+              {lang === 'th' ? '📋 ขอใบเสนอราคาฟรี' : '📋 Get Free Quote'}
+            </button>
+            <button className="gq-popup-skip" onClick={() => setOpen(false)}>
+              {lang === 'th' ? 'ข้ามไปก่อน' : 'Maybe later'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ── Path → page name mapping (for Navbar active state) ────────
 function getPageFromPath(pathname) {
   if (pathname === '/')                       return 'home';
@@ -446,6 +670,15 @@ function AppInner() {
       </main>
       <Footer lang={lang} t={t} navigate={navigate} settings={settings} />
       <FloatingContact settings={settings} />
+
+      {/* ── Sticky Group Quote Float Button ──────────────────── */}
+      {!location.pathname.startsWith('/group-quote') && (
+        <GroupQuoteFloat navigate={navigate} lang={lang} />
+      )}
+
+      {/* ── Welcome Popup (first visit) ───────────────────────── */}
+      <GroupQuotePopup navigate={navigate} lang={lang} />
+
       {compareList.length >= 2 && (
         <CompareBar compareList={compareList} setCompareList={setCompareList}
           tours={tours} t={t} navigate={navigate} />

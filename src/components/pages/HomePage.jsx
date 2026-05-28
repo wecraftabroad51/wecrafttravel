@@ -596,6 +596,104 @@ function StatsStrip({ lang }) {
   );
 }
 
+// ─── GROUP QUOTE BANNER ──────────────────────────────────────
+function GroupQuoteBanner({ navigate, lang }) {
+  const th = lang !== 'en';
+  const stats = [
+    { num: '500+',  label: th ? 'กรุ๊ปที่จัดสำเร็จ'      : 'Groups Arranged' },
+    { num: '30+',   label: th ? 'ประเทศทั่วโลก'           : 'Countries' },
+    { num: '10+ ปี', label: th ? 'ประสบการณ์กรุ๊ปเหมา'   : 'Years Experience' },
+    { num: '24 ชม.', label: th ? 'รับใบเสนอราคา'          : 'Quote Turnaround' },
+  ];
+  const benefits = [
+    { icon: '✈️', title: th ? 'ออกแบบเส้นทางได้เอง' : 'Custom Itinerary', desc: th ? 'Tailor-made ทุก route ตามใจคุณ 100%' : '100% tailor-made routes' },
+    { icon: '💰', title: th ? 'ควบคุมงบประมาณ'      : 'Budget Control',    desc: th ? 'ทุกงบ — ประหยัด จนถึง VVIP'          : 'Economy to VVIP — any budget' },
+    { icon: '🏨', title: th ? 'จัดการครบวงจร'       : 'Full Package',      desc: th ? 'ตั๋ว โรงแรม รถ ไกด์ ประกัน'           : 'Flights, hotel, guide, insurance' },
+    { icon: '📋', title: th ? 'ใบเสนอราคาฟรี'       : 'Free Quote',        desc: th ? 'ไม่มีข้อผูกมัด ตอบกลับใน 24 ชม.'     : 'No commitment, reply within 24h' },
+  ];
+  return (
+    <section style={{
+      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+      color: '#fff', padding: '60px 0', position: 'relative', overflow: 'hidden',
+    }}>
+      {/* decorative circles */}
+      <div style={{ position:'absolute', top:-80, right:-80, width:320, height:320, borderRadius:'50%', background:'rgba(255,140,0,.08)', pointerEvents:'none' }} />
+      <div style={{ position:'absolute', bottom:-60, left:-60, width:240, height:240, borderRadius:'50%', background:'rgba(255,140,0,.06)', pointerEvents:'none' }} />
+
+      <div className="wrap">
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:48, alignItems:'center' }}>
+
+          {/* Left */}
+          <div>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:8, background:'rgba(255,140,0,.18)', border:'1px solid rgba(255,140,0,.4)', borderRadius:999, padding:'6px 16px', fontSize:13, fontWeight:700, color:'#ffb347', marginBottom:20 }}>
+              🎯 {th ? 'บริการหลักของเรา — เชี่ยวชาญมากกว่า 10 ปี' : 'Our Core Service — 10+ Years Expertise'}
+            </div>
+            <h2 style={{ margin:'0 0 16px', fontSize:'clamp(24px,3vw,40px)', fontWeight:800, lineHeight:1.2 }}>
+              {th ? <>จัดกรุ๊ปทัวร์ส่วนตัว<br/><span style={{color:'#ff8c00'}}>ทั่วโลก ในราคาพิเศษ</span></> : <>Private Group Tours<br/><span style={{color:'#ff8c00'}}>Worldwide, Special Rates</span></>}
+            </h2>
+            <p style={{ margin:'0 0 28px', fontSize:15, opacity:.85, lineHeight:1.7 }}>
+              {th ? 'ไม่ว่าจะเป็น Family Trip, Company Outing หรือ Incentive Group — เราออกแบบ Itinerary และใบเสนอราคาให้คุณ ภายใน 24 ชั่วโมง ฟรี!'
+                  : 'Family trips, company outings or incentive groups — we design your itinerary and send a free quote within 24 hours.'}
+            </p>
+
+            {/* Mini stats */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:12, marginBottom:32 }}>
+              {stats.map((s,i) => (
+                <div key={i} style={{ textAlign:'center', background:'rgba(255,255,255,.07)', borderRadius:10, padding:'12px 8px', border:'1px solid rgba(255,255,255,.1)' }}>
+                  <div style={{ fontSize:20, fontWeight:800, color:'#ff8c00' }}>{s.num}</div>
+                  <div style={{ fontSize:11, opacity:.8, marginTop:4, lineHeight:1.3 }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+
+            <button onClick={() => navigate('group-quote')}
+              style={{
+                background:'linear-gradient(135deg, #ff8c00, #e65c00)', color:'#fff', border:'none',
+                borderRadius:10, padding:'16px 36px', fontSize:16, fontWeight:800,
+                cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center', gap:10,
+                boxShadow:'0 6px 24px rgba(230,92,0,.55)',
+                animation:'gq-pulse 2.2s ease-in-out infinite',
+              }}>
+              🎯 {th ? 'ขอใบเสนอราคา — ฟรี!' : 'Get Free Quote!'}
+              <span style={{ fontSize:20 }}>→</span>
+            </button>
+            <p style={{ marginTop:10, fontSize:12, opacity:.6 }}>
+              {th ? '* ไม่มีค่าใช้จ่าย · ไม่มีข้อผูกมัด · ตอบกลับภายใน 24 ชม.' : '* No cost · No commitment · Reply within 24h'}
+            </p>
+          </div>
+
+          {/* Right — benefit cards */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+            {benefits.map((b,i) => (
+              <div key={i} style={{
+                background:'rgba(255,255,255,.07)', border:'1px solid rgba(255,255,255,.12)',
+                borderRadius:12, padding:'20px 16px',
+                transition:'background .2s, transform .2s',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.background='rgba(255,140,0,.15)'; e.currentTarget.style.transform='translateY(-3px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background='rgba(255,255,255,.07)'; e.currentTarget.style.transform=''; }}>
+                <div style={{ fontSize:28, marginBottom:10 }}>{b.icon}</div>
+                <div style={{ fontWeight:700, fontSize:14, marginBottom:6 }}>{b.title}</div>
+                <div style={{ fontSize:12, opacity:.75, lineHeight:1.5 }}>{b.desc}</div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </div>
+      <style>{`
+        @keyframes gq-pulse {
+          0%,100% { box-shadow: 0 6px 24px rgba(230,92,0,.55); }
+          50%      { box-shadow: 0 8px 36px rgba(230,92,0,.85), 0 0 0 8px rgba(255,140,0,.12); }
+        }
+        @media (max-width: 768px) {
+          .gq-2col { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+    </section>
+  );
+}
+
 // ─── CONTACT CTA ─────────────────────────────────────────────
 function ContactCta({ navigate, lang }) {
   return (
@@ -681,6 +779,7 @@ export default function HomePage({ lang, t, navigate, tours, articles, promotion
 
       {/* Full-width sections below */}
       <WhyUsSection lang={lang} />
+      <GroupQuoteBanner navigate={navigate} lang={lang} />
       <NewToursSection tours={tours} navigate={navigate} t={t} compareList={compareList} toggleCompare={toggleCompare} lang={lang} />
       <StatsStrip lang={lang} />
       <PromoBanners promotions={promotions} navigate={navigate} t={t} lang={lang} />
