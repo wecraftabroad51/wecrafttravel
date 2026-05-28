@@ -196,6 +196,7 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
         { ...form, _type: 'car-rental', rentalLabel, carLabel, _seqNo: seqNo || undefined },
         form.email || undefined
       );
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       setSuccess(true);
     } catch (err) {
       setError(lang === 'th' ? 'เกิดข้อผิดพลาด กรุณาลองใหม่' : 'An error occurred. Please try again.');

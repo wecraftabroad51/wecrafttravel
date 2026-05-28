@@ -92,6 +92,7 @@ export default function ContactPage({ lang, t, settings, setMessages }) {
     const { error } = await insertMessage(msg);
     if (!error) {
       setMessages(prev => [{ id: Date.now(), ...msg }, ...prev]);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       setSent(true);
     } else {
       alert(lang === 'th' ? 'ส่งไม่สำเร็จ กรุณาลองใหม่' : 'Failed to send. Please try again.');
