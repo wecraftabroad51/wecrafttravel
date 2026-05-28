@@ -1514,51 +1514,190 @@ function BookingsSection({ bookings, setBookings, tours, t }) {
 }
 
 // ===== MESSAGES =====
+const MSG_TYPES = {
+  group:   { label: '🎯 กรุ๊ปเหมา', color: '#e65c00', bg: '#fff3e0', border: '#fb923c' },
+  ticket:  { label: '🎫 จองตั๋ว',   color: '#1565c0', bg: '#e3f2fd', border: '#3b82f6' },
+  car:     { label: '🚗 รถเช่า',    color: '#166534', bg: '#dcfce7', border: '#22c55e' },
+  contact: { label: '💬 ติดต่อ',    color: '#6b21a8', bg: '#f3e8ff', border: '#a855f7' },
+};
+
+function getMsgType(msg) {
+  const body = (msg.message || msg.body || '').toLowerCase();
+  const ti   = (msg.tour_interest || '').toLowerCase();
+  if (body.includes('กรุ๊ปเหมา') || ti.includes('กรุ๊ป')) return 'group';
+  if (body.includes('จองตั๋ว') || ti.includes('จองตั๋ว'))  return 'ticket';
+  if (body.includes('รถเช่า')  || ti.includes('รถเช่า'))   return 'car';
+  return 'contact';
+}
+
+function parseMsg(body) {
+  if (!body) return [];
+  return body.split('\n')
+    .filter(l => l.includes(':') && !l.startsWith('===') && !l.startsWith('---'))
+    .map(l => { const i = l.indexOf(':'); return { k: l.slice(0,i).trim(), v: l.slice(i+1).trim() }; })
+    .filter(({ k, v }) => k && v && v !== '-');
+}
+
 function MessagesSection({ messages, setMessages }) {
+  const [tab,      setTab]      = useState('all');
+  const [expanded, setExpanded] = useState(null);
+
   const handleRead = async (id) => {
     const { error } = await markMessageRead(id);
     if (error) { alert('อัปเดตไม่สำเร็จ'); return; }
     setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
   };
-
   const handleDelete = async (id) => {
     if (!window.confirm('ลบข้อความนี้?')) return;
     const { error } = await deleteMessage(id);
     if (error) { alert('ลบไม่สำเร็จ'); return; }
     setMessages(prev => prev.filter(m => m.id !== id));
+    if (expanded === id) setExpanded(null);
   };
+
+  const TABS = [
+    { key: 'all',     icon: '📋', label: 'ทั้งหมด'  },
+    { key: 'group',   icon: '🎯', label: 'กรุ๊ปเหมา' },
+    { key: 'ticket',  icon: '🎫', label: 'จองตั๋ว'  },
+    { key: 'car',     icon: '🚗', label: 'รถเช่า'   },
+    { key: 'contact', icon: '💬', label: 'ติดต่อ'   },
+  ];
+
+  const unread   = messages.filter(m => !m.read).length;
+  const filtered = tab === 'all' ? messages : messages.filter(m => getMsgType(m) === tab);
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-slate-800 mb-6">ข้อความ ({messages.filter(m => !m.read).length} ใหม่)</h2>
-      <div className="space-y-3">
-        {messages.map(msg => (
-          <div key={msg.id} className={`bg-white rounded-2xl p-5 shadow-sm border-l-4 ${msg.read ? 'border-slate-200' : 'border-teal-500'}`}>
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-semibold text-slate-800">{msg.name}</span>
-                  {!msg.read && <span className="bg-teal-100 text-teal-700 text-xs px-2 py-0.5 rounded-full">ใหม่</span>}
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#1e293b', margin: 0 }}>
+          ข้อความ{' '}
+          {unread > 0 && (
+            <span style={{ background: '#e65c00', color: '#fff', fontSize: 13, fontWeight: 700, padding: '2px 10px', borderRadius: 20, marginLeft: 6 }}>
+              {unread} ใหม่
+            </span>
+          )}
+        </h2>
+        <div style={{ fontSize: 13, color: '#94a3b8' }}>ทั้งหมด {messages.length} รายการ</div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+        {TABS.map(t => {
+          const cnt    = t.key === 'all' ? messages.length : messages.filter(m => getMsgType(m) === t.key).length;
+          const newCnt = t.key === 'all' ? unread : messages.filter(m => getMsgType(m) === t.key && !m.read).length;
+          const active = tab === t.key;
+          return (
+            <button key={t.key} onClick={() => setTab(t.key)} style={{
+              padding: '8px 14px', borderRadius: 10, border: 'none',
+              background: active ? '#0f766e' : '#f1f5f9',
+              color: active ? '#fff' : '#475569',
+              fontWeight: 600, fontSize: 13, cursor: 'pointer',
+              fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6,
+              transition: 'all .15s',
+              boxShadow: active ? '0 2px 8px rgba(15,118,110,.3)' : 'none',
+            }}>
+              {t.icon} {t.label}
+              <span style={{
+                background: active ? 'rgba(255,255,255,.25)' : newCnt > 0 ? '#e65c00' : '#cbd5e1',
+                color: '#fff', fontSize: 11, fontWeight: 800,
+                padding: '1px 7px', borderRadius: 20, minWidth: 20, textAlign: 'center',
+              }}>{cnt}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Cards */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {filtered.map(msg => {
+          const type  = getMsgType(msg);
+          const cfg   = MSG_TYPES[type];
+          const body  = msg.message || msg.body || '';
+          const pairs = parseMsg(body);
+          const open  = expanded === msg.id;
+
+          return (
+            <div key={msg.id} style={{
+              background: '#fff', borderRadius: 12, overflow: 'hidden',
+              border: `1px solid ${msg.read ? '#e2e8f0' : cfg.border}`,
+              borderLeft: `4px solid ${msg.read ? '#cbd5e1' : cfg.border}`,
+              boxShadow: msg.read ? 'none' : '0 2px 10px rgba(0,0,0,.06)',
+              transition: 'box-shadow .15s',
+            }}>
+              {/* ── Row header (always visible) ── */}
+              <div style={{ padding: '13px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
+                onClick={() => setExpanded(open ? null : msg.id)}>
+
+                {/* Avatar */}
+                <div style={{
+                  width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                  background: cfg.bg, color: cfg.color,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 18, fontWeight: 800,
+                }}>
+                  {(msg.name || '?')[0].toUpperCase()}
                 </div>
-                <p className="text-xs text-slate-400 mb-2">{msg.email} · {msg.phone}</p>
-                <p className="text-sm text-slate-600">{msg.body || msg.message}</p>
+
+                {/* Info */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 700, fontSize: 14, color: '#1e293b' }}>{msg.name}</span>
+                    <span style={{ background: cfg.bg, color: cfg.color, fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>{cfg.label}</span>
+                    {!msg.read && <span style={{ background: '#e65c00', color: '#fff', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>ใหม่</span>}
+                  </div>
+                  <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 3, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    {msg.email && <span>✉ {msg.email}</span>}
+                    {msg.phone && <span>☎ {msg.phone}</span>}
+                    {msg.date  && <span>📅 {msg.date}</span>}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                  {!msg.read && (
+                    <button onClick={e => { e.stopPropagation(); handleRead(msg.id); }} style={{
+                      background: '#ccfbf1', color: '#0f766e', border: 'none',
+                      borderRadius: 8, padding: '6px 12px', fontSize: 12, fontWeight: 700,
+                      cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                    }}>✓ อ่านแล้ว</button>
+                  )}
+                  <button onClick={e => { e.stopPropagation(); handleDelete(msg.id); }} style={{
+                    width: 32, height: 32, background: '#fef2f2', color: '#ef4444',
+                    border: 'none', borderRadius: 8, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15,
+                  }}>🗑</button>
+                  <span style={{ color: '#94a3b8', fontSize: 13, marginLeft: 2 }}>{open ? '▲' : '▼'}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 ml-4 shrink-0">
-                {!msg.read && (
-                  <button onClick={() => handleRead(msg.id)}
-                    className="bg-teal-100 hover:bg-teal-200 text-teal-700 text-xs px-3 py-1.5 rounded-lg font-medium transition-colors">
-                    <Eye className="w-3.5 h-3.5 inline mr-1" />อ่านแล้ว
-                  </button>
-                )}
-                <button onClick={() => handleDelete(msg.id)}
-                  className="w-8 h-8 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg flex items-center justify-center transition-colors">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
+
+              {/* ── Expanded detail ── */}
+              {open && (
+                <div style={{ borderTop: `1px solid ${cfg.bg}`, background: '#f8fafc', padding: '16px 20px' }}>
+                  {pairs.length > 0 ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '8px 24px' }}>
+                      {pairs.map(({ k, v }, i) => (
+                        <div key={i} style={{ display: 'flex', gap: 8, fontSize: 13, alignItems: 'flex-start' }}>
+                          <span style={{ color: '#94a3b8', fontWeight: 600, minWidth: 110, flexShrink: 0, paddingTop: 1 }}>{k}</span>
+                          <span style={{ color: '#1e293b', fontWeight: 500, wordBreak: 'break-word' }}>{v}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.75, whiteSpace: 'pre-wrap', margin: 0 }}>{body}</p>
+                  )}
+                </div>
+              )}
             </div>
+          );
+        })}
+
+        {filtered.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: '#94a3b8' }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>📭</div>
+            <div style={{ fontSize: 14 }}>ไม่มีข้อความในหมวดนี้</div>
           </div>
-        ))}
-        {messages.length === 0 && <p className="text-slate-400 text-sm">ยังไม่มีข้อความ</p>}
+        )}
       </div>
     </div>
   );
