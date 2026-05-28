@@ -154,7 +154,7 @@ export default function TourCard({ tour, t, navigate, inCompare, onCompare }) {
         <div style={{ height: 1, background: 'var(--line)', margin: '4px 0', marginTop: 'auto' }} />
 
         {/* Price + CTA */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div>
             <div style={{ fontSize: 11, color: 'var(--muted)' }}>ราคาเริ่มต้น / คน</div>
             {originalPrice && (
@@ -169,11 +169,12 @@ export default function TourCard({ tour, t, navigate, inCompare, onCompare }) {
           <button
             onClick={e => { e.stopPropagation(); handleOpen(); }}
             style={{
+              width: '100%',
               background: 'var(--primary)', color: '#fff',
               border: 'none', borderRadius: 6,
-              padding: '8px 14px', fontSize: 13, fontWeight: 700,
+              padding: '10px 14px', fontSize: 13, fontWeight: 700,
               cursor: 'pointer', fontFamily: 'inherit',
-              display: 'flex', alignItems: 'center', gap: 4,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
             }}
           >
             ดูโปรแกรม <Icon name="arrow" size={13} />
