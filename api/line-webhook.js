@@ -25,23 +25,22 @@ function lineReply(replyToken, text) {
 }
 
 module.exports = async function handler(req, res) {
-  res.status(200).json({ ok: true }); // ตอบ LINE ก่อนเสมอ
+  if (req.method !== 'POST') {
+    return res.status(200).json({ ok: true });
+  }
 
-  if (req.method !== 'POST') return;
   const events = req.body?.events || [];
 
   for (const event of events) {
     const src = event.source || {};
     const replyToken = event.replyToken;
 
-    // บอทถูกเชิญเข้ากลุ่ม → ตอบกลับ Group ID ทันที
     if (event.type === 'join' && src.type === 'group') {
       await lineReply(replyToken,
         `✅ WeCraft Bot เข้ากลุ่มแล้ว!\n\n🔑 Group ID ของกลุ่มนี้:\n${src.groupId}\n\nคัดลอกค่านี้ไปใส่ใน Vercel:\nEnvironment Variable ชื่อ LINE_GROUP_ID`
       );
     }
 
-    // มีข้อความในกลุ่ม → ตอบ Group ID ถ้าใส่ LINE_GROUP_ID ยังไม่ครบ
     if (event.type === 'message' && src.type === 'group') {
       const alreadySet = !!process.env.LINE_GROUP_ID;
       if (!alreadySet) {
@@ -51,4 +50,6 @@ module.exports = async function handler(req, res) {
       }
     }
   }
+
+  res.status(200).json({ ok: true });
 };
