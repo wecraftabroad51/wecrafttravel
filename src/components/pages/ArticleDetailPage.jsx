@@ -130,7 +130,7 @@ export default function ArticleDetailPage({ lang, t, navigate, articles, article
               <img
                 src={article.image || article.coverImage}
                 alt={title}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#f5f5f5' }}
               />
             </div>
           </div>

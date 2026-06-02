@@ -116,7 +116,7 @@ export default function ArticlesPage({ lang, t, navigate, articles }) {
                   }}>
                     {a.image
                       ? <img src={a.image} alt={getTitle(a)}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block',
+                          style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block',
                             transition: 'transform .4s' }}
                           onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
                           onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
