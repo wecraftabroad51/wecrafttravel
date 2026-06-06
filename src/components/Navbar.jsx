@@ -195,7 +195,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
     <header ref={headerRef} style={{ position: 'sticky', top: 0, zIndex: 150 }}>
 
       {/* ── Row 1: teal quick-links bar ─────────────────── */}
-      <div style={{ background: 'var(--primary)', color: '#fff', fontSize: 15 }}>
+      <div style={{ background: 'var(--primary)', color: '#fff', fontSize: 18 }}>
         <div className="wrap" style={{
           display: 'grid',
           gridTemplateColumns: '1fr auto 1fr',
