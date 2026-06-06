@@ -175,8 +175,13 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
   const filtered = useMemo(() => {
     let list = [...tours];
     if (tourType !== 'all') {
-      const accepted = LEGACY[tourType] || [tourType];
-      list = list.filter(tr => accepted.includes(tr.tourType));
+      if (tourType === 'hottour') {
+        // ทัวร์ไฟไหม้ = tourType เป็น hottour/hotdeal หรือ ติก Featured ไว้
+        list = list.filter(tr => tr.tourType === 'hottour' || tr.tourType === 'hotdeal' || tr.featured === true);
+      } else {
+        const accepted = LEGACY[tourType] || [tourType];
+        list = list.filter(tr => accepted.includes(tr.tourType));
+      }
     }
     if (continent !== 'All') list = list.filter(tr => tr.continent === continent);
     if (country) list = list.filter(tr => tr.country === country || t(tr.destination)?.includes(country));
