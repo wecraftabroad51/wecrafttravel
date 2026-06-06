@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { insertMessage } from '../../lib/db.js';
+import DateRangePicker from '../DateRangePicker.jsx';
 
 const RENTAL_TYPES = [
   { value: 'domestic',  th: 'ในประเทศ',       en: 'Domestic' },
@@ -276,20 +277,25 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
               <Label th="ประเภทรถเช่า" en="Car Rental Type" lang={lang} required />
               <RadioGroup options={RENTAL_TYPES} value={form.rentalType} onChange={v => set('rentalType', v)} lang={lang} />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-              <div>
-                <Label th="วันที่รับรถ" en="Pickup Date" lang={lang} required />
-                <Input type="date" value={form.pickupDate}
-                  min={new Date().toISOString().split('T')[0]}
-                  onChange={e => set('pickupDate', e.target.value)} />
-              </div>
-              {!isAirport && (
+            <div style={{ marginBottom: 16 }}>
+              {isAirport ? (
                 <div>
-                  <Label th="วันที่คืนรถ" en="Return Date" lang={lang} />
-                  <Input type="date" value={form.returnDate}
-                    min={form.pickupDate || new Date().toISOString().split('T')[0]}
-                    onChange={e => set('returnDate', e.target.value)} />
+                  <Label th="วันที่รับรถ" en="Pickup Date" lang={lang} required />
+                  <DateRangePicker
+                    startDate={form.pickupDate} endDate=""
+                    onStartChange={v => set('pickupDate', v)} onEndChange={() => {}}
+                    startLabel={lang === 'th' ? 'วันที่รับรถ' : 'Pickup Date'}
+                    endLabel="" minDate={new Date().toISOString().split('T')[0]}
+                  />
                 </div>
+              ) : (
+                <DateRangePicker
+                  startDate={form.pickupDate} endDate={form.returnDate}
+                  onStartChange={v => set('pickupDate', v)} onEndChange={v => set('returnDate', v)}
+                  startLabel={lang === 'th' ? 'วันที่รับรถ' : 'Pickup Date'}
+                  endLabel={lang === 'th' ? 'วันที่คืนรถ' : 'Return Date'}
+                  minDate={new Date().toISOString().split('T')[0]}
+                />
               )}
             </div>
             <div style={{ marginBottom: 16 }}>

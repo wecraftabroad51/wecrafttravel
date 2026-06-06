@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { insertMessage, uploadPassport } from '../../lib/db.js';
+import DateRangePicker from '../DateRangePicker.jsx';
 
 // ── Compress image before upload (max 800px, quality 0.6) ─────
 function compressImage(file, maxPx = 800, quality = 0.6) {
@@ -393,22 +394,24 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
             <h3 style={{ margin: '0 0 20px', fontSize: 16, fontWeight: 800, color: 'var(--primary, #e65c00)', borderBottom: '2px solid #fff3e0', paddingBottom: 10 }}>
               {lang === 'th' ? 'ช่วงเวลาเดินทาง' : 'Travel Times'}
             </h3>
-            {/* Outbound */}
+            {/* Date Range Picker */}
             <div style={{ marginBottom: 18 }}>
-              <Label th="ขาไป — วันที่" en="Outbound — Date" lang={lang} required />
-              <Input type="date" value={form.outboundDate}
-                min={new Date().toISOString().split('T')[0]}
-                onChange={e => set('outboundDate', e.target.value)} style={{ marginBottom: 10 }} />
+              <DateRangePicker
+                startDate={form.outboundDate} endDate={form.returnDate}
+                onStartChange={v => set('outboundDate', v)} onEndChange={v => set('returnDate', v)}
+                startLabel={lang === 'th' ? 'ขาไป — วันที่' : 'Outbound — Date'}
+                endLabel={lang === 'th' ? 'ขากลับ — วันที่' : 'Return — Date'}
+                minDate={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+            {/* Outbound time */}
+            <div style={{ marginBottom: 18 }}>
               <Label th="ขาไป — ช่วงเวลาที่ต้องการ" en="Outbound — Preferred Time" lang={lang} />
               <RadioGroup options={TIME_SLOTS.map(s => ({ value: s, th: s, en: s }))}
                 value={form.outboundTime} onChange={v => set('outboundTime', v)} lang={lang} />
             </div>
-            {/* Return */}
+            {/* Return time */}
             <div>
-              <Label th="ขากลับ — วันที่" en="Return — Date" lang={lang} />
-              <Input type="date" value={form.returnDate}
-                min={form.outboundDate || new Date().toISOString().split('T')[0]}
-                onChange={e => set('returnDate', e.target.value)} style={{ marginBottom: 10 }} />
               <Label th="ขากลับ — ช่วงเวลาที่ต้องการ" en="Return — Preferred Time" lang={lang} />
               <RadioGroup options={TIME_SLOTS.map(s => ({ value: s, th: s, en: s }))}
                 value={form.returnTime} onChange={v => set('returnTime', v)} lang={lang} />

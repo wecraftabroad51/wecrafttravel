@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import DateRangePicker from '../DateRangePicker.jsx';
 import { LogOut, LayoutDashboard, Globe, Tag, Star, FileText, HelpCircle,
   Mail, Settings, Plane, Check, X, Eye, Trash2, Plus, Edit2, MessageSquare } from 'lucide-react';
 import {
@@ -1295,17 +1296,17 @@ function ToursSection({ tours, setTours, t }) {
                 <div className="space-y-3">
                   {(form.departures || []).map((dep, i) => (
                     <div key={i} className="bg-slate-50 border border-slate-200 p-3 rounded-xl space-y-2">
-                      <div className="grid grid-cols-3 gap-2 items-center">
-                        <div>
-                          <label className="text-xs text-slate-500 font-semibold block mb-1">วันไป</label>
-                          <input className={inp} type="date" value={dep.date || ''}
-                            onChange={e => updateArr('departures', i, { ...dep, date: e.target.value })} />
-                        </div>
-                        <div>
-                          <label className="text-xs text-slate-500 font-semibold block mb-1">วันกลับ</label>
-                          <input className={inp} type="date" value={dep.returnDate || ''}
-                            onChange={e => updateArr('departures', i, { ...dep, returnDate: e.target.value })} />
-                        </div>
+                      <div className="grid grid-cols-1 gap-2">
+                        <DateRangePicker
+                          startDate={dep.date || ''}
+                          endDate={dep.returnDate || ''}
+                          onStartChange={val => updateArr('departures', i, { ...dep, date: val })}
+                          onEndChange={val => updateArr('departures', i, { ...dep, returnDate: val })}
+                          startLabel="วันไป"
+                          endLabel="วันกลับ"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 items-center">
                         <div className="flex gap-2 items-end">
                           <div className="flex-1">
                             <label className="text-xs text-slate-500 font-semibold block mb-1">ที่นั่งทั้งหมด</label>
