@@ -88,7 +88,22 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
   const tourName    = tv(tour.name);
   const airline     = tour.flight?.outbound?.airline || tour.airline || '';
   const basePrice   = tour.priceTiers?.[0]?.price || tour.price || 0;
-  const tourCode    = tour.code || `TW${String(tour.id).padStart(4,'0')}`;
+  const tourCode    = tour.code || '-';
+
+  // Travel month range from departures
+  const MONTHS_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const travelMonthRange = (() => {
+    const deps = tour.departures || [];
+    if (!deps.length) return null;
+    const months = deps.flatMap(d => {
+      const dates = [d.date, d.returnDate].filter(Boolean);
+      return dates.map(dt => new Date(dt).getMonth()).filter(m => !isNaN(m));
+    });
+    if (!months.length) return null;
+    const minM = Math.min(...months);
+    const maxM = Math.max(...months);
+    return minM === maxM ? MONTHS_TH[minM] : `${MONTHS_TH[minM]}-${MONTHS_TH[maxM]}`;
+  })();
 
   const depStatus = (dep) => {
     if (!dep.totalSeats) return 'open';
@@ -238,6 +253,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                     val: <span style={{ color: '#dc2626', fontWeight: 800, fontSize: 17 }}>
                       {basePrice.toLocaleString()} <span style={{ fontSize: 12, fontWeight: 600 }}>{th ? 'บาท/ท่าน' : 'THB/pax'}</span>
                     </span> },
+                  ...(travelMonthRange ? [{ icon: '🗓️', label: th ? 'ช่วงเดือนที่เดินทาง' : 'Travel Months', val: <span style={{ fontWeight: 700, color: '#0f766e' }}>{travelMonthRange}</span> }] : []),
                   { icon: '✈️', label: th ? 'เดินทางโดย' : 'Airline',      val: airline || (th ? 'ติดต่อสอบถาม' : 'TBA') },
                 ].map(({ icon, label, val }) => (
                   <div key={label} className="info-cell">
