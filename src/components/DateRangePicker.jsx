@@ -25,8 +25,7 @@ function formatDisplay(str) {
 
 function CalendarMonth({ year, month, startDate, endDate, hoverDate, onSelect, onHover, minDate }) {
   const firstDay = new Date(year, month, 1);
-  // Monday-first: 0=Mon ... 6=Sun
-  let startDow = firstDay.getDay(); // 0=Sun,1=Mon...
+  let startDow = firstDay.getDay();
   startDow = startDow === 0 ? 6 : startDow - 1;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
@@ -38,17 +37,16 @@ function CalendarMonth({ year, month, startDate, endDate, hoverDate, onSelect, o
   const end = parseDate(endDate);
   const hover = hoverDate ? parseDate(hoverDate) : null;
   const min = minDate ? parseDate(minDate) : null;
-
   const rangeEnd = end || hover;
 
   return (
-    <div style={{ minWidth: 280 }}>
+    <div style={{ width: 252 }}>
       <div style={{ textAlign: 'center', fontWeight: 700, fontSize: 15, marginBottom: 10, color: '#1a1a2e' }}>
         {MONTHS_TH[month]} {year}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2, marginBottom: 4 }}>
         {DAYS_TH.map(d => (
-          <div key={d} style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, color: '#94a3b8', padding: '4px 0' }}>{d}</div>
+          <div key={d} style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: '#94a3b8', padding: '4px 0' }}>{d}</div>
         ))}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 2 }}>
@@ -56,36 +54,35 @@ function CalendarMonth({ year, month, startDate, endDate, hoverDate, onSelect, o
           if (!d) return <div key={i} />;
           const date = new Date(year, month, d);
           const dateStr = toDateStr(date);
-          const isStart = startDate === dateStr;
-          const isEnd = endDate === dateStr;
+          const isStart = start && toDateStr(start) === dateStr;
+          const isEnd = end && toDateStr(end) === dateStr;
+          const isHoverEnd = !end && hover && toDateStr(hover) === dateStr;
           const isPast = min && date < min;
-          const inRange = start && rangeEnd && date > (isStart ? start : start) && date < rangeEnd && !isStart && !isEnd;
-          const isRangeStart = start && toDateStr(start) === dateStr;
-          const isRangeEnd = rangeEnd && toDateStr(rangeEnd) === dateStr;
+          const inRange = start && rangeEnd && date > start && date < rangeEnd;
 
           let bg = 'transparent';
           let color = '#334155';
-          let borderRadius = 8;
-          let fontWeight = 400;
+          let br = 8;
+          let fw = 400;
 
-          if (isStart || isRangeStart) { bg = '#0f766e'; color = '#fff'; fontWeight = 700; }
-          else if (isEnd || isRangeEnd) { bg = '#0f766e'; color = '#fff'; fontWeight = 700; }
-          else if (inRange) { bg = '#ccfbf1'; color = '#0f766e'; borderRadius = 0; }
+          if (isStart) { bg = '#0f766e'; color = '#fff'; fw = 700; }
+          else if (isEnd || isHoverEnd) { bg = '#0f766e'; color = '#fff'; fw = 700; }
+          else if (inRange) { bg = '#ccfbf1'; color = '#0f766e'; br = 0; }
 
           if (isPast) { color = '#cbd5e1'; bg = 'transparent'; }
 
           return (
-            <div
-              key={i}
+            <div key={i}
               onClick={() => !isPast && onSelect(dateStr)}
               onMouseEnter={() => !isPast && onHover(dateStr)}
               onMouseLeave={() => onHover(null)}
               style={{
-                textAlign: 'center', padding: '7px 0',
-                background: bg, color, borderRadius, fontWeight,
+                textAlign: 'center', padding: '7px 2px',
+                background: bg, color, borderRadius: br, fontWeight: fw,
                 fontSize: 13, cursor: isPast ? 'not-allowed' : 'pointer',
+                opacity: isPast ? 0.35 : 1,
                 transition: 'background .1s',
-                opacity: isPast ? 0.4 : 1,
+                userSelect: 'none',
               }}
               onMouseOver={e => { if (!isPast && !isStart && !isEnd && !inRange) e.currentTarget.style.background = '#f0fdfa'; }}
               onMouseOut={e => { if (!isPast && !isStart && !isEnd && !inRange) e.currentTarget.style.background = bg; }}
@@ -106,20 +103,44 @@ export default function DateRangePicker({
   minDate,
 }) {
   const [open, setOpen] = useState(false);
-  const [selecting, setSelecting] = useState('start'); // 'start' | 'end'
+  const [selecting, setSelecting] = useState('start');
   const [hoverDate, setHoverDate] = useState(null);
+  const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
+
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
-  const ref = useRef(null);
+
+  const triggerRef = useRef(null);
+  const dropRef = useRef(null);
+
+  // Position dropdown using fixed so it escapes overflow:hidden modals
+  const openDropdown = (mode) => {
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      let left = rect.left;
+      // Prevent going off right edge of screen
+      if (left + 660 > window.innerWidth) left = window.innerWidth - 670;
+      setDropPos({ top: rect.bottom + 6, left: Math.max(8, left) });
+    }
+    setSelecting(mode);
+    setOpen(true);
+  };
 
   useEffect(() => {
-    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const handler = (e) => {
+      if (
+        dropRef.current && !dropRef.current.contains(e.target) &&
+        triggerRef.current && !triggerRef.current.contains(e.target)
+      ) setOpen(false);
+    };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const nextMonth = viewMonth === 11 ? { year: viewYear + 1, month: 0 } : { year: viewYear, month: viewMonth + 1 };
+  const nextMonth = viewMonth === 11
+    ? { year: viewYear + 1, month: 0 }
+    : { year: viewYear, month: viewMonth + 1 };
 
   const handleSelect = (dateStr) => {
     if (selecting === 'start') {
@@ -127,106 +148,128 @@ export default function DateRangePicker({
       onEndChange('');
       setSelecting('end');
     } else {
-      const start = parseDate(startDate);
-      const selected = parseDate(dateStr);
-      if (start && selected < start) {
-        // clicked before start → make it new start
+      const s = parseDate(startDate);
+      const sel = parseDate(dateStr);
+      if (s && sel < s) {
         onStartChange(dateStr);
         onEndChange('');
         setSelecting('end');
       } else {
         onEndChange(dateStr);
-        setSelecting('start');
         setOpen(false);
+        setSelecting('start');
       }
     }
   };
 
-  const prevMonthNav = () => {
+  const prevM = () => {
     if (viewMonth === 0) { setViewYear(y => y - 1); setViewMonth(11); }
     else setViewMonth(m => m - 1);
   };
-  const nextMonthNav = () => {
+  const nextM = () => {
     if (viewMonth === 11) { setViewYear(y => y + 1); setViewMonth(0); }
     else setViewMonth(m => m + 1);
   };
 
-  const inp = {
+  const btn = {
     background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: 8,
-    padding: '8px 12px', fontSize: 14, color: '#334155',
+    padding: '9px 12px', fontSize: 14, color: '#334155',
     cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left',
     width: '100%', display: 'block',
   };
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      {/* Trigger */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+    <>
+      <div ref={triggerRef} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <div>
           <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>{startLabel}</div>
-          <button type="button" onClick={() => { setOpen(true); setSelecting('start'); }}
-            style={{ ...inp, borderColor: open && selecting === 'start' ? '#0f766e' : '#e2e8f0' }}>
-            {startDate ? formatDisplay(startDate) : <span style={{ color: '#94a3b8' }}>วว/ดด/ปปปป</span>}
+          <button type="button" onClick={() => openDropdown('start')}
+            style={{ ...btn, borderColor: open && selecting === 'start' ? '#0f766e' : '#e2e8f0', boxShadow: open && selecting === 'start' ? '0 0 0 2px #ccfbf1' : 'none' }}>
+            {startDate ? formatDisplay(startDate) : <span style={{ color: '#94a3b8' }}>เลือกวันที่</span>}
           </button>
         </div>
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>{endLabel}</div>
-          <button type="button" onClick={() => { setOpen(true); setSelecting('end'); }}
-            style={{ ...inp, borderColor: open && selecting === 'end' ? '#0f766e' : '#e2e8f0' }}>
-            {endDate ? formatDisplay(endDate) : <span style={{ color: '#94a3b8' }}>วว/ดด/ปปปป</span>}
-          </button>
-        </div>
+        {endLabel && (
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>{endLabel}</div>
+            <button type="button" onClick={() => openDropdown('end')}
+              style={{ ...btn, borderColor: open && selecting === 'end' ? '#0f766e' : '#e2e8f0', boxShadow: open && selecting === 'end' ? '0 0 0 2px #ccfbf1' : 'none' }}>
+              {endDate ? formatDisplay(endDate) : <span style={{ color: '#94a3b8' }}>เลือกวันที่</span>}
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Hint */}
-      {open && (
+      {open && selecting && (
         <div style={{ fontSize: 12, color: '#0f766e', fontWeight: 600, marginTop: 4 }}>
-          {selecting === 'start' ? '👆 เลือกวันออกเดินทาง' : '👆 เลือกวันเดินทางกลับ'}
+          {selecting === 'start' ? '📅 กรุณาเลือกวันออกเดินทาง' : '📅 กรุณาเลือกวันเดินทางกลับ'}
         </div>
       )}
 
-      {/* Calendar dropdown */}
+      {/* Calendar — position: fixed เพื่อหนี overflow:hidden */}
       {open && (
-        <div style={{
-          position: 'absolute', top: '100%', left: 0, zIndex: 9999,
-          background: '#fff', borderRadius: 16, marginTop: 8,
-          boxShadow: '0 8px 40px rgba(0,0,0,0.15)',
-          border: '1px solid #e2e8f0', padding: 20,
-          display: 'flex', flexDirection: 'column', gap: 16,
+        <div ref={dropRef} style={{
+          position: 'fixed',
+          top: dropPos.top,
+          left: dropPos.left,
+          zIndex: 99999,
+          background: '#fff',
+          borderRadius: 16,
+          boxShadow: '0 12px 48px rgba(0,0,0,0.18)',
+          border: '1px solid #e2e8f0',
+          padding: '20px 24px',
+          minWidth: 640,
         }}>
-          {/* Nav */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <button type="button" onClick={prevMonthNav}
-              style={{ background: '#f1f5f9', border: 'none', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', fontSize: 16 }}>‹</button>
-            <div style={{ display: 'flex', gap: 32 }}>
+          {/* Header hint */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: selecting === 'start' ? '#0f766e' : '#64748b' }}>
+              {selecting === 'start' ? '● วันออกเดินทาง' : '○ วันออกเดินทาง'}
+            </span>
+            <span style={{ color: '#e2e8f0' }}>→</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: selecting === 'end' ? '#0f766e' : '#64748b' }}>
+              {selecting === 'end' ? '● วันเดินทางกลับ' : '○ วันเดินทางกลับ'}
+            </span>
+            <button type="button" onClick={() => setOpen(false)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 18, lineHeight: 1, padding: '0 4px' }}>✕</button>
+          </div>
+
+          {/* 2 Calendars */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 0 }}>
+            <button type="button" onClick={prevM}
+              style={{ background: '#f1f5f9', border: 'none', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', fontSize: 18, flexShrink: 0, alignSelf: 'center' }}>‹</button>
+
+            <div style={{ display: 'flex', gap: 24, flex: 1, justifyContent: 'center' }}>
               <CalendarMonth year={viewYear} month={viewMonth}
                 startDate={startDate} endDate={endDate} hoverDate={hoverDate}
                 onSelect={handleSelect} onHover={setHoverDate} minDate={minDate} />
+              <div style={{ width: 1, background: '#f1f5f9', alignSelf: 'stretch' }} />
               <CalendarMonth year={nextMonth.year} month={nextMonth.month}
                 startDate={startDate} endDate={endDate} hoverDate={hoverDate}
                 onSelect={handleSelect} onHover={setHoverDate} minDate={minDate} />
             </div>
-            <button type="button" onClick={nextMonthNav}
-              style={{ background: '#f1f5f9', border: 'none', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', fontSize: 16 }}>›</button>
+
+            <button type="button" onClick={nextM}
+              style={{ background: '#f1f5f9', border: 'none', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', fontSize: 18, flexShrink: 0, alignSelf: 'center' }}>›</button>
           </div>
 
           {/* Footer */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f5f9', paddingTop: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f1f5f9', paddingTop: 14, marginTop: 16 }}>
             <button type="button" onClick={() => { onStartChange(''); onEndChange(''); setSelecting('start'); }}
-              style={{ background: 'none', border: 'none', color: '#64748b', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
-              ล้าง
+              style={{ background: 'none', border: '1px solid #e2e8f0', color: '#64748b', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', borderRadius: 8, padding: '6px 14px' }}>
+              ล้างวันที่
             </button>
-            <span style={{ fontSize: 13, color: '#64748b' }}>
-              {startDate && endDate ? `${formatDisplay(startDate)} → ${formatDisplay(endDate)}` :
-               startDate ? `${formatDisplay(startDate)} → เลือกวันกลับ` : 'เลือกวันออกเดินทาง'}
+            <span style={{ fontSize: 13, color: '#0f766e', fontWeight: 600 }}>
+              {startDate && endDate
+                ? `${formatDisplay(startDate)} → ${formatDisplay(endDate)}`
+                : startDate ? `${formatDisplay(startDate)} → ?`
+                : 'เลือกวันออกเดินทางก่อน'}
             </span>
             <button type="button" onClick={() => setOpen(false)}
-              style={{ background: '#0f766e', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-              วันนี้
+              style={{ background: '#0f766e', color: '#fff', border: 'none', borderRadius: 8, padding: '7px 18px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+              ยืนยัน
             </button>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
