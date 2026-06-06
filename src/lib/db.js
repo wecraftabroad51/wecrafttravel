@@ -95,6 +95,7 @@ export const upsertTour = async (tour) => {
     pdf_label:      tour.pdfLabel       ?? tour.pdf_label      ?? {},
     pdf_updated:    tour.pdfUpdated     ?? tour.pdf_updated    ?? '',
     discount:       tour.discount       ?? 0,
+    code:           tour.code           || '',
   }
   const { data, error } = await supabase
     .from('tours')
