@@ -187,10 +187,10 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
           <div style={{ display: 'flex', gap: 0, flexWrap: 'wrap' }}>
 
             {/* Image */}
-            <div style={{ width: 280, minWidth: 220, flexShrink: 0, position: 'relative', background: '#f0f4f8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 420, minWidth: 280, flexShrink: 0, position: 'relative', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {tour.image ? (
                 <img src={tour.image} alt={tourName}
-                  style={{ width: '100%', height: 'auto', maxHeight: 420, objectFit: 'contain', display: 'block' }} />
+                  style={{ width: '100%', height: 'auto', maxHeight: 560, objectFit: 'contain', display: 'block' }} />
               ) : (
                 <div style={{ width: '100%', height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 48 }}>
                   🗺️
