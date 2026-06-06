@@ -1213,16 +1213,16 @@ function ToursSection({ tours, setTours, t }) {
               </Field>
               <div className="grid grid-cols-4 gap-3">
                 <Field label="ราคาเริ่มต้น (฿)">
-                  <input className={inp} type="number" style={{ textAlign: 'right' }} value={form.price} onChange={e => setF(['price'], Number(e.target.value))} />
+                  <input className={inp} type="text" inputMode="numeric" style={{ textAlign: 'right' }} value={form.price} onChange={e => setF(['price'], Number(e.target.value.replace(/\D/g,'')) || 0)} placeholder="0" />
                 </Field>
                 <Field label="ระยะเวลา (วัน)">
-                  <input className={inp} type="number" style={{ textAlign: 'center' }} value={form.duration} onChange={e => setF(['duration'], Number(e.target.value))} />
+                  <input className={inp} type="text" inputMode="numeric" style={{ textAlign: 'center' }} value={form.duration} onChange={e => setF(['duration'], Number(e.target.value.replace(/\D/g,'')) || 0)} placeholder="0" />
                 </Field>
                 <Field label="จำนวนคน (สูงสุด)">
-                  <input className={inp} type="number" style={{ textAlign: 'center' }} value={form.groupSize} onChange={e => setF(['groupSize'], Number(e.target.value))} />
+                  <input className={inp} type="text" inputMode="numeric" style={{ textAlign: 'center' }} value={form.groupSize} onChange={e => setF(['groupSize'], Number(e.target.value.replace(/\D/g,'')) || 0)} placeholder="0" />
                 </Field>
                 <Field label="ส่วนลด (%)">
-                  <input className={inp} type="number" min={0} max={99} style={{ textAlign: 'center' }} value={form.discount || 0} onChange={e => setF(['discount'], Number(e.target.value))} placeholder="0" />
+                  <input className={inp} type="text" inputMode="numeric" style={{ textAlign: 'center' }} value={form.discount || ''} onChange={e => setF(['discount'], Number(e.target.value.replace(/\D/g,'')) || 0)} placeholder="0" />
                 </Field>
               </div>
               <div className="grid grid-cols-2 gap-3">
