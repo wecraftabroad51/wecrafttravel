@@ -874,6 +874,115 @@ const AIRLINES = {
   ],
 };
 
+// ===== AIRLINE SELECT COMPONENT =====
+const ALL_AIRLINES_FLAT = Object.entries(AIRLINES).flatMap(([region, list]) =>
+  list.map(name => ({ name, region }))
+);
+
+function AirlineSelect({ value, onChange }) {
+  const [open, setOpen]       = useState(false);
+  const [query, setQuery]     = useState('');
+  const [custom, setCustom]   = useState('');
+  const ref                   = useRef(null);
+
+  const isOther = value === 'อื่นๆ';
+  const displayValue = isOther ? (custom ? `อื่นๆ: ${custom}` : 'อื่นๆ') : (value || '');
+
+  // close on outside click
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const filtered = query.trim()
+    ? ALL_AIRLINES_FLAT.filter(a => a.name.toLowerCase().includes(query.toLowerCase()))
+    : ALL_AIRLINES_FLAT;
+
+  const grouped = query.trim()
+    ? { 'ผลการค้นหา': filtered.map(a => a.name) }
+    : Object.fromEntries(Object.entries(AIRLINES).map(([r, list]) => [r, list]));
+
+  const select = (val) => {
+    onChange(val);
+    if (val !== 'อื่นๆ') setCustom('');
+    setOpen(false);
+    setQuery('');
+  };
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      {/* Trigger */}
+      <button type="button" onClick={() => setOpen(p => !p)}
+        className={`${inp} text-left flex items-center justify-between`}
+        style={{ cursor: 'pointer' }}>
+        <span className={displayValue ? 'text-slate-800' : 'text-slate-400'}>
+          {displayValue || '-- เลือกสายการบิน --'}
+        </span>
+        <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 9999,
+          background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12,
+          boxShadow: '0 8px 30px rgba(0,0,0,0.12)', marginTop: 4, overflow: 'hidden',
+        }}>
+          {/* Search */}
+          <div style={{ padding: '10px 12px', borderBottom: '1px solid #f1f5f9' }}>
+            <input
+              autoFocus
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="🔍 ค้นหาสายการบิน..."
+              className={inp}
+              style={{ margin: 0 }}
+            />
+          </div>
+
+          {/* List */}
+          <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+            {Object.entries(grouped).map(([region, list]) => (
+              <div key={region}>
+                <div style={{ padding: '6px 12px 2px', fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', background: '#f8fafc' }}>
+                  {region}
+                </div>
+                {list.map(name => (
+                  <button key={name} type="button" onClick={() => select(name)}
+                    style={{ display: 'block', width: '100%', textAlign: 'left', padding: '7px 16px', fontSize: 13, color: '#334155', background: value === name ? '#f0fdfa' : 'transparent', fontWeight: value === name ? 600 : 400 }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#f0fdfa'}
+                    onMouseLeave={e => e.currentTarget.style.background = value === name ? '#f0fdfa' : 'transparent'}>
+                    {name}
+                  </button>
+                ))}
+              </div>
+            ))}
+            {/* อื่นๆ */}
+            <button type="button" onClick={() => select('อื่นๆ')}
+              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 16px', fontSize: 13, color: '#0f766e', fontWeight: 600, borderTop: '1px solid #f1f5f9', background: isOther ? '#f0fdfa' : 'transparent' }}>
+              ✏️ อื่นๆ (ระบุเอง)
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Custom input when "อื่นๆ" selected */}
+      {isOther && (
+        <input
+          className={inp}
+          style={{ marginTop: 8 }}
+          placeholder="ระบุชื่อสายการบิน / หมายเหตุ..."
+          value={custom}
+          onChange={e => { setCustom(e.target.value); onChange('อื่นๆ:' + e.target.value); }}
+        />
+      )}
+    </div>
+  );
+}
+
 // ===== TOURS =====
 const EMPTY_TOUR = {
   name: { th: '', en: '' }, destination: { th: '', en: '' }, description: { th: '', en: '' },
@@ -1121,15 +1230,10 @@ function ToursSection({ tours, setTours, t }) {
                   <input className={inp} value={form.code || ''} onChange={e => setF(['code'], e.target.value)} placeholder="เช่น CANAQ0326, JPNTOK001" />
                 </Field>
                 <Field label="สายการบิน">
-                  <select className={inp} value={form.flight?.outbound?.airline || ''} onChange={e => setF(['flight','outbound','airline'], e.target.value)}>
-                    <option value="">-- เลือกสายการบิน --</option>
-                    {Object.entries(AIRLINES).map(([region, list]) => (
-                      <optgroup key={region} label={region}>
-                        {list.map(a => <option key={a} value={a}>{a}</option>)}
-                      </optgroup>
-                    ))}
-                    <option value="อื่นๆ">อื่นๆ (ระบุในหมายเหตุ)</option>
-                  </select>
+                  <AirlineSelect
+                    value={form.flight?.outbound?.airline || ''}
+                    onChange={val => setF(['flight','outbound','airline'], val)}
+                  />
                 </Field>
               </div>
               <Field label="📄 PDF โปรแกรมทัวร์">
