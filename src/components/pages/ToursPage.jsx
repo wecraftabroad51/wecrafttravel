@@ -26,8 +26,8 @@ function TourRow({ tour, t, navigate, inCompare, onCompare }) {
 
   return (
     <article className="card layout-tours-item" style={{ overflow: 'hidden', background: 'var(--card)' }}>
-      <div style={{ position: 'relative', overflow: 'hidden', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 320 }}>
-        <img src={tour.image} alt={name} style={{ width: '100%', height: 'auto', maxHeight: 480, objectFit: 'contain', display: 'block' }} />
+      <div style={{ position: 'relative', overflow: 'hidden', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 420 }}>
+        <img src={tour.image} alt={name} style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }} />
         {tour.featured && (
           <span style={{
             position: 'absolute', top: 12, left: 12,

@@ -264,7 +264,7 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
 .layout-faq { display: grid; grid-template-columns: 220px 1fr 280px; }
 .layout-sidebar { display: grid; grid-template-columns: 1fr 280px; }
 .layout-footer { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; }
-.layout-tours-item { display: grid; grid-template-columns: 220px 1fr 260px; }
+.layout-tours-item { display: grid; grid-template-columns: 380px 1fr 260px; }
 .search-bar { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr auto; }
 .grid-review-item { display: grid; grid-template-columns: 60px 1fr; }
 .layout-hero-3 { display: grid; grid-template-columns: 2.4fr 1fr 1.4fr; }
