@@ -282,8 +282,8 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
             style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0, marginRight: 28 }}>
             <img src="/logo.png" alt="WeCraft Travel" style={{ width: 52, height: 52, objectFit: 'contain' }} />
             <div style={{ lineHeight: 1.25 }}>
-              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--primary)' }}>WeCraft Travel</div>
-              <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '.04em' }}>WE CRAFT ABROAD</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--primary)' }}>WeCraft Travel</div>
+              <div style={{ fontSize: 12, color: 'var(--muted)', letterSpacing: '.04em' }}>WE CRAFT ABROAD</div>
             </div>
           </button>
 
@@ -299,8 +299,8 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
               </svg>
             </span>
             <div>
-              <div style={{ fontWeight: 700, fontSize: 13, color: '#333' }}>{lang === 'th' ? 'เวลาทำการ' : 'Office Hours'}</div>
-              <div style={{ fontSize: 12, color: '#666', marginTop: 1 }}>{lang === 'th' ? 'จันทร์-เสาร์ : 09.00-18.00 น.' : 'Mon–Sat : 09:00–18:00'}</div>
+              <div style={{ fontWeight: 700, fontSize: 15, color: '#333' }}>{lang === 'th' ? 'เวลาทำการ' : 'Office Hours'}</div>
+              <div style={{ fontSize: 14, color: '#666', marginTop: 1 }}>{lang === 'th' ? 'จันทร์-เสาร์ : 09.00-18.00 น.' : 'Mon–Sat : 09:00–18:00'}</div>
             </div>
           </div>
 
@@ -316,16 +316,16 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
               </svg>
             </span>
             <div>
-              <div style={{ fontWeight: 700, fontSize: 13, color: '#333' }}>
+              <div style={{ fontWeight: 700, fontSize: 15, color: '#333' }}>
                 {lang === 'th' ? 'สายด่วน' : 'Hotline'}{' '}
                 <span style={{ color: 'var(--primary)', fontWeight: 700 }}>
                   {lang === 'th' ? 'Hot Line 24 ชม.' : 'Hot Line 24 hrs'}
                 </span>
               </div>
-              <a href="tel:0618686889" style={{ display: 'block', fontSize: 13, color: '#555', textDecoration: 'none', marginTop: 1 }}>
+              <a href="tel:0618686889" style={{ display: 'block', fontSize: 15, color: '#555', textDecoration: 'none', marginTop: 1 }}>
                 061-868-6889
               </a>
-              <a href="tel:0652398915" style={{ display: 'block', fontSize: 12, color: '#555', textDecoration: 'none', marginTop: 2 }}>
+              <a href="tel:0652398915" style={{ display: 'block', fontSize: 14, color: '#555', textDecoration: 'none', marginTop: 2 }}>
                 065-239-8915
               </a>
             </div>
@@ -349,10 +349,10 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
             </a>
             <div>
               <a href="https://line.me/R/ti/p/@wecrafttravel" target="_blank" rel="noopener noreferrer"
-                style={{ fontWeight: 800, fontSize: 15, color: '#06c755', textDecoration: 'none' }}>
+                style={{ fontWeight: 800, fontSize: 17, color: '#06c755', textDecoration: 'none' }}>
                 @wecrafttravel
               </a>
-              <div style={{ fontSize: 13, color: 'var(--ink)', marginTop: 1 }}>We Craft Travel · We Craft Happiness</div>
+              <div style={{ fontSize: 15, color: 'var(--ink)', marginTop: 1 }}>We Craft Travel · We Craft Happiness</div>
             </div>
           </div>
 
