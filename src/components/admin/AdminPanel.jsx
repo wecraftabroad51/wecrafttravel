@@ -882,11 +882,11 @@ const ALL_AIRLINES_FLAT = Object.entries(AIRLINES).flatMap(([region, list]) =>
 function AirlineSelect({ value, onChange }) {
   const [open, setOpen]       = useState(false);
   const [query, setQuery]     = useState('');
-  const [custom, setCustom]   = useState('');
+  const [custom, setCustom]   = useState(() => value?.startsWith('อื่นๆ:') ? value.slice(4) : '');
   const ref                   = useRef(null);
 
-  const isOther = value === 'อื่นๆ';
-  const displayValue = isOther ? (custom ? `อื่นๆ: ${custom}` : 'อื่นๆ') : (value || '');
+  const isOther = value === 'อื่นๆ' || value?.startsWith('อื่นๆ:');
+  const displayValue = isOther ? (custom ? `อื่นๆ: ${custom}` : 'อื่นๆ (ระบุเอง)') : (value || '');
 
   // close on outside click
   useEffect(() => {
