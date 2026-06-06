@@ -195,7 +195,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
     <header ref={headerRef} style={{ position: 'sticky', top: 0, zIndex: 150 }}>
 
       {/* ── Row 1: teal quick-links bar ─────────────────── */}
-      <div style={{ background: 'var(--primary)', color: '#fff', fontSize: 13 }}>
+      <div style={{ background: 'var(--primary)', color: '#fff', fontSize: 14 }}>
         <div className="wrap" style={{
           display: 'grid',
           gridTemplateColumns: '1fr auto 1fr',
@@ -378,23 +378,23 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
             </div>
           </button>
 
-          {/* Desktop nav — centered, no logo */}
-          <nav className="nav-desktop" style={{ display: 'flex', alignItems: 'stretch', gap: 0, height: '100%', flex: 1, justifyContent: 'center' }}>
+          {/* Desktop nav — spread full width */}
+          <nav className="nav-desktop" style={{ display: 'flex', alignItems: 'stretch', gap: 0, height: '100%', flex: 1, justifyContent: 'space-evenly' }}>
             {MENU.map((m, i) => (
-              <div key={i} style={{ position: 'relative', display: 'flex', alignItems: 'stretch' }}
+              <div key={i} style={{ position: 'relative', display: 'flex', alignItems: 'stretch', flex: 1 }}
                 onMouseEnter={() => openMenu(i)}
                 onMouseLeave={closeMenu}
               >
                 <button
                   onClick={() => { navigate(m.key, null, m.tourType ? { tourType: m.tourType } : null); setActiveMenu(null); }}
                   style={{
-                    padding: '0 10px', border: 'none',
+                    padding: '0 6px', border: 'none', width: '100%',
                     borderBottom: activeMenu === i || page === m.key ? '3px solid var(--primary)' : '3px solid transparent',
                     color: activeMenu === i || page === m.key ? 'var(--primary)' : 'var(--ink-2)',
                     background: 'transparent',
-                    fontSize: 13, fontWeight: 700,
+                    fontSize: 14, fontWeight: 700,
                     cursor: 'pointer', fontFamily: 'inherit',
-                    display: 'flex', alignItems: 'center', gap: 3,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3,
                     whiteSpace: 'nowrap',
                     transition: 'color .12s, border-color .12s',
                   }}
