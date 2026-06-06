@@ -1309,8 +1309,8 @@ function ToursSection({ tours, setTours, t }) {
                         <div className="flex gap-2 items-end">
                           <div className="flex-1">
                             <label className="text-xs text-slate-500 font-semibold block mb-1">ที่นั่งทั้งหมด</label>
-                            <input className={inp} type="number" min={0} value={dep.totalSeats ?? 20}
-                              onChange={e => updateArr('departures', i, { ...dep, totalSeats: Number(e.target.value) })} />
+                            <input className={inp} type="text" inputMode="numeric" value={dep.totalSeats ?? 20}
+                              onChange={e => updateArr('departures', i, { ...dep, totalSeats: Number(e.target.value.replace(/\D/g,'')) || 0 })} placeholder="0" />
                           </div>
                           <div className="flex-1">
                             <label className="text-xs text-slate-500 font-semibold block mb-1">จองแล้ว</label>
