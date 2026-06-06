@@ -215,7 +215,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
                     style={{
                       background: 'linear-gradient(135deg, #ff8c00, #e65c00)',
                       border: 'none', color: '#fff',
-                      fontSize: 12, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
+                      fontSize: 16, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
                       padding: '3px 10px', borderRadius: 12,
                       boxShadow: '0 2px 8px rgba(230,92,0,0.5)',
                       transition: 'opacity .15s, transform .15s',
@@ -231,7 +231,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
                     onClick={() => navigate(ql.key)}
                     style={{
                       background: 'none', border: 'none', color: '#fff',
-                      fontSize: 13, cursor: 'pointer', fontFamily: 'inherit',
+                      fontSize: 16, cursor: 'pointer', fontFamily: 'inherit',
                       padding: '2px 0',
                       transition: 'color .15s',
                     }}
@@ -250,7 +250,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
               style={{
                 background: 'rgba(255,255,255,.15)', border: '1px solid rgba(255,255,255,.35)',
                 color: '#fff', padding: '2px 10px', borderRadius: 3,
-                fontSize: 12, cursor: 'pointer', fontFamily: 'inherit',
+                fontSize: 15, cursor: 'pointer', fontFamily: 'inherit',
               }}>
               {lang === 'th' ? 'EN' : 'TH'}
             </button>
