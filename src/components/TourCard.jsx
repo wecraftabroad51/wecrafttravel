@@ -39,14 +39,12 @@ export default function TourCard({ tour, t, navigate, inCompare, onCompare }) {
       onClick={handleOpen}
     >
       {/* Image */}
-      <div style={{ position: 'relative', aspectRatio: '16/10', overflow: 'hidden', background: '#f0f0f0' }}>
+      <div style={{ position: 'relative', overflow: 'hidden', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 240 }}>
         {tour.image ? (
           <img
             src={tour.image}
             alt={name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform .5s ease' }}
-            onMouseOver={e => e.currentTarget.style.transform = 'scale(1.06)'}
-            onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+            style={{ width: '100%', height: 'auto', objectFit: 'contain', display: 'block' }}
           />
         ) : (
           <div style={{
