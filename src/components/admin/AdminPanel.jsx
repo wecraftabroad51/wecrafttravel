@@ -596,6 +596,135 @@ function DashboardSection({ tours, articles, bookings, messages, reviews }) {
   );
 }
 
+// ===== AIRLINE LIST =====
+const AIRLINES = {
+  'สายการบินไทย': [
+    'Thai Airways (TG)', 'Bangkok Airways (PG)', 'Thai AirAsia (FD)', 'Thai AirAsia X (XJ)',
+    'Thai Lion Air (SL)', 'Nok Air (DD)', 'Thai Smile (WE)', 'Thai Vietjet (VZ)',
+    'NokScoot (XW)', 'Kan Air (KR)',
+  ],
+  'เอเชียตะวันออกเฉียงใต้': [
+    'AirAsia (AK)', 'AirAsia X (D7)', 'Batik Air Malaysia (OD)', 'Malaysia Airlines (MH)',
+    'Firefly (FY)', 'Singapore Airlines (SQ)', 'Scoot (TR)', 'Jetstar Asia (3K)',
+    'SilkAir (MI)', 'Vietnam Airlines (VN)', 'VietJet Air (VJ)', 'Bamboo Airways (QH)',
+    'Indochina Airlines (IC)', 'Cambodia Angkor Air (K6)', 'Lao Airlines (QV)',
+    'Myanmar Airways International (8M)', 'Garuda Indonesia (GA)', 'Citilink (QG)',
+    'Lion Air (JT)', 'Batik Air (ID)', 'Wings Air (IW)', 'Sriwijaya Air (SJ)',
+    'Philippines Airlines (PR)', 'Cebu Pacific (5J)', 'AirAsia Philippines (Z2)',
+    'Royal Brunei Airlines (BI)', 'AirBagan (W9)',
+  ],
+  'เอเชียตะวันออก': [
+    'Korean Air (KE)', 'Asiana Airlines (OZ)', 'Jeju Air (7C)', 'Jin Air (LJ)',
+    'Air Busan (BX)', 'Eastar Jet (ZE)', 'T'way Air (TW)', 'Air Seoul (RS)',
+    'Japan Airlines (JL)', 'ANA - All Nippon Airways (NH)', 'Peach Aviation (MM)',
+    'Jetstar Japan (GK)', 'Vanilla Air (JW)', 'Solaseed Air (6J)', 'StarFlyer (7G)',
+    'Skymark Airlines (BC)', 'Air Do (HD)', 'Ibex Airlines (FW)',
+    'China Airlines (CI)', 'Eva Air (BR)', 'Starlux Airlines (JX)', 'Mandarin Airlines (AE)',
+    'Air China (CA)', 'China Eastern (MU)', 'China Southern (CZ)', 'Hainan Airlines (HU)',
+    'Xiamen Airlines (MF)', 'Shenzhen Airlines (ZH)', 'Sichuan Airlines (3U)',
+    'Juneyao Airlines (HO)', 'Shanghai Airlines (FM)', 'Chongqing Airlines (OQ)',
+    'Tianjin Airlines (GS)', 'Lucky Air (8L)', 'Ruili Airlines (DR)', '9 Air (AQ)',
+    'West Air (PN)', 'Air Hong Kong (LD)', 'Cathay Pacific (CX)', 'Cathay Dragon (KA)',
+    'Hong Kong Airlines (HX)', 'Greater Bay Airlines (HB)',
+    'Air Macau (NX)', 'Mongolian Airlines (OM)',
+  ],
+  'เอเชียใต้': [
+    'Air India (AI)', 'IndiGo (6E)', 'SpiceJet (SG)', 'Vistara (UK)',
+    'GoAir (G8)', 'Blue Dart Aviation (BZ)', 'Air Asia India (I5)',
+    'Pakistan International Airlines (PK)', 'AirBlue (PA)',
+    'SriLankan Airlines (UL)', 'FitsAir (FAD)', 'Maldivian (Q2)',
+    'Drukair (KB)', 'Buddha Air (U4)', 'Yeti Airlines (YT)',
+    'Biman Bangladesh (BG)', 'US-Bangla Airlines (BS)', 'NovoAir (VQ)',
+  ],
+  'เอเชียกลาง & ตะวันออกกลาง': [
+    'Emirates (EK)', 'Etihad Airways (EY)', 'Air Arabia (G9)', 'flydubai (FZ)',
+    'Qatar Airways (QR)', 'Qatar Executive (QE)',
+    'Saudi Arabian Airlines (SV)', 'flynas (XY)', 'flyadeal (F3)',
+    'Kuwait Airways (KU)', 'Jazeera Airways (J9)',
+    'Oman Air (WY)', 'SalamAir (OV)',
+    'Gulf Air (GF)', 'Bahrain Air (IT)',
+    'Middle East Airlines (ME)', 'Air Lebanon (LQ)',
+    'Royal Jordanian (RJ)', 'flyone Armenia (RM)',
+    'Iran Air (IR)', 'Mahan Air (W5)', 'Qeshm Air (IRQ)',
+    'Turkish Airlines (TK)', 'Pegasus Airlines (PC)', 'AnadoluJet (TK)',
+    'Air Astana (KC)', 'SCAT Airlines (DV)', 'Bek Air (Z9)',
+    'Uzbekistan Airways (HY)', 'Azal - Azerbaijan Airlines (J2)',
+    'Georgian Airways (A9)', 'Silk Way Airlines (7L)',
+  ],
+  'ยุโรปตะวันตก': [
+    'Lufthansa (LH)', 'Swiss International Air Lines (LX)', 'Austrian Airlines (OS)',
+    'Brussels Airlines (SN)', 'Eurowings (EW)', 'Condor (DE)',
+    'Air France (AF)', 'Transavia France (TO)', 'Corsair (SS)',
+    'British Airways (BA)', 'easyJet (U2)', 'Jet2 (LS)', 'Virgin Atlantic (VS)',
+    'TUI Airways (BY)', 'Flybe (BE)',
+    'KLM (KL)', 'Transavia (HV)',
+    'Iberia (IB)', 'Vueling (VY)', 'Iberia Express (I2)', 'Air Europa (UX)',
+    'Ryanair (FR)', 'Aer Lingus (EI)',
+    'TAP Air Portugal (TP)', 'SATA Air Açores (SP)',
+    'Alitalia / ITA Airways (AZ)', 'Neos (NO)', 'Blue Panorama (BV)',
+    'Swiss (LX)', 'Helvetic Airways (2L)',
+    'Scandinavian Airlines (SK)', 'Norwegian Air (DY)', 'Wideroe (WF)',
+    'Finnair (AY)', 'Nordic Regional Airlines (N7)',
+    'Icelandair (FI)', 'PLAY Airlines (OG)',
+    'Wizz Air (W6)', 'LOT Polish Airlines (LO)',
+    'Czech Airlines (OK)', 'Smartwings (QS)',
+    'Aegean Airlines (A3)', 'Olympic Air (OA)', 'Sky Express (GQ)',
+  ],
+  'ยุโรปตะวันออก': [
+    'Aeroflot (SU)', 'Rossiya Airlines (FV)', 'S7 Airlines (S7)', 'Ural Airlines (U6)',
+    'UTair (UT)', 'Pobeda (DP)', 'Nordwind Airlines (N4)',
+    'Ukraine International Airlines (PS)', 'SkyUp Airlines (PQ)',
+    'Air Serbia (JU)', 'Croatia Airlines (OU)',
+    'Adria Airways (JP)', 'Luxair (LG)',
+    'Air Moldova (9U)', 'TAROM (RO)',
+    'Bulgaria Air (FB)', 'Balkan Holidays Air (8H)',
+    'Belavia (B2)', 'Air Baltic (BT)',
+    'Estonian Air (OV)', 'airBaltic (BT)',
+  ],
+  'แอฟริกา': [
+    'Ethiopian Airlines (ET)', 'EgyptAir (MS)', 'EgyptAir Express (MSE)',
+    'Royal Air Maroc (AT)', 'Air Algerie (AH)', 'Tunisair (TU)',
+    'South African Airways (SA)', 'Mango (JE)', 'FlySafair (FA)', 'Airlink (4Z)',
+    'Kenya Airways (KQ)', 'Jambojet (JM)',
+    'RwandAir (WB)', 'Uganda Airlines (UR)', 'Precision Air (PW)',
+    'Air Tanzania (TC)', 'Fastjet (FN)',
+    'TAAG Angola Airlines (DT)', 'LAM Mozambique (TM)',
+    'Air Madagascar (MD)', 'Corsair International (SS)',
+    'Mauritius (MK)', 'Air Austral (UU)', 'Air Seychelles (HM)',
+  ],
+  'อเมริกาเหนือ': [
+    'American Airlines (AA)', 'United Airlines (UA)', 'Delta Air Lines (DL)',
+    'Southwest Airlines (WN)', 'JetBlue Airways (B6)', 'Alaska Airlines (AS)',
+    'Spirit Airlines (NK)', 'Frontier Airlines (F9)', 'Allegiant Air (G4)',
+    'Hawaiian Airlines (HA)', 'Sun Country Airlines (SY)',
+    'Air Canada (AC)', 'WestJet (WS)', 'Porter Airlines (PD)', 'Air Transat (TS)',
+    'Aeromexico (AM)', 'Volaris (Y4)', 'VivaAerobus (VB)', 'Interjet (4O)',
+  ],
+  'อเมริกากลาง & แคริบเบียน': [
+    'Copa Airlines (CM)', 'Avianca (AV)', 'LATAM Airlines (LA)',
+    'Caribbean Airlines (BW)', 'Cayman Airways (KX)',
+    'Cubana (CU)', 'Bahamasair (UP)', 'LIAT (LI)',
+    'Winair (WM)', 'Air Caraibes (TX)',
+  ],
+  'อเมริกาใต้': [
+    'LATAM Brasil (JJ)', 'GOL Transportes Aéreos (G3)', 'Azul Brazilian Airlines (AD)',
+    'LATAM Chile (LA)', 'Sky Airline (H2)',
+    'Aerolíneas Argentinas (AR)', 'Flybondi (FO)', 'JetSMART (JA)',
+    'Avianca Colombia (AV)', 'Wingo (P5)',
+    'Conviasa (V0)', 'Avior Airlines (9V)', 'Rutaca Airlines (5R)',
+    'Boliviana de Aviación (OB)', 'Ecojet (8J)',
+    'LATAM Perú (LP)', 'Star Peru (2I)', 'Peruvian Airlines (P9)',
+  ],
+  'โอเชียเนีย': [
+    'Qantas (QF)', 'Jetstar Airways (JQ)', 'Virgin Australia (VA)',
+    'Rex Regional Express (ZL)', 'Bonza (AB)',
+    'Air New Zealand (NZ)', 'Jetstar New Zealand (JQ)',
+    'Fiji Airways (FJ)', 'Air Vanuatu (NF)', 'Solomon Airlines (IE)',
+    'Air Niugini (PX)', 'PNG Air (CG)', 'Air Tahiti Nui (TN)', 'Air Tahiti (VT)',
+    'Air Caledonie (TY)',
+  ],
+};
+
 // ===== TOURS =====
 const EMPTY_TOUR = {
   name: { th: '', en: '' }, destination: { th: '', en: '' }, description: { th: '', en: '' },
@@ -845,42 +974,11 @@ function ToursSection({ tours, setTours, t }) {
                 <Field label="สายการบิน">
                   <select className={inp} value={form.flight?.outbound?.airline || ''} onChange={e => setF(['flight','outbound','airline'], e.target.value)}>
                     <option value="">-- เลือกสายการบิน --</option>
-                    <optgroup label="สายการบินไทย">
-                      <option value="Thai Airways (TG)">Thai Airways (TG)</option>
-                      <option value="Bangkok Airways (PG)">Bangkok Airways (PG)</option>
-                      <option value="Thai Lion Air (SL)">Thai Lion Air (SL)</option>
-                      <option value="Thai AirAsia (FD)">Thai AirAsia (FD)</option>
-                      <option value="Thai AirAsia X (XJ)">Thai AirAsia X (XJ)</option>
-                      <option value="Nok Air (DD)">Nok Air (DD)</option>
-                      <option value="Thai Smile (WE)">Thai Smile (WE)</option>
-                      <option value="Thai Vietjet (VZ)">Thai Vietjet (VZ)</option>
-                    </optgroup>
-                    <optgroup label="สายการบินต่างประเทศ">
-                      <option value="Singapore Airlines (SQ)">Singapore Airlines (SQ)</option>
-                      <option value="Cathay Pacific (CX)">Cathay Pacific (CX)</option>
-                      <option value="Emirates (EK)">Emirates (EK)</option>
-                      <option value="Qatar Airways (QR)">Qatar Airways (QR)</option>
-                      <option value="AirAsia (AK)">AirAsia (AK)</option>
-                      <option value="AirAsia X (D7)">AirAsia X (D7)</option>
-                      <option value="Malaysia Airlines (MH)">Malaysia Airlines (MH)</option>
-                      <option value="Korean Air (KE)">Korean Air (KE)</option>
-                      <option value="Asiana Airlines (OZ)">Asiana Airlines (OZ)</option>
-                      <option value="Japan Airlines (JL)">Japan Airlines (JL)</option>
-                      <option value="ANA (NH)">ANA (NH)</option>
-                      <option value="China Airlines (CI)">China Airlines (CI)</option>
-                      <option value="Eva Air (BR)">Eva Air (BR)</option>
-                      <option value="Vietnam Airlines (VN)">Vietnam Airlines (VN)</option>
-                      <option value="Scoot (TR)">Scoot (TR)</option>
-                      <option value="Jetstar Asia (3K)">Jetstar Asia (3K)</option>
-                      <option value="Turkish Airlines (TK)">Turkish Airlines (TK)</option>
-                      <option value="Lufthansa (LH)">Lufthansa (LH)</option>
-                      <option value="Swiss Airlines (LX)">Swiss Airlines (LX)</option>
-                      <option value="Air France (AF)">Air France (AF)</option>
-                      <option value="British Airways (BA)">British Airways (BA)</option>
-                      <option value="KLM (KL)">KLM (KL)</option>
-                      <option value="Finnair (AY)">Finnair (AY)</option>
-                      <option value="Ethiopian Airlines (ET)">Ethiopian Airlines (ET)</option>
-                    </optgroup>
+                    {Object.entries(AIRLINES).map(([region, list]) => (
+                      <optgroup key={region} label={region}>
+                        {list.map(a => <option key={a} value={a}>{a}</option>)}
+                      </optgroup>
+                    ))}
                     <option value="อื่นๆ">อื่นๆ (ระบุในหมายเหตุ)</option>
                   </select>
                 </Field>
