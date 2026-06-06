@@ -1311,9 +1311,11 @@ const calcReadTime = (content) => {
 };
 
 function ArticlesSection({ articles, setArticles, t }) {
-  const [modal, setModal]   = useState(null);
-  const [form, setForm]     = useState(EMPTY_ARTICLE);
-  const [saving, setSaving] = useState(false);
+  const [modal, setModal]       = useState(null);
+  const [form, setForm]         = useState(EMPTY_ARTICLE);
+  const [saving, setSaving]     = useState(false);
+  const [autoSaved, setAutoSaved] = useState(null); // null | 'saving' | timestamp
+  const autoSaveRef             = useRef(null);
 
   const setF = (path, val) => setForm(prev => {
     const next = JSON.parse(JSON.stringify(prev));
@@ -1321,14 +1323,39 @@ function ArticlesSection({ articles, setArticles, t }) {
     return next;
   });
 
-  const handleSave = async () => {
+  // Auto-save draft every 5 minutes when modal is open and has title
+  useEffect(() => {
+    if (!modal) { clearInterval(autoSaveRef.current); return; }
+    autoSaveRef.current = setInterval(async () => {
+      if (!form.title?.th) return;
+      setAutoSaved('saving');
+      const readTime = calcReadTime(form.content);
+      const { data, error } = await upsertArticle({ ...form, readTime, published: false });
+      if (!error && data) {
+        setForm(prev => ({ ...prev, id: data.id }));
+        setArticles(prev => {
+          const exists = prev.find(a => a.id === data.id);
+          return exists ? prev.map(a => a.id === data.id ? data : a) : [data, ...prev];
+        });
+        setAutoSaved(new Date());
+      } else {
+        setAutoSaved(null);
+      }
+    }, 5 * 60 * 1000);
+    return () => clearInterval(autoSaveRef.current);
+  }, [modal, form]);
+
+  const handleSave = async (asDraft = false) => {
     if (!form.title.th) return alert('กรุณากรอกชื่อบทความ');
     setSaving(true);
     const readTime = calcReadTime(form.content);
-    const { data, error } = await upsertArticle({ ...form, readTime });
+    const { data, error } = await upsertArticle({ ...form, readTime, published: asDraft ? false : form.published });
     setSaving(false);
     if (error) { alert('บันทึกไม่สำเร็จ: ' + JSON.stringify(error)); return; }
-    setArticles(prev => modal.mode === 'add' ? [data, ...prev] : prev.map(a => a.id === data.id ? data : a));
+    setArticles(prev => {
+      const exists = prev.find(a => a.id === data.id);
+      return exists ? prev.map(a => a.id === data.id ? data : a) : [data, ...prev];
+    });
     setModal(null);
   };
 
@@ -1438,11 +1465,21 @@ function ArticlesSection({ articles, setArticles, t }) {
               </Field>
             </div>
 
+            {/* Auto-save status */}
+            {autoSaved && (
+              <p className="text-xs text-slate-400 text-right -mb-1">
+                {autoSaved === 'saving' ? '⏳ กำลังบันทึกฉบับร่างอัตโนมัติ...' : `✅ บันทึกอัตโนมัติล่าสุด ${autoSaved instanceof Date ? autoSaved.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : ''}`}
+              </p>
+            )}
+
             <div className="flex gap-3 pt-2">
-              <button onClick={handleSave} disabled={saving} className="flex-1 bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white py-2.5 rounded-xl font-semibold text-sm transition-colors">
+              <button onClick={() => handleSave(false)} disabled={saving} className="flex-1 bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white py-2.5 rounded-xl font-semibold text-sm transition-colors">
                 {saving ? 'กำลังบันทึก...' : 'บันทึก'}
               </button>
-              <button onClick={() => setModal(null)} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl font-semibold text-sm transition-colors">ยกเลิก</button>
+              <button onClick={() => handleSave(true)} disabled={saving} className="flex-1 bg-slate-200 hover:bg-slate-300 disabled:opacity-50 text-slate-700 py-2.5 rounded-xl font-semibold text-sm transition-colors">
+                บันทึกฉบับร่าง
+              </button>
+              <button onClick={() => setModal(null)} className="px-5 bg-slate-100 hover:bg-slate-200 text-slate-500 py-2.5 rounded-xl font-semibold text-sm transition-colors">ยกเลิก</button>
             </div>
           </div>
         </Modal>
