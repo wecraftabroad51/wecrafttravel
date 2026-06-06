@@ -195,7 +195,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
     <header ref={headerRef} style={{ position: 'sticky', top: 0, zIndex: 150 }}>
 
       {/* ── Row 1: teal quick-links bar ─────────────────── */}
-      <div style={{ background: 'var(--primary)', color: '#fff', fontSize: 14 }}>
+      <div style={{ background: 'var(--primary)', color: '#fff', fontSize: 15 }}>
         <div className="wrap" style={{
           display: 'grid',
           gridTemplateColumns: '1fr auto 1fr',
@@ -392,7 +392,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
                     borderBottom: activeMenu === i || page === m.key ? '3px solid var(--primary)' : '3px solid transparent',
                     color: activeMenu === i || page === m.key ? 'var(--primary)' : 'var(--ink-2)',
                     background: 'transparent',
-                    fontSize: 14, fontWeight: 700,
+                    fontSize: 16, fontWeight: 700,
                     cursor: 'pointer', fontFamily: 'inherit',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3,
                     whiteSpace: 'nowrap',
