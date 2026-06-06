@@ -843,7 +843,46 @@ function ToursSection({ tours, setTours, t }) {
                   <input className={inp} value={form.code || ''} onChange={e => setF(['code'], e.target.value)} placeholder="เช่น CANAQ0326, JPNTOK001" />
                 </Field>
                 <Field label="สายการบิน">
-                  <input className={inp} value={form.flight?.outbound?.airline || ''} onChange={e => setF(['flight','outbound','airline'], e.target.value)} placeholder="เช่น Thai Airways (TG), AirAsia (FD)" />
+                  <select className={inp} value={form.flight?.outbound?.airline || ''} onChange={e => setF(['flight','outbound','airline'], e.target.value)}>
+                    <option value="">-- เลือกสายการบิน --</option>
+                    <optgroup label="สายการบินไทย">
+                      <option value="Thai Airways (TG)">Thai Airways (TG)</option>
+                      <option value="Bangkok Airways (PG)">Bangkok Airways (PG)</option>
+                      <option value="Thai Lion Air (SL)">Thai Lion Air (SL)</option>
+                      <option value="Thai AirAsia (FD)">Thai AirAsia (FD)</option>
+                      <option value="Thai AirAsia X (XJ)">Thai AirAsia X (XJ)</option>
+                      <option value="Nok Air (DD)">Nok Air (DD)</option>
+                      <option value="Thai Smile (WE)">Thai Smile (WE)</option>
+                      <option value="Thai Vietjet (VZ)">Thai Vietjet (VZ)</option>
+                    </optgroup>
+                    <optgroup label="สายการบินต่างประเทศ">
+                      <option value="Singapore Airlines (SQ)">Singapore Airlines (SQ)</option>
+                      <option value="Cathay Pacific (CX)">Cathay Pacific (CX)</option>
+                      <option value="Emirates (EK)">Emirates (EK)</option>
+                      <option value="Qatar Airways (QR)">Qatar Airways (QR)</option>
+                      <option value="AirAsia (AK)">AirAsia (AK)</option>
+                      <option value="AirAsia X (D7)">AirAsia X (D7)</option>
+                      <option value="Malaysia Airlines (MH)">Malaysia Airlines (MH)</option>
+                      <option value="Korean Air (KE)">Korean Air (KE)</option>
+                      <option value="Asiana Airlines (OZ)">Asiana Airlines (OZ)</option>
+                      <option value="Japan Airlines (JL)">Japan Airlines (JL)</option>
+                      <option value="ANA (NH)">ANA (NH)</option>
+                      <option value="China Airlines (CI)">China Airlines (CI)</option>
+                      <option value="Eva Air (BR)">Eva Air (BR)</option>
+                      <option value="Vietnam Airlines (VN)">Vietnam Airlines (VN)</option>
+                      <option value="Scoot (TR)">Scoot (TR)</option>
+                      <option value="Jetstar Asia (3K)">Jetstar Asia (3K)</option>
+                      <option value="Turkish Airlines (TK)">Turkish Airlines (TK)</option>
+                      <option value="Lufthansa (LH)">Lufthansa (LH)</option>
+                      <option value="Swiss Airlines (LX)">Swiss Airlines (LX)</option>
+                      <option value="Air France (AF)">Air France (AF)</option>
+                      <option value="British Airways (BA)">British Airways (BA)</option>
+                      <option value="KLM (KL)">KLM (KL)</option>
+                      <option value="Finnair (AY)">Finnair (AY)</option>
+                      <option value="Ethiopian Airlines (ET)">Ethiopian Airlines (ET)</option>
+                    </optgroup>
+                    <option value="อื่นๆ">อื่นๆ (ระบุในหมายเหตุ)</option>
+                  </select>
                 </Field>
               </div>
               <Field label="📄 PDF โปรแกรมทัวร์">
