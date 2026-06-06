@@ -154,7 +154,7 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
   const [view, setView]           = useState('grid');
   const [search, setSearch]       = useState(initialFilters?.search    || '');
   const [sort, setSort]           = useState('popular');
-  const [priceMax, setPriceMax]   = useState(300000);
+  const [priceMax, setPriceMax]   = useState(100000);
 
   const allContinents = Array.from(new Set(tours.map(tr => tr.continent).filter(Boolean)));
   const relevantContinents = tourType === 'outbound' ? allContinents.filter(c => INTERNATIONAL_CONTINENTS.includes(c))
@@ -180,7 +180,7 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
     }
     if (continent !== 'All') list = list.filter(tr => tr.continent === continent);
     if (country) list = list.filter(tr => tr.country === country || t(tr.destination)?.includes(country));
-    list = list.filter(tr => !tr.price || tr.price <= priceMax);
+    list = list.filter(tr => !tr.price || (tr.price >= 3000 && tr.price <= priceMax));
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(tr => {
@@ -253,7 +253,7 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--muted)' }}>
             <span style={{ letterSpacing: '.08em', textTransform: 'uppercase', fontWeight: 600 }}>{lang === 'th' ? 'งบประมาณ' : 'Budget'}</span>
             <input
-              type="range" min={50000} max={300000} step={5000} value={priceMax}
+              type="range" min={3000} max={100000} step={1000} value={priceMax}
               onChange={e => setPriceMax(+e.target.value)}
               style={{ width: 120, accentColor: 'var(--ink)' }}
             />
