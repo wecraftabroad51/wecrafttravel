@@ -1300,7 +1300,15 @@ function ReviewsSection({ reviews, setReviews, tours, t }) {
 
 // ===== ARTICLES =====
 const ARTICLE_CATS = ['บทความท่องเที่ยว','บทความอาหาร','บทความน่าอ่าน','เกี่ยวกับการเดินทาง'];
-const EMPTY_ARTICLE = { title: { th: '', en: '' }, excerpt: { th: '', en: '' }, content: { th: '', en: '' }, image: '', category: 'บทความท่องเที่ยว', author: 'Admin', readTime: 5, views: 0, published: true };
+const EMPTY_ARTICLE = { title: { th: '', en: '' }, excerpt: { th: '', en: '' }, content: { th: '', en: '' }, image: '', category: 'บทความท่องเที่ยว', author: 'Admin', published: true };
+
+const calcReadTime = (content) => {
+  const text = typeof content === 'object'
+    ? Object.values(content).join(' ')
+    : (content || '');
+  const words = text.replace(/<[^>]+>/g, '').trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200));
+};
 
 function ArticlesSection({ articles, setArticles, t }) {
   const [modal, setModal]   = useState(null);
@@ -1316,7 +1324,8 @@ function ArticlesSection({ articles, setArticles, t }) {
   const handleSave = async () => {
     if (!form.title.th) return alert('กรุณากรอกชื่อบทความ');
     setSaving(true);
-    const { data, error } = await upsertArticle(form);
+    const readTime = calcReadTime(form.content);
+    const { data, error } = await upsertArticle({ ...form, readTime });
     setSaving(false);
     if (error) { alert('บันทึกไม่สำเร็จ: ' + JSON.stringify(error)); return; }
     setArticles(prev => modal.mode === 'add' ? [data, ...prev] : prev.map(a => a.id === data.id ? data : a));
@@ -1377,15 +1386,13 @@ function ArticlesSection({ articles, setArticles, t }) {
             </div>
 
             {/* Meta */}
-            <div className="grid gap-3" style={{ gridTemplateColumns: '1fr 140px 90px 90px' }}>
+            <div className="grid gap-3" style={{ gridTemplateColumns: '1fr 140px' }}>
               <Field label="หมวดหมู่">
                 <select className={inp} value={form.category || 'บทความท่องเที่ยว'} onChange={e => setF(['category'], e.target.value)}>
                   {ARTICLE_CATS.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </Field>
               <Field label="ผู้เขียน"><input className={inp} value={form.author} onChange={e => setF(['author'], e.target.value)} /></Field>
-              <Field label="อ่าน (นาที)"><input className={inp} type="number" style={{ textAlign: 'center' }} value={form.readTime} onChange={e => setF(['readTime'], Number(e.target.value))} /></Field>
-              <Field label="ยอดดู"><input className={inp} type="number" style={{ textAlign: 'center' }} value={form.views || 0} onChange={e => setF(['views'], Number(e.target.value))} /></Field>
             </div>
 
             {/* รูปภาพ */}
