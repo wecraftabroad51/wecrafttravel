@@ -64,9 +64,24 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { fileBase64, mimeType, fileName } = req.body || {};
-    if (!fileBase64 || !mimeType) {
+    let { fileBase64, fileUrl, mimeType, fileName } = req.body || {};
+    if ((!fileBase64 && !fileUrl) || !mimeType) {
       return res.status(400).json({ error: 'ไม่พบไฟล์ที่อัปโหลด' });
+    }
+
+    // ถ้าส่งมาเป็นลิงก์ไฟล์ (อัปโหลดขึ้น Storage มาก่อนแล้ว) ให้ดึงไฟล์มาแปลงเป็น base64 ฝั่งเซิร์ฟเวอร์
+    // วิธีนี้ทำให้รองรับไฟล์ขนาดใหญ่ได้ โดยไม่ติดข้อจำกัดขนาดคำขอ (request body) ของ Vercel Functions
+    if (!fileBase64 && fileUrl) {
+      const fileResp = await fetch(fileUrl);
+      if (!fileResp.ok) {
+        return res.status(400).json({ error: 'ไม่สามารถดึงไฟล์จากลิงก์ที่อัปโหลดได้ กรุณาลองใหม่อีกครั้ง' });
+      }
+      const arrayBuf = await fileResp.arrayBuffer();
+      const AI_LIMIT = 28 * 1024 * 1024;
+      if (arrayBuf.byteLength > AI_LIMIT) {
+        return res.status(413).json({ error: 'ไฟล์มีขนาดใหญ่เกินกว่าที่ AI จะวิเคราะห์เนื้อหาได้โดยตรง (จำกัดประมาณ 25-28MB) กรุณากรอกข้อมูลด้วยตนเอง' });
+      }
+      fileBase64 = Buffer.from(arrayBuf).toString('base64');
     }
 
     let textContent = null;

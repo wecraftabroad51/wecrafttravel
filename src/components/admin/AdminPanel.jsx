@@ -1004,6 +1004,7 @@ function ToursSection({ tours, setTours, t }) {
   const [autoSaved, setAutoSaved] = useState(null);
   const [aiParsing, setAiParsing] = useState(false);
   const [aiError, setAiError]     = useState(null);
+  const [aiPending, setAiPending] = useState(false);
   const autoSaveRef               = useRef(null);
 
   // ── AI: อ่านไฟล์โปรแกรมทัวร์แล้วเติมข้อมูลลงฟอร์มอัตโนมัติ ──
@@ -1045,25 +1046,36 @@ function ToursSection({ tours, setTours, t }) {
 
   const handleAIFile = async (file) => {
     if (!file) return;
-    if (file.size > 20 * 1024 * 1024) { setAiError('ไฟล์ใหญ่เกินไป (จำกัดไม่เกิน 20MB)'); return; }
+    if (file.size > 100 * 1024 * 1024) { setAiError('ไฟล์ใหญ่เกินไป (จำกัดไม่เกิน 100MB)'); return; }
     setAiParsing(true);
     setAiError(null);
     try {
-      const base64 = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload  = () => resolve(String(reader.result).split(',')[1] || '');
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+      // 1) อัปโหลดไฟล์ขึ้น Supabase Storage ก่อนเสมอ — เพื่อเลี่ยงข้อจำกัดขนาดคำขอ (request body)
+      //    ของ Vercel Functions (~4.5MB) ทำให้รองรับไฟล์ขนาดใหญ่ได้จริง
+      const { url: fileUrl, error: upErr } = await uploadFile(file, 'ai-program-uploads');
+      if (upErr || !fileUrl) throw new Error('อัปโหลดไฟล์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+
+      // ผู้ให้บริการ AI (Claude) มีข้อจำกัดขนาดเอกสาร/รูปภาพที่วิเคราะห์ได้โดยตรงอยู่ที่ ~28MB
+      const AI_ANALYZE_LIMIT = 28 * 1024 * 1024;
+      if (file.size > AI_ANALYZE_LIMIT) {
+        setF(['pdfUrl'], fileUrl);
+        alert('📎 อัปโหลดไฟล์เรียบร้อยแล้ว แต่ไฟล์มีขนาดใหญ่เกินกว่าที่ AI จะวิเคราะห์เนื้อหาได้โดยตรง (รองรับการวิเคราะห์ไม่เกินประมาณ 25-28MB)\n\nระบบได้แนบลิงก์ไฟล์นี้ไว้ในช่อง "ไฟล์ PDF โปรแกรมทัวร์" ให้แล้ว กรุณากรอกข้อมูลในฟอร์มด้วยตนเองครับ');
+        return;
+      }
+
+      // 2) ส่ง "ลิงก์ไฟล์" (payload เล็ก) ให้เซิร์ฟเวอร์ไปดึงไฟล์มาวิเคราะห์ด้วย AI แทนการส่งไฟล์ทั้งไฟล์
       const resp = await fetch('/api/parse-tour-program', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileBase64: base64, mimeType: file.type || 'application/octet-stream', fileName: file.name }),
+        body: JSON.stringify({ fileUrl, mimeType: file.type || 'application/octet-stream', fileName: file.name }),
       });
       const json = await resp.json().catch(() => ({}));
       if (!resp.ok) throw new Error(json?.error || 'เกิดข้อผิดพลาดในการอ่านไฟล์');
       applyAIParsed(json?.data || {});
-      alert('✅ AI อ่านไฟล์และกรอกข้อมูลลงฟอร์มให้แล้ว — กรุณาตรวจสอบความถูกต้องในแต่ละแท็บอีกครั้งก่อนกดบันทึก');
+      // ตั้งสถานะทัวร์เป็น "ยังไม่เผยแพร่ / รอตรวจสอบ" โดยอัตโนมัติ เพื่อให้แอดมินรีวิวก่อนเปิดใช้งานจริง
+      setF(['active'], false);
+      setAiPending(true);
+      alert('✅ AI อ่านไฟล์และกรอกข้อมูลลงฟอร์มให้แล้ว\n\n🕓 ระบบตั้งสถานะทัวร์นี้เป็น "รอตรวจสอบ" (ยังไม่เผยแพร่) ให้อัตโนมัติ — กรุณาตรวจสอบความถูกต้องของข้อมูลในทุกแท็บ แล้วค่อยติ๊กเปิดใช้งาน (Active) เมื่อพร้อมเผยแพร่จริง');
     } catch (err) {
       setAiError(err?.message || 'เกิดข้อผิดพลาดในการอ่านไฟล์ กรุณาลองใหม่อีกครั้ง');
     } finally {
@@ -1071,8 +1083,8 @@ function ToursSection({ tours, setTours, t }) {
     }
   };
 
-  const openAdd  = () => { setForm(EMPTY_TOUR); setTourTab('พื้นฐาน'); setAutoSaved(null); setAiError(null); setModal({ mode: 'add' }); };
-  const openEdit = (tour) => { setForm(tour); setTourTab('พื้นฐาน'); setAutoSaved(null); setModal({ mode: 'edit', tour }); };
+  const openAdd  = () => { setForm(EMPTY_TOUR); setTourTab('พื้นฐาน'); setAutoSaved(null); setAiError(null); setAiPending(false); setModal({ mode: 'add' }); };
+  const openEdit = (tour) => { setForm(tour); setTourTab('พื้นฐาน'); setAutoSaved(null); setAiError(null); setAiPending(false); setModal({ mode: 'edit', tour }); };
   const closeModal = () => { clearInterval(autoSaveRef.current); setModal(null); };
 
   const setF = (path, val) => setForm(prev => {
@@ -1239,7 +1251,7 @@ function ToursSection({ tours, setTours, t }) {
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div>
                     <div className="text-sm font-bold text-teal-700">🤖 อัปโหลดไฟล์โปรแกรมทัวร์ ให้ AI ช่วยกรอกข้อมูลอัตโนมัติ</div>
-                    <div className="text-xs text-slate-500 mt-0.5">รองรับ PDF, รูปภาพ (JPG/PNG/WebP), Word (.docx), ข้อความ (.txt/.csv) — ขนาดไม่เกิน 20MB · AI จะอ่านไฮไลท์ โปรแกรมแต่ละวัน วันเดินทาง และราคา มากรอกให้อัตโนมัติ</div>
+                    <div className="text-xs text-slate-500 mt-0.5">รองรับ PDF, รูปภาพ (JPG/PNG/WebP), Word (.docx), ข้อความ (.txt/.csv) — ไฟล์ขนาดไม่เกิน 100MB (AI จะวิเคราะห์เนื้อหาให้อัตโนมัติเมื่อไฟล์ไม่เกิน ~28MB ถ้าไฟล์ใหญ่กว่านั้นจะแนบไฟล์ไว้ให้กรอกเองภายหลัง) · AI จะอ่านไฮไลท์ โปรแกรมแต่ละวัน วันเดินทาง และราคา มากรอกให้อัตโนมัติ</div>
                   </div>
                   <label className={`px-4 py-2 rounded-lg text-sm font-bold cursor-pointer transition whitespace-nowrap ${aiParsing ? 'bg-slate-300 text-slate-500 cursor-wait' : 'bg-teal-600 text-white hover:bg-teal-700'}`}>
                     {aiParsing ? '⏳ กำลังวิเคราะห์ไฟล์ด้วย AI...' : '📄 เลือกไฟล์โปรแกรมทัวร์'}
@@ -1251,6 +1263,19 @@ function ToursSection({ tours, setTours, t }) {
                 {aiError && <div className="text-xs text-red-600 font-semibold mt-2">⚠ {aiError}</div>}
                 <div className="text-[11px] text-slate-400 mt-2">* หลังจาก AI กรอกข้อมูลให้แล้ว กรุณาตรวจสอบความถูกต้องของทุกแท็บ (ราคา / โปรแกรม / ที่พัก / รวม-ไม่รวม) ก่อนกด "เพิ่มทัวร์" หรือ "บันทึก" เสมอ</div>
               </div>
+
+              {aiPending && (
+                <div className="p-3 bg-amber-50 border border-amber-300 rounded-xl flex items-start gap-2">
+                  <span className="text-lg leading-none">🕓</span>
+                  <div>
+                    <div className="text-sm font-bold text-amber-700">สถานะ: รอตรวจสอบ (ยังไม่เผยแพร่)</div>
+                    <div className="text-xs text-amber-700/80 mt-0.5">
+                      AI กรอกข้อมูลทัวร์นี้ให้อัตโนมัติ ระบบจึงปิดการเผยแพร่ (Active) ไว้ก่อนเพื่อให้คุณตรวจสอบความถูกต้อง
+                      เมื่อตรวจสอบครบทุกแท็บแล้ว กรุณาติ๊กช่อง "Active (แสดงในเว็บ)" ในแท็บพื้นฐาน แล้วกดบันทึกอีกครั้งเพื่อเผยแพร่จริง
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Tour type + continent + country */}
               <div className="grid grid-cols-3 gap-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
