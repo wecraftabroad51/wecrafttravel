@@ -122,14 +122,39 @@ function MegaDropdown({ menu, navigate, onClose, topOffset, lang }) {
             flex: 1, padding: '0 20px',
             borderRight: gi < menu.mega.length - 1 ? '1px solid var(--line)' : 'none',
           }}>
-            <div style={{
-              fontSize: 12, fontWeight: 800, color: 'var(--primary)',
-              textTransform: 'uppercase', letterSpacing: '.08em',
-              marginBottom: 10, paddingBottom: 8,
-              borderBottom: '2px solid var(--primary-light)',
-            }}>
-              {lang === 'en' ? (CONTINENT_EN[group.continent] || group.continent) : group.continent}
-            </div>
+            {menu.key === 'tours' ? (
+              <button
+                onClick={() => {
+                  navigate(menu.key, null, menu.tourType
+                    ? { tourType: menu.tourType, continentLabel: group.continent, countries: group.countries }
+                    : null);
+                  onClose();
+                }}
+                style={{
+                  display: 'block', width: '100%', textAlign: 'left',
+                  background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                  fontSize: 12, fontWeight: 800, color: 'var(--primary)',
+                  textTransform: 'uppercase', letterSpacing: '.08em',
+                  marginBottom: 10, paddingBottom: 8,
+                  borderBottom: '2px solid var(--primary-light)',
+                  borderRadius: 0, transition: 'color .12s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.color = 'var(--ink)'; e.currentTarget.style.textDecoration = 'underline'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.textDecoration = 'none'; }}
+                title={lang === 'en' ? `View all ${CONTINENT_EN[group.continent] || group.continent} tours` : `ดูทัวร์ทั้งหมดในภูมิภาค ${group.continent}`}
+              >
+                {lang === 'en' ? (CONTINENT_EN[group.continent] || group.continent) : group.continent} ›
+              </button>
+            ) : (
+              <div style={{
+                fontSize: 12, fontWeight: 800, color: 'var(--primary)',
+                textTransform: 'uppercase', letterSpacing: '.08em',
+                marginBottom: 10, paddingBottom: 8,
+                borderBottom: '2px solid var(--primary-light)',
+              }}>
+                {lang === 'en' ? (CONTINENT_EN[group.continent] || group.continent) : group.continent}
+              </div>
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {group.countries.map(c => (
                 <button key={c}

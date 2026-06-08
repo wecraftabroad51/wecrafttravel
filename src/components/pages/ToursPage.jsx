@@ -151,6 +151,9 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
   const [tourType,  setTourType]  = useState(initialFilters?.tourType  || 'all');
   const [continent, setContinent] = useState(initialFilters?.continent || 'All');
   const [country,   setCountry]   = useState(initialFilters?.country   || '');
+  // Continent-group filter (from navbar mega-menu continent header click)
+  const [groupCountries, setGroupCountries] = useState(initialFilters?.countries || null);
+  const [groupLabel,     setGroupLabel]     = useState(initialFilters?.continentLabel || '');
   const [view, setView]           = useState('grid');
   const [search, setSearch]       = useState(initialFilters?.search    || '');
   const [sort, setSort]           = useState('popular');
@@ -185,6 +188,12 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
     }
     if (continent !== 'All') list = list.filter(tr => tr.continent === continent);
     if (country) list = list.filter(tr => tr.country === country || t(tr.destination)?.includes(country));
+    if (groupCountries?.length) {
+      list = list.filter(tr =>
+        groupCountries.includes(tr.country) ||
+        groupCountries.some(gc => t(tr.destination)?.includes(gc))
+      );
+    }
     list = list.filter(tr => !tr.price || (tr.price >= 3000 && tr.price <= priceMax));
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -200,7 +209,9 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
     if (sort === 'duration')   list = [...list].sort((a, b) => (b.duration || 0) - (a.duration || 0));
     if (sort === 'popular')    list = [...list].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
     return list;
-  }, [tours, tourType, continent, country, priceMax, search, sort, lang]);
+  }, [tours, tourType, continent, country, groupCountries, priceMax, search, sort, lang]);
+
+  const clearGroupFilter = () => { setGroupCountries(null); setGroupLabel(''); };
 
   return (
     <main className="page-enter">
@@ -212,9 +223,42 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
             {lang === 'th' ? 'หน้าหลัก' : 'Home'}
           </button>
           <span>/</span>
-          <span style={{ color: 'var(--ink)' }}>{lang === 'th' ? 'ทัวร์ทั้งหมด' : 'All Tours'}</span>
+          {groupLabel ? (
+            <>
+              <button onClick={clearGroupFilter} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 12, padding: 0 }}>
+                {lang === 'th' ? 'ทัวร์ทั้งหมด' : 'All Tours'}
+              </button>
+              <span>/</span>
+              <span style={{ color: 'var(--ink)' }}>{groupLabel}</span>
+            </>
+          ) : (
+            <span style={{ color: 'var(--ink)' }}>{lang === 'th' ? 'ทัวร์ทั้งหมด' : 'All Tours'}</span>
+          )}
         </nav>
       </div>
+
+      {/* Continent-group banner (from navbar mega-menu) */}
+      {groupLabel && (
+        <div className="wrap-wide" style={{ padding: '14px 0 0' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap',
+            background: 'var(--primary-light)', border: '1px solid var(--primary)', borderRadius: 12,
+            padding: '14px 20px',
+          }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 4 }}>
+                {lang === 'th' ? 'กำลังแสดงทัวร์ในภูมิภาค' : 'Showing tours in region'}
+              </div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--ink)' }}>
+                🌍 {groupLabel}
+              </div>
+            </div>
+            <button onClick={clearGroupFilter} className="btn btn-light btn-sm" style={{ background: '#fff' }}>
+              {lang === 'th' ? '✕ ล้างตัวกรองภูมิภาค' : '✕ Clear region filter'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Sticky filter bar */}
       <section style={{
@@ -226,7 +270,7 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
           {/* Continent pills */}
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {continents.map(c => (
-              <button key={c} onClick={() => { setContinent(c); setCountry(''); }}
+              <button key={c} onClick={() => { setContinent(c); setCountry(''); clearGroupFilter(); }}
                 style={{
                   padding: '7px 14px', borderRadius: 999,
                   border: `1px solid ${continent === c ? 'var(--primary)' : 'var(--line)'}`,
