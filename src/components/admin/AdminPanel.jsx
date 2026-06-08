@@ -1323,7 +1323,7 @@ function ToursSection({ tours, setTours, t }) {
                           </div>
                           <div className="flex-1">
                             <label className="text-xs text-slate-500 font-semibold block mb-1">จองแล้ว</label>
-                            <input className={inp} type="number" min={0} value={dep.bookedSeats ?? 0}
+                            <input className={inp} type="number" min={0} placeholder="0" value={dep.bookedSeats || ''}
                               onChange={e => updateArr('departures', i, { ...dep, bookedSeats: Number(e.target.value) })} />
                           </div>
                         </div>
