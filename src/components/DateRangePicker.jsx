@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 
 const DAYS_TH = ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'];
 const MONTHS_TH = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const MONTHS_TH_ABBR = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 
 function toDateStr(d) {
   if (!d) return '';
@@ -20,7 +21,7 @@ function parseDate(str) {
 function formatDisplay(str) {
   if (!str) return '';
   const d = parseDate(str);
-  return `${d.getDate()} ${MONTHS_TH[d.getMonth()].slice(0, 3)}. ${d.getFullYear()}`;
+  return `${d.getDate()} ${MONTHS_TH_ABBR[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 function CalendarMonth({ year, month, startDate, endDate, hoverDate, onSelect, onHover, minDate }) {

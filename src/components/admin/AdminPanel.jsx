@@ -1022,6 +1022,14 @@ function ToursSection({ tours, setTours, t }) {
     arr[idx] = val;
     return { ...prev, [field]: arr };
   });
+  // Merge a partial patch into arr[idx] based on the LATEST state — avoids stale-closure
+  // overwrites when two updates fire back-to-back (e.g. DateRangePicker calling
+  // onStartChange then onEndChange synchronously).
+  const patchArr = (field, idx, patch) => setForm(prev => {
+    const arr = [...(prev[field] || [])];
+    arr[idx] = { ...(arr[idx] || {}), ...patch };
+    return { ...prev, [field]: arr };
+  });
 
   // Auto-save draft every 5 minutes
   useEffect(() => {
@@ -1300,10 +1308,10 @@ function ToursSection({ tours, setTours, t }) {
                         <DateRangePicker
                           startDate={dep.date || ''}
                           endDate={dep.returnDate || ''}
-                          onStartChange={val => updateArr('departures', i, { ...dep, date: val })}
-                          onEndChange={val => updateArr('departures', i, { ...dep, returnDate: val })}
-                          startLabel="วันไป"
-                          endLabel="วันกลับ"
+                          onStartChange={val => patchArr('departures', i, { date: val })}
+                          onEndChange={val => patchArr('departures', i, { returnDate: val })}
+                          startLabel="วันที่ ขาไป"
+                          endLabel="วันที่ ขากลับ"
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-2 items-center">
