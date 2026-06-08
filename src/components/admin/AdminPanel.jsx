@@ -1045,7 +1045,7 @@ function ToursSection({ tours, setTours, t }) {
 
   const handleAIFile = async (file) => {
     if (!file) return;
-    if (file.size > 8 * 1024 * 1024) { setAiError('ไฟล์ใหญ่เกินไป (จำกัดไม่เกิน 8MB)'); return; }
+    if (file.size > 20 * 1024 * 1024) { setAiError('ไฟล์ใหญ่เกินไป (จำกัดไม่เกิน 20MB)'); return; }
     setAiParsing(true);
     setAiError(null);
     try {
@@ -1239,7 +1239,7 @@ function ToursSection({ tours, setTours, t }) {
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div>
                     <div className="text-sm font-bold text-teal-700">🤖 อัปโหลดไฟล์โปรแกรมทัวร์ ให้ AI ช่วยกรอกข้อมูลอัตโนมัติ</div>
-                    <div className="text-xs text-slate-500 mt-0.5">รองรับ PDF, รูปภาพ (JPG/PNG/WebP), Word (.docx), ข้อความ (.txt/.csv) — ขนาดไม่เกิน 8MB · AI จะอ่านไฮไลท์ โปรแกรมแต่ละวัน วันเดินทาง และราคา มากรอกให้อัตโนมัติ</div>
+                    <div className="text-xs text-slate-500 mt-0.5">รองรับ PDF, รูปภาพ (JPG/PNG/WebP), Word (.docx), ข้อความ (.txt/.csv) — ขนาดไม่เกิน 20MB · AI จะอ่านไฮไลท์ โปรแกรมแต่ละวัน วันเดินทาง และราคา มากรอกให้อัตโนมัติ</div>
                   </div>
                   <label className={`px-4 py-2 rounded-lg text-sm font-bold cursor-pointer transition whitespace-nowrap ${aiParsing ? 'bg-slate-300 text-slate-500 cursor-wait' : 'bg-teal-600 text-white hover:bg-teal-700'}`}>
                     {aiParsing ? '⏳ กำลังวิเคราะห์ไฟล์ด้วย AI...' : '📄 เลือกไฟล์โปรแกรมทัวร์'}
