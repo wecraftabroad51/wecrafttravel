@@ -1002,9 +1002,76 @@ function ToursSection({ tours, setTours, t }) {
   const [form, setForm]           = useState(EMPTY_TOUR);
   const [tourTab, setTourTab]     = useState('พื้นฐาน');
   const [autoSaved, setAutoSaved] = useState(null);
+  const [aiParsing, setAiParsing] = useState(false);
+  const [aiError, setAiError]     = useState(null);
   const autoSaveRef               = useRef(null);
 
-  const openAdd  = () => { setForm(EMPTY_TOUR); setTourTab('พื้นฐาน'); setAutoSaved(null); setModal({ mode: 'add' }); };
+  // ── AI: อ่านไฟล์โปรแกรมทัวร์แล้วเติมข้อมูลลงฟอร์มอัตโนมัติ ──
+  const applyAIParsed = (d) => {
+    if (!d || typeof d !== 'object') return;
+    setForm(prev => {
+      const next = { ...prev };
+      if (d.name && (d.name.th || d.name.en)) {
+        next.name = { th: d.name.th || prev.name?.th || '', en: d.name.en || prev.name?.en || '' };
+      }
+      if (d.destination && (d.destination.th || d.destination.en)) {
+        next.destination = { th: d.destination.th || prev.destination?.th || '', en: d.destination.en || prev.destination?.en || '' };
+      }
+      if (d.description && (d.description.th || d.description.en)) {
+        next.description = { th: d.description.th || prev.description?.th || '', en: d.description.en || prev.description?.en || '' };
+      }
+      if (d.duration) next.duration = Number(d.duration) || prev.duration;
+      if (d.groupSize) next.groupSize = Number(d.groupSize) || prev.groupSize;
+      if (Array.isArray(d.itinerary) && d.itinerary.length) {
+        next.itinerary = d.itinerary.map(day => ({
+          title: day?.title || '', description: day?.description || '', meals: [], hotel: day?.hotel || '',
+        }));
+      }
+      if (Array.isArray(d.includes) && d.includes.filter(Boolean).length) next.includes = d.includes.filter(Boolean);
+      if (Array.isArray(d.excludes) && d.excludes.filter(Boolean).length) next.excludes = d.excludes.filter(Boolean);
+      if (Array.isArray(d.hotels) && d.hotels.filter(Boolean).length) next.hotels = d.hotels.filter(Boolean);
+      if (Array.isArray(d.departures) && d.departures.length) {
+        next.departures = d.departures.map(dep => ({
+          date: dep?.date || '', returnDate: dep?.returnDate || '',
+          totalSeats: Number(dep?.totalSeats) || 20, bookedSeats: 0,
+          price: Number(dep?.price) || 0, childPrice: Number(dep?.childPrice) || 0,
+          infantPrice: Number(dep?.infantPrice) || 0, singleSupplement: Number(dep?.singleSupplement) || 0,
+          promoPrice: 0,
+        }));
+      }
+      return next;
+    });
+  };
+
+  const handleAIFile = async (file) => {
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) { setAiError('ไฟล์ใหญ่เกินไป (จำกัดไม่เกิน 8MB)'); return; }
+    setAiParsing(true);
+    setAiError(null);
+    try {
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload  = () => resolve(String(reader.result).split(',')[1] || '');
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const resp = await fetch('/api/parse-tour-program', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileBase64: base64, mimeType: file.type || 'application/octet-stream', fileName: file.name }),
+      });
+      const json = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(json?.error || 'เกิดข้อผิดพลาดในการอ่านไฟล์');
+      applyAIParsed(json?.data || {});
+      alert('✅ AI อ่านไฟล์และกรอกข้อมูลลงฟอร์มให้แล้ว — กรุณาตรวจสอบความถูกต้องในแต่ละแท็บอีกครั้งก่อนกดบันทึก');
+    } catch (err) {
+      setAiError(err?.message || 'เกิดข้อผิดพลาดในการอ่านไฟล์ กรุณาลองใหม่อีกครั้ง');
+    } finally {
+      setAiParsing(false);
+    }
+  };
+
+  const openAdd  = () => { setForm(EMPTY_TOUR); setTourTab('พื้นฐาน'); setAutoSaved(null); setAiError(null); setModal({ mode: 'add' }); };
   const openEdit = (tour) => { setForm(tour); setTourTab('พื้นฐาน'); setAutoSaved(null); setModal({ mode: 'edit', tour }); };
   const closeModal = () => { clearInterval(autoSaveRef.current); setModal(null); };
 
@@ -1167,6 +1234,24 @@ function ToursSection({ tours, setTours, t }) {
           {/* ── Tab: พื้นฐาน ── */}
           {tourTab === 'พื้นฐาน' && (
             <div className="space-y-4">
+              {/* AI: อัปโหลดไฟล์โปรแกรมทัวร์ ให้ช่วยกรอกฟอร์มอัตโนมัติ */}
+              <div className="p-3 bg-teal-50 border border-teal-200 rounded-xl">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div>
+                    <div className="text-sm font-bold text-teal-700">🤖 อัปโหลดไฟล์โปรแกรมทัวร์ ให้ AI ช่วยกรอกข้อมูลอัตโนมัติ</div>
+                    <div className="text-xs text-slate-500 mt-0.5">รองรับ PDF, รูปภาพ (JPG/PNG/WebP), Word (.docx), ข้อความ (.txt/.csv) — ขนาดไม่เกิน 8MB · AI จะอ่านไฮไลท์ โปรแกรมแต่ละวัน วันเดินทาง และราคา มากรอกให้อัตโนมัติ</div>
+                  </div>
+                  <label className={`px-4 py-2 rounded-lg text-sm font-bold cursor-pointer transition whitespace-nowrap ${aiParsing ? 'bg-slate-300 text-slate-500 cursor-wait' : 'bg-teal-600 text-white hover:bg-teal-700'}`}>
+                    {aiParsing ? '⏳ กำลังวิเคราะห์ไฟล์ด้วย AI...' : '📄 เลือกไฟล์โปรแกรมทัวร์'}
+                    <input type="file" className="hidden" disabled={aiParsing}
+                      accept=".pdf,.docx,.txt,.csv,image/*"
+                      onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; handleAIFile(f); }} />
+                  </label>
+                </div>
+                {aiError && <div className="text-xs text-red-600 font-semibold mt-2">⚠ {aiError}</div>}
+                <div className="text-[11px] text-slate-400 mt-2">* หลังจาก AI กรอกข้อมูลให้แล้ว กรุณาตรวจสอบความถูกต้องของทุกแท็บ (ราคา / โปรแกรม / ที่พัก / รวม-ไม่รวม) ก่อนกด "เพิ่มทัวร์" หรือ "บันทึก" เสมอ</div>
+              </div>
+
               {/* Tour type + continent + country */}
               <div className="grid grid-cols-3 gap-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
                 <Field label="ประเภทการเดินทาง *">
