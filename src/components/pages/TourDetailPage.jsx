@@ -92,12 +92,33 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
 
   // Travel month range from departures
   const MONTHS_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  // Robustly extract month index (0-11) from a date value of any common shape:
+  // "YYYY-MM-DD", "YYYY/MM/DD", Date object, timestamp, or other parseable string.
+  const monthFromDateVal = (val) => {
+    if (val === null || val === undefined || val === '') return NaN;
+    if (val instanceof Date) {
+      return isNaN(val.getTime()) ? NaN : val.getMonth();
+    }
+    const s = String(val).trim();
+    // Direct ISO-ish match avoids timezone parsing quirks entirely
+    const m1 = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (m1) {
+      const mo = parseInt(m1[2], 10);
+      return (mo >= 1 && mo <= 12) ? mo - 1 : NaN;
+    }
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? NaN : d.getMonth();
+  };
   const travelMonthRange = (() => {
-    const deps = tour.departures || [];
+    const deps = Array.isArray(tour.departures) ? tour.departures : [];
     if (!deps.length) return null;
-    const months = deps.flatMap(d => {
-      const dates = [d.date, d.returnDate].filter(Boolean);
-      return dates.map(dt => new Date(dt).getMonth()).filter(m => !isNaN(m));
+    const months = [];
+    deps.forEach(d => {
+      if (!d) return;
+      [d.date, d.returnDate].forEach(dt => {
+        const m = monthFromDateVal(dt);
+        if (!isNaN(m)) months.push(m);
+      });
     });
     if (!months.length) return null;
     const minM = Math.min(...months);
@@ -253,7 +274,8 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                     val: <span style={{ color: '#dc2626', fontWeight: 800, fontSize: 20 }}>
                       {basePrice.toLocaleString()} <span style={{ fontSize: 15, fontWeight: 600 }}>{th ? 'บาท/ท่าน' : 'THB/pax'}</span>
                     </span> },
-                  ...(travelMonthRange ? [{ icon: '🗓️', label: th ? 'ช่วงเดือนที่เดินทาง' : 'Travel Months', val: <span style={{ fontWeight: 700, color: '#0f766e' }}>{travelMonthRange}</span> }] : []),
+                  { icon: '🗓️', label: th ? 'ช่วงเดือนที่เดินทาง' : 'Travel Months',
+                    val: <span style={{ fontWeight: 700, color: travelMonthRange ? '#0f766e' : '#94a3b8' }}>{travelMonthRange || '-'}</span> },
                   { icon: '✈️', label: th ? 'เดินทางโดย' : 'Airline',      val: airline || (th ? 'ติดต่อสอบถาม' : 'TBA') },
                 ].map(({ icon, label, val }) => (
                   <div key={label} className="info-cell">
