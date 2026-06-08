@@ -1288,7 +1288,7 @@ function ToursSection({ tours, setTours, t }) {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-semibold text-slate-700 text-sm">วันเดินทาง (Departures)</h4>
-                  <button onClick={() => addToArr('departures', { date: '', returnDate: '', totalSeats: 20, bookedSeats: 0, price: 0, childPrice: 0, singleSupplement: 0 })}
+                  <button onClick={() => addToArr('departures', { date: '', returnDate: '', totalSeats: 20, bookedSeats: 0, price: 0, childPrice: 0, infantPrice: 0, singleSupplement: 0, promoPrice: 0 })}
                     className="flex items-center gap-1 bg-teal-50 hover:bg-teal-100 text-teal-700 px-3 py-1.5 rounded-lg text-xs font-semibold">
                     <Plus className="w-3 h-3" /> เพิ่มวัน
                   </button>
@@ -1332,9 +1332,23 @@ function ToursSection({ tours, setTours, t }) {
                             onChange={e => updateArr('departures', i, { ...dep, childPrice: Number(e.target.value) })} />
                         </div>
                         <div>
+                          <label className="text-xs text-slate-500 font-semibold block mb-1">ราคาเด็กทารก (฿)</label>
+                          <input className={inp} type="number" min={0} placeholder="0" value={dep.infantPrice || ''}
+                            onChange={e => updateArr('departures', i, { ...dep, infantPrice: Number(e.target.value) })} />
+                        </div>
+                        <div>
                           <label className="text-xs text-slate-500 font-semibold block mb-1">พักเดี่ยว +฿</label>
                           <input className={inp} type="number" min={0} placeholder="0" value={dep.singleSupplement || ''}
                             onChange={e => updateArr('departures', i, { ...dep, singleSupplement: Number(e.target.value) })} />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-4 gap-2 items-end">
+                        <div className="col-span-3">
+                          <label className="text-xs text-teal-600 font-semibold block mb-1">
+                            ราคาโปรโมชั่น ผู้ใหญ่ (฿) <span className="text-slate-400 font-normal">— ถ้าใส่ จะแสดงราคาเดิมขีดทับคู่กับราคานี้</span>
+                          </label>
+                          <input className={inp} type="number" min={0} placeholder="ไม่ระบุ = ไม่มีโปรโมชั่น" value={dep.promoPrice || ''}
+                            onChange={e => updateArr('departures', i, { ...dep, promoPrice: Number(e.target.value) })} />
                         </div>
                         <div className="flex items-end">
                           <button onClick={() => removeFromArr('departures', i)}

@@ -350,6 +350,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                     <th>{th ? 'วันเดินทางไป-กลับ' : 'Travel Dates'}</th>
                     <th>{th ? 'ผู้ใหญ่ (฿)' : 'Adult (฿)'}</th>
                     <th>{th ? 'เด็กเดี่ยว (฿)' : 'Child (฿)'}</th>
+                    <th>{th ? 'เด็กทารก (฿)' : 'Infant (฿)'}</th>
                     <th>{th ? 'พักเดี่ยว (฿)' : 'Single Supp.'}</th>
                     <th>{th ? 'จอยแลนด์' : 'Joyland'}</th>
                     <th>Group Size</th>
@@ -362,7 +363,9 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                     const st     = depStatus(dep);
                     const adultP = dep.price || basePrice;
                     const childP = dep.childPrice || null;
+                    const infantP = dep.infantPrice || null;
                     const singleP = dep.singleSupplement || null;
+                    const promoP = dep.promoPrice > 0 && dep.promoPrice < adultP ? dep.promoPrice : null;
                     const total  = dep.totalSeats || tour.groupSize || '-';
                     const avail  = dep.totalSeats ? Math.max(0, dep.totalSeats - (dep.bookedSeats || 0)) : (dep.available ?? total);
                     const fmt    = (n) => n ? n.toLocaleString() : '-';
@@ -374,9 +377,17 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                           </div>
                         </td>
                         <td>
-                          <span style={{ fontWeight: 800, color: '#dc2626', fontSize: 14 }}>{fmt(adultP)}</span>
+                          {promoP ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                              <span style={{ fontWeight: 600, color: '#94a3b8', fontSize: 12, textDecoration: 'line-through' }}>{fmt(adultP)}</span>
+                              <span style={{ fontWeight: 800, color: '#dc2626', fontSize: 14 }}>{fmt(promoP)}</span>
+                            </div>
+                          ) : (
+                            <span style={{ fontWeight: 800, color: '#dc2626', fontSize: 14 }}>{fmt(adultP)}</span>
+                          )}
                         </td>
                         <td style={{ color: '#475569' }}>{fmt(childP)}</td>
+                        <td style={{ color: '#475569' }}>{fmt(infantP)}</td>
                         <td style={{ color: '#475569' }}>{singleP ? `+${fmt(singleP)}` : '-'}</td>
                         <td style={{ color: '#94a3b8' }}>-</td>
                         <td>
