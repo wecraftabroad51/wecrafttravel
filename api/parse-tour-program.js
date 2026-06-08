@@ -110,7 +110,7 @@ module.exports = async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-5',
-        max_tokens: 4096,
+        max_tokens: 16000,
         messages: [{ role: 'user', content }],
       }),
     });
@@ -129,7 +129,10 @@ module.exports = async function handler(req, res) {
     try {
       parsed = JSON.parse(cleaned);
     } catch (e) {
-      console.error('JSON parse failed. Raw AI output:', cleaned.slice(0, 2000));
+      console.error('JSON parse failed. stop_reason=' + aiData.stop_reason + '. Raw AI output (last 500 chars):', cleaned.slice(-500));
+      if (aiData.stop_reason === 'max_tokens') {
+        return res.status(502).json({ error: 'ไฟล์โปรแกรมทัวร์มีรายละเอียดยาวมาก ทำให้ AI สร้างผลลัพธ์ไม่เสร็จสมบูรณ์ — กรุณาลองอัปโหลดเฉพาะบางส่วนของไฟล์ หรือกรอกข้อมูลบางส่วนด้วยตนเอง' });
+      }
       return res.status(502).json({ error: 'AI อ่านไฟล์ได้ แต่ไม่สามารถแปลงผลลัพธ์เป็นข้อมูลได้ กรุณาลองใหม่อีกครั้ง' });
     }
 
