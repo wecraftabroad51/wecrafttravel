@@ -45,11 +45,11 @@ function Accordion({ title, icon, badge, defaultOpen = false, children }) {
         borderBottom: open ? '1px solid #bae6fd' : 'none',
         transition: 'background .15s',
       }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, fontWeight: 700, color: '#0f172a' }}>
-          {icon && <span style={{ fontSize: 16 }}>{icon}</span>}
+        <span style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 17, fontWeight: 700, color: '#0f172a' }}>
+          {icon && <span style={{ fontSize: 19 }}>{icon}</span>}
           {title}
           {badge && (
-            <span style={{ background: '#0f3460', color: '#fff', fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>
+            <span style={{ background: '#0f3460', color: '#fff', fontSize: 13, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>
               {badge}
             </span>
           )}
@@ -130,29 +130,29 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
       <style>{`
         @keyframes tdFadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
         .td-card { background:#fff; border-radius:16px; border:1px solid #e2e8f0; box-shadow:0 2px 12px rgba(0,0,0,.06); animation:tdFadeIn .4s ease both; }
-        .td-back { display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s; }
+        .td-back { display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:10px;padding:8px 18px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s; }
         .td-back:hover { background:rgba(255,255,255,.25); }
-        .td-btn { display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:10px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;letter-spacing:.01em; }
+        .td-btn { display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:10px;padding:11px 22px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;letter-spacing:.01em; }
         .td-btn:hover { filter:brightness(1.08); transform:translateY(-1px); box-shadow:0 4px 14px rgba(0,0,0,.15); }
-        .td-save { display:inline-flex;align-items:center;gap:7px;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;color:#64748b;cursor:pointer;font-family:inherit;transition:all .2s; }
+        .td-save { display:inline-flex;align-items:center;gap:7px;background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 16px;font-size:15px;font-weight:700;color:#64748b;cursor:pointer;font-family:inherit;transition:all .2s; }
         .td-save:hover,.td-save.active { border-color:#2db04b;color:#16a34a;background:#f0fdf4; }
         .td-table { width:100%;border-collapse:collapse; }
-        .td-table th { background:linear-gradient(135deg,#0f3460,#1e4a7a);color:#fff;padding:11px 14px;text-align:center;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap; }
+        .td-table th { background:linear-gradient(135deg,#0f3460,#1e4a7a);color:#fff;padding:11px 14px;text-align:center;font-size:14.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap; }
         .td-table th:first-child { text-align:left;border-radius:0; }
-        .td-table td { padding:10px 14px;text-align:center;border-bottom:1px solid #f1f5f9;font-size:13px;white-space:nowrap; }
+        .td-table td { padding:10px 14px;text-align:center;border-bottom:1px solid #f1f5f9;font-size:16px;white-space:nowrap; }
         .td-table td:first-child { text-align:left; }
         .td-table tr:last-child td { border-bottom:none; }
         .td-table tbody tr:hover td { background:#f8fafc; }
-        .td-full   { display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;background:#fee2e2;color:#dc2626; }
-        .td-hurry  { display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(22,163,74,.3);transition:all .15s; }
+        .td-full   { display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:14px;font-weight:700;background:#fee2e2;color:#dc2626; }
+        .td-hurry  { display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:20px;font-size:14px;font-weight:700;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(22,163,74,.3);transition:all .15s; }
         .td-hurry:hover { transform:scale(1.05); }
-        .td-open   { display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(22,163,74,.3);transition:all .15s; }
+        .td-open   { display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border-radius:20px;font-size:14px;font-weight:700;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(22,163,74,.3);transition:all .15s; }
         .td-open:hover { transform:scale(1.05); }
         .info-cell { display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9; }
         .info-cell:last-child { border-bottom:none; }
-        .info-label { font-size:10.5px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px; }
-        .info-value { font-size:13.5px;font-weight:700;color:#1e293b;line-height:1.3; }
-        .chip-cont { display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.02em; }
+        .info-label { font-size:13.5px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px; }
+        .info-value { font-size:16.5px;font-weight:700;color:#1e293b;line-height:1.3; }
+        .chip-cont { display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:14px;font-weight:700;letter-spacing:.02em; }
       `}</style>
 
       {/* ── Hero banner ────────────────────────────────────────── */}
@@ -165,12 +165,12 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
             <Icon name="arrow-left" size={14} />
             {th ? 'ย้อนกลับ' : 'Back'}
           </button>
-          <div style={{ color: 'rgba(255,255,255,.55)', fontSize: 12, display: 'flex', gap: 6, alignItems: 'center' }}>
-            <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 12 }}>
+          <div style={{ color: 'rgba(255,255,255,.55)', fontSize: 15, display: 'flex', gap: 6, alignItems: 'center' }}>
+            <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 15 }}>
               {th ? 'หน้าหลัก' : 'Home'}
             </button>
             <span>/</span>
-            <button onClick={() => navigate('tours')} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 12 }}>
+            <button onClick={() => navigate('tours')} style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: 15 }}>
               {th ? 'ทัวร์' : 'Tours'}
             </button>
             <span>/</span>
@@ -192,7 +192,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                 <img src={tour.image} alt={tourName}
                   style={{ width: '100%', height: 'auto', maxHeight: 560, objectFit: 'contain', display: 'block' }} />
               ) : (
-                <div style={{ width: '100%', height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 48 }}>
+                <div style={{ width: '100%', height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 51 }}>
                   🗺️
                 </div>
               )}
@@ -225,7 +225,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
 
               {/* Title */}
               <h1 style={{
-                fontSize: 'clamp(15px,1.8vw,21px)', fontWeight: 800,
+                fontSize: 'clamp(18px,1.8vw,24px)', fontWeight: 800,
                 color: '#0f172a', margin: '0 0 10px', lineHeight: 1.35,
                 borderLeft: '4px solid #0f3460', paddingLeft: 12,
               }}>
@@ -234,7 +234,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
 
               {/* Description */}
               {tour.description && (
-                <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 16px', lineHeight: 1.65, maxWidth: 560 }}>
+                <p style={{ fontSize: 16, color: '#64748b', margin: '0 0 16px', lineHeight: 1.65, maxWidth: 560 }}>
                   {tv(tour.description)}
                 </p>
               )}
@@ -242,7 +242,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
               {/* Info grid — 2 columns */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 32px', flex: 1, alignContent: 'start' }}>
                 {[
-                  { icon: '🔖', label: th ? 'รหัสทัวร์' : 'Tour Code',    val: <span style={{ fontFamily: 'monospace', background: '#f1f5f9', padding: '2px 8px', borderRadius: 6, fontSize: 12 }}>{tourCode}</span> },
+                  { icon: '🔖', label: th ? 'รหัสทัวร์' : 'Tour Code',    val: <span style={{ fontFamily: 'monospace', background: '#f1f5f9', padding: '2px 8px', borderRadius: 6, fontSize: 15 }}>{tourCode}</span> },
                   { icon: '🏷️', label: th ? 'ประเภท' : 'Type',            val: tour.tourType || '-' },
                   { icon: '📅', label: th ? 'กำหนดการเดินทาง' : 'Travel Period',
                     val: tour.departures?.length > 0
@@ -250,14 +250,14 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                       : (th ? 'ติดต่อสอบถาม' : 'Contact us') },
                   { icon: '⏱️', label: th ? 'จำนวนวัน' : 'Duration',       val: tour.duration ? `${tour.duration} ${th ? 'วัน' : 'days'}` : '-' },
                   { icon: '💰', label: th ? 'ราคาเริ่มต้น' : 'Starting Price',
-                    val: <span style={{ color: '#dc2626', fontWeight: 800, fontSize: 17 }}>
-                      {basePrice.toLocaleString()} <span style={{ fontSize: 12, fontWeight: 600 }}>{th ? 'บาท/ท่าน' : 'THB/pax'}</span>
+                    val: <span style={{ color: '#dc2626', fontWeight: 800, fontSize: 20 }}>
+                      {basePrice.toLocaleString()} <span style={{ fontSize: 15, fontWeight: 600 }}>{th ? 'บาท/ท่าน' : 'THB/pax'}</span>
                     </span> },
                   ...(travelMonthRange ? [{ icon: '🗓️', label: th ? 'ช่วงเดือนที่เดินทาง' : 'Travel Months', val: <span style={{ fontWeight: 700, color: '#0f766e' }}>{travelMonthRange}</span> }] : []),
                   { icon: '✈️', label: th ? 'เดินทางโดย' : 'Airline',      val: airline || (th ? 'ติดต่อสอบถาม' : 'TBA') },
                 ].map(({ icon, label, val }) => (
                   <div key={label} className="info-cell">
-                    <span style={{ fontSize: 17, lineHeight: 1, flexShrink: 0, marginTop: 2 }}>{icon}</span>
+                    <span style={{ fontSize: 20, lineHeight: 1, flexShrink: 0, marginTop: 2 }}>{icon}</span>
                     <div>
                       <div className="info-label">{label}</div>
                       <div className="info-value">{val}</div>
@@ -277,17 +277,17 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                   border: '1.5px solid #fed7aa', borderRadius: 10,
                   padding: '10px 16px', marginBottom: 14,
                 }}>
-                  <span style={{ fontSize: 28, lineHeight: 1 }}>📄</span>
+                  <span style={{ fontSize: 31, lineHeight: 1 }}>📄</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12, fontWeight: 800, color: '#9a3412', marginBottom: 2 }}>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: '#9a3412', marginBottom: 2 }}>
                       {th ? 'ไฟล์โปรแกรมทัวร์' : 'Tour Program PDF'}
                     </div>
-                    <div style={{ fontSize: 11, color: '#c2410c' }}>
+                    <div style={{ fontSize: 14, color: '#c2410c' }}>
                       {th ? 'ดาวน์โหลดรายละเอียดโปรแกรมฉบับเต็ม' : 'Download the full tour program details'}
                     </div>
                   </div>
                   <a href={tour.pdfUrl} download target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', flexShrink: 0 }}>
-                    <button className="td-btn" style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)', color: '#fff', padding: '8px 16px', fontSize: 12 }}>
+                    <button className="td-btn" style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)', color: '#fff', padding: '8px 16px', fontSize: 15 }}>
                       <Icon name="download" size={14} />
                       {th ? 'ดาวน์โหลด' : 'Download'}
                     </button>
@@ -334,11 +334,11 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
               background: 'linear-gradient(135deg,#0f3460,#1e4a7a)',
               padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 10
             }}>
-              <span style={{ fontSize: 18 }}>📅</span>
-              <h2 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#fff', letterSpacing: '.01em' }}>
+              <span style={{ fontSize: 21 }}>📅</span>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#fff', letterSpacing: '.01em' }}>
                 {th ? 'วันเดินทางและราคา' : 'Departure Dates & Prices'}
               </h2>
-              <span style={{ background: 'rgba(255,255,255,.2)', color: '#fff', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20, marginLeft: 'auto' }}>
+              <span style={{ background: 'rgba(255,255,255,.2)', color: '#fff', fontSize: 14, fontWeight: 700, padding: '3px 10px', borderRadius: 20, marginLeft: 'auto' }}>
                 {tour.departures.length} {th ? 'รอบ' : 'dates'}
               </span>
             </div>
@@ -372,18 +372,18 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                     return (
                       <tr key={dep.id || i}>
                         <td>
-                          <div style={{ fontWeight: 700, color: '#0f3460', fontSize: 13 }}>
+                          <div style={{ fontWeight: 700, color: '#0f3460', fontSize: 16 }}>
                             {dep.date}{dep.returnDate ? ` — ${dep.returnDate}` : ''}
                           </div>
                         </td>
                         <td>
                           {promoP ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                              <span style={{ fontWeight: 600, color: '#94a3b8', fontSize: 12, textDecoration: 'line-through' }}>{fmt(adultP)}</span>
-                              <span style={{ fontWeight: 800, color: '#dc2626', fontSize: 14 }}>{fmt(promoP)}</span>
+                              <span style={{ fontWeight: 600, color: '#94a3b8', fontSize: 15, textDecoration: 'line-through' }}>{fmt(adultP)}</span>
+                              <span style={{ fontWeight: 800, color: '#dc2626', fontSize: 17 }}>{fmt(promoP)}</span>
                             </div>
                           ) : (
-                            <span style={{ fontWeight: 800, color: '#dc2626', fontSize: 14 }}>{fmt(adultP)}</span>
+                            <span style={{ fontWeight: 800, color: '#dc2626', fontSize: 17 }}>{fmt(adultP)}</span>
                           )}
                         </td>
                         <td style={{ color: '#475569' }}>{fmt(childP)}</td>
@@ -392,7 +392,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                         <td style={{ color: '#94a3b8' }}>-</td>
                         <td>
                           {total !== '-'
-                            ? <span style={{ fontWeight: 700, color: '#0369a1', background: '#e0f2fe', padding: '3px 10px', borderRadius: 20, fontSize: 12 }}>{total}</span>
+                            ? <span style={{ fontWeight: 700, color: '#0369a1', background: '#e0f2fe', padding: '3px 10px', borderRadius: 20, fontSize: 15 }}>{total}</span>
                             : '-'}
                         </td>
                         <td>
@@ -416,7 +416,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
             </div>
 
             {/* Table footer note */}
-            <div style={{ padding: '10px 20px', background: '#f8fafc', borderTop: '1px solid #f1f5f9', fontSize: 11.5, color: '#94a3b8', display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+            <div style={{ padding: '10px 20px', background: '#f8fafc', borderTop: '1px solid #f1f5f9', fontSize: 14.5, color: '#94a3b8', display: 'flex', gap: 20, flexWrap: 'wrap' }}>
               <span>💡 {th ? 'ราคาต่อท่าน รวม VAT แล้ว' : 'Price per person, VAT included'}</span>
               <span>📞 {th ? 'โทรจอง: 061-868-6889' : 'Book: 061-868-6889'}</span>
             </div>
@@ -440,27 +440,27 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                         width: 28, height: 28, borderRadius: '50%',
                         background: 'linear-gradient(135deg,#0f3460,#1e4a7a)', color: '#fff',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 11, fontWeight: 800, boxShadow: '0 2px 8px rgba(15,52,96,.3)',
+                        fontSize: 14, fontWeight: 800, boxShadow: '0 2px 8px rgba(15,52,96,.3)',
                       }}>
                         D{day.day || idx + 1}
                       </div>
                       <div style={{ background: '#f8fafc', borderRadius: 10, padding: '12px 16px', border: '1px solid #f1f5f9' }}>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>
+                        <div style={{ fontSize: 17, fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>
                           {tv(day.title)}
                         </div>
                         {day.description && (
-                          <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.65 }}>
+                          <div style={{ fontSize: 16, color: '#64748b', lineHeight: 1.65 }}>
                             {tv(day.description)}
                           </div>
                         )}
                         <div style={{ display: 'flex', gap: 6, marginTop: day.description ? 8 : 0, flexWrap: 'wrap' }}>
                           {(day.meals || []).map(m => (
-                            <span key={m} style={{ fontSize: 11, background: '#fff', color: '#16a34a', padding: '2px 9px', borderRadius: 20, border: '1px solid #bbf7d0', fontWeight: 600 }}>
+                            <span key={m} style={{ fontSize: 14, background: '#fff', color: '#16a34a', padding: '2px 9px', borderRadius: 20, border: '1px solid #bbf7d0', fontWeight: 600 }}>
                               {m === 'breakfast' ? '☕ เช้า' : m === 'lunch' ? '🍱 กลางวัน' : '🍽️ เย็น'}
                             </span>
                           ))}
                           {day.hotel && (
-                            <span style={{ fontSize: 11, background: '#fff', color: '#0369a1', padding: '2px 9px', borderRadius: 20, border: '1px solid #bae6fd', fontWeight: 600 }}>
+                            <span style={{ fontSize: 14, background: '#fff', color: '#0369a1', padding: '2px 9px', borderRadius: 20, border: '1px solid #bae6fd', fontWeight: 600 }}>
                               🏨 {day.hotel}
                             </span>
                           )}
@@ -476,11 +476,11 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                   {tour.includes?.length > 0 && (
                     <div style={{ background: '#f0fdf4', borderRadius: 10, padding: '14px 16px', border: '1px solid #bbf7d0' }}>
-                      <div style={{ fontWeight: 800, fontSize: 13, color: '#16a34a', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ fontWeight: 800, fontSize: 16, color: '#16a34a', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
                         ✅ {th ? 'รวมในราคา' : 'Included'}
                       </div>
                       {tour.includes.map((item, i) => (
-                        <div key={i} style={{ fontSize: 12.5, color: '#374151', padding: '3px 0', display: 'flex', gap: 7, alignItems: 'flex-start' }}>
+                        <div key={i} style={{ fontSize: 15.5, color: '#374151', padding: '3px 0', display: 'flex', gap: 7, alignItems: 'flex-start' }}>
                           <span style={{ color: '#16a34a', flexShrink: 0, marginTop: 2 }}>•</span> {tv(item)}
                         </div>
                       ))}
@@ -488,11 +488,11 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                   )}
                   {tour.excludes?.length > 0 && (
                     <div style={{ background: '#fff7f7', borderRadius: 10, padding: '14px 16px', border: '1px solid #fecaca' }}>
-                      <div style={{ fontWeight: 800, fontSize: 13, color: '#dc2626', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ fontWeight: 800, fontSize: 16, color: '#dc2626', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
                         ❌ {th ? 'ไม่รวมในราคา' : 'Not included'}
                       </div>
                       {tour.excludes.map((item, i) => (
-                        <div key={i} style={{ fontSize: 12.5, color: '#374151', padding: '3px 0', display: 'flex', gap: 7, alignItems: 'flex-start' }}>
+                        <div key={i} style={{ fontSize: 15.5, color: '#374151', padding: '3px 0', display: 'flex', gap: 7, alignItems: 'flex-start' }}>
                           <span style={{ color: '#dc2626', flexShrink: 0, marginTop: 2 }}>•</span> {tv(item)}
                         </div>
                       ))}
@@ -513,7 +513,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                     {th ? 'ดาวน์โหลด PDF' : 'Download PDF'}
                   </button>
                 </a>
-                <span style={{ fontSize: 12, color: '#94a3b8' }}>{th ? 'รายละเอียดโปรแกรมทัวร์ฉบับเต็ม' : 'Full tour program details'}</span>
+                <span style={{ fontSize: 15, color: '#94a3b8' }}>{th ? 'รายละเอียดโปรแกรมทัวร์ฉบับเต็ม' : 'Full tour program details'}</span>
               </div>
               <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid #e2e8f0', height: 520 }}>
                 <iframe src={tour.pdfUrl} style={{ width: '100%', height: '100%', border: 'none' }} title="Tour PDF" />
@@ -528,16 +528,16 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                 {tourReviews.map(r => (
                   <div key={r.id} style={{ padding: '14px 18px', background: '#fafafa', borderRadius: 10, border: '1px solid #f1f5f9' }}>
                     <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                      <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg,#0f3460,#1e4a7a)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, flexShrink: 0 }}>
+                      <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg,#0f3460,#1e4a7a)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 17, flexShrink: 0 }}>
                         {(r.name || '?')[0].toUpperCase()}
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                          <span style={{ fontWeight: 700, fontSize: 13 }}>{r.name}</span>
+                          <span style={{ fontWeight: 700, fontSize: 16 }}>{r.name}</span>
                           <Stars value={r.rating} />
-                          <span style={{ fontSize: 11, color: '#94a3b8' }}>{r.date}</span>
+                          <span style={{ fontSize: 14, color: '#94a3b8' }}>{r.date}</span>
                         </div>
-                        <p style={{ margin: '7px 0 0', fontSize: 13, color: '#475569', lineHeight: 1.65 }}>
+                        <p style={{ margin: '7px 0 0', fontSize: 16, color: '#475569', lineHeight: 1.65 }}>
                           {tv(r.text)}
                         </p>
                       </div>
@@ -551,25 +551,25 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
           {/* Write review */}
           <Accordion title={th ? 'เขียนรีวิว' : 'Write a Review'} icon="✍️">
             {reviewSent ? (
-              <div style={{ padding: '14px 18px', background: '#f0fdf4', borderRadius: 10, border: '1px solid #bbf7d0', color: '#16a34a', fontWeight: 700, fontSize: 13 }}>
+              <div style={{ padding: '14px 18px', background: '#f0fdf4', borderRadius: 10, border: '1px solid #bbf7d0', color: '#16a34a', fontWeight: 700, fontSize: 16 }}>
                 ✅ {th ? 'ขอบคุณ! รีวิวของคุณรอการอนุมัติ' : 'Thank you! Your review is pending approval.'}
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 560 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                   <div>
-                    <label style={{ fontSize: 12, fontWeight: 600, color: '#64748b', display: 'block', marginBottom: 5 }}>{th ? 'ชื่อ *' : 'Name *'}</label>
-                    <input style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: 8, padding: '9px 12px', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
+                    <label style={{ fontSize: 15, fontWeight: 600, color: '#64748b', display: 'block', marginBottom: 5 }}>{th ? 'ชื่อ *' : 'Name *'}</label>
+                    <input style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: 8, padding: '9px 12px', fontSize: 16, outline: 'none', boxSizing: 'border-box' }}
                       value={reviewForm.name} onChange={e => setReviewForm(p => ({ ...p, name: e.target.value }))} />
                   </div>
                   <div>
-                    <label style={{ fontSize: 12, fontWeight: 600, color: '#64748b', display: 'block', marginBottom: 5 }}>Email</label>
-                    <input style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: 8, padding: '9px 12px', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
+                    <label style={{ fontSize: 15, fontWeight: 600, color: '#64748b', display: 'block', marginBottom: 5 }}>Email</label>
+                    <input style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: 8, padding: '9px 12px', fontSize: 16, outline: 'none', boxSizing: 'border-box' }}
                       value={reviewForm.email} onChange={e => setReviewForm(p => ({ ...p, email: e.target.value }))} />
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>Rating:</span>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: '#64748b' }}>Rating:</span>
                   {[1,2,3,4,5].map(s => (
                     <button key={s} onClick={() => setReviewForm(p => ({ ...p, rating: s }))}
                       style={{ background: 'none', border: 'none', cursor: 'pointer', color: s <= reviewForm.rating ? '#f59e0b' : '#e2e8f0', padding: 2, transition: 'color .15s' }}>
@@ -578,13 +578,13 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                   ))}
                 </div>
                 <div>
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#64748b', display: 'block', marginBottom: 5 }}>{th ? 'ความคิดเห็น *' : 'Review *'}</label>
-                  <textarea rows={4} style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: 8, padding: '9px 12px', fontSize: 13, resize: 'vertical', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}
+                  <label style={{ fontSize: 15, fontWeight: 600, color: '#64748b', display: 'block', marginBottom: 5 }}>{th ? 'ความคิดเห็น *' : 'Review *'}</label>
+                  <textarea rows={4} style={{ width: '100%', border: '1.5px solid #e2e8f0', borderRadius: 8, padding: '9px 12px', fontSize: 16, resize: 'vertical', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }}
                     placeholder={th ? 'แชร์ประสบการณ์การเดินทางของคุณ...' : 'Share your travel experience…'}
                     value={reviewForm.text} onChange={e => setReviewForm(p => ({ ...p, text: e.target.value }))} />
                 </div>
                 <button onClick={submitReview}
-                  style={{ alignSelf: 'flex-start', background: 'linear-gradient(135deg,#0f3460,#1e4a7a)', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 24px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .2s' }}>
+                  style={{ alignSelf: 'flex-start', background: 'linear-gradient(135deg,#0f3460,#1e4a7a)', color: '#fff', border: 'none', borderRadius: 9, padding: '10px 24px', fontSize: 16, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .2s' }}>
                   {th ? '✈️ ส่งรีวิว' : '✈️ Submit Review'}
                 </button>
               </div>
@@ -596,8 +596,8 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
         {tours.filter(tr => tr.id !== tour.id).length > 0 && (
           <div className="td-card" style={{ padding: '24px 28px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-              <span style={{ fontSize: 20 }}>🗺️</span>
-              <h2 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0f172a' }}>
+              <span style={{ fontSize: 23 }}>🗺️</span>
+              <h2 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: '#0f172a' }}>
                 {th ? 'ทัวร์ที่น่าสนใจอื่นๆ' : 'You may also like'}
               </h2>
             </div>
