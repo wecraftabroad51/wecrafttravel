@@ -1083,6 +1083,39 @@ function ToursSection({ tours, setTours, t }) {
     }
   };
 
+  // อัปโหลดรูปภาพ infographic รวม/ไม่รวม โดยตรง → AI อ่านด้วย Vision API (แม่นยำกว่า PDF)
+  const handleAIIncludesImage = async (file) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { setAiError('กรุณาเลือกไฟล์รูปภาพ (JPG, PNG, WebP, ฯลฯ)'); return; }
+    if (file.size > 20 * 1024 * 1024) { setAiError('รูปภาพใหญ่เกินไป (จำกัดไม่เกิน 20MB)'); return; }
+    setAiParsing(true); setAiError(null);
+    try {
+      const { url: fileUrl, error: upErr } = await uploadFile(file, 'ai-program-uploads');
+      if (upErr || !fileUrl) throw new Error('อัปโหลดรูปไม่สำเร็จ');
+      const resp = await fetch('/api/parse-tour-program', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileUrl, mimeType: file.type, fileName: file.name,
+          mode: 'includes_only',
+        }),
+      });
+      const json = await resp.json().catch(() => ({}));
+      if (!resp.ok) throw new Error(json?.error || 'เกิดข้อผิดพลาด');
+      const d = json?.data || {};
+      setForm(prev => {
+        const next = { ...prev };
+        if (Array.isArray(d.includes) && d.includes.filter(Boolean).length) next.includes = d.includes.filter(Boolean);
+        if (Array.isArray(d.excludes) && d.excludes.filter(Boolean).length) next.excludes = d.excludes.filter(Boolean);
+        return next;
+      });
+      alert(`✅ AI อ่านรูปภาพเสร็จแล้ว\nรวม: ${(d.includes||[]).length} รายการ | ไม่รวม: ${(d.excludes||[]).length} รายการ`);
+    } catch (err) {
+      setAiError(err?.message || 'เกิดข้อผิดพลาดในการอ่านรูป กรุณาลองใหม่อีกครั้ง');
+    } finally {
+      setAiParsing(false);
+    }
+  };
+
   const openAdd  = () => { setForm(EMPTY_TOUR); setTourTab('พื้นฐาน'); setAutoSaved(null); setAiError(null); setAiPending(false); setModal({ mode: 'add' }); };
   const openEdit = (tour) => { setForm(tour); setTourTab('พื้นฐาน'); setAutoSaved(null); setAiError(null); setAiPending(false); setModal({ mode: 'edit', tour }); };
   const closeModal = () => { clearInterval(autoSaveRef.current); setModal(null); };
@@ -1574,6 +1607,22 @@ function ToursSection({ tours, setTours, t }) {
 
           {/* ── Tab: รวม/ไม่รวม ── */}
           {tourTab === 'รวม/ไม่รวม' && (
+            <div className="space-y-4">
+              {/* AI อ่านรูปภาพ infographic รวม/ไม่รวม โดยตรง */}
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div>
+                    <div className="text-sm font-bold text-blue-700">📸 อัปโหลดรูปส่วน "รวม/ไม่รวม" ให้ AI อ่านโดยตรง</div>
+                    <div className="text-xs text-slate-500 mt-0.5">ถ้าไฟล์หลักอ่านรายการรวม/ไม่รวมไม่ครบ — อัปโหลดรูปภาพ (screenshot/JPG/PNG) ของส่วนนั้นโดยตรง จะแม่นยำกว่า</div>
+                  </div>
+                  <label className={`px-3 py-2 rounded-lg text-xs font-bold cursor-pointer transition whitespace-nowrap ${aiParsing ? 'bg-slate-300 text-slate-500 cursor-wait' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>
+                    {aiParsing ? '⏳ กำลังอ่านรูป...' : '🖼 อัปโหลดรูป รวม/ไม่รวม'}
+                    <input type="file" className="hidden" disabled={aiParsing}
+                      accept="image/*"
+                      onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; handleAIIncludesImage(f); }} />
+                  </label>
+                </div>
+              </div>
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <div className="flex items-center justify-between mb-3">
@@ -1620,6 +1669,7 @@ function ToursSection({ tours, setTours, t }) {
                 </div>
               </div>
             </div>
+            </div>{/* end space-y-4 */}
           )}
 
           {/* ── Tab: ภาพ ── */}

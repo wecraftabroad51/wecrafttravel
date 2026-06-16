@@ -76,19 +76,23 @@ function buildContent(mimeType, base64, textContent, promptText) {
 }
 
 // ── helper: เรียก Claude API ─────────────────────────────────────────────
-async function callClaude(apiKey, content) {
+async function callClaude(apiKey, content, systemPrompt = null) {
+  const body = {
+    model: 'claude-sonnet-4-5',
+    max_tokens: 16000,
+    messages: [{ role: 'user', content }],
+  };
+  if (systemPrompt) body.system = systemPrompt;
+
   const resp = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
       'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
+      'anthropic-beta': 'pdfs-2024-09-25',   // เปิดใช้งาน OCR แบบ page-by-page สำหรับ PDF
     },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 16000,
-      messages: [{ role: 'user', content }],
-    }),
+    body: JSON.stringify(body),
   });
   if (!resp.ok) {
     const errText = await resp.text();
@@ -144,20 +148,50 @@ module.exports = async function handler(req, res) {
       textContent = Buffer.from(fileBase64, 'base64').toString('utf-8');
     }
 
-    const contentGeneral  = buildContent(mimeType, fileBase64, textContent, PROMPT_GENERAL);
+    const { mode } = req.body || {};
+    const includesOnly = mode === 'includes_only';
+
     const contentIncludes = buildContent(mimeType, fileBase64, textContent, PROMPT_INCLUDES);
-    if (!contentGeneral) {
+    if (!contentIncludes) {
       return res.status(400).json({ error: 'ไม่รองรับไฟล์ประเภทนี้ — รองรับ PDF, รูปภาพ (JPG/PNG/WebP), Word (.docx), ข้อความ (.txt/.csv)' });
     }
 
-    // ── รอบที่ 1 และ 2 รันพร้อมกัน (parallel) เพื่อประหยัดเวลา ────────
+    // System prompt สำหรับ Pass 2 — บังคับให้ AI ทำงานในโหมด OCR precision
+    const systemPass2 = `คุณคือระบบ OCR ที่มีความแม่นยำสูง เชี่ยวชาญการอ่านเอกสารภาษาไทย
+หน้าที่ของคุณคืออ่านทุกองค์ประกอบในเอกสาร — ทั้งข้อความ, กราฟิก, infographic, ตาราง, และรูปภาพที่ฝังอยู่
+คุณต้องอ่านและถอดทุกตัวอักษรจากภาพกราฟิกได้แม่นยำ 100% ห้ามข้ามส่วนใดของเอกสาร
+ตอบกลับเป็น JSON เท่านั้น ห้ามมีข้อความอื่น`;
+
+    let general = {};
+    let incExc = { includes: [], excludes: [] };
+
+    if (includesOnly) {
+      // ── โหมดอ่านแค่รวม/ไม่รวม จากรูปภาพ ──────────────────────────────
+      const result2 = await callClaude(apiKey, contentIncludes, systemPass2).catch(e => ({ error: e.message }));
+      if (!result2.error) {
+        try {
+          const p2 = JSON.parse(result2.cleaned);
+          if (Array.isArray(p2.includes)) incExc.includes = p2.includes.filter(Boolean);
+          if (Array.isArray(p2.excludes)) incExc.excludes = p2.excludes.filter(Boolean);
+        } catch (e) {
+          console.error('IncludesOnly JSON parse failed:', result2.cleaned?.slice(-300));
+        }
+      } else {
+        console.error('IncludesOnly error:', result2.error);
+      }
+      console.log('=== INCLUDES_ONLY includes count:', incExc.includes.length, 'items:', JSON.stringify(incExc.includes));
+      console.log('=== INCLUDES_ONLY excludes count:', incExc.excludes.length, 'items:', JSON.stringify(incExc.excludes));
+      return res.status(200).json({ data: { includes: incExc.includes, excludes: incExc.excludes } });
+    }
+
+    // ── โหมดปกติ: รอบที่ 1 และ 2 รันพร้อมกัน (parallel) ────────────────
+    const contentGeneral = buildContent(mimeType, fileBase64, textContent, PROMPT_GENERAL);
     const [result1, result2] = await Promise.all([
       callClaude(apiKey, contentGeneral).catch(e => ({ error: e.message })),
-      callClaude(apiKey, contentIncludes).catch(e => ({ error: e.message })),
+      callClaude(apiKey, contentIncludes, systemPass2).catch(e => ({ error: e.message })),
     ]);
 
     // ── Parse รอบที่ 1 (ข้อมูลทั่วไป) ──────────────────────────────────
-    let general = {};
     if (!result1.error) {
       try {
         general = JSON.parse(result1.cleaned);
@@ -169,7 +203,6 @@ module.exports = async function handler(req, res) {
     }
 
     // ── Parse รอบที่ 2 (รวม/ไม่รวม) ────────────────────────────────────
-    let incExc = { includes: [], excludes: [] };
     if (!result2.error) {
       try {
         const p2 = JSON.parse(result2.cleaned);
@@ -185,7 +218,6 @@ module.exports = async function handler(req, res) {
     // ── รวมผลทั้งสองรอบ ──────────────────────────────────────────────────
     const merged = { ...general, includes: incExc.includes, excludes: incExc.excludes };
 
-    // LOG เพื่อ debug — ดูว่า AI ส่งอะไรกลับมาใน Pass2 จริงๆ
     console.log('=== PASS2 RAW cleaned ===', result2.cleaned?.slice(0, 3000));
     console.log('=== PASS2 includes count:', incExc.includes.length, 'items:', JSON.stringify(incExc.includes));
     console.log('=== PASS2 excludes count:', incExc.excludes.length, 'items:', JSON.stringify(incExc.excludes));
