@@ -69,6 +69,9 @@ async function sendSMS(phone, otp) {
     message:    message,
   });
 
+  console.log('[SMSMKT] Sending to:', to, '| sender:', sender);
+  console.log('[SMSMKT] Request body:', postData);
+
   return new Promise((resolve, reject) => {
     const req = https.request({
       hostname: 'www.smsmkt.com',
@@ -82,23 +85,31 @@ async function sendSMS(phone, otp) {
       let data = '';
       res.on('data', c => { data += c; });
       res.on('end', () => {
+        console.log('[SMSMKT] HTTP status:', res.statusCode);
+        console.log('[SMSMKT] Response body:', data);
         try {
           const json = JSON.parse(data);
           // SMSMKT ตอบกลับ: { code: "000", detail: "success" } = สำเร็จ
-          if (json.code && json.code !== '000') {
-            reject(new Error(`SMSMKT Error ${json.code}: ${json.detail || data.slice(0, 100)}`));
-          } else if (res.statusCode >= 400) {
-            reject(new Error(`SMS HTTP Error ${res.statusCode}: ${data.slice(0, 200)}`));
+          // หรือ { result: true/false } ขึ้นกับ API version
+          const code = json.code ?? json.result ?? json.status;
+          const isOk = code === '000' || code === true || code === 0 || code === 1 || code === '1';
+          if (res.statusCode >= 400) {
+            reject(new Error(`SMSMKT HTTP ${res.statusCode}: ${data.slice(0, 200)}`));
+          } else if (!isOk && code !== undefined) {
+            reject(new Error(`SMSMKT ส่งไม่สำเร็จ: ${json.detail || json.message || data.slice(0, 100)}`));
           } else {
             resolve(true);
           }
         } catch {
-          if (res.statusCode >= 400) reject(new Error(`SMS Error ${res.statusCode}`));
+          if (res.statusCode >= 400) reject(new Error(`SMSMKT HTTP Error ${res.statusCode}: ${data.slice(0,100)}`));
           else resolve(true);
         }
       });
     });
-    req.on('error', reject);
+    req.on('error', (e) => {
+      console.error('[SMSMKT] Request error:', e.message);
+      reject(e);
+    });
     req.write(postData);
     req.end();
   });
