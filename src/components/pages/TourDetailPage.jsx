@@ -478,7 +478,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                         <div style={{ display: 'flex', gap: 6, marginTop: day.description ? 8 : 0, flexWrap: 'wrap' }}>
                           {(day.meals || []).map(m => (
                             <span key={m} style={{ fontSize: 14, background: '#fff', color: '#16a34a', padding: '2px 9px', borderRadius: 20, border: '1px solid #bbf7d0', fontWeight: 600 }}>
-                              {m === 'breakfast' ? '☕ เช้า' : m === 'lunch' ? '🍱 กลางวัน' : '🍽️ เย็น'}
+                              {(m === 'เช้า' || m === 'breakfast') ? '☕ เช้า' : (m === 'กลางวัน' || m === 'lunch') ? '🍱 กลางวัน' : '🍽️ เย็น'}
                             </span>
                           ))}
                           {day.hotel && (
