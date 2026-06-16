@@ -61,12 +61,11 @@ async function sendSMS(phone, otp) {
   const sender  = process.env.SMSMKT_SENDER || 'WeCraft';
   const message = `WeCraft Travel รหัส OTP: ${otp} (หมดอายุใน 5 นาที อย่าแชร์รหัสนี้)`;
 
+  // api_key + secret_key อยู่ใน Header, phone field (ไม่ใช่ to)
   const postData = JSON.stringify({
-    api_key:    apiKey,
-    secret_key: secretKey,
-    sender:     sender,
-    to:         to,
-    message:    message,
+    phone:   to,
+    message: message,
+    sender:  sender,
   });
 
   console.log('[SMSMKT] Sending to:', to, '| sender:', sender);
@@ -74,12 +73,14 @@ async function sendSMS(phone, otp) {
 
   return new Promise((resolve, reject) => {
     const req = https.request({
-      hostname: 'www.smsmkt.com',
+      hostname: 'portal-otp.smsmkt.com',
       path:     '/api/send-message',
       method:   'POST',
       headers: {
         'Content-Type':   'application/json',
         'Content-Length': Buffer.byteLength(postData),
+        'api_key':        apiKey,
+        'secret_key':     secretKey,
       },
     }, (res) => {
       let data = '';
