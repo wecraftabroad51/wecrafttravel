@@ -91,7 +91,25 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
   const tourCode    = tour.code || '-';
 
   // Travel month range from departures
-  const MONTHS_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const MONTHS_TH      = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const MONTHS_TH_FULL = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  const parseDate = (s) => {
+    if (!s) return null;
+    const parts = String(s).trim().split(/[-/]/);
+    if (parts.length < 3) return null;
+    const y = parseInt(parts[0], 10), m = parseInt(parts[1], 10) - 1, d = parseInt(parts[2], 10);
+    if (isNaN(y) || isNaN(m) || isNaN(d)) return null;
+    return { d, m, y: y < 2400 ? y + 543 : y };
+  };
+  const formatDepRange = (dateStr, returnDateStr) => {
+    const a = parseDate(dateStr);
+    const b = parseDate(returnDateStr);
+    if (!a) return dateStr || '';
+    if (!b) return `${a.d} ${MONTHS_TH_FULL[a.m]} ${a.y}`;
+    if (a.m === b.m && a.y === b.y) return `${a.d}-${b.d} ${MONTHS_TH_FULL[a.m]} ${a.y}`;
+    if (a.y === b.y) return `${a.d} ${MONTHS_TH_FULL[a.m]} – ${b.d} ${MONTHS_TH_FULL[b.m]} ${a.y}`;
+    return `${a.d} ${MONTHS_TH_FULL[a.m]} ${a.y} – ${b.d} ${MONTHS_TH_FULL[b.m]} ${b.y}`;
+  };
   // Robustly extract month index (0-11) from a date value of any common shape:
   // "YYYY-MM-DD", "YYYY/MM/DD", Date object, timestamp, or other parseable string.
   const monthFromDateVal = (val) => {
@@ -267,7 +285,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                   { icon: '🏷️', label: th ? 'ประเภท' : 'Type',            val: tour.tourType || '-' },
                   { icon: '📅', label: th ? 'กำหนดการเดินทาง' : 'Travel Period',
                     val: tour.departures?.length > 0
-                      ? `${tour.departures[0].date} – ${tour.departures[tour.departures.length-1].returnDate || tour.departures[tour.departures.length-1].date}`
+                      ? formatDepRange(tour.departures[0].date, tour.departures[tour.departures.length-1].returnDate || tour.departures[tour.departures.length-1].date)
                       : (th ? 'ติดต่อสอบถาม' : 'Contact us') },
                   { icon: '⏱️', label: th ? 'จำนวนวัน' : 'Duration',       val: tour.duration ? `${tour.duration} ${th ? 'วัน' : 'days'}` : '-' },
                   { icon: '💰', label: th ? 'ราคาเริ่มต้น' : 'Starting Price',
@@ -395,7 +413,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                       <tr key={dep.id || i}>
                         <td>
                           <div style={{ fontWeight: 700, color: '#0f3460', fontSize: 16 }}>
-                            {dep.date}{dep.returnDate ? ` — ${dep.returnDate}` : ''}
+                            {formatDepRange(dep.date, dep.returnDate)}
                           </div>
                         </td>
                         <td>
