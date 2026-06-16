@@ -1,91 +1,109 @@
 // รับไฟล์โปรแกรมทัวร์ (PDF / รูปภาพ / Word .docx / ข้อความ)
 // แล้วใช้ Claude AI อ่านและดึงข้อมูลออกมาเป็น JSON
-// สำหรับเติมฟอร์ม "เพิ่ม/แก้ไขทัวร์" ในหน้าแอดมินอัตโนมัติ
-//
-// ต้องตั้งค่า ENV: ANTHROPIC_API_KEY (Vercel → Project Settings → Environment Variables)
+// ทำงาน 2 รอบ: รอบแรก = ข้อมูลทั่วไป + โปรแกรม, รอบสอง = รวม/ไม่รวม (โฟกัสเฉพาะ)
 
 const mammoth = require('mammoth');
 
-const SCHEMA_PROMPT = `คุณคือผู้ช่วยแอดมินบริษัททัวร์ไทย มีหน้าที่อ่าน "ไฟล์โปรแกรมทัวร์" ที่แนบมา (อาจเป็น PDF, รูปภาพ, หรือเอกสาร) แล้วดึงข้อมูลทั้งหมดออกมาเป็น JSON ตามโครงสร้างด้านล่างนี้ "เป๊ะๆ" — ห้ามใส่ข้อความอื่นนอกเหนือจาก JSON เด็ดขาด:
+// ── Prompt รอบที่ 1: ข้อมูลทั่วไป ─────────────────────────────────────
+const PROMPT_GENERAL = `คุณคือผู้ช่วยแอดมินบริษัททัวร์ไทย อ่านไฟล์โปรแกรมทัวร์ที่แนบมา แล้วดึงข้อมูลออกมาเป็น JSON เป๊ะๆ
+ห้ามใส่ข้อความอื่นนอกจาก JSON เด็ดขาด (ห้ามมี \`\`\`json ครอบ ห้ามมีคำอธิบายใดๆ):
 
 {
   "name": { "th": "ชื่อทัวร์ภาษาไทยเต็ม", "en": "Full English tour name (blank if not found)" },
-  "destination": { "th": "เมือง/ประเทศปลายทาง เช่น โตเกียว โอซาก้า เกียวโต", "en": "Tokyo, Osaka, Kyoto" },
-  "description": { "th": "คำโปรยอธิบายไฮไลท์/จุดเด่นของทัวร์ ภาษาไทย แบบย่อหน้า", "en": "English highlights paragraph if available" },
+  "destination": { "th": "ปลายทาง เช่น โตเกียว โอซาก้า เกียวโต", "en": "Tokyo, Osaka, Kyoto" },
+  "description": { "th": "คำโปรยไฮไลท์ทัวร์แบบย่อหน้า ภาษาไทย", "en": "English highlights paragraph if available" },
   "duration": 7,
   "groupSize": 20,
   "itinerary": [
-    { "title": "วันที่ 1: กรุงเทพฯ – โตเกียว", "description": "รายละเอียดกิจกรรม สถานที่ท่องเที่ยว มื้ออาหารแบบเต็ม", "hotel": "ชื่อโรงแรมที่พักคืนนั้น" }
-  ],
-  "includes": [
-    "ค่าตั๋วเครื่องบินไป-กลับพร้อมคณะ",
-    "ค่าที่พักตามที่ระบุในรายการ พักห้องละ 2-3 ท่าน",
-    "ค่าอาหารตามที่ระบุในรายการ",
-    "... รายการอื่นๆ ครบทุกข้อ"
-  ],
-  "excludes": [
-    "ค่าใช้จ่ายส่วนตัวนอกเหนือจากรายการ เช่น ค่าโทรศัพท์ ค่าซักรีด มินิบาร์",
-    "ค่าทิปไกด์ คนขับรถ และหัวหน้าทัวร์",
-    "... รายการอื่นๆ ครบทุกข้อ"
+    { "title": "วันที่ 1: กรุงเทพฯ – โตเกียว", "description": "รายละเอียดกิจกรรม สถานที่ มื้ออาหาร ครบถ้วน", "hotel": "ชื่อโรงแรมที่พักคืนนั้น" }
   ],
   "departures": [
     { "date": "2026-07-08", "returnDate": "2026-07-25", "totalSeats": 20, "price": 35900, "childPrice": 0, "infantPrice": 0, "singleSupplement": 0 }
   ],
-  "hotels": ["ชื่อโรงแรมที่พักทั้งหมดในโปรแกรม (ไม่ซ้ำ)"]
+  "hotels": ["ชื่อโรงแรมทั้งหมดในโปรแกรม (ไม่ซ้ำ)"]
 }
 
-═══════════════════════════════════════════════════
-⚠️ คำแนะนำพิเศษสำหรับ "includes" และ "excludes" — สำคัญมาก:
-═══════════════════════════════════════════════════
+กฎ: วันที่ → YYYY-MM-DD (ค.ศ., พ.ศ.ลบ543) | ราคา → ตัวเลขล้วน | ไม่พบ → "" / [] / 0`;
 
-ในโปรแกรมทัวร์ไทย มักมีส่วน "อัตราค่าบริการนี้รวม" และ "อัตราค่าบริการนี้ไม่รวม"
-ส่วนนี้อาจแสดงในรูปแบบต่างๆ เช่น:
-  • กราฟิก/Infographic — กล่องสีสวยงามพร้อมไอคอน
-  • ตาราง 2 คอลัมน์ซ้าย-ขวา
-  • หัวข้อสีเขียว ✅ / สีแดง ❌
-  • หัวข้อ "รวม" / "ไม่รวม" / "ราคานี้รวม" / "ราคานี้ไม่รวม"
+// ── Prompt รอบที่ 2: โฟกัสเฉพาะ รวม/ไม่รวม ────────────────────────────
+const PROMPT_INCLUDES = `คุณคือผู้ช่วยแอดมินบริษัททัวร์ไทย งานนี้มีขั้นตอนเดียวคือ:
 
-คุณต้องใช้ความสามารถในการมองเห็นภาพ (vision) อ่านข้อความทุกตัวอักษรจากกราฟิกเหล่านี้ให้ครบถ้วน
+อ่านไฟล์ทั้งหมดอย่างละเอียดทุกหน้า แล้วค้นหาส่วนที่แสดงรายการ "รวม" และ "ไม่รวม" ในทุกรูปแบบที่พบ
 
-สำหรับ "includes" ให้ดึงทุกรายการจากส่วนที่มีหัวข้อว่า:
-  "อัตราค่าบริการนี้รวม" / "ราคาทัวร์รวม" / "รวมในราคา" / หัวข้อที่มีเครื่องหมาย ✅ หรือ ✓
+═══ วิธีการค้นหา ═══
 
-สำหรับ "excludes" ให้ดึงทุกรายการจากส่วนที่มีหัวข้อว่า:
-  "อัตราค่าบริการนี้ไม่รวม" / "ราคาทัวร์ไม่รวม" / "ไม่รวมในราคา" / หัวข้อที่มีเครื่องหมาย ❌ หรือ ✗
+ส่วน "INCLUDES" (รวมในราคาทัวร์) — มองหาหัวข้อที่มีคำเหล่านี้:
+  อัตราค่าบริการนี้รวม | ราคาทัวร์รวม | รวมในราคา | ราคานี้รวม | Price Includes
 
-กฎการดึงข้อมูล includes/excludes:
-  ✓ ดึงครบทุกรายการ ห้ามตัดข้อความใดออก แม้รายการนั้นจะยาวมาก
-  ✓ แต่ละรายการให้ใส่เป็น string เดียวใน array (ไม่ต้องแยกย่อย)
-  ✓ ถ้ารายการยาว ให้คงข้อความเต็มไว้ ห้ามตัดทอน
-  ✓ ลำดับให้เรียงตามที่ปรากฏในเอกสาร
+ส่วน "EXCLUDES" (ไม่รวมในราคาทัวร์) — มองหาหัวข้อที่มีคำเหล่านี้:
+  อัตราค่าบริการนี้ไม่รวม | ราคาทัวร์ไม่รวม | ไม่รวมในราคา | ราคานี้ไม่รวม | Price Excludes
 
-═══════════════════════════════════════════════════
-กฎทั่วไป:
-═══════════════════════════════════════════════════
-- วันที่ทุกชนิดแปลงเป็น "YYYY-MM-DD" (ค.ศ.) — พ.ศ. ให้ลบ 543
-- ราคาเป็นตัวเลขล้วน ไม่มีคอมม่า ไม่มีสัญลักษณ์สกุลเงิน
-- ถ้าไม่พบข้อมูลส่วนใด ให้ใส่ "" / [] / 0 ตามชนิดข้อมูล ห้ามแต่งขึ้นมาเอง
-- ตอบกลับเป็น valid JSON เพียวๆ เท่านั้น ห้ามมี \`\`\`json ครอบ ห้ามมีคำอธิบายใดๆ`;
+═══ รูปแบบที่ต้องอ่าน ═══
+  • กราฟิก/Infographic สีสวยงาม พร้อมไอคอนรูปภาพ
+  • ตาราง 2 คอลัมน์ ซ้าย–ขวา (อ่านทั้งซ้ายและขวาให้ครบ!)
+  • หัวข้อสีเขียว ✅ หรือสัญลักษณ์ ✓ = รวม
+  • หัวข้อสีแดง ❌ หรือสัญลักษณ์ ✗ = ไม่รวม
+  • รายการ bullet point หรือ numbered list
 
-function buildContent(mimeType, base64, textContent) {
+═══ กฎการดึงข้อมูล ═══
+  1. ดึงทุกรายการจากทั้งคอลัมน์ซ้ายและคอลัมน์ขวา ห้ามข้ามแม้แต่รายการเดียว
+  2. คงข้อความเต็มทุกตัวอักษร ห้ามตัดทอนหรือย่อ
+  3. แต่ละรายการ = 1 string ใน array
+  4. เรียงตามลำดับที่ปรากฏในเอกสาร (ซ้ายก่อน-ขวาทีหลัง สำหรับ 2 คอลัมน์)
+  5. ถ้าไม่พบส่วนนี้เลย ให้ใส่ array ว่าง []
+
+ตอบกลับเป็น valid JSON เพียวๆ เท่านั้น ห้ามมี \`\`\`json ครอบ ห้ามมีคำอธิบาย:
+{ "includes": ["...รายการที่รวมครบทุกข้อ..."], "excludes": ["...รายการที่ไม่รวมครบทุกข้อ..."] }`;
+
+// ── helper: สร้าง content blocks ────────────────────────────────────────
+function buildContent(mimeType, base64, textContent, promptText) {
   if (textContent != null) {
-    return [{ type: 'text', text: `นี่คือเนื้อหาที่ดึงมาจากไฟล์โปรแกรมทัวร์:\n\n"""\n${textContent.slice(0, 60000)}\n"""\n\n${SCHEMA_PROMPT}` }];
+    return [{ type: 'text', text: `เนื้อหาจากไฟล์โปรแกรมทัวร์:\n\n"""\n${textContent.slice(0, 60000)}\n"""\n\n${promptText}` }];
   }
   if (mimeType === 'application/pdf') {
     return [
       { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
-      { type: 'text', text: SCHEMA_PROMPT },
+      { type: 'text', text: promptText },
     ];
   }
   if (mimeType.startsWith('image/')) {
     return [
       { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } },
-      { type: 'text', text: SCHEMA_PROMPT },
+      { type: 'text', text: promptText },
     ];
   }
   return null;
 }
 
+// ── helper: เรียก Claude API ─────────────────────────────────────────────
+async function callClaude(apiKey, content) {
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 16000,
+      messages: [{ role: 'user', content }],
+    }),
+  });
+  if (!resp.ok) {
+    const errText = await resp.text();
+    throw new Error(`Anthropic API ${resp.status}: ${errText.slice(0, 300)}`);
+  }
+  const data = await resp.json();
+  const raw = (data.content || []).map(b => b.text || '').join('').trim();
+  const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
+  if (data.stop_reason === 'max_tokens') {
+    throw new Error('MAX_TOKENS');
+  }
+  return { cleaned, stop_reason: data.stop_reason };
+}
+
+// ── Main handler ─────────────────────────────────────────────────────────
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -95,7 +113,7 @@ module.exports = async function handler(req, res) {
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'เซิร์ฟเวอร์ยังไม่ได้ตั้งค่า ANTHROPIC_API_KEY (กรุณาแจ้งผู้ดูแลระบบให้ตั้งค่าใน Vercel Environment Variables)' });
+    return res.status(500).json({ error: 'เซิร์ฟเวอร์ยังไม่ได้ตั้งค่า ANTHROPIC_API_KEY' });
   }
 
   try {
@@ -104,74 +122,75 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'ไม่พบไฟล์ที่อัปโหลด' });
     }
 
-    // ถ้าส่งมาเป็นลิงก์ไฟล์ (อัปโหลดขึ้น Storage มาก่อนแล้ว) ให้ดึงไฟล์มาแปลงเป็น base64 ฝั่งเซิร์ฟเวอร์
-    // วิธีนี้ทำให้รองรับไฟล์ขนาดใหญ่ได้ โดยไม่ติดข้อจำกัดขนาดคำขอ (request body) ของ Vercel Functions
+    // ดาวน์โหลดไฟล์จาก Supabase Storage URL (เลี่ยง Vercel body-size limit)
     if (!fileBase64 && fileUrl) {
       const fileResp = await fetch(fileUrl);
-      if (!fileResp.ok) {
-        return res.status(400).json({ error: 'ไม่สามารถดึงไฟล์จากลิงก์ที่อัปโหลดได้ กรุณาลองใหม่อีกครั้ง' });
-      }
+      if (!fileResp.ok) return res.status(400).json({ error: 'ไม่สามารถดึงไฟล์จากลิงก์ได้ กรุณาลองใหม่' });
       const arrayBuf = await fileResp.arrayBuffer();
-      const AI_LIMIT = 28 * 1024 * 1024;
-      if (arrayBuf.byteLength > AI_LIMIT) {
-        return res.status(413).json({ error: 'ไฟล์มีขนาดใหญ่เกินกว่าที่ AI จะวิเคราะห์เนื้อหาได้โดยตรง (จำกัดประมาณ 25-28MB) กรุณากรอกข้อมูลด้วยตนเอง' });
+      if (arrayBuf.byteLength > 28 * 1024 * 1024) {
+        return res.status(413).json({ error: 'ไฟล์ใหญ่เกิน 28MB ที่ AI จะวิเคราะห์ได้ กรุณากรอกข้อมูลด้วยตนเอง' });
       }
       fileBase64 = Buffer.from(arrayBuf).toString('base64');
     }
 
+    // แปลงประเภทไฟล์พิเศษเป็นข้อความ
     let textContent = null;
     const isDocx = /officedocument\.wordprocessingml/.test(mimeType) || /\.docx$/i.test(fileName || '');
     const isPlainText = mimeType.startsWith('text/') || /\.(txt|csv)$/i.test(fileName || '');
-
     if (isDocx) {
-      const buffer = Buffer.from(fileBase64, 'base64');
-      const result = await mammoth.extractRawText({ buffer });
+      const result = await mammoth.extractRawText({ buffer: Buffer.from(fileBase64, 'base64') });
       textContent = result.value || '';
     } else if (isPlainText) {
       textContent = Buffer.from(fileBase64, 'base64').toString('utf-8');
     }
 
-    const content = buildContent(mimeType, fileBase64, textContent);
-    if (!content) {
-      return res.status(400).json({ error: 'ไม่รองรับไฟล์ประเภทนี้ — รองรับ PDF, รูปภาพ (JPG/PNG/WebP), Word (.docx), และไฟล์ข้อความ (.txt/.csv)' });
+    const contentGeneral  = buildContent(mimeType, fileBase64, textContent, PROMPT_GENERAL);
+    const contentIncludes = buildContent(mimeType, fileBase64, textContent, PROMPT_INCLUDES);
+    if (!contentGeneral) {
+      return res.status(400).json({ error: 'ไม่รองรับไฟล์ประเภทนี้ — รองรับ PDF, รูปภาพ (JPG/PNG/WebP), Word (.docx), ข้อความ (.txt/.csv)' });
     }
 
-    const aiResp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 16000,
-        messages: [{ role: 'user', content }],
-      }),
-    });
+    // ── รอบที่ 1 และ 2 รันพร้อมกัน (parallel) เพื่อประหยัดเวลา ────────
+    const [result1, result2] = await Promise.all([
+      callClaude(apiKey, contentGeneral).catch(e => ({ error: e.message })),
+      callClaude(apiKey, contentIncludes).catch(e => ({ error: e.message })),
+    ]);
 
-    if (!aiResp.ok) {
-      const errText = await aiResp.text();
-      console.error('Anthropic API error:', aiResp.status, errText);
-      return res.status(502).json({ error: 'เรียกใช้ AI ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง (' + aiResp.status + ')' });
-    }
-
-    const aiData = await aiResp.json();
-    const raw = (aiData.content || []).map(b => b.text || '').join('').trim();
-    const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
-
-    let parsed;
-    try {
-      parsed = JSON.parse(cleaned);
-    } catch (e) {
-      console.error('JSON parse failed. stop_reason=' + aiData.stop_reason + '. Raw AI output (last 500 chars):', cleaned.slice(-500));
-      if (aiData.stop_reason === 'max_tokens') {
-        return res.status(502).json({ error: 'ไฟล์โปรแกรมทัวร์มีรายละเอียดยาวมาก ทำให้ AI สร้างผลลัพธ์ไม่เสร็จสมบูรณ์ — กรุณาลองอัปโหลดเฉพาะบางส่วนของไฟล์ หรือกรอกข้อมูลบางส่วนด้วยตนเอง' });
+    // ── Parse รอบที่ 1 (ข้อมูลทั่วไป) ──────────────────────────────────
+    let general = {};
+    if (!result1.error) {
+      try {
+        general = JSON.parse(result1.cleaned);
+      } catch (e) {
+        console.error('Pass1 JSON parse failed:', result1.cleaned?.slice(-300));
       }
-      return res.status(502).json({ error: 'AI อ่านไฟล์ได้ แต่ไม่สามารถแปลงผลลัพธ์เป็นข้อมูลได้ กรุณาลองใหม่อีกครั้ง' });
+    } else {
+      console.error('Pass1 error:', result1.error);
     }
 
-    return res.status(200).json({ data: parsed });
+    // ── Parse รอบที่ 2 (รวม/ไม่รวม) ────────────────────────────────────
+    let incExc = { includes: [], excludes: [] };
+    if (!result2.error) {
+      try {
+        const p2 = JSON.parse(result2.cleaned);
+        if (Array.isArray(p2.includes)) incExc.includes = p2.includes.filter(Boolean);
+        if (Array.isArray(p2.excludes)) incExc.excludes = p2.excludes.filter(Boolean);
+      } catch (e) {
+        console.error('Pass2 JSON parse failed:', result2.cleaned?.slice(-300));
+      }
+    } else {
+      console.error('Pass2 error:', result2.error);
+    }
+
+    // ── รวมผลทั้งสองรอบ ──────────────────────────────────────────────────
+    const merged = { ...general, includes: incExc.includes, excludes: incExc.excludes };
+
+    if (!merged.name && !merged.itinerary?.length && !incExc.includes.length) {
+      return res.status(502).json({ error: 'AI ไม่สามารถดึงข้อมูลจากไฟล์ได้ กรุณาลองใหม่อีกครั้ง' });
+    }
+
+    return res.status(200).json({ data: merged });
+
   } catch (err) {
     console.error('parse-tour-program error:', err);
     return res.status(500).json({ error: 'เกิดข้อผิดพลาดระหว่างประมวลผลไฟล์ กรุณาลองใหม่อีกครั้ง' });
