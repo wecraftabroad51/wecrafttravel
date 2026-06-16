@@ -185,6 +185,12 @@ module.exports = async function handler(req, res) {
     // ── รวมผลทั้งสองรอบ ──────────────────────────────────────────────────
     const merged = { ...general, includes: incExc.includes, excludes: incExc.excludes };
 
+    // LOG เพื่อ debug — ดูว่า AI ส่งอะไรกลับมาใน Pass2 จริงๆ
+    console.log('=== PASS2 RAW cleaned ===', result2.cleaned?.slice(0, 3000));
+    console.log('=== PASS2 includes count:', incExc.includes.length, 'items:', JSON.stringify(incExc.includes));
+    console.log('=== PASS2 excludes count:', incExc.excludes.length, 'items:', JSON.stringify(incExc.excludes));
+    console.log('=== PASS1 name:', general?.name, '| itinerary days:', general?.itinerary?.length);
+
     if (!merged.name && !merged.itinerary?.length && !incExc.includes.length) {
       return res.status(502).json({ error: 'AI ไม่สามารถดึงข้อมูลจากไฟล์ได้ กรุณาลองใหม่อีกครั้ง' });
     }
