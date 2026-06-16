@@ -27,6 +27,7 @@ function httpsPost(hostname, path, headers, body) {
 function sheetNameFor(type) {
   if (type === 'ticket')     return 'จองตั๋ว';
   if (type === 'car-rental') return 'รถเช่า';
+  if (type === 'join-tour')  return 'จอยทัวร์';
   return 'กรุ๊ปเหมา';
 }
 
@@ -34,6 +35,7 @@ function sheetNameFor(type) {
 function seqPrefixFor(type) {
   if (type === 'ticket')     return 'TK';
   if (type === 'car-rental') return 'RC';
+  if (type === 'join-tour')  return 'JT';
   return 'GI';
 }
 
@@ -108,6 +110,38 @@ async function sendLine(formData, seqNo, sheetUrl) {
       `🚗 ประเภทรถ: ${f.carLabel || f.carType}`,
       `👥 จำนวนผู้โดยสาร: ${f.passengers} คน`,
       f.note ? `💬 หมายเหตุ: ${f.note}` : null,
+      '━━━━━━━━━━━━━━━━━━',
+      '⚡ รีบตอบกลับภายใน 24 ชั่วโมง!',
+    ].filter(Boolean).join('\n');
+
+  } else if (f._type === 'join-tour') {
+    // คำนวณระยะเวลา
+    let duration = '';
+    if (f.depDate && f.retDate) {
+      const d1 = new Date(f.depDate), d2 = new Date(f.retDate);
+      const days = Math.round((d2 - d1) / 86400000) + 1;
+      if (!isNaN(days) && days > 0) duration = `${days} วัน`;
+    }
+    text = [
+      '🎉🎊 มาแล้วๆๆ!!! จอยทัวร์ มาแล้ว!! ✈️',
+      seqNo ? `🔢 หมายเลขอ้างอิง: ${seqNo}` : null,
+      '━━━━━━━━━━━━━━━━━━',
+      '👤 ข้อมูลผู้ติดต่อ',
+      `ชื่อ: ${f.fullName}`,
+      `โทร: ${f.phone}`,
+      f.email   ? `อีเมล: ${f.email}`          : null,
+      f.passportNo ? `🛂 พาสปอร์ต: ${f.passportNo}` : null,
+      '━━━━━━━━━━━━━━━━━━',
+      '✈️ รายละเอียดทัวร์',
+      f.tourCode ? `🔖 รหัสทัวร์: ${f.tourCode}`  : null,
+      f.tourName ? `📍 ปลายทาง: ${f.tourName}`    : null,
+      f.depDate  ? `📅 วันเดินทาง: ${f.depDate}${f.retDate ? ` → ${f.retDate}` : ''}` : null,
+      duration   ? `⏱️ ระยะเวลา: ${duration}`      : null,
+      `👥 จำนวนผู้เดินทาง: ผู้ใหญ่ ${f.adults||0} / เด็ก ${f.children||0} / ทารก ${f.infants||0} (รวม ${f.totalPax||0} คน)`,
+      f.note     ? `💬 หมายเหตุ: ${f.note}`        : null,
+      ...(f.driveFiles?.length
+        ? ['━━━━━━━━━━━━━━━━━━', '📎 ไฟล์แนบ:', ...f.driveFiles.map(d => `• ${d.name}\n  ${d.url}`)]
+        : []),
       '━━━━━━━━━━━━━━━━━━',
       '⚡ รีบตอบกลับภายใน 24 ชั่วโมง!',
     ].filter(Boolean).join('\n');
@@ -257,6 +291,26 @@ async function sendCustomerConfirmation(customerEmail, seqNo, formData) {
            <td style="padding:8px 14px;color:#333;font-weight:600;font-size:13px;">${v}</td></tr>`
     ).join('');
 
+  } else if (f._type === 'join-tour') {
+    const rows = [
+      ['รหัสทัวร์',          f.tourCode || '-'],
+      ['โปรแกรมทัวร์',       f.tourName || '-'],
+      ['วันเดินทางไป',       f.depDate  || '-'],
+      f.retDate  ? ['วันเดินทางกลับ', f.retDate]  : null,
+      ['ผู้ใหญ่',            `${f.adults||0} คน`],
+      ['เด็ก',               `${f.children||0} คน`],
+      ['ทารก',               `${f.infants||0} คน`],
+      ['รวมผู้เดินทาง',      `${f.totalPax||0} คน`],
+      ['ชื่อผู้ติดต่อ',      f.fullName],
+      ['โทรศัพท์',           f.phone],
+      f.passportNo ? ['เลขพาสปอร์ต', f.passportNo] : null,
+      f.note ? ['หมายเหตุ', f.note] : null,
+    ].filter(Boolean);
+    detailRows = rows.map(([k, v]) =>
+      `<tr><td style="padding:8px 14px;color:#888;width:140px;vertical-align:top;font-size:13px;">${k}</td>
+           <td style="padding:8px 14px;color:#333;font-weight:600;font-size:13px;">${v}</td></tr>`
+    ).join('');
+
   } else if (f._type === 'group-quote') {
     const tourTypeLabel = (f.tourType === 'อื่นๆ' && f.tourTypeOther)
       ? `อื่นๆ: ${f.tourTypeOther}` : (f.tourType || '-');
@@ -292,10 +346,13 @@ async function sendCustomerConfirmation(customerEmail, seqNo, formData) {
     </div>` : '';
 
   const isGroupQuote = f._type === 'group-quote';
-  const headerColor  = isGroupQuote ? 'linear-gradient(135deg,#e65c00,#ff8c00)' : 'linear-gradient(135deg,#1a5276,#1a8a6e)';
-  const headerTitle  = isGroupQuote ? '📋 ได้รับคำขอราคากรุ๊ปเหมาแล้ว!'
-                     : f._type === 'ticket' ? '🎫 ได้รับคำขอจองตั๋วแล้ว!'
+  const headerColor  = isGroupQuote        ? 'linear-gradient(135deg,#e65c00,#ff8c00)'
+                     : f._type === 'join-tour' ? 'linear-gradient(135deg,#0d7c5f,#1a5276)'
+                     : 'linear-gradient(135deg,#1a5276,#1a8a6e)';
+  const headerTitle  = isGroupQuote        ? '📋 ได้รับคำขอราคากรุ๊ปเหมาแล้ว!'
+                     : f._type === 'ticket'     ? '🎫 ได้รับคำขอจองตั๋วแล้ว!'
                      : f._type === 'car-rental' ? '🚗 ได้รับคำขอเช่ารถแล้ว!'
+                     : f._type === 'join-tour'  ? '🌏 ได้รับคำขอจองจอยทัวร์แล้ว!'
                      : '✅ ได้รับคำขอของคุณแล้ว!';
 
   const html = `
@@ -399,6 +456,27 @@ async function appendToSheet(formData, seqNo, sheets, sheetId, sheetName) {
       f.carLabel || f.carType || '',
       f.passengers      || '',
       f.note            || '',
+    ];
+
+  } else if (f._type === 'join-tour') {
+    row = [
+      seqNo,
+      now,
+      f.fullName       || '',
+      f.phone          || '',
+      f.email          || '',
+      f.tourCode       || '',
+      f.tourName       || '',
+      f.depDate        || '',
+      f.retDate        || '',
+      f.adults         || 0,
+      f.children       || 0,
+      f.infants        || 0,
+      f.totalPax       || (Number(f.adults||0) + Number(f.children||0) + Number(f.infants||0)),
+      f.passportNo     || '',
+      f.passportExpiry || '',
+      f.note           || '',
+      (f.driveFiles || []).map(d => d.url).join('\n') || '',
     ];
 
   } else {

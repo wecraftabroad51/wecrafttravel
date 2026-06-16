@@ -3,12 +3,14 @@ const { createClient } = require('@supabase/supabase-js');
 function sheetNameFor(type) {
   if (type === 'ticket')     return 'จองตั๋ว';
   if (type === 'car-rental') return 'รถเช่า';
+  if (type === 'join')       return 'จอยทัวร์';
   return 'กรุ๊ปเหมา';
 }
 
 function seqPrefixFor(type) {
   if (type === 'ticket')     return 'TK';
   if (type === 'car-rental') return 'RC';
+  if (type === 'join')       return 'JT';
   return 'GI';
 }
 
