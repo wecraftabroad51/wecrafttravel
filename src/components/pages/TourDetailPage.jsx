@@ -444,8 +444,14 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                           {st === 'full'
                             ? <span className="td-full">🔴 {th ? 'ปิดรับ' : 'Full'}</span>
                             : st === 'hurry'
-                            ? <span className="td-hurry" onClick={() => navigate('contact')}>⚡ {th ? 'จองด่วน!' : 'Book fast!'}</span>
-                            : <span className="td-open" onClick={() => navigate('contact')}>✓ {th ? 'จองด่วน' : 'Book now'}</span>
+                            ? <span className="td-hurry" onClick={() => navigate('join-tour', null, {
+                                code: tour.code || '', name: th ? (tour.name?.th || tour.name?.en || '') : (tour.name?.en || tour.name?.th || ''),
+                                date: dep.date || '', returnDate: dep.returnDate || '', price: dep.price || '',
+                              })}>⚡ {th ? 'จองด่วน!' : 'Book fast!'}</span>
+                            : <span className="td-open" onClick={() => navigate('join-tour', null, {
+                                code: tour.code || '', name: th ? (tour.name?.th || tour.name?.en || '') : (tour.name?.en || tour.name?.th || ''),
+                                date: dep.date || '', returnDate: dep.returnDate || '', price: dep.price || '',
+                              })}>✓ {th ? 'จองด่วน' : 'Book now'}</span>
                           }
                         </td>
                       </tr>

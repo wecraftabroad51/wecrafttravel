@@ -32,6 +32,7 @@ import AboutPage from './components/pages/AboutPage.jsx';
 import VisaPage from './components/pages/VisaPage.jsx';
 import AdminPanel from './components/admin/AdminPanel.jsx';
 import TicketBookingPage from './components/pages/TicketBookingPage.jsx';
+import JoinTourPage from './components/pages/JoinTourPage.jsx';
 import CarRentalPage from './components/pages/CarRentalPage.jsx';
 import LegalPage from './components/pages/LegalPage.jsx';
 
@@ -429,6 +430,7 @@ function AppInner() {
       about:            '/about',
       visa:             '/visa',
       'ticket-booking': '/ticket-booking',
+      'join-tour':      '/join-tour',
       'car-rental':     '/car-rental',
       'legal-privacy':  '/privacy',
       'legal-terms':    '/terms',
@@ -441,6 +443,16 @@ function AppInner() {
       if (filters.continent) p.set('continent', filters.continent);
       if (filters.country)   p.set('country',   filters.country);
       if (filters.search)    p.set('q',         filters.search);
+      const qs = p.toString();
+      if (qs) path += '?' + qs;
+    }
+    if (page === 'join-tour' && filters) {
+      const p = new URLSearchParams();
+      if (filters.code)       p.set('code',       filters.code);
+      if (filters.name)       p.set('name',       filters.name);
+      if (filters.date)       p.set('date',       filters.date);
+      if (filters.returnDate) p.set('returnDate', filters.returnDate);
+      if (filters.price)      p.set('price',      filters.price);
       const qs = p.toString();
       if (qs) path += '?' + qs;
     }
@@ -684,6 +696,7 @@ function AppInner() {
           <Route path="/about"       element={<AboutPage lang={pageProps.lang} navigate={navigate} />} />
           <Route path="/visa"           element={<VisaPage lang={pageProps.lang} navigate={navigate} />} />
           <Route path="/ticket-booking" element={<TicketBookingPage {...pageProps} />} />
+          <Route path="/join-tour"     element={<JoinTourPage lang={pageProps.lang} navigate={navigate} />} />
           <Route path="/car-rental"     element={<CarRentalPage {...pageProps} />} />
           <Route path="/privacy"        element={<LegalPage lang={lang} navigate={navigate} settings={settings} type="privacy" />} />
           <Route path="/terms"          element={<LegalPage lang={lang} navigate={navigate} settings={settings} type="terms" />} />
