@@ -201,7 +201,8 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
         const name = t ? t(tr.name) : (tr.name?.en || tr.name?.th || '');
         const dest = t ? t(tr.destination) : (tr.destination?.en || tr.destination?.th || '');
         const desc = t ? t(tr.description) : (tr.description?.en || tr.description?.th || '');
-        return name.toLowerCase().includes(q) || dest.toLowerCase().includes(q) || desc.toLowerCase().includes(q);
+        const code = (tr.code || '').toLowerCase();
+        return code.includes(q) || name.toLowerCase().includes(q) || dest.toLowerCase().includes(q) || desc.toLowerCase().includes(q);
       });
     }
     if (sort === 'price-low')  list = [...list].sort((a, b) => (a.price || 0) - (b.price || 0));
