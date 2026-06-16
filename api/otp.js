@@ -39,44 +39,63 @@ function verifyToken(token, otp, target) {
   } catch { return { ok: false, reason: 'error' }; }
 }
 
-// ── Format Thai phone → E.164 ────────────────────────────────────
-function toE164(phone) {
+// ── Normalize Thai phone (keep 10-digit local format) ────────────
+function normalizePhone(phone) {
   const d = String(phone).replace(/\D/g, '');
-  if (d.startsWith('66') && d.length >= 11) return '+' + d;
-  if (d.startsWith('0')  && d.length === 10) return '+66' + d.slice(1);
+  // แปลง 66XXXXXXXXX → 0XXXXXXXXX
+  if (d.startsWith('66') && d.length === 11) return '0' + d.slice(2);
+  if (d.startsWith('0')  && d.length === 10) return d;
   return null;
 }
 
-// ── Send SMS via Twilio ──────────────────────────────────────────
+// ── Send SMS via SMSMKT ──────────────────────────────────────────
+// env vars: SMSMKT_API_KEY, SMSMKT_SECRET_KEY, SMSMKT_SENDER (optional, default "WeCraft")
 async function sendSMS(phone, otp) {
-  const sid  = process.env.TWILIO_ACCOUNT_SID;
-  const auth = process.env.TWILIO_AUTH_TOKEN;
-  const from = process.env.TWILIO_FROM_NUMBER;
-  if (!sid || !auth || !from) throw new Error('SMS_NOT_CONFIGURED');
+  const apiKey    = process.env.SMSMKT_API_KEY;
+  const secretKey = process.env.SMSMKT_SECRET_KEY;
+  if (!apiKey || !secretKey) throw new Error('SMS_NOT_CONFIGURED');
 
-  const to   = toE164(phone);
+  const to     = normalizePhone(phone);
   if (!to) throw new Error('รูปแบบเบอร์โทรไม่ถูกต้อง (ต้องเป็น 10 หลัก ขึ้นต้นด้วย 0)');
 
-  const body     = `WeCraft Travel รหัส OTP: ${otp} (หมดอายุใน 5 นาที อย่าแชร์รหัสนี้)`;
-  const postData = new URLSearchParams({ To: to, From: from, Body: body }).toString();
-  const authB64  = Buffer.from(`${sid}:${auth}`).toString('base64');
+  const sender  = process.env.SMSMKT_SENDER || 'WeCraft';
+  const message = `WeCraft Travel รหัส OTP: ${otp} (หมดอายุใน 5 นาที อย่าแชร์รหัสนี้)`;
+
+  const postData = JSON.stringify({
+    api_key:    apiKey,
+    secret_key: secretKey,
+    sender:     sender,
+    to:         to,
+    message:    message,
+  });
 
   return new Promise((resolve, reject) => {
     const req = https.request({
-      hostname: 'api.twilio.com',
-      path: `/2010-04-01/Accounts/${sid}/Messages.json`,
-      method: 'POST',
+      hostname: 'www.smsmkt.com',
+      path:     '/api/send-message',
+      method:   'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${authB64}`,
+        'Content-Type':   'application/json',
         'Content-Length': Buffer.byteLength(postData),
       },
     }, (res) => {
       let data = '';
       res.on('data', c => { data += c; });
       res.on('end', () => {
-        if (res.statusCode >= 400) reject(new Error(`SMS Error ${res.statusCode}: ${data.slice(0, 200)}`));
-        else resolve(true);
+        try {
+          const json = JSON.parse(data);
+          // SMSMKT ตอบกลับ: { code: "000", detail: "success" } = สำเร็จ
+          if (json.code && json.code !== '000') {
+            reject(new Error(`SMSMKT Error ${json.code}: ${json.detail || data.slice(0, 100)}`));
+          } else if (res.statusCode >= 400) {
+            reject(new Error(`SMS HTTP Error ${res.statusCode}: ${data.slice(0, 200)}`));
+          } else {
+            resolve(true);
+          }
+        } catch {
+          if (res.statusCode >= 400) reject(new Error(`SMS Error ${res.statusCode}`));
+          else resolve(true);
+        }
       });
     });
     req.on('error', reject);
@@ -149,7 +168,7 @@ module.exports = async function handler(req, res) {
     } catch (e) {
       console.error('OTP send error:', e.message);
       if (e.message === 'SMS_NOT_CONFIGURED') {
-        return res.status(503).json({ error: 'ระบบ SMS ยังไม่พร้อมใช้งาน กรุณาติดต่อทีมงาน' });
+        return res.status(503).json({ error: 'ระบบ SMS ยังไม่พร้อมใช้งาน กรุณาติดต่อผู้ดูแลระบบ' });
       }
       return res.status(500).json({ error: e.message });
     }
