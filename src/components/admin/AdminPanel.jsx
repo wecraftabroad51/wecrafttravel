@@ -1669,7 +1669,7 @@ function ToursSection({ tours, setTours, t }) {
                 </div>
               </div>
             </div>
-            </div>{/* end space-y-4 */}
+            </div>
           )}
 
           {/* ── Tab: ภาพ ── */}
