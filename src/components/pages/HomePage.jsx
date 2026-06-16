@@ -152,6 +152,7 @@ function SearchSidebar({ navigate, lang }) {
   const [country, setCountry] = useState('');
   const [airline, setAirline] = useState('');
   const [month, setMonth] = useState('');
+  const [codeSearch, setCodeSearch] = useState('');
   const zoneObj = ZONE_OPTIONS.find(z => z.value === zone);
   const countries = zoneObj ? zoneObj.countries : [];
   const MONTH_NAMES = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
@@ -171,9 +172,10 @@ function SearchSidebar({ navigate, lang }) {
 
   const handleSearch = () => {
     const filters = {};
-    if (tourType) filters.tourType = tourType;
-    if (zone) filters.continent = zone;
-    if (country) filters.country = country;
+    if (tourType)    filters.tourType  = tourType;
+    if (zone)        filters.continent = zone;
+    if (country)     filters.country   = country;
+    if (codeSearch.trim()) filters.search = codeSearch.trim();
     navigate('tours', null, filters);
   };
 
@@ -192,6 +194,23 @@ function SearchSidebar({ navigate, lang }) {
         <Icon name="search" size={17} color="#fff" /> {lang === 'th' ? 'ค้นหาทัวร์ที่ต้องการ' : 'Find Your Tour'}
       </div>
       <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {/* ช่องค้นหารหัส / ชื่อทัวร์ */}
+        <div>
+          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'รหัสทัวร์ / ชื่อทัวร์' : 'Tour Code / Name'}</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#fff', border: '1.5px solid var(--line)', borderRadius: 6, padding: '0 10px' }}>
+            <Icon name="search" size={14} />
+            <input
+              value={codeSearch}
+              onChange={e => setCodeSearch(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSearch()}
+              placeholder={lang === 'th' ? 'พิมพ์รหัสหรือชื่อทัวร์...' : 'Enter code or tour name...'}
+              style={{ border: 'none', padding: '9px 0', background: 'transparent', fontSize: 13, width: '100%', fontFamily: 'inherit' }}
+            />
+            {codeSearch && (
+              <button onClick={() => setCodeSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 16, lineHeight: 1, padding: 0 }}>×</button>
+            )}
+          </div>
+        </div>
         <div>
           <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'ประเภทการเดินทาง' : 'Tour Type'}</label>
           <select value={tourType} onChange={e => setTourType(e.target.value)}>

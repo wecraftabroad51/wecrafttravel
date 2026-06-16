@@ -49,6 +49,7 @@ function ToursRoute(props) {
     tourType:  searchParams.get('type')      || '',
     continent: searchParams.get('continent') || '',
     country:   searchParams.get('country')   || '',
+    search:    searchParams.get('q')         || '',
   };
   // key เปลี่ยนเมื่อ filter เปลี่ยน → remount เพื่อ reset state
   return <ToursPage {...props} initialFilters={initialFilters} key={searchParams.toString()} />;
@@ -439,6 +440,7 @@ function AppInner() {
       if (filters.tourType)  p.set('type',      filters.tourType);
       if (filters.continent) p.set('continent', filters.continent);
       if (filters.country)   p.set('country',   filters.country);
+      if (filters.search)    p.set('q',         filters.search);
       const qs = p.toString();
       if (qs) path += '?' + qs;
     }
