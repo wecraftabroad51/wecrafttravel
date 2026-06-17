@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { insertMessage } from '../../lib/db.js';
 import DateRangePicker from '../DateRangePicker.jsx';
 
@@ -61,6 +61,49 @@ function RadioGroup({ options, value, onChange, lang }) {
   );
 }
 
+const INIT_OTP = { sent: false, token: '', code: '', verified: false, loading: false, error: '', countdown: 0 };
+
+function isValidPhone(ph) { return /^0[0-9]{9}$/.test(ph.replace(/[\s\-().]/g, '')); }
+function isValidEmail(em) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em); }
+
+function OtpBox({ label, otp, onRequest, onVerify, onCodeChange, onReset }) {
+  return (
+    <div style={{ marginTop: 8 }}>
+      {!otp.verified ? (
+        !otp.sent ? (
+          <button type="button" onClick={onRequest} disabled={otp.loading}
+            style={{ padding: '7px 16px', fontSize: 12, fontWeight: 700, borderRadius: 6, cursor: otp.loading ? 'wait' : 'pointer', background: otp.loading ? '#ccc' : '#1a5276', color: '#fff', border: 'none', fontFamily: 'inherit' }}>
+            {otp.loading ? '⏳ กำลังส่ง...' : `📲 ขอรหัส OTP ทาง${label}`}
+          </button>
+        ) : (
+          <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 8, padding: '10px 14px' }}>
+            <div style={{ fontSize: 12, color: '#0369a1', fontWeight: 700, marginBottom: 8 }}>📨 ส่งรหัส OTP ไปยัง{label}แล้ว (หมดอายุใน 5 นาที)</div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input type="text" inputMode="numeric" maxLength={6} value={otp.code}
+                onChange={e => onCodeChange(e.target.value.replace(/\D/g,'').slice(0,6))}
+                placeholder="______" autoComplete="one-time-code"
+                style={{ width: 130, padding: '8px 10px', border: '2px solid #38bdf8', borderRadius: 6, fontSize: 20, fontWeight: 800, letterSpacing: 8, fontFamily: 'monospace', textAlign: 'center', boxSizing: 'border-box' }} />
+              <button type="button" onClick={onVerify} disabled={otp.loading || otp.code.length < 6}
+                style={{ padding: '8px 14px', fontSize: 12, fontWeight: 700, borderRadius: 6, cursor: (otp.loading || otp.code.length < 6) ? 'not-allowed' : 'pointer', background: (otp.loading || otp.code.length < 6) ? '#ccc' : '#0d7c5f', color: '#fff', border: 'none', fontFamily: 'inherit' }}>
+                {otp.loading ? '⏳' : 'ยืนยัน'}
+              </button>
+              {otp.countdown > 0
+                ? <span style={{ fontSize: 11, color: '#888' }}>ขอใหม่ได้ใน {otp.countdown}s</span>
+                : <button type="button" onClick={onRequest} disabled={otp.loading} style={{ fontSize: 11, color: '#1a5276', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit' }}>ขอรหัสใหม่</button>}
+            </div>
+            {otp.error && <div style={{ marginTop: 6, fontSize: 12, color: '#dc2626' }}>⚠ {otp.error}</div>}
+          </div>
+        )
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 12, color: '#16a34a', fontWeight: 700 }}>✅ ยืนยัน{label}สำเร็จแล้ว</span>
+          <button type="button" onClick={onReset} style={{ fontSize: 11, color: '#888', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit' }}>เปลี่ยน{label}</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 const sendNotifications = async (subject, html, formData, customerEmail) => {
   try {
     const res = await fetch('/api/send-email', {
@@ -92,9 +135,62 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [phoneOtp, setPhoneOtp] = useState({ ...INIT_OTP });
+  const [emailOtp, setEmailOtp] = useState({ ...INIT_OTP });
+  const phoneTimerRef = useRef(null);
+  const emailTimerRef = useRef(null);
+
+  useEffect(() => () => {
+    if (phoneTimerRef.current) clearInterval(phoneTimerRef.current);
+    if (emailTimerRef.current) clearInterval(emailTimerRef.current);
+  }, []);
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
   const isAirport = form.rentalType === 'airport';
+
+  function startCountdown(setter, timerRef, seconds = 60) {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setter(prev => ({ ...prev, countdown: seconds }));
+    timerRef.current = setInterval(() => {
+      setter(prev => {
+        if (prev.countdown <= 1) { clearInterval(timerRef.current); return { ...prev, countdown: 0 }; }
+        return { ...prev, countdown: prev.countdown - 1 };
+      });
+    }, 1000);
+  }
+
+  const requestOtp = async (type) => {
+    const target = type === 'phone' ? form.phone.replace(/[\s\-().]/g,'') : form.email.trim();
+    const setter = type === 'phone' ? setPhoneOtp : setEmailOtp;
+    const timerRef = type === 'phone' ? phoneTimerRef : emailTimerRef;
+    if (type === 'phone' && !isValidPhone(form.phone)) { setter(prev => ({ ...prev, error: 'เบอร์โทรไม่ถูกต้อง' })); return; }
+    if (type === 'email' && !isValidEmail(form.email)) { setter(prev => ({ ...prev, error: 'รูปแบบอีเมลไม่ถูกต้อง' })); return; }
+    setter(prev => ({ ...prev, loading: true, error: '' }));
+    try {
+      const res = await fetch('/api/otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'send', type, target }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'ส่ง OTP ไม่สำเร็จ');
+      setter(prev => ({ ...prev, loading: false, sent: true, token: data.token, code: '', error: '' }));
+      startCountdown(setter, timerRef, 60);
+    } catch (e) { setter(prev => ({ ...prev, loading: false, error: e.message })); }
+  };
+
+  const verifyOtp = async (type) => {
+    const otp = type === 'phone' ? phoneOtp : emailOtp;
+    const target = type === 'phone' ? form.phone.replace(/[\s\-().]/g,'') : form.email.trim();
+    const setter = type === 'phone' ? setPhoneOtp : setEmailOtp;
+    const timerRef = type === 'phone' ? phoneTimerRef : emailTimerRef;
+    setter(prev => ({ ...prev, loading: true, error: '' }));
+    try {
+      const res = await fetch('/api/otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'verify', type, target, otp: otp.code, token: otp.token }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'รหัส OTP ไม่ถูกต้อง');
+      if (timerRef.current) clearInterval(timerRef.current);
+      setter(prev => ({ ...prev, loading: false, verified: true, error: '' }));
+    } catch (e) { setter(prev => ({ ...prev, loading: false, error: e.message })); }
+  };
+
+  const canSubmit = phoneOtp.verified && emailOtp.verified && !submitting;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,17 +199,16 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
       setError(th ? 'กรุณากรอกข้อมูลที่จำเป็น (ชื่อ, เบอร์โทร, วันรับรถ, สถานที่รับรถ)' : 'Please fill in required fields.');
       return;
     }
-    // Phone — Thai 10 digits starting with 0
-    const phoneClean = form.phone.replace(/[\s\-().]/g, '');
-    if (!/^0[0-9]{9}$/.test(phoneClean)) {
+    if (!isValidPhone(form.phone)) {
       setError(th ? 'เบอร์โทรไม่ถูกต้อง (ต้อง 10 หลัก ขึ้นต้นด้วย 0 เช่น 081-234-5678)' : 'Invalid phone number (must be 10 digits starting with 0).');
       return;
     }
-    // Email (optional — validate only if filled)
-    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      setError(th ? 'รูปแบบอีเมลไม่ถูกต้อง (เช่น example@mail.com)' : 'Invalid email address format.');
+    if (!form.email || !isValidEmail(form.email)) {
+      setError(th ? 'กรุณากรอกอีเมลให้ถูกต้อง' : 'Please enter a valid email address.');
       return;
     }
+    if (!phoneOtp.verified) { setError(th ? 'กรุณายืนยันเบอร์โทรด้วย OTP ก่อนส่งข้อมูล' : 'Please verify your phone number via OTP first.'); return; }
+    if (!emailOtp.verified) { setError(th ? 'กรุณายืนยันอีเมลด้วย OTP ก่อนส่งข้อมูล' : 'Please verify your email via OTP first.'); return; }
     // Pickup date — must be today or future
     const today = new Date(); today.setHours(0,0,0,0);
     if (new Date(form.pickupDate) < today) {
@@ -255,15 +350,25 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
                 <Input value={form.fullName} onChange={e => set('fullName', e.target.value)}
                   placeholder={lang === 'th' ? 'ชื่อ นามสกุล' : 'Full name'} required />
               </div>
-              <div>
+              <div style={{ gridColumn: '1 / -1' }}>
                 <Label th="เบอร์โทรศัพท์" en="Phone Number" lang={lang} required />
-                <Input type="tel" value={form.phone} onChange={e => set('phone', e.target.value)}
-                  placeholder="08X-XXX-XXXX" />
+                <Input type="tel" value={form.phone}
+                  onChange={e => { set('phone', e.target.value); setPhoneOtp({ ...INIT_OTP }); if (phoneTimerRef.current) clearInterval(phoneTimerRef.current); }}
+                  placeholder="08X-XXX-XXXX" style={{ borderColor: phoneOtp.verified ? '#16a34a' : '#ddd' }} />
+                <OtpBox label="SMS" otp={phoneOtp}
+                  onRequest={() => requestOtp('phone')} onVerify={() => verifyOtp('phone')}
+                  onCodeChange={v => setPhoneOtp(p => ({ ...p, code: v }))}
+                  onReset={() => { setPhoneOtp({ ...INIT_OTP }); if (phoneTimerRef.current) clearInterval(phoneTimerRef.current); }} />
               </div>
-              <div>
-                <Label th="อีเมล" en="Email" lang={lang} />
-                <Input type="email" value={form.email} onChange={e => set('email', e.target.value)}
-                  placeholder="email@example.com" />
+              <div style={{ gridColumn: '1 / -1' }}>
+                <Label th="อีเมล" en="Email" lang={lang} required />
+                <Input type="email" value={form.email}
+                  onChange={e => { set('email', e.target.value); setEmailOtp({ ...INIT_OTP }); if (emailTimerRef.current) clearInterval(emailTimerRef.current); }}
+                  placeholder="email@example.com" style={{ borderColor: emailOtp.verified ? '#16a34a' : '#ddd' }} />
+                <OtpBox label="อีเมล" otp={emailOtp}
+                  onRequest={() => requestOtp('email')} onVerify={() => verifyOtp('email')}
+                  onCodeChange={v => setEmailOtp(p => ({ ...p, code: v }))}
+                  onReset={() => { setEmailOtp({ ...INIT_OTP }); if (emailTimerRef.current) clearInterval(emailTimerRef.current); }} />
               </div>
             </div>
           </div>
@@ -337,17 +442,28 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
             </div>
           )}
 
-          <button type="submit" disabled={submitting}
+          <div style={{ background: '#fff', borderRadius: 10, padding: '14px 20px', marginBottom: 16, border: '1px solid #eee' }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#444', marginBottom: 8 }}>สถานะการยืนยัน</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ fontSize: 12, color: phoneOtp.verified ? '#16a34a' : '#dc2626' }}>{phoneOtp.verified ? '✅' : '⏳'} ยืนยันเบอร์โทรทาง SMS</div>
+              <div style={{ fontSize: 12, color: emailOtp.verified ? '#16a34a' : '#dc2626' }}>{emailOtp.verified ? '✅' : '⏳'} ยืนยันอีเมล</div>
+            </div>
+          </div>
+
+          <button type="submit" disabled={!canSubmit}
             style={{
-              width: '100%', background: submitting ? '#ccc' : 'var(--primary, #e65c00)', color: '#fff',
+              width: '100%', background: !canSubmit ? '#ccc' : 'var(--primary, #e65c00)', color: '#fff',
               border: 'none', borderRadius: 8, padding: '14px', fontSize: 16, fontWeight: 800,
-              cursor: submitting ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
-              boxShadow: '0 4px 16px rgba(230,92,0,.3)',
+              cursor: !canSubmit ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+              boxShadow: !canSubmit ? 'none' : '0 4px 16px rgba(230,92,0,.3)',
             }}>
             {submitting
               ? (lang === 'th' ? 'กำลังส่ง...' : 'Submitting...')
               : (lang === 'th' ? '🚗 ส่งคำขอเช่ารถ' : '🚗 Submit Rental Request')}
           </button>
+          {!canSubmit && !submitting && (
+            <p style={{ fontSize: 12, color: '#dc2626', textAlign: 'center', marginTop: 8 }}>กรุณายืนยัน OTP เบอร์โทรและอีเมลให้ครบก่อนส่งข้อมูล</p>
+          )}
         </form>
       </div>
     </main>
