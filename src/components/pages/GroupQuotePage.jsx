@@ -1,5 +1,48 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { insertMessage } from '../../lib/db.js';
+
+// ─── OTP helpers ────────────────────────────────────────────────
+const INIT_OTP = { sent: false, token: '', code: '', verified: false, loading: false, error: '', countdown: 0 };
+function isValidPhone(ph) { return /^0[0-9]{9}$/.test(ph.replace(/[\s\-().]/g, '')); }
+function isValidEmail(em) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em); }
+
+function OtpBox({ label, otp, onRequest, onVerify, onCodeChange, onReset }) {
+  return (
+    <div style={{ marginTop: 8 }}>
+      {!otp.verified ? (
+        !otp.sent ? (
+          <button type="button" onClick={onRequest} disabled={otp.loading}
+            style={{ padding: '7px 16px', fontSize: 12, fontWeight: 700, borderRadius: 6, cursor: otp.loading ? 'wait' : 'pointer', background: otp.loading ? '#ccc' : '#1a5276', color: '#fff', border: 'none', fontFamily: 'inherit' }}>
+            {otp.loading ? '⏳ กำลังส่ง...' : `📲 ขอรหัส OTP ทาง${label}`}
+          </button>
+        ) : (
+          <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 8, padding: '10px 14px' }}>
+            <div style={{ fontSize: 12, color: '#0369a1', fontWeight: 700, marginBottom: 8 }}>📨 ส่งรหัส OTP ไปยัง{label}แล้ว (หมดอายุใน 5 นาที)</div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input type="text" inputMode="numeric" maxLength={6} value={otp.code}
+                onChange={e => onCodeChange(e.target.value.replace(/\D/g,'').slice(0,6))}
+                placeholder="______" autoComplete="one-time-code"
+                style={{ width: 130, padding: '8px 10px', border: '2px solid #38bdf8', borderRadius: 6, fontSize: 20, fontWeight: 800, letterSpacing: 8, fontFamily: 'monospace', textAlign: 'center', boxSizing: 'border-box' }} />
+              <button type="button" onClick={onVerify} disabled={otp.loading || otp.code.length < 6}
+                style={{ padding: '8px 14px', fontSize: 12, fontWeight: 700, borderRadius: 6, cursor: (otp.loading || otp.code.length < 6) ? 'not-allowed' : 'pointer', background: (otp.loading || otp.code.length < 6) ? '#ccc' : '#0d7c5f', color: '#fff', border: 'none', fontFamily: 'inherit' }}>
+                {otp.loading ? '⏳' : 'ยืนยัน'}
+              </button>
+              {otp.countdown > 0
+                ? <span style={{ fontSize: 11, color: '#888' }}>ขอใหม่ได้ใน {otp.countdown}s</span>
+                : <button type="button" onClick={onRequest} disabled={otp.loading} style={{ fontSize: 11, color: '#1a5276', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit' }}>ขอรหัสใหม่</button>}
+            </div>
+            {otp.error && <div style={{ marginTop: 6, fontSize: 12, color: '#dc2626' }}>⚠ {otp.error}</div>}
+          </div>
+        )
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 12, color: '#16a34a', fontWeight: 700 }}>✅ ยืนยัน{label}สำเร็จแล้ว</span>
+          <button type="button" onClick={onReset} style={{ fontSize: 11, color: '#888', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit' }}>เปลี่ยน{label}</button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ─── Email sending via Vercel API route (/api/send-email) ────────
 // Setup: เพิ่ม 2 ตัวแปรใน Vercel → Environment Variables:
@@ -318,9 +361,62 @@ export default function GroupQuotePage({ lang, setMessages }) {
   const [sent, setSent] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
-  const submittingRef = useRef(false); // prevent double submit
+  const submittingRef = useRef(false);
+  const [phoneOtp, setPhoneOtp] = useState({ ...INIT_OTP });
+  const [emailOtp, setEmailOtp] = useState({ ...INIT_OTP });
+  const phoneTimerRef = useRef(null);
+  const emailTimerRef = useRef(null);
+
+  useEffect(() => () => {
+    if (phoneTimerRef.current) clearInterval(phoneTimerRef.current);
+    if (emailTimerRef.current) clearInterval(emailTimerRef.current);
+  }, []);
 
   const set = (k) => (e) => setForm(p => ({ ...p, [k]: e.target.value }));
+
+  function startCountdown(setter, timerRef, seconds = 60) {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setter(prev => ({ ...prev, countdown: seconds }));
+    timerRef.current = setInterval(() => {
+      setter(prev => {
+        if (prev.countdown <= 1) { clearInterval(timerRef.current); return { ...prev, countdown: 0 }; }
+        return { ...prev, countdown: prev.countdown - 1 };
+      });
+    }, 1000);
+  }
+
+  const requestOtp = async (type) => {
+    const target = type === 'phone' ? form.phone.replace(/[\s\-().]/g,'') : form.email.trim();
+    const setter = type === 'phone' ? setPhoneOtp : setEmailOtp;
+    const timerRef = type === 'phone' ? phoneTimerRef : emailTimerRef;
+    if (type === 'phone' && !isValidPhone(form.phone)) { setter(prev => ({ ...prev, error: 'เบอร์โทรไม่ถูกต้อง' })); return; }
+    if (type === 'email' && !isValidEmail(form.email)) { setter(prev => ({ ...prev, error: 'รูปแบบอีเมลไม่ถูกต้อง' })); return; }
+    setter(prev => ({ ...prev, loading: true, error: '' }));
+    try {
+      const res = await fetch('/api/otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'send', type, target }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'ส่ง OTP ไม่สำเร็จ');
+      setter(prev => ({ ...prev, loading: false, sent: true, token: data.token, code: '', error: '' }));
+      startCountdown(setter, timerRef, 60);
+    } catch (e) { setter(prev => ({ ...prev, loading: false, error: e.message })); }
+  };
+
+  const verifyOtp = async (type) => {
+    const otp = type === 'phone' ? phoneOtp : emailOtp;
+    const target = type === 'phone' ? form.phone.replace(/[\s\-().]/g,'') : form.email.trim();
+    const setter = type === 'phone' ? setPhoneOtp : setEmailOtp;
+    const timerRef = type === 'phone' ? phoneTimerRef : emailTimerRef;
+    setter(prev => ({ ...prev, loading: true, error: '' }));
+    try {
+      const res = await fetch('/api/otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'verify', type, target, otp: otp.code, token: otp.token }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'รหัส OTP ไม่ถูกต้อง');
+      if (timerRef.current) clearInterval(timerRef.current);
+      setter(prev => ({ ...prev, loading: false, verified: true, error: '' }));
+    } catch (e) { setter(prev => ({ ...prev, loading: false, error: e.message })); }
+  };
+
+  const canSubmit = phoneOtp.verified && emailOtp.verified && !saving;
 
   const validate = () => {
     const e = {};
@@ -367,6 +463,9 @@ export default function GroupQuotePage({ lang, setMessages }) {
       const n = parseInt(form.pax, 10);
       if (isNaN(n) || n < 1) e.pax = 'จำนวนผู้เดินทางต้องอย่างน้อย 1 คน';
     }
+
+    if (!phoneOtp.verified) e.phoneOtp = 'กรุณายืนยันเบอร์โทรด้วย OTP ก่อนส่งข้อมูล';
+    if (!emailOtp.verified) e.emailOtp = 'กรุณายืนยันอีเมลด้วย OTP ก่อนส่งข้อมูล';
 
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -646,31 +745,51 @@ export default function GroupQuotePage({ lang, setMessages }) {
                 value={form.pax} onChange={set('pax')} />
             </Field>
 
-            {/* โทร-LINE */}
-            <Field label="หมายเลขโทรศัพท์" required error={errors.phone}>
-              <input style={inpStyle('phone')} placeholder="081-234-5678" type="tel"
-                value={form.phone} onChange={set('phone')}
-                onBlur={e => {
-                  const v = e.target.value.replace(/[\s\-().]/g, '');
-                  if (v.length === 10 && /^0[0-9]{9}$/.test(v)) {
-                    setForm(p => ({ ...p, phone: v.replace(/^(\d{3})(\d{3})(\d{4})$/, '$1-$2-$3') }));
-                  }
-                }} />
-            </Field>
-            <Field label="Line ID" optional="ถ้ามี">
-              <input style={inpStyle()} placeholder="@wecrafttravel"
-                value={form.lineId} onChange={set('lineId')} />
-            </Field>
+            {/* โทร + OTP */}
+            <div style={{ gridColumn: '1 / -1' }}>
+              <Field label="หมายเลขโทรศัพท์" required error={errors.phone}>
+                <input style={{ ...inpStyle('phone'), borderColor: phoneOtp.verified ? '#16a34a' : (errors.phone ? '#e53e3e' : '#ddd') }}
+                  placeholder="081-234-5678" type="tel" value={form.phone}
+                  onChange={e => { setForm(p => ({ ...p, phone: e.target.value })); setPhoneOtp({ ...INIT_OTP }); if (phoneTimerRef.current) clearInterval(phoneTimerRef.current); }}
+                  onBlur={e => {
+                    const v = e.target.value.replace(/[\s\-().]/g, '');
+                    if (v.length === 10 && /^0[0-9]{9}$/.test(v))
+                      setForm(p => ({ ...p, phone: v.replace(/^(\d{3})(\d{3})(\d{4})$/, '$1-$2-$3') }));
+                  }} />
+              </Field>
+              <OtpBox label="SMS" otp={phoneOtp}
+                onRequest={() => requestOtp('phone')} onVerify={() => verifyOtp('phone')}
+                onCodeChange={v => setPhoneOtp(p => ({ ...p, code: v }))}
+                onReset={() => { setPhoneOtp({ ...INIT_OTP }); if (phoneTimerRef.current) clearInterval(phoneTimerRef.current); }} />
+            </div>
 
-            {/* Email */}
-            <Field label="อีเมล" required error={errors.email}>
-              <input style={inpStyle('email')} placeholder="example@email.com" type="email"
-                value={form.email} onChange={set('email')} />
-            </Field>
-            <Field label="อีเมลสำรอง" optional="ถ้ามี" error={errors.emailAlt}>
-              <input style={inpStyle('emailAlt')} placeholder="example@email.com" type="email"
-                value={form.emailAlt} onChange={set('emailAlt')} />
-            </Field>
+            {/* LINE ID */}
+            <div style={{ gridColumn: '1 / -1' }}>
+              <Field label="Line ID" optional="ถ้ามี">
+                <input style={inpStyle()} placeholder="@wecrafttravel" value={form.lineId} onChange={set('lineId')} />
+              </Field>
+            </div>
+
+            {/* Email + OTP */}
+            <div style={{ gridColumn: '1 / -1' }}>
+              <Field label="อีเมล" required error={errors.email}>
+                <input style={{ ...inpStyle('email'), borderColor: emailOtp.verified ? '#16a34a' : (errors.email ? '#e53e3e' : '#ddd') }}
+                  placeholder="example@email.com" type="email" value={form.email}
+                  onChange={e => { setForm(p => ({ ...p, email: e.target.value })); setEmailOtp({ ...INIT_OTP }); if (emailTimerRef.current) clearInterval(emailTimerRef.current); }} />
+              </Field>
+              <OtpBox label="อีเมล" otp={emailOtp}
+                onRequest={() => requestOtp('email')} onVerify={() => verifyOtp('email')}
+                onCodeChange={v => setEmailOtp(p => ({ ...p, code: v }))}
+                onReset={() => { setEmailOtp({ ...INIT_OTP }); if (emailTimerRef.current) clearInterval(emailTimerRef.current); }} />
+            </div>
+
+            {/* อีเมลสำรอง */}
+            <div style={{ gridColumn: '1 / -1' }}>
+              <Field label="อีเมลสำรอง" optional="ถ้ามี" error={errors.emailAlt}>
+                <input style={inpStyle('emailAlt')} placeholder="example@email.com" type="email"
+                  value={form.emailAlt} onChange={set('emailAlt')} />
+              </Field>
+            </div>
 
             {/* ปลายทาง-งบ */}
             <Field label="ประเทศ-เมือง-สถานที่ ที่ต้องการไป" required error={errors.destination}>
@@ -774,24 +893,37 @@ export default function GroupQuotePage({ lang, setMessages }) {
             </div>
           )}
 
+          {/* OTP checklist */}
+          <div style={{ marginTop: 20, background: '#fff', borderRadius: 10, padding: '14px 20px', border: '1px solid #eee' }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#444', marginBottom: 8 }}>สถานะการยืนยัน</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ fontSize: 12, color: phoneOtp.verified ? '#16a34a' : '#dc2626' }}>{phoneOtp.verified ? '✅' : '⏳'} ยืนยันเบอร์โทรทาง SMS</div>
+              <div style={{ fontSize: 12, color: emailOtp.verified ? '#16a34a' : '#dc2626' }}>{emailOtp.verified ? '✅' : '⏳'} ยืนยันอีเมล</div>
+            </div>
+          </div>
+
           {/* Submit */}
-          <div style={{ marginTop: 28, textAlign: 'center' }}>
+          <div style={{ marginTop: 20, textAlign: 'center' }}>
             <button
               onClick={submit}
-              disabled={saving}
+              disabled={!canSubmit}
               style={{
-                background: saving ? '#ccc' : 'var(--primary)',
+                background: !canSubmit ? '#ccc' : 'var(--primary)',
                 color: '#fff', border: 'none',
                 borderRadius: 8, padding: '14px 48px',
                 fontSize: 16, fontWeight: 800,
-                cursor: saving ? 'not-allowed' : 'pointer',
+                cursor: !canSubmit ? 'not-allowed' : 'pointer',
                 fontFamily: 'inherit',
                 transition: 'background .2s',
+                boxShadow: !canSubmit ? 'none' : '0 4px 16px rgba(230,92,0,.3)',
               }}
             >
               {saving ? 'กำลังส่งข้อมูล...' : 'ส่งข้อมูลขอราคากรุ๊ปเหมา'}
             </button>
-            <p style={{ marginTop: 10, fontSize: 12, color: '#999' }}>
+            {!canSubmit && !saving && (
+              <p style={{ marginTop: 8, fontSize: 12, color: '#dc2626' }}>กรุณายืนยัน OTP เบอร์โทรและอีเมลให้ครบก่อนส่งข้อมูล</p>
+            )}
+            <p style={{ marginTop: 8, fontSize: 12, color: '#999' }}>
               เมื่อส่งแล้ว ทีมงานจะติดต่อกลับภายใน 24 ชั่วโมงในวันทำการ
             </p>
           </div>
