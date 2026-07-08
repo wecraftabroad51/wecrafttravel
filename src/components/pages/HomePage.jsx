@@ -21,6 +21,12 @@ function Icon({ name, size = 18, color }) {
 // ─── SLIDES DATA ─────────────────────────────────────────────
 const SLIDES = [
   {
+    // แบนเนอร์ออกแบบสำเร็จ (มีข้อความ/โลโก้ในตัว) → แสดงเต็มใบ ไม่ทับ overlay
+    plain: true,
+    alt:   { th: 'WeCraft Travel — ให้สนุกทุกโลเคชั่น', en: 'WeCraft Travel — Fun in every location' },
+    img:   '/hero-banner-1.jpg',
+  },
+  {
     tag:   { th: '🔥 โปรพิเศษ',   en: '🔥 Hot Deal' },
     title: { th: 'ยุโรป 9 ประเทศ 15 วัน', en: 'Europe 9 Countries 15 Days' },
     sub:   { th: 'ฝรั่งเศส · อิตาลี · สวิตเซอร์แลนด์ · เยอรมัน', en: 'France · Italy · Switzerland · Germany' },
@@ -61,11 +67,28 @@ function HeroSection({ navigate, lang }) {
       {/* Slides */}
       {SLIDES.map((sl, i) => (
         <div key={i} style={{ position: 'absolute', inset: 0, opacity: i === idx ? 1 : 0, transition: 'opacity .7s ease' }}>
-          <img src={sl.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,.65) 0%, rgba(0,0,0,.15) 60%)' }} />
+          {sl.plain ? (
+            <div
+              onClick={() => navigate('tours')}
+              style={{ position: 'absolute', inset: 0, cursor: 'pointer', background: '#dCEeF0' }}
+            >
+              {/* ขอบข้างเบลอโทนเดียวกัน เนียนบนจอกว้าง */}
+              <img src={sl.img} alt="" aria-hidden="true"
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(24px)', transform: 'scale(1.12)' }} />
+              {/* แบนเนอร์เต็มใบ */}
+              <img src={sl.img} alt={(sl.alt?.[lang] || sl.alt?.th) || ''}
+                style={{ position: 'relative', width: '100%', height: '100%', objectFit: 'contain', zIndex: 1 }} />
+            </div>
+          ) : (
+            <>
+              <img src={sl.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,.65) 0%, rgba(0,0,0,.15) 60%)' }} />
+            </>
+          )}
         </div>
       ))}
-      {/* Content */}
+      {/* Content — ซ่อนบนสไลด์แบนเนอร์สำเร็จรูป */}
+      {!s.plain && (
       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center' }}>
         <div className="wrap" style={{ color: '#fff' }}>
           <div style={{ maxWidth: 580 }}>
@@ -92,6 +115,7 @@ function HeroSection({ navigate, lang }) {
           </div>
         </div>
       </div>
+      )}
       {/* Arrows */}
       <button onClick={() => go(idx - 1)} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', width: 42, height: 42, borderRadius: '50%', background: 'rgba(255,255,255,.22)', border: '1px solid rgba(255,255,255,.5)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Icon name="arrow-l" size={18} color="#fff" />
