@@ -257,6 +257,9 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
 .grid-cols-5 { display: grid; grid-template-columns: repeat(5, 1fr); }
 .grid-cols-6 { display: grid; grid-template-columns: repeat(6, 1fr); }
 
+/* Tour listing grid — 4 คอลัมน์ (ไล่ลง 3 → 2 → 1 บนจอเล็ก) */
+.tours-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+
 .layout-hero { display: grid; grid-template-columns: 2fr 1fr; }
 .layout-half { display: grid; grid-template-columns: 1fr 1fr; }
 .layout-feat { display: grid; grid-template-columns: 1.4fr 1fr; }
@@ -281,6 +284,7 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
   .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-cols-5 { grid-template-columns: repeat(3, 1fr); }
   .grid-cols-6 { grid-template-columns: repeat(3, 1fr); }
+  .tours-grid { grid-template-columns: repeat(3, 1fr); }
   .layout-footer { grid-template-columns: 1fr 1fr; }
   .layout-tour { grid-template-columns: 1fr 320px; }
 }
@@ -300,6 +304,7 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
   .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
   .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-cols-6 { grid-template-columns: repeat(3, 1fr); }
+  .tours-grid { grid-template-columns: repeat(2, 1fr); }
   .layout-footer { grid-template-columns: 1fr 1fr; }
   .sticky-aside { position: static !important; }
   .hide-mobile { display: none !important; }
@@ -317,6 +322,7 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
   .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-cols-5 { grid-template-columns: repeat(2, 1fr); }
   .grid-cols-6 { grid-template-columns: repeat(2, 1fr); }
+  .tours-grid { grid-template-columns: repeat(2, 1fr); }
   .layout-footer { grid-template-columns: 1fr; }
   .search-bar { grid-template-columns: 1fr; }
 }

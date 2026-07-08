@@ -359,7 +359,7 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
               </div>
             </div>
           ) : view === 'grid' ? (
-            <div className="grid-cols-3" style={{ gap: 16 }}>
+            <div className="tours-grid" style={{ gap: 16 }}>
               {filtered.map(tr => (
                 <TourCard
                   key={tr.id} tour={tr} t={t} navigate={navigate}
