@@ -147,7 +147,7 @@ const CONTINENT_EN = {
   'All': 'All',
 };
 
-export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, reviews, settings, compareList, toggleCompare, setBookings, setReviews, setMessages, initialFilters }) {
+export default function ToursPage({ lang, t, navigate, tours, supplierTours = [], promotions, faqs, reviews, settings, compareList, toggleCompare, setBookings, setReviews, setMessages, initialFilters }) {
   const [tourType,  setTourType]  = useState(initialFilters?.tourType  || 'all');
   const [continent, setContinent] = useState(initialFilters?.continent || 'All');
   const [country,   setCountry]   = useState(initialFilters?.country   || '');
@@ -159,7 +159,10 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
   const [sort, setSort]           = useState('popular');
   const [priceMax, setPriceMax]   = useState(100000);
 
-  const allContinents = Array.from(new Set(tours.map(tr => tr.continent).filter(Boolean)));
+  // รวมทัวร์ของเรา + ทัวร์ซัพพลายเออร์ (ลูกค้าไม่รู้ว่ามาจากไหน)
+  const allTours = useMemo(() => [...tours, ...supplierTours], [tours, supplierTours]);
+
+  const allContinents = Array.from(new Set(allTours.map(tr => tr.continent).filter(Boolean)));
   const relevantContinents = tourType === 'outbound' ? allContinents.filter(c => INTERNATIONAL_CONTINENTS.includes(c))
     : tourType === 'inbound' ? allContinents.filter(c => DOMESTIC_CONTINENTS.includes(c))
     : tourType === 'premiumtour' ? allContinents.filter(c => PREMIUM_CONTINENTS.includes(c))
@@ -176,7 +179,7 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
   };
 
   const filtered = useMemo(() => {
-    let list = [...tours];
+    let list = [...allTours];
     if (tourType !== 'all') {
       if (tourType === 'hottour') {
         // ทัวร์ไฟไหม้ = tourType เป็น hottour/hotdeal หรือ ติก Featured ไว้
@@ -210,7 +213,7 @@ export default function ToursPage({ lang, t, navigate, tours, promotions, faqs, 
     if (sort === 'duration')   list = [...list].sort((a, b) => (b.duration || 0) - (a.duration || 0));
     if (sort === 'popular')    list = [...list].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
     return list;
-  }, [tours, tourType, continent, country, groupCountries, priceMax, search, sort, lang]);
+  }, [allTours, tourType, continent, country, groupCountries, priceMax, search, sort, lang]);
 
   const clearGroupFilter = () => { setGroupCountries(null); setGroupLabel(''); };
 

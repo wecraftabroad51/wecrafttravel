@@ -14,6 +14,7 @@ import {
   REVIEWS_DATA, SITE_SETTINGS_DEFAULT, BOOKINGS_DATA, MESSAGES_DATA, CHAT_SESSIONS_DEFAULT,
 } from './data.js';
 import { LEGAL_DEFAULTS } from './lib/legalDefaults.js';
+import { normalizePbTours } from './lib/supplierUtils.js';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
 import FloatingContact from './components/FloatingContact.jsx';
@@ -324,6 +325,7 @@ function AppInner() {
   const [settings,     setSettings]     = useState(SETTINGS_DEFAULT);
 
   const [compareList, setCompareList] = useState([]);
+  const [supplierTours, setSupplierTours] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [minDelay, setMinDelay] = useState(true);   // splash shows at least 2.8s
@@ -331,6 +333,16 @@ function AppInner() {
 
   // Minimum splash duration
   useEffect(() => { const t = setTimeout(() => setMinDelay(false), 2800); return () => clearTimeout(t); }, []);
+
+  // ── Load ProBooking supplier tours (live, ไม่ cache) ──────────
+  useEffect(() => {
+    fetch('/api/probooking')
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(data => {
+        if (Array.isArray(data)) setSupplierTours(normalizePbTours(data));
+      })
+      .catch(err => console.warn('[ProBooking] fetch failed:', err));
+  }, []);
 
   const t = (obj) => (obj && (obj[lang] || obj['th'])) || '';
 
@@ -650,7 +662,7 @@ function AppInner() {
   }
 
   const pageProps = {
-    lang, t, navigate, tours, articles, promotions, faqs,
+    lang, t, navigate, tours, supplierTours, articles, promotions, faqs,
     reviews, settings, compareList, toggleCompare,
     setBookings, setReviews, setMessages, setArticles,
   };
@@ -658,6 +670,7 @@ function AppInner() {
   const adminProps = {
     lang, t, setLang,
     tours,        setTours,
+    supplierTours,
     articles,     setArticles,
     promotions,   setPromotions,
     faqs,         setFaqs,

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TourCard from '../TourCard.jsx';
 
 function Icon({ name, size = 16 }) {
@@ -63,8 +63,23 @@ function Accordion({ title, icon, badge, defaultOpen = false, children }) {
   );
 }
 
-export default function TourDetailPage({ lang, t, navigate, tours, reviews, setBookings, setReviews, tourId, compareList, toggleCompare }) {
-  const tour = tours.find(tr => String(tr.id) === String(tourId));
+export default function TourDetailPage({ lang, t, navigate, tours, supplierTours = [], reviews, setBookings, setReviews, tourId, compareList, toggleCompare }) {
+  const isPb  = String(tourId).startsWith('pb_');
+  const pbId  = isPb ? String(tourId).replace('pb_', '') : null;
+
+  // ── Fetch ProBooking full detail (plans, include/notInclude) ──
+  const [pbDetail, setPbDetail] = useState(null);
+  useEffect(() => {
+    if (!isPb || !pbId) return;
+    fetch(`/api/probooking?id=${pbId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setPbDetail(data.data || data); })
+      .catch(() => {});
+  }, [pbId]);
+
+  const allTours = [...tours, ...supplierTours];
+  const tour = allTours.find(tr => String(tr.id) === String(tourId));
+
   const [saved, setSaved]           = useState(false);
   const [lightbox, setLightbox]     = useState(null);
   const [reviewForm, setReviewForm] = useState({ name: '', email: '', rating: 5, text: '' });
@@ -86,7 +101,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
 
   const tourReviews = reviews.filter(r => String(r.tourId) === String(tour.id) && r.approved);
   const tourName    = tv(tour.name);
-  const airline     = tour.flight?.outbound?.airline || tour.airline || '';
+  const airline     = tour.flight?.outbound?.airline || tour.airline || pbDetail?.vehicle || '';
   const basePrice   = tour.priceTiers?.[0]?.price || tour.price || 0;
   const tourCode    = tour.code || '-';
 
@@ -295,6 +310,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                   { icon: '🗓️', label: th ? 'ช่วงเดือนที่เดินทาง' : 'Travel Months',
                     val: <span style={{ fontWeight: 700, color: travelMonthRange ? '#0f766e' : '#94a3b8' }}>{travelMonthRange || '-'}</span> },
                   { icon: '✈️', label: th ? 'เดินทางโดย' : 'Airline',      val: airline || (th ? 'ติดต่อสอบถาม' : 'TBA') },
+                  ...(pbDetail?.hotelStar ? [{ icon: '🏨', label: th ? 'ระดับโรงแรม' : 'Hotel', val: `${'⭐'.repeat(pbDetail.hotelStar)} (${pbDetail.hotelStar} ${th ? 'ดาว' : 'stars'})` }] : []),
                 ].map(({ icon, label, val }) => (
                   <div key={label} className="info-cell">
                     <span style={{ fontSize: 20, lineHeight: 1, flexShrink: 0, marginTop: 2 }}>{icon}</span>
@@ -429,7 +445,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
                         <td style={{ color: '#475569' }}>{fmt(childP)}</td>
                         <td style={{ color: '#475569' }}>{fmt(infantP)}</td>
                         <td style={{ color: '#475569' }}>{singleP ? `+${fmt(singleP)}` : '-'}</td>
-                        <td style={{ color: '#94a3b8' }}>-</td>
+                        <td style={{ color: '#475569' }}>{dep.joinPrice ? fmt(dep.joinPrice) : '-'}</td>
                         <td>
                           {total !== '-'
                             ? <span style={{ fontWeight: 700, color: '#0369a1', background: '#e0f2fe', padding: '3px 10px', borderRadius: 20, fontSize: 15 }}>{total}</span>
@@ -464,6 +480,9 @@ export default function TourDetailPage({ lang, t, navigate, tours, reviews, setB
             {/* Table footer note */}
             <div style={{ padding: '10px 20px', background: '#f8fafc', borderTop: '1px solid #f1f5f9', fontSize: 14.5, color: '#94a3b8', display: 'flex', gap: 20, flexWrap: 'wrap' }}>
               <span>💡 {th ? 'ราคาต่อท่าน รวม VAT แล้ว' : 'Price per person, VAT included'}</span>
+              {isPb && tour.departures?.[0]?.deposit > 0 && (
+                <span>💳 {th ? `มัดจำ: ${tour.departures[0].deposit.toLocaleString()} บาท/ท่าน` : `Deposit: ฿${tour.departures[0].deposit.toLocaleString()}/pax`}</span>
+              )}
               <span>📞 {th ? 'โทรจอง: 061-868-6889' : 'Book: 061-868-6889'}</span>
             </div>
           </div>
