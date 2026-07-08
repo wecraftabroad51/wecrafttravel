@@ -10,6 +10,7 @@ const https = require('https');
 const SUPPLIER_HOSTS = {
   probooking:  'api.probooking.co.th',
   wondergroup: 'api.wondergrouptour.com',
+  gs25tour:    'api.gs25tour.com',
 };
 
 function pbFetch(host, path) {

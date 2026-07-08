@@ -13,6 +13,8 @@ export const CODE_TO_CONTINENT = {
   US: 'Americas', CA: 'Americas', MX: 'Americas',
   AU: 'Oceania', NZ: 'Oceania',
   AE: 'Asia-S-ME', SA: 'Asia-S-ME', QA: 'Asia-S-ME', IN: 'Asia-S-ME',
+  KZ: 'Asia-S-ME', KG: 'Asia-S-ME', UZ: 'Asia-S-ME', // เอเชียกลาง
+  EG: 'Africa', MA: 'Africa', ZA: 'Africa', KE: 'Africa', TZ: 'Africa',
 };
 
 export const COUNTRY_CODE_NAME_TH = {
@@ -22,6 +24,7 @@ export const COUNTRY_CODE_NAME_TH = {
   MM: 'พม่า', KH: 'กัมพูชา', LA: 'ลาว', ID: 'อินโดนีเซีย', BN: 'บรูไน',
   FR: 'ฝรั่งเศส', ES: 'สเปน', DE: 'เยอรมัน', IT: 'อิตาลี',
   GB: 'อังกฤษ', AU: 'ออสเตรเลีย', US: 'สหรัฐอเมริกา',
+  IN: 'อินเดีย', EG: 'อียิปต์', KZ: 'คาซัคสถาน', KG: 'คีร์กีซสถาน', UZ: 'อุซเบกิสถาน',
 };
 
 export function normalizePbTour(t, source = 'probooking', sourceName = 'ProBooking') {
