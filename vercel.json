@@ -4,7 +4,7 @@
     "api/upload-drive.js": { "maxDuration": 30, "memory": 1024 },
     "api/send-email.js":   { "maxDuration": 30 },
     "api/parse-tour-program.js": { "maxDuration": 300, "memory": 1024 },
-    "api/otp.js":        { "maxDuration": 30 },
-    "api/probooking.js": { "maxDuration": 15 }
+    "api/otp.js":       { "maxDuration": 30 },
+    "api/suppliers.js": { "maxDuration": 15 }
   }
 }

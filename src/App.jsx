@@ -15,6 +15,7 @@ import {
 } from './data.js';
 import { LEGAL_DEFAULTS } from './lib/legalDefaults.js';
 import { normalizePbTours } from './lib/supplierUtils.js';
+import { ENABLED_SUPPLIERS } from './lib/suppliers.js';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
 import FloatingContact from './components/FloatingContact.jsx';
@@ -334,14 +335,20 @@ function AppInner() {
   // Minimum splash duration
   useEffect(() => { const t = setTimeout(() => setMinDelay(false), 2800); return () => clearTimeout(t); }, []);
 
-  // ── Load ProBooking supplier tours (live, ไม่ cache) ──────────
+  // ── Load supplier tours (live, ทุกเจ้าพร้อมกัน) ───────────────
   useEffect(() => {
-    fetch('/api/probooking')
-      .then(r => r.ok ? r.json() : Promise.reject(r.status))
-      .then(data => {
-        if (Array.isArray(data)) setSupplierTours(normalizePbTours(data));
-      })
-      .catch(err => console.warn('[ProBooking] fetch failed:', err));
+    let cancelled = false;
+    Promise.all(
+      ENABLED_SUPPLIERS.map(sup =>
+        fetch(`/api/suppliers?supplier=${sup.id}`)
+          .then(r => r.ok ? r.json() : Promise.reject(r.status))
+          .then(data => Array.isArray(data) ? normalizePbTours(data, sup.id, sup.name) : [])
+          .catch(err => { console.warn(`[${sup.name}] fetch failed:`, err); return []; })
+      )
+    ).then(results => {
+      if (!cancelled) setSupplierTours(results.flat());
+    });
+    return () => { cancelled = true; };
   }, []);
 
   const t = (obj) => (obj && (obj[lang] || obj['th'])) || '';

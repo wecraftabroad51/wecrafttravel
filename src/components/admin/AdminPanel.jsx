@@ -576,7 +576,8 @@ export default function AdminPanel(props) {
 
 // ===== SUPPLIERS =====
 function SuppliersSection({ supplierTours }) {
-  const [search, setSearch] = useState('');
+  const [search, setSearch]     = useState('');
+  const [supFilter, setSupFilter] = useState('all');
   const MONTHS_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
   const fmt = (d) => {
     if (!d) return '-';
@@ -585,108 +586,146 @@ function SuppliersSection({ supplierTours }) {
     return `${parseInt(parts[2])} ${MONTHS_TH[parseInt(parts[1])-1]} ${parseInt(parts[0])+543}`;
   };
 
-  const filtered = supplierTours.filter(t =>
-    !search || t.code?.toLowerCase().includes(search.toLowerCase()) ||
-    t.name?.th?.toLowerCase().includes(search.toLowerCase()) ||
-    t.country?.toLowerCase().includes(search.toLowerCase())
-  );
+  // รายชื่อซัพพลายเออร์ที่มีข้อมูล
+  const supList = Array.from(
+    supplierTours.reduce((m, t) => m.set(t._source, t._sourceName || t._source), new Map())
+  ); // [ [id, name], ... ]
 
-  // Group by country
-  const byCountry = filtered.reduce((acc, t) => {
+  const filtered = supplierTours.filter(t => {
+    if (supFilter !== 'all' && t._source !== supFilter) return false;
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return t.code?.toLowerCase().includes(q) ||
+      t.name?.th?.toLowerCase().includes(q) ||
+      t.country?.toLowerCase().includes(q);
+  });
+
+  // Group: supplier → country
+  const bySupplier = filtered.reduce((acc, t) => {
+    const s = t._source || 'unknown';
+    if (!acc[s]) acc[s] = { name: t._sourceName || s, byCountry: {} };
     const c = t.country || 'อื่นๆ';
-    if (!acc[c]) acc[c] = [];
-    acc[c].push(t);
+    if (!acc[s].byCountry[c]) acc[s].byCountry[c] = [];
+    acc[s].byCountry[c].push(t);
     return acc;
   }, {});
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-bold text-slate-800">ทัวร์ซัพพลายเออร์</h2>
-          <p className="text-sm text-slate-500 mt-1">ดึงข้อมูล Live จาก ProBooking API · อ่านอย่างเดียว · ลูกค้าเห็นรวมกับทัวร์ของเรา</p>
+          <p className="text-sm text-slate-500 mt-1">ดึงข้อมูล Live จาก API ผู้ผลิตทัวร์ · อ่านอย่างเดียว · ลูกค้าเห็นรวมกับทัวร์ของเรา</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="bg-teal-50 border border-teal-200 text-teal-800 text-sm font-semibold px-3 py-1.5 rounded-lg">
             {supplierTours.length} รายการ
           </div>
           <div className="bg-blue-50 border border-blue-200 text-blue-800 text-sm font-semibold px-3 py-1.5 rounded-lg">
-            ProBooking
+            {supList.length} ซัพพลายเออร์
           </div>
         </div>
       </div>
 
-      {/* Search */}
-      <div className="mb-4">
+      {/* Filters */}
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
         <input
-          className="w-full max-w-md border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+          className="flex-1 min-w-[200px] max-w-md border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
           placeholder="ค้นหารหัส / ชื่อทัวร์ / ประเทศ..."
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
+        <button onClick={() => setSupFilter('all')}
+          className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${supFilter === 'all' ? 'bg-teal-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+          ทั้งหมด
+        </button>
+        {supList.map(([id, name]) => (
+          <button key={id} onClick={() => setSupFilter(id)}
+            className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${supFilter === id ? 'bg-teal-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+            {name}
+          </button>
+        ))}
       </div>
 
       {supplierTours.length === 0 ? (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center text-amber-700">
-          ⏳ กำลังโหลดข้อมูลจาก ProBooking... หรือ API ไม่ตอบสนอง
+          ⏳ กำลังโหลดข้อมูลจากซัพพลายเออร์... หรือ API ไม่ตอบสนอง
         </div>
       ) : (
-        <div className="space-y-6">
-          {Object.entries(byCountry).map(([country, tours]) => (
-            <div key={country}>
-              <div className="flex items-center gap-3 mb-3">
-                <h3 className="text-base font-bold text-slate-700">{tours[0]?.destination?.th || country}</h3>
-                <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">{country}</span>
-                <span className="text-xs text-slate-400">{tours.length} โปรแกรม</span>
+        <div className="space-y-8">
+          {Object.entries(bySupplier).map(([supId, { name, byCountry }]) => {
+            const supCount = Object.values(byCountry).reduce((n, arr) => n + arr.length, 0);
+            return (
+              <div key={supId} className="border border-slate-200 rounded-2xl overflow-hidden">
+                {/* Supplier header */}
+                <div className="bg-gradient-to-r from-slate-800 to-slate-700 px-5 py-3 flex items-center gap-3">
+                  <Building2 className="w-5 h-5 text-teal-300" />
+                  <h3 className="text-white font-bold">{name}</h3>
+                  <span className="bg-white/20 text-white text-xs font-semibold px-2 py-0.5 rounded-full ml-auto">
+                    {supCount} โปรแกรม
+                  </span>
+                </div>
+
+                <div className="p-4 space-y-5">
+                  {Object.entries(byCountry).map(([country, tours]) => (
+                    <div key={country}>
+                      <div className="flex items-center gap-3 mb-2">
+                        <h4 className="text-sm font-bold text-slate-700">{tours[0]?.destination?.th || country}</h4>
+                        <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-mono">{country}</span>
+                        <span className="text-xs text-slate-400">{tours.length} โปรแกรม</span>
+                      </div>
+                      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="bg-slate-50 border-b border-slate-200">
+                              <th className="text-left px-4 py-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wide">รหัส</th>
+                              <th className="text-left px-4 py-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wide">ชื่อโปรแกรม</th>
+                              <th className="text-center px-4 py-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wide">วัน/คืน</th>
+                              <th className="text-right px-4 py-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wide">ราคาเริ่มต้น</th>
+                              <th className="text-center px-4 py-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wide">รอบเดินทาง</th>
+                              <th className="text-center px-4 py-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wide">เดินทางถัดไป</th>
+                              <th className="text-center px-4 py-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wide">PDF</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {tours.map((tour, i) => {
+                              const nextDep = tour.departures?.[0];
+                              return (
+                                <tr key={tour.id} className={`border-b border-slate-100 hover:bg-slate-50 transition-colors ${i === tours.length-1 ? 'border-none' : ''}`}>
+                                  <td className="px-4 py-2.5">
+                                    <span className="font-mono text-xs bg-slate-100 px-2 py-1 rounded text-slate-600">{tour.code}</span>
+                                  </td>
+                                  <td className="px-4 py-2.5">
+                                    <div className="font-medium text-slate-800 text-xs leading-snug max-w-xs">{tour.name?.th || tour.name?.en}</div>
+                                  </td>
+                                  <td className="px-4 py-2.5 text-center text-slate-600">{tour.duration}D/{tour._night || (tour.duration-1)}N</td>
+                                  <td className="px-4 py-2.5 text-right font-bold text-red-600">{tour.price?.toLocaleString()} ฿</td>
+                                  <td className="px-4 py-2.5 text-center">
+                                    <span className="bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+                                      {tour.departures?.length || 0} รอบ
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-2.5 text-center text-slate-600 text-xs">
+                                    {nextDep ? fmt(nextDep.date) : '-'}
+                                  </td>
+                                  <td className="px-4 py-2.5 text-center">
+                                    {tour.pdfUrl ? (
+                                      <a href={tour.pdfUrl} target="_blank" rel="noopener noreferrer"
+                                        className="text-blue-600 hover:text-blue-800 text-xs underline">PDF</a>
+                                    ) : '-'}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200">
-                      <th className="text-left px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide">รหัส</th>
-                      <th className="text-left px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide">ชื่อโปรแกรม</th>
-                      <th className="text-center px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide">วัน/คืน</th>
-                      <th className="text-right px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide">ราคาเริ่มต้น</th>
-                      <th className="text-center px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide">รอบเดินทาง</th>
-                      <th className="text-center px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide">เดินทางถัดไป</th>
-                      <th className="text-center px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wide">PDF</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tours.map((tour, i) => {
-                      const nextDep = tour.departures?.[0];
-                      return (
-                        <tr key={tour.id} className={`border-b border-slate-100 hover:bg-slate-50 transition-colors ${i === tours.length-1 ? 'border-none' : ''}`}>
-                          <td className="px-4 py-3">
-                            <span className="font-mono text-xs bg-slate-100 px-2 py-1 rounded text-slate-600">{tour.code}</span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="font-medium text-slate-800 text-xs leading-snug max-w-xs">{tour.name?.th || tour.name?.en}</div>
-                          </td>
-                          <td className="px-4 py-3 text-center text-slate-600">{tour.duration}D/{tour._night || (tour.duration-1)}N</td>
-                          <td className="px-4 py-3 text-right font-bold text-red-600">{tour.price?.toLocaleString()} ฿</td>
-                          <td className="px-4 py-3 text-center">
-                            <span className="bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full text-xs font-semibold">
-                              {tour.departures?.length || 0} รอบ
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-center text-slate-600 text-xs">
-                            {nextDep ? fmt(nextDep.date) : '-'}
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            {tour.pdfUrl ? (
-                              <a href={tour.pdfUrl} target="_blank" rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 text-xs underline">PDF</a>
-                            ) : '-'}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

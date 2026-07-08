@@ -4,9 +4,9 @@
 
 export const CODE_TO_CONTINENT = {
   JP: 'Asia-East', CN: 'Asia-East', HK: 'Asia-East', MO: 'Asia-East',
-  KR: 'Asia-East', TW: 'Asia-East',
+  KR: 'Asia-East', TW: 'Asia-East', MN: 'Asia-East',
   VN: 'Asia-SE', SG: 'Asia-SE', MY: 'Asia-SE', PH: 'Asia-SE',
-  ID: 'Asia-SE', MM: 'Asia-SE', KH: 'Asia-SE', LA: 'Asia-SE',
+  ID: 'Asia-SE', MM: 'Asia-SE', KH: 'Asia-SE', LA: 'Asia-SE', BN: 'Asia-SE',
   FR: 'Europe', ES: 'Europe', DE: 'Europe', IT: 'Europe', GB: 'Europe',
   PT: 'Europe', NL: 'Europe', BE: 'Europe', CH: 'Europe', AT: 'Europe',
   GR: 'Europe', CZ: 'Europe', PL: 'Europe', TR: 'Europe',
@@ -17,13 +17,14 @@ export const CODE_TO_CONTINENT = {
 
 export const COUNTRY_CODE_NAME_TH = {
   JP: 'ญี่ปุ่น', CN: 'จีน', HK: 'ฮ่องกง', MO: 'มาเก๊า',
-  KR: 'เกาหลีใต้', TW: 'ไต้หวัน',
+  KR: 'เกาหลีใต้', TW: 'ไต้หวัน', MN: 'มองโกเลีย',
   VN: 'เวียดนาม', SG: 'สิงคโปร์', MY: 'มาเลเซีย', PH: 'ฟิลิปปินส์',
+  MM: 'พม่า', KH: 'กัมพูชา', LA: 'ลาว', ID: 'อินโดนีเซีย', BN: 'บรูไน',
   FR: 'ฝรั่งเศส', ES: 'สเปน', DE: 'เยอรมัน', IT: 'อิตาลี',
   GB: 'อังกฤษ', AU: 'ออสเตรเลีย', US: 'สหรัฐอเมริกา',
 };
 
-export function normalizePbTour(t) {
+export function normalizePbTour(t, source = 'probooking', sourceName = 'ProBooking') {
   const primaryCountry = t.countries?.[0];
   const countryCode    = primaryCountry?.code || '';
   const continent      = CODE_TO_CONTINENT[countryCode] || 'Asia-East';
@@ -36,7 +37,8 @@ export function normalizePbTour(t) {
 
   return {
     // ── ใช้ {th, en} format เดียวกับทัวร์ของเรา ────────────────
-    id:          `pb_${t.id}`,
+    // id ต้อง unique ข้ามซัพพลายเออร์ → prefix ด้วย source
+    id:          `sup_${source}_${t.id}`,
     code:        t.code || '',
     name:        { th: t.name, en: t.name },
     destination: { th: nameTh, en: countryCode },
@@ -67,13 +69,14 @@ export function normalizePbTour(t) {
     pdfUrl: t.pdf || null,
 
     // ── Internal metadata (ไม่แสดงลูกค้า) ─────────────────────
-    _source: 'probooking',
-    _pbId:   t.id,
-    _night:  t.night || 0,
+    _source:     source,      // 'probooking' | 'wondergroup' | ...
+    _sourceName: sourceName,  // ชื่อโชว์ใน admin
+    _pbId:       t.id,        // id เดิมฝั่งซัพพลายเออร์ (ใช้ fetch detail)
+    _night:      t.night || 0,
   };
 }
 
-export function normalizePbTours(list) {
+export function normalizePbTours(list, source = 'probooking', sourceName = 'ProBooking') {
   if (!Array.isArray(list)) return [];
-  return list.map(normalizePbTour);
+  return list.map(t => normalizePbTour(t, source, sourceName));
 }

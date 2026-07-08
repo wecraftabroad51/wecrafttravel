@@ -64,18 +64,19 @@ function Accordion({ title, icon, badge, defaultOpen = false, children }) {
 }
 
 export default function TourDetailPage({ lang, t, navigate, tours, supplierTours = [], reviews, setBookings, setReviews, tourId, compareList, toggleCompare }) {
-  const isPb  = String(tourId).startsWith('pb_');
-  const pbId  = isPb ? String(tourId).replace('pb_', '') : null;
+  // supplier tour id = "sup_<source>_<pbId>"
+  const isPb = String(tourId).startsWith('sup_');
+  const [, pbSource, pbId] = isPb ? String(tourId).split('_') : [];
 
-  // ── Fetch ProBooking full detail (plans, include/notInclude) ──
+  // ── Fetch supplier full detail (plans, include/notInclude) ────
   const [pbDetail, setPbDetail] = useState(null);
   useEffect(() => {
-    if (!isPb || !pbId) return;
-    fetch(`/api/probooking?id=${pbId}`)
+    if (!isPb || !pbId || !pbSource) return;
+    fetch(`/api/suppliers?supplier=${pbSource}&id=${pbId}`)
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data) setPbDetail(data.data || data); })
       .catch(() => {});
-  }, [pbId]);
+  }, [pbId, pbSource]);
 
   const allTours = [...tours, ...supplierTours];
   const tour = allTours.find(tr => String(tr.id) === String(tourId));
