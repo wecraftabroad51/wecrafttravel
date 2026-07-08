@@ -700,6 +700,7 @@ function AppInner() {
         lang={lang} setLang={setLang}
         page={getPageFromPath(location.pathname)}
         navigate={navigate} t={t}
+        tours={tours} supplierTours={supplierTours}
       />
       <main>
         <Routes>

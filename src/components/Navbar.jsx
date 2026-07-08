@@ -1,17 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { buildMenuGroups } from '../lib/countries.js';
 
 const MENU = [
   {
     label: 'ทัวร์ต่างประเทศ', labelEn: 'Outbound Tours',
     key: 'tours', tourType: 'outbound',
-    mega: [
-      { continent: 'ยุโรป', countries: ['ฝรั่งเศส','อิตาลี','สวิตเซอร์แลนด์','เยอรมัน','อังกฤษ','สเปน','โปรตุเกส','ออสเตรีย','เนเธอร์แลนด์','เบลเยียม','นอร์เวย์','สวีเดน','เดนมาร์ก'] },
-      { continent: 'เอเชียตะวันออก', countries: ['ญี่ปุ่น','จีน','เกาหลีใต้','ไต้หวัน','ฮ่องกง','มาเก๊า'] },
-      { continent: 'เอเชียตะวันออกเฉียงใต้', countries: ['สิงคโปร์','เวียดนาม','มาเลเซีย','อินโดนีเซีย','ฟิลิปปินส์','พม่า','กัมพูชา','ลาว'] },
-      { continent: 'เอเชียใต้ / ตะวันออกกลาง', countries: ['อินเดีย','มัลดีฟส์','ศรีลังกา','สหรัฐอาหรับเอมิเรตส์','ซาอุดีอาระเบีย','กาตาร์','จอร์แดน'] },
-      { continent: 'อเมริกา / แปซิฟิก', countries: ['สหรัฐอเมริกา','แคนาดา','เม็กซิโก','เปรู','บราซิล','ออสเตรเลีย','นิวซีแลนด์'] },
-      { continent: 'แอฟริกา', countries: ['โมร็อกโก','แอฟริกาใต้','เคนยา','อียิปต์','แทนซาเนีย'] },
-    ],
+    dynamic: 'country',   // ← สร้างเมนูจากข้อมูลทัวร์จริง (ธง + จำนวน)
+    mega: true,
   },
   {
     label: 'ทัวร์ในประเทศ', labelEn: 'Inbound Tours',
@@ -187,13 +182,123 @@ function MegaDropdown({ menu, navigate, onClose, topOffset, lang }) {
   );
 }
 
-export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick }) {
+// ── Mega-menu แบบธง + จำนวนทัวร์ (Sanook-style, โทนเว็บเรา) ────────
+function CountryMegaDropdown({ groups, navigate, onClose, topOffset, lang }) {
+  const en = lang === 'en';
+  if (!groups.length) {
+    return (
+      <div style={{ position: 'fixed', top: topOffset, left: 0, right: 0, background: '#fff',
+        borderTop: '3px solid var(--primary)', boxShadow: '0 8px 32px rgba(0,0,0,.15)', zIndex: 200, padding: '28px 0' }}
+        onMouseLeave={onClose}>
+        <div className="wrap" style={{ textAlign: 'center', color: 'var(--muted)', fontSize: 14 }}>
+          {en ? 'Loading tours…' : 'กำลังโหลดรายการทัวร์…'}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div
+      style={{
+        position: 'fixed', top: topOffset, left: 0, right: 0,
+        background: '#fff', borderTop: '3px solid var(--primary)',
+        boxShadow: '0 8px 32px rgba(0,0,0,.15)', zIndex: 200,
+        padding: '24px 0', maxHeight: `calc(100vh - ${topOffset}px)`, overflowY: 'auto',
+      }}
+      onMouseLeave={onClose}
+    >
+      <div className="wrap" style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))',
+        gap: '4px 28px',
+        alignItems: 'start',
+      }}>
+        {groups.map((g) => {
+          // ถ้าประเทศเยอะ แบ่งเป็น 2 คอลัมน์ย่อยในกลุ่มเดียว
+          const cols = g.countries.length > 9 ? 2 : 1;
+          return (
+            <div key={g.id} style={{ gridColumn: cols === 2 ? 'span 2' : 'span 1', marginBottom: 14 }}>
+              {/* Continent header — คลิกดูทั้งภูมิภาค */}
+              <button
+                onClick={() => {
+                  navigate('tours', null, {
+                    tourType: 'outbound',
+                    continentLabel: en ? g.en : g.th,
+                    countries: g.countries.map(c => c.th),
+                  });
+                  onClose();
+                }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6, width: '100%', textAlign: 'left',
+                  background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                  fontSize: 12.5, fontWeight: 800, color: 'var(--primary)',
+                  textTransform: 'uppercase', letterSpacing: '.06em',
+                  marginBottom: 8, paddingBottom: 7,
+                  borderBottom: '2px solid var(--primary-light)',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--ink)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--primary)')}
+                title={en ? `View all ${g.en} tours` : `ดูทัวร์ทั้งหมดในภูมิภาค${g.th}`}
+              >
+                {en ? g.en : g.th}
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)' }}>
+                  ({g.countries.reduce((n, c) => n + c.count, 0)})
+                </span>
+                <span style={{ marginLeft: 'auto', fontSize: 12 }}>›</span>
+              </button>
+
+              {/* Countries grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: '1px 14px' }}>
+                {g.countries.map(c => (
+                  <button key={c.code}
+                    onClick={() => {
+                      navigate('tours', null, { tourType: 'outbound', country: c.th });
+                      onClose();
+                    }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      background: 'none', border: 'none', textAlign: 'left',
+                      padding: '5px 7px', fontSize: 13.5, color: 'var(--ink-2)',
+                      cursor: 'pointer', borderRadius: 5, fontFamily: 'inherit',
+                      transition: 'background .12s, color .12s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-light)'; e.currentTarget.style.color = 'var(--primary)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--ink-2)'; }}
+                  >
+                    <span style={{ fontSize: 17, lineHeight: 1, flexShrink: 0 }}>{c.flag}</span>
+                    <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {en ? c.en : c.th}
+                    </span>
+                    <span style={{
+                      flexShrink: 0, minWidth: 26, textAlign: 'center',
+                      fontSize: 11.5, fontWeight: 700, color: 'var(--primary)',
+                      background: 'var(--primary-light)', borderRadius: 20, padding: '1px 8px',
+                    }}>
+                      {c.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick, tours = [], supplierTours = [] }) {
   const [scrolled, setScrolled]     = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
   const [headerH, setHeaderH]       = useState(172);
   const closeTimer = useRef(null);
   const headerRef  = useRef(null);
+
+  // สร้างเมนูประเทศจากข้อมูลทัวร์จริง (ของเรา + ซัพพลายเออร์) พร้อมจำนวน
+  const outboundGroups = useMemo(
+    () => buildMenuGroups([...tours, ...supplierTours]),
+    [tours, supplierTours]
+  );
 
   useEffect(() => {
     const onS = () => setScrolled(window.scrollY > 8);
@@ -429,7 +534,11 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
                 </button>
                 {activeMenu === i && m.mega && (
                   <div onMouseEnter={keepMenu} onMouseLeave={closeMenu}>
-                    <MegaDropdown menu={m} navigate={navigate} onClose={() => setActiveMenu(null)} topOffset={headerH} lang={lang} />
+                    {m.dynamic === 'country' ? (
+                      <CountryMegaDropdown groups={outboundGroups} navigate={navigate} onClose={() => setActiveMenu(null)} topOffset={headerH} lang={lang} />
+                    ) : (
+                      <MegaDropdown menu={m} navigate={navigate} onClose={() => setActiveMenu(null)} topOffset={headerH} lang={lang} />
+                    )}
                   </div>
                 )}
               </div>
@@ -480,7 +589,34 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick 
               >
                 {lang === 'en' ? (m.labelEn || m.label) : m.label}
               </button>
-              {m.mega && (
+              {/* Mobile: dynamic country menu (ธง + จำนวน) */}
+              {m.dynamic === 'country' && (
+                <div style={{ background: '#fafafa', padding: '8px 20px 12px' }}>
+                  {outboundGroups.map((g) => (
+                    <div key={g.id} style={{ marginBottom: 12 }}>
+                      <button
+                        onClick={() => { navigate('tours', null, { tourType: 'outbound', continentLabel: lang === 'en' ? g.en : g.th, countries: g.countries.map(c => c.th) }); setMobileOpen(false); }}
+                        style={{ background: 'none', border: 'none', fontSize: 11.5, fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: 6, cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>
+                        {lang === 'en' ? g.en : g.th} ›
+                      </button>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 10px' }}>
+                        {g.countries.map(c => (
+                          <button key={c.code}
+                            onClick={() => { navigate('tours', null, { tourType: 'outbound', country: c.th }); setMobileOpen(false); }}
+                            style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'inherit', padding: '3px 0', textAlign: 'left' }}>
+                            <span style={{ fontSize: 15 }}>{c.flag}</span>
+                            <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lang === 'en' ? c.en : c.th}</span>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)' }}>{c.count}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Mobile: static mega (ทัวร์ในประเทศ / แพ็คเกจ ฯลฯ) */}
+              {Array.isArray(m.mega) && (
                 <div style={{ background: '#fafafa', padding: '8px 20px 12px' }}>
                   {m.mega.map((g, gi) => (
                     <div key={gi} style={{ marginBottom: 10 }}>
