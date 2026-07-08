@@ -19,33 +19,31 @@ function Icon({ name, size = 18, color }) {
 }
 
 // ─── SLIDES DATA ─────────────────────────────────────────────
+// แบนเนอร์ทั้งหมดออกแบบสำเร็จ (มีข้อความ/โลโก้ในตัว) → แสดงเต็มใบ ไม่ทับ overlay
 const SLIDES = [
   {
-    // แบนเนอร์ออกแบบสำเร็จ (มีข้อความ/โลโก้ในตัว) → แสดงเต็มใบ ไม่ทับ overlay
     plain: true,
     alt:   { th: 'WeCraft Travel — ให้สนุกทุกโลเคชั่น', en: 'WeCraft Travel — Fun in every location' },
     img:   '/hero-banner-1.jpg',
+    link:  'tours',
   },
   {
-    tag:   { th: '🔥 โปรพิเศษ',   en: '🔥 Hot Deal' },
-    title: { th: 'ยุโรป 9 ประเทศ 15 วัน', en: 'Europe 9 Countries 15 Days' },
-    sub:   { th: 'ฝรั่งเศส · อิตาลี · สวิตเซอร์แลนด์ · เยอรมัน', en: 'France · Italy · Switzerland · Germany' },
-    price: '79,900',
-    img: 'https://picsum.photos/seed/europe1/1400/520',
+    plain: true,
+    alt:   { th: 'เที่ยวญี่ปุ่น ซากุระบาน ครบทุกซีซั่น', en: 'Japan Tours' },
+    img:   '/hero-japan.svg',
+    link:  'tours', filters: { tourType: 'outbound', country: 'ญี่ปุ่น' },
   },
   {
-    tag:   { th: '✨ มาใหม่',      en: '✨ New' },
-    title: { th: 'ญี่ปุ่น โตเกียว โอซาก้า 7 วัน', en: 'Japan Tokyo Osaka 7 Days' },
-    sub:   { th: 'นิกโก้ · ฟูจิ · เกียวโต · นารา · ยูนิเวอร์แซล', en: 'Nikko · Fuji · Kyoto · Nara · Universal' },
-    price: '39,900',
-    img: 'https://picsum.photos/seed/japan1/1400/520',
+    plain: true,
+    alt:   { th: 'เที่ยวจีน มหัศจรรย์ สุดอลังการ', en: 'China Tours' },
+    img:   '/hero-china.svg',
+    link:  'tours', filters: { tourType: 'outbound', country: 'จีน' },
   },
   {
-    tag:   { th: '⭐ แนะนำ',      en: '⭐ Featured' },
-    title: { th: 'จีน เซี่ยงไฮ้ ปักกิ่ง 8 วัน', en: 'China Shanghai Beijing 8 Days' },
-    sub:   { th: 'กำแพงเมืองจีน · พระราชวังต้องห้าม · หยูหยวน', en: 'Great Wall · Forbidden City · Yu Garden' },
-    price: '29,900',
-    img: 'https://picsum.photos/seed/china1/1400/520',
+    plain: true,
+    alt:   { th: 'เที่ยวยุโรป หลายประเทศ ครบทุกเส้นทาง', en: 'Europe Tours' },
+    img:   '/hero-europe.svg',
+    link:  'tours', filters: { tourType: 'outbound', continent: 'Europe' },
   },
 ];
 
@@ -56,7 +54,7 @@ function HeroSection({ navigate, lang }) {
   const go = (n) => setIdx((n + SLIDES.length) % SLIDES.length);
 
   useEffect(() => {
-    timerRef.current = setInterval(() => setIdx(i => (i + 1) % SLIDES.length), 5000);
+    timerRef.current = setInterval(() => setIdx(i => (i + 1) % SLIDES.length), 10000);
     return () => clearInterval(timerRef.current);
   }, []);
 
@@ -69,8 +67,8 @@ function HeroSection({ navigate, lang }) {
         <div key={i} style={{ position: 'absolute', inset: 0, opacity: i === idx ? 1 : 0, transition: 'opacity .7s ease' }}>
           {sl.plain ? (
             <div
-              onClick={() => navigate('tours')}
-              style={{ position: 'absolute', inset: 0, cursor: 'pointer', background: '#dCEeF0' }}
+              onClick={() => navigate(sl.link || 'tours', null, sl.filters || null)}
+              style={{ position: 'absolute', inset: 0, cursor: 'pointer', background: '#e6f2f0' }}
             >
               {/* ขอบข้างเบลอโทนเดียวกัน เนียนบนจอกว้าง */}
               <img src={sl.img} alt="" aria-hidden="true"
