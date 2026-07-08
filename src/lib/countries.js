@@ -97,6 +97,11 @@ export const COUNTRIES = {
   FJ: { flag: '🇫🇯', th: 'ฟิจิ',          en: 'Fiji',         group: 'oceania' },
 };
 
+// URL รูปธงจริง (แสดงได้ทุก OS — Windows ไม่มี emoji ธง)
+export function flagUrl(code, size = '32x24') {
+  return `https://flagcdn.com/${size}/${String(code).toLowerCase()}.png`;
+}
+
 // จับคู่ th-name → code (เรียงชื่อยาวก่อน เพื่อ match ที่เฉพาะเจาะจงกว่า)
 const NAME_CODE_PAIRS = Object.entries(COUNTRIES)
   .map(([code, c]) => ({ code, th: c.th }))

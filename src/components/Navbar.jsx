@@ -1,5 +1,25 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { buildMenuGroups } from '../lib/countries.js';
+import { buildMenuGroups, flagUrl } from '../lib/countries.js';
+
+// ── รูปธงจริง (flagcdn) + fallback เป็น emoji ถ้าโหลดรูปไม่ได้ ────
+function Flag({ code, emoji, w = 22 }) {
+  const h = Math.round(w * 0.75);
+  return (
+    <img
+      src={flagUrl(code, '32x24')}
+      srcSet={`${flagUrl(code, '64x48')} 2x`}
+      width={w} height={h} alt="" loading="lazy" aria-hidden="true"
+      onError={e => {
+        // ถ้าโหลดรูปธงไม่ได้ → แทนที่ด้วย emoji
+        const span = document.createElement('span');
+        span.textContent = emoji || '';
+        span.style.fontSize = `${w * 0.8}px`;
+        e.currentTarget.replaceWith(span);
+      }}
+      style={{ flexShrink: 0, borderRadius: 3, objectFit: 'cover', boxShadow: '0 0 0 1px rgba(0,0,0,.08)' }}
+    />
+  );
+}
 
 const MENU = [
   {
@@ -264,7 +284,7 @@ function CountryMegaDropdown({ groups, navigate, onClose, topOffset, lang }) {
                     onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-light)'; e.currentTarget.style.color = 'var(--primary)'; }}
                     onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--ink-2)'; }}
                   >
-                    <span style={{ fontSize: 17, lineHeight: 1, flexShrink: 0 }}>{c.flag}</span>
+                    <Flag code={c.code} emoji={c.flag} w={22} />
                     <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {en ? c.en : c.th}
                     </span>
@@ -604,7 +624,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
                           <button key={c.code}
                             onClick={() => { navigate('tours', null, { tourType: 'outbound', country: c.th }); setMobileOpen(false); }}
                             style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'inherit', padding: '3px 0', textAlign: 'left' }}>
-                            <span style={{ fontSize: 15 }}>{c.flag}</span>
+                            <Flag code={c.code} emoji={c.flag} w={18} />
                             <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lang === 'en' ? c.en : c.th}</span>
                             <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)' }}>{c.count}</span>
                           </button>
