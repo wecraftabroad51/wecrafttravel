@@ -293,6 +293,14 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
   .layout-tour { grid-template-columns: 1fr 320px; }
 }
 
+/* ---- Navbar → hamburger ≤960px (กันเมนูเดสก์ท็อปล้นจอมือถือแนวนอน) ---- */
+@media (max-width: 960px) {
+  .nav-desktop { display: none !important; }
+  .nav-right-btn { display: none !important; }
+  .mobile-menu-btn { display: inline-flex !important; }
+  .navbar-topbar-phone { display: none !important; }
+}
+
 /* ---- Mobile: ≤768px ---- */
 @media (max-width: 768px) {
   .nav-desktop { display: none !important; }
