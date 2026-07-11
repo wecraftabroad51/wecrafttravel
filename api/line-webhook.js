@@ -26,6 +26,8 @@ const REGION = {
 const M_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 function fmtDate(s) { if (!s) return ''; const [y,m,d] = String(s).split('-').map(Number); if (!y||!m||!d) return s; return `${d} ${M_TH[m-1]} ${String(y+543).slice(-2)}`; }
 const baht = (n) => '฿' + Number(n || 0).toLocaleString();
+// encode URL รูป (บางเจ้ามีเว้นวรรคในชื่อไฟล์ → LINE ปฏิเสธ)
+const img = (u) => { try { return encodeURI(String(u || '').trim()); } catch { return ''; } };
 // ถอด HTML/entity ออกจากข้อความ (ไฮไลต์บางเจ้าเป็น HTML)
 function stripHtml(s) {
   return String(s || '')
@@ -122,7 +124,7 @@ async function submitBooking(st) {
 // ── การ์ดเลือกประเทศ (รูปสถานที่จริง + ธง) ───────────────────────
 function heroImg(image, iso) {
   return image
-    ? { type: 'image', url: image, size: 'full', aspectRatio: '20:13', aspectMode: 'cover' }
+    ? { type: 'image', url: img(image), size: 'full', aspectRatio: '20:13', aspectMode: 'cover' }
     : { type: 'image', url: `https://flagcdn.com/w400/${iso.toLowerCase()}.png`, size: 'full', aspectRatio: '20:13', aspectMode: 'fit', backgroundColor: '#f4f4f5' };
 }
 function countryBubble(iso, n, image) {
@@ -182,7 +184,7 @@ async function cityChooser(iso) {
 function tourBubble(t, iso) {
   return {
     type: 'bubble',
-    hero: { type: 'image', url: t.image, size: 'full', aspectRatio: '20:13', aspectMode: 'cover' },
+    hero: { type: 'image', url: img(t.image), size: 'full', aspectRatio: '20:13', aspectMode: 'cover' },
     body: { type: 'box', layout: 'vertical', spacing: 'sm', contents: [
       { type: 'text', text: t.name, weight: 'bold', size: 'sm', wrap: true, maxLines: 2 },
       { type: 'box', layout: 'baseline', contents: [
@@ -284,7 +286,7 @@ function renderDetail(t) {
     type: 'flex', altText: `รายละเอียด: ${t.name}`,
     contents: {
       type: 'bubble',
-      hero: { type: 'image', url: t.image, size: 'full', aspectRatio: '20:13', aspectMode: 'cover' },
+      hero: { type: 'image', url: img(t.image), size: 'full', aspectRatio: '20:13', aspectMode: 'cover' },
       body: { type: 'box', layout: 'vertical', spacing: 'sm', contents: body },
       footer: { type: 'box', layout: 'vertical', spacing: 'sm', contents: footerBtns },
     },
