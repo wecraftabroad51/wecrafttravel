@@ -64,7 +64,13 @@ const SB_URL = process.env.VITE_SUPABASE_URL, SB_KEY = process.env.VITE_SUPABASE
 const sbH = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' };
 async function getSession(uid) {
   if (!SB_URL || !uid) return null;
-  try { const a = await (await fetch(`${SB_URL}/rest/v1/line_sessions?user_id=eq.${encodeURIComponent(uid)}&select=*`, { headers: sbH })).json(); return Array.isArray(a) ? a[0] : null; } catch { return null; }
+  try {
+    const a = await (await fetch(`${SB_URL}/rest/v1/line_sessions?user_id=eq.${encodeURIComponent(uid)}&select=*`, { headers: sbH })).json();
+    const row = Array.isArray(a) ? a[0] : null;
+    // session ค้างเกิน 30 นาที → ทิ้ง (กันรหัส/เมนูโดนกินเข้า wizard)
+    if (row && row.created_at && Date.now() - new Date(row.created_at).getTime() > 30 * 60 * 1000) { await delSession(uid); return null; }
+    return row;
+  } catch { return null; }
 }
 async function setSession(uid, state) {
   if (!SB_URL || !uid) return;
@@ -207,12 +213,15 @@ async function tourDetail(iso, id) {
   if (!t) return { type: 'text', text: 'ไม่พบข้อมูลทัวร์นี้ ลองเลือกใหม่นะครับ 🙏' };
   return renderDetail(t);
 }
-// ค้นทัวร์จากรหัสโปรแกรม (พิมพ์รหัสในแชท)
+// ค้นทัวร์จากรหัสโปรแกรม (ยืดหยุ่น — ตัดขีด/เว้นวรรคออกเทียบ)
 async function findByCode(q) {
-  const Q = String(q).trim().toUpperCase();
+  const norm = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const Q = norm(q);
+  if (Q.length < 3) return null;
   const all = await fetchFeed('');
-  return all.find(t => (t.code || '').toUpperCase() === Q)
-    || (Q.length >= 4 ? all.find(t => (t.code || '').toUpperCase().includes(Q)) : null);
+  return all.find(t => norm(t.code) === Q)
+    || (Q.length >= 4 ? all.find(t => norm(t.code).includes(Q)) : null)
+    || (Q.length >= 4 ? all.find(t => norm(t.code) && Q.includes(norm(t.code))) : null);
 }
 function renderDetail(t) {
   const iso = t.country || '';
@@ -370,8 +379,8 @@ module.exports = async function handler(req, res) {
         if (hitIso) return reply(ev.replyToken, await cityChooser(hitIso));
         if (/จองจอยทัวร์|จอยทัวร์|ดูทัวร์|เลือกทัวร์|ทัวร์/i.test(text)) return reply(ev.replyToken, await countryChooser());
 
-        // 2) พิมพ์รหัสโปรแกรมทัวร์ → แสดงทัวร์นั้นเลย
-        if (/^[A-Za-z0-9][\w-]{3,}$/.test(text)) {
+        // 2) พิมพ์รหัสโปรแกรมทัวร์ → แสดงทัวร์นั้นเลย (ข้อความอังกฤษ/ตัวเลข ≥3)
+        if (!/[฀-๿]/.test(text) && text.replace(/\s/g, '').length >= 3) {
           const t = await findByCode(text);
           if (t) return reply(ev.replyToken, renderDetail(t));
           return reply(ev.replyToken, { type: 'text', text: `ไม่พบทัวร์รหัส "${text}" ครับ 🙏\nลองตรวจสอบรหัสอีกครั้ง หรือกดเมนู "จองจอยทัวร์" เพื่อเลือกทัวร์` });
