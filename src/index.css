@@ -260,6 +260,10 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
 /* Tour listing grid — 4 คอลัมน์ (ไล่ลง 3 → 2 → 1 บนจอเล็ก) */
 .tours-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
 
+/* ซ่อน scrollbar แถบ chips เลื่อนแนวนอน */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 .layout-hero { display: grid; grid-template-columns: 2fr 1fr; }
 .layout-half { display: grid; grid-template-columns: 1fr 1fr; }
 .layout-feat { display: grid; grid-template-columns: 1.4fr 1fr; }
@@ -322,7 +326,7 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
   .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-cols-5 { grid-template-columns: repeat(2, 1fr); }
   .grid-cols-6 { grid-template-columns: repeat(2, 1fr); }
-  .tours-grid { grid-template-columns: repeat(2, 1fr); }
+  .tours-grid { grid-template-columns: 1fr; }
   .layout-footer { grid-template-columns: 1fr; }
   .search-bar { grid-template-columns: 1fr; }
 }

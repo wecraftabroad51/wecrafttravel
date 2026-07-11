@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import TourCard from '../TourCard.jsx';
-import { resolveCountryCode } from '../../lib/countries.js';
+import { resolveCountryCode, COUNTRIES, flagUrl } from '../../lib/countries.js';
 
 function Icon({ name, size = 16 }) {
   const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round' };
@@ -223,6 +223,26 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
 
   const clearGroupFilter = () => { setGroupCountries(null); setGroupLabel(''); };
 
+  // นับจำนวนทัวร์ต่อประเทศ (เรียงมากไปน้อย) สำหรับแถบเลือกจุดหมาย
+  const countryChips = useMemo(() => {
+    const m = {};
+    for (const tr of allTours) { const c = resolveCountryCode(tr); if (c) m[c] = (m[c] || 0) + 1; }
+    return Object.entries(m)
+      .filter(([c]) => COUNTRIES[c])
+      .sort((a, b) => b[1] - a[1])
+      .map(([code, count]) => ({ code, count, ...COUNTRIES[code] }));
+  }, [allTours]);
+
+  const CATEGORIES = [
+    { value: 'all',         th: 'ทั้งหมด',        en: 'All' },
+    { value: 'hottour',     th: '🔥 โปรไฟไหม้',   en: '🔥 Hot' },
+    { value: 'premiumtour', th: 'พรีเมี่ยม',      en: 'Premium' },
+    { value: 'tourpackage', th: 'แพ็กเกจ',        en: 'Packages' },
+  ];
+
+  const activeCountry = country && COUNTRIES[country] ? COUNTRIES[country] : null;
+  const clearCountry  = () => setCountry('');
+
   return (
     <main className="page-enter">
       {/* Header */}
@@ -270,9 +290,84 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
         </div>
       )}
 
+      {/* ── Filter bar ────────────────────────────────────────── */}
+      <section style={{ background: 'var(--canvas)', borderBottom: '1px solid var(--line)', padding: '12px 0 10px', marginTop: 12 }}>
+        <div className="wrap-wide" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+          {/* Row 1: search + sort */}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, padding: '9px 14px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--card)' }}>
+              <Icon name="search" size={16} />
+              <input value={search} onChange={e => setSearch(e.target.value)}
+                placeholder={lang === 'th' ? 'ค้นหาประเทศ เมือง หรือรหัสทัวร์…' : 'Search country, city or code…'}
+                style={{ border: 'none', padding: 0, background: 'transparent', fontSize: 14, width: '100%', outline: 'none' }} />
+              {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>}
+            </div>
+            <select value={sort} onChange={e => setSort(e.target.value)}
+              style={{ padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--card)', fontSize: 13, cursor: 'pointer', flexShrink: 0 }}>
+              <option value="popular">{lang === 'th' ? 'ยอดนิยม' : 'Popular'}</option>
+              <option value="price-low">{lang === 'th' ? 'ราคาต่ำ→สูง' : 'Price ↑'}</option>
+              <option value="price-high">{lang === 'th' ? 'ราคาสูง→ต่ำ' : 'Price ↓'}</option>
+            </select>
+          </div>
+
+          {/* Row 2: category chips */}
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }} className="no-scrollbar">
+            {CATEGORIES.map(c => {
+              const on = tourType === c.value;
+              return (
+                <button key={c.value} onClick={() => setTourType(c.value)}
+                  style={{ flexShrink: 0, padding: '6px 14px', borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                    border: `1px solid ${on ? 'var(--ink)' : 'var(--line)'}`, background: on ? 'var(--ink)' : 'var(--card)', color: on ? 'var(--canvas)' : 'var(--ink-2)', whiteSpace: 'nowrap' }}>
+                  {lang === 'th' ? c.th : c.en}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Row 3: country quick-pick chips */}
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }} className="no-scrollbar">
+            <button onClick={clearCountry}
+              style={{ flexShrink: 0, padding: '7px 14px', borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                border: `1px solid ${!country ? 'var(--primary)' : 'var(--line)'}`, background: !country ? 'var(--primary)' : 'var(--card)', color: !country ? '#fff' : 'var(--ink-2)' }}>
+              {lang === 'th' ? 'ทุกประเทศ' : 'All'}
+            </button>
+            {countryChips.map(c => {
+              const on = country === c.code;
+              return (
+                <button key={c.code} onClick={() => setCountry(on ? '' : c.code)}
+                  style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '6px 13px', borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                    border: `1px solid ${on ? 'var(--primary)' : 'var(--line)'}`, background: on ? 'var(--primary-light)' : 'var(--card)', color: on ? 'var(--primary)' : 'var(--ink-2)' }}>
+                  <img src={flagUrl(c.code, '32x24')} alt="" width={20} height={15} loading="lazy"
+                    style={{ borderRadius: 3, objectFit: 'cover', boxShadow: '0 0 0 1px rgba(0,0,0,.08)' }} />
+                  {lang === 'th' ? c.th : c.en}
+                  <span style={{ fontSize: 11, fontWeight: 700, opacity: .65 }}>{c.count}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* Results */}
-      <section style={{ padding: '32px 0 80px' }}>
+      <section style={{ padding: '20px 0 80px' }}>
         <div className="wrap-wide">
+          {/* Result count */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
+            <div style={{ fontSize: 14, color: 'var(--muted)' }}>
+              {lang === 'th' ? 'พบ ' : 'Found '}
+              <span style={{ color: 'var(--ink)', fontWeight: 700 }}>{filtered.length}</span>
+              {lang === 'th' ? ' ทัวร์' : ' tours'}
+              {activeCountry && <span> · {lang === 'th' ? activeCountry.th : activeCountry.en}</span>}
+            </div>
+            {(activeCountry || tourType !== 'all' || search) && (
+              <button onClick={() => { setCountry(''); setTourType('all'); setSearch(''); clearGroupFilter(); }}
+                style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'inherit' }}>
+                {lang === 'th' ? '✕ ล้างตัวกรอง' : '✕ Clear filters'}
+              </button>
+            )}
+          </div>
+
           {filtered.length === 0 ? (
             <div style={{ padding: 80, textAlign: 'center', border: '1px dashed var(--line)', borderRadius: 'var(--r-lg)' }}>
               <div style={{ fontSize: 18, fontWeight: 600 }}>
