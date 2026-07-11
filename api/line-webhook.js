@@ -162,38 +162,77 @@ async function tourCarousel(iso, city, feed) {
   return { type: 'flex', altText: `ทัวร์${city || nameOf(iso)}`, contents: { type: 'carousel', contents: filtered.slice(0, 12).map(t => tourBubble(t, iso)) } };
 }
 
-// ── รายละเอียดทัวร์ (ในไลน์) ─────────────────────────────────────
+// ── รายละเอียดทัวร์ (ในไลน์ · ละเอียดเหมือนเว็บ) ─────────────────
+function infoRow(label, val) {
+  return { type: 'box', layout: 'baseline', spacing: 'sm', contents: [
+    { type: 'text', text: label, size: 'sm', color: '#999999', flex: 2 },
+    { type: 'text', text: String(val), size: 'sm', color: '#333333', flex: 4, weight: 'bold', wrap: true, align: 'end' } ] };
+}
 async function tourDetail(iso, id) {
   const list = await fetchFeed(iso);
   const t = list.find(x => x.id === id);
   if (!t) return { type: 'text', text: 'ไม่พบข้อมูลทัวร์นี้ ลองเลือกใหม่นะครับ 🙏' };
-  const info = [];
-  if (t.days) info.push({ type: 'box', layout: 'baseline', spacing: 'sm', contents: [
-    { type: 'text', text: 'จำนวนวัน', size: 'sm', color: '#999999', flex: 2 }, { type: 'text', text: `${t.days} วัน`, size: 'sm', color: '#333333', flex: 3, weight: 'bold' } ] });
-  if (t.airline) info.push({ type: 'box', layout: 'baseline', spacing: 'sm', contents: [
-    { type: 'text', text: 'สายการบิน', size: 'sm', color: '#999999', flex: 2 }, { type: 'text', text: t.airline, size: 'sm', color: '#333333', flex: 3, weight: 'bold', wrap: true } ] });
-  const deps = (t.deps || []).slice(0, 5).map(d => ({ type: 'box', layout: 'baseline', spacing: 'sm', contents: [
-    { type: 'text', text: fmtDate(d.date), size: 'sm', color: '#555555', flex: 3 },
-    { type: 'text', text: baht(d.price), size: 'sm', color: '#e2231a', weight: 'bold', align: 'end', flex: 2 } ] }));
+
   const body = [
     { type: 'text', text: t.name, weight: 'bold', size: 'md', wrap: true },
-    { type: 'box', layout: 'baseline', contents: [
-      { type: 'text', text: 'ราคาเริ่มต้น', size: 'sm', color: '#999999', flex: 0 },
-      { type: 'text', text: baht(t.price), size: 'xl', weight: 'bold', color: '#e2231a', align: 'end' } ] },
-    { type: 'separator', margin: 'md' },
-    ...info,
   ];
-  if (deps.length) { body.push({ type: 'text', text: 'รอบเดินทาง / ราคา', size: 'sm', weight: 'bold', color: '#0f9d8f', margin: 'md' }, ...deps); }
+  // แถวรหัส + โรงแรม
+  const tags = [];
+  if (t.code) tags.push({ type: 'text', text: t.code, size: 'xs', color: '#0f9d8f', flex: 0 });
+  if (t.hotel) tags.push({ type: 'text', text: `${'⭐'.repeat(Math.min(5, t.hotel))} ${t.hotel} ดาว`, size: 'xs', color: '#f5a623', align: 'end' });
+  if (tags.length) body.push({ type: 'box', layout: 'baseline', spacing: 'sm', margin: 'sm', contents: tags });
+
+  // ราคาเริ่มต้น
+  body.push({ type: 'box', layout: 'baseline', margin: 'md', contents: [
+    { type: 'text', text: 'ราคาเริ่มต้น', size: 'sm', color: '#999999', flex: 0 },
+    { type: 'text', text: `${baht(t.price)} /ท่าน`, size: 'xl', weight: 'bold', color: '#e2231a', align: 'end' } ] });
+  body.push({ type: 'separator', margin: 'md' });
+
+  // ข้อมูลทั่วไป
+  if (t.days) body.push(infoRow('ระยะเวลา', `${t.days} วัน${t.night ? ` ${t.night} คืน` : ''}`));
+  if (t.airline) body.push(infoRow('สายการบิน', t.airline));
+  if (t.deps?.length) body.push(infoRow('รอบเดินทาง', `${t.deps.length}+ รอบ`));
+
+  // ไฮไลต์ (ถ้ามี)
+  if (t.highlight) {
+    const hl = String(t.highlight).replace(/\s*,\s*/g, ' · ').slice(0, 160);
+    body.push({ type: 'separator', margin: 'md' },
+      { type: 'text', text: '✨ ไฮไลต์', size: 'sm', weight: 'bold', color: '#0f9d8f', margin: 'md' },
+      { type: 'text', text: hl, size: 'xs', color: '#555555', wrap: true });
+  }
+
+  // ตารางรอบเดินทาง + ราคา (ผู้ใหญ่/เด็ก/พักเดี่ยว/ที่นั่ง)
+  if (t.deps?.length) {
+    body.push({ type: 'separator', margin: 'md' },
+      { type: 'text', text: '📅 รอบเดินทาง / ราคา', size: 'sm', weight: 'bold', color: '#0f9d8f', margin: 'md' });
+    for (const d of t.deps.slice(0, 6)) {
+      const sub = [];
+      if (d.child) sub.push(`เด็ก ${baht(d.child)}`);
+      if (d.single) sub.push(`พักเดี่ยว +${baht(d.single)}`);
+      if (d.seat != null) sub.push(`ว่าง ${d.seat}`);
+      body.push({ type: 'box', layout: 'vertical', margin: 'sm', spacing: 'none', contents: [
+        { type: 'box', layout: 'baseline', contents: [
+          { type: 'text', text: fmtDate(d.date) + (d.ret ? `-${fmtDate(d.ret)}` : ''), size: 'sm', color: '#333333', flex: 5, weight: 'bold' },
+          { type: 'text', text: baht(d.adult), size: 'sm', color: '#e2231a', weight: 'bold', align: 'end', flex: 3 } ] },
+        sub.length ? { type: 'text', text: sub.join(' · '), size: 'xxs', color: '#999999' } : { type: 'filler' },
+      ] });
+    }
+    body.push({ type: 'text', text: 'ราคาผู้ใหญ่ (พักคู่) · ภาษาไทย', size: 'xxs', color: '#bbbbbb', margin: 'sm' });
+  }
+
+  const footerBtns = [
+    { type: 'button', style: 'primary', color: '#e2231a', height: 'sm', action: { type: 'postback', label: 'สนใจจองทัวร์นี้', data: pb({ s: 'book', iso, id }), displayText: '🎫 สนใจจองทัวร์นี้' } },
+  ];
+  if (t.pdf) footerBtns.push({ type: 'button', style: 'secondary', height: 'sm', action: { type: 'uri', label: 'โปรแกรมเต็ม (PDF)', uri: t.pdf } });
+  footerBtns.push({ type: 'button', style: 'link', height: 'sm', action: { type: 'postback', label: '← ดูทัวร์อื่น', data: pb({ s: 'tours', iso, city: '' }), displayText: 'ดูทัวร์อื่น' } });
+
   return {
     type: 'flex', altText: `รายละเอียด: ${t.name}`,
     contents: {
       type: 'bubble',
       hero: { type: 'image', url: t.image, size: 'full', aspectRatio: '20:13', aspectMode: 'cover' },
       body: { type: 'box', layout: 'vertical', spacing: 'sm', contents: body },
-      footer: { type: 'box', layout: 'vertical', spacing: 'sm', contents: [
-        { type: 'button', style: 'primary', color: '#e2231a', height: 'sm', action: { type: 'postback', label: 'สนใจจองทัวร์นี้', data: pb({ s: 'book', iso, id }), displayText: '🎫 สนใจจองทัวร์นี้' } },
-        { type: 'button', style: 'secondary', height: 'sm', action: { type: 'postback', label: '← ดูทัวร์อื่น', data: pb({ s: 'tours', iso, city: '' }), displayText: 'ดูทัวร์อื่น' } },
-      ] },
+      footer: { type: 'box', layout: 'vertical', spacing: 'sm', contents: footerBtns },
     },
   };
 }
