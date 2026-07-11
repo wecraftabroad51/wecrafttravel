@@ -242,7 +242,7 @@ function CountryMegaDropdown({ groups, navigate, onClose, topOffset, lang }) {
                 onClick={() => {
                   navigate('tours', null, {
                     continentLabel: en ? g.en : g.th,
-                    countries: g.countries.map(c => c.th),
+                    countries: g.countries.map(c => c.code),
                   });
                   onClose();
                 }}
@@ -270,7 +270,7 @@ function CountryMegaDropdown({ groups, navigate, onClose, topOffset, lang }) {
                 {g.countries.map(c => (
                   <button key={c.code}
                     onClick={() => {
-                      navigate('tours', null, { country: c.th });
+                      navigate('tours', null, { country: c.code });
                       onClose();
                     }}
                     style={{
@@ -614,14 +614,14 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
                   {outboundGroups.map((g) => (
                     <div key={g.id} style={{ marginBottom: 12 }}>
                       <button
-                        onClick={() => { navigate('tours', null, { continentLabel: lang === 'en' ? g.en : g.th, countries: g.countries.map(c => c.th) }); setMobileOpen(false); }}
+                        onClick={() => { navigate('tours', null, { continentLabel: lang === 'en' ? g.en : g.th, countries: g.countries.map(c => c.code) }); setMobileOpen(false); }}
                         style={{ background: 'none', border: 'none', fontSize: 11.5, fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: 6, cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>
                         {lang === 'en' ? g.en : g.th} ›
                       </button>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 10px' }}>
                         {g.countries.map(c => (
                           <button key={c.code}
-                            onClick={() => { navigate('tours', null, { country: c.th }); setMobileOpen(false); }}
+                            onClick={() => { navigate('tours', null, { country: c.code }); setMobileOpen(false); }}
                             style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'inherit', padding: '3px 0', textAlign: 'left' }}>
                             <Flag code={c.code} emoji={c.flag} w={18} />
                             <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lang === 'en' ? c.en : c.th}</span>

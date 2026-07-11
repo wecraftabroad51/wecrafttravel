@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import TourCard from '../TourCard.jsx';
+import { resolveCountryCode } from '../../lib/countries.js';
 
 function Icon({ name, size = 16 }) {
   const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round' };
@@ -190,9 +191,15 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
       }
     }
     if (continent !== 'All') list = list.filter(tr => tr.continent === continent);
-    if (country) list = list.filter(tr => tr.country === country || t(tr.destination)?.includes(country));
+    // country อาจเป็น ISO code (จากเมนู) หรือชื่อไทย (จากหน้าแรก) — รองรับทั้งคู่
+    if (country) list = list.filter(tr =>
+      resolveCountryCode(tr) === country ||
+      tr.country === country ||
+      t(tr.destination)?.includes(country)
+    );
     if (groupCountries?.length) {
       list = list.filter(tr =>
+        groupCountries.includes(resolveCountryCode(tr)) ||
         groupCountries.includes(tr.country) ||
         groupCountries.some(gc => t(tr.destination)?.includes(gc))
       );
