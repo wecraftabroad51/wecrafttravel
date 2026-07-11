@@ -84,11 +84,22 @@ const STEPS = {
   round: { next: 'email', ask: '(4/5) สนใจเดินทาง 📅 รอบ/เดือนไหนครับ? (เช่น ธันวาคม)' },
   email: { next: 'confirm', ask: '(5/5) 📧 อีเมล (ถ้าไม่มี พิมพ์ - เพื่อข้าม)' },
 };
+// (4/5) คำถามรอบเดินทาง — ดึงรอบจริงมาเป็นปุ่มให้กด
+async function roundQuestion(st) {
+  const t = (await fetchFeed(st.tour_country)).find(x => x.id === st.tour_id);
+  const dates = [...new Set((t?.deps || []).map(d => fmtDate(d.date)).filter(Boolean))].slice(0, 11);
+  const items = dates.map(dt => ({ type: 'action', action: { type: 'message', label: dt.slice(0, 20), text: dt } }));
+  items.push({ type: 'action', action: { type: 'message', label: 'เดือนอื่น/สอบถาม', text: 'ยังไม่ระบุ' } });
+  return { type: 'text', text: '(4/5) เลือก 📅 รอบเดินทางที่สะดวกครับ (แตะเลือกได้เลย)', quickReply: { items: items.slice(0, 13) } };
+}
+
 async function submitBooking(st) {
+  let via = 'LINE OA';
+  if (st.uid) { const dn = await getName(st.uid); via = `LINE OA${dn ? ` (${dn})` : ''} · userId:${st.uid}`; }
   const formData = {
     _type: 'join-tour', fullName: st.name, phone: st.phone, email: st.email || '',
     tourCode: st.tour_id || '', tourName: st.tour_name || '', adults: st.pax || '',
-    note: `รอบ/เดือน: ${st.round || '-'} | ช่องทาง: LINE OA`,
+    note: `รอบ/เดือน: ${st.round || '-'} | ช่องทาง: ${via}`,
   };
   const html = `<h3>🌏 จองจอยทัวร์ (ผ่าน LINE OA)</h3>
     <p><b>ทัวร์:</b> ${st.tour_name || '-'}<br>
@@ -102,36 +113,45 @@ async function submitBooking(st) {
   } catch { return null; }
 }
 
-// ── การ์ดเลือกประเทศ (ธง) ────────────────────────────────────────
-function countryBubble(iso, n) {
+// ── การ์ดเลือกประเทศ (รูปสถานที่จริง + ธง) ───────────────────────
+function heroImg(image, iso) {
+  return image
+    ? { type: 'image', url: image, size: 'full', aspectRatio: '20:13', aspectMode: 'cover' }
+    : { type: 'image', url: `https://flagcdn.com/w400/${iso.toLowerCase()}.png`, size: 'full', aspectRatio: '20:13', aspectMode: 'fit', backgroundColor: '#f4f4f5' };
+}
+function countryBubble(iso, n, image) {
   return {
     type: 'bubble',
-    hero: { type: 'image', url: `https://flagcdn.com/w400/${iso.toLowerCase()}.png`, size: 'full', aspectRatio: '20:13', aspectMode: 'fit', backgroundColor: '#f4f4f5' },
+    hero: heroImg(image, iso),
     body: { type: 'box', layout: 'vertical', spacing: 'xs', contents: [
-      { type: 'text', text: nameOf(iso), weight: 'bold', size: 'lg', align: 'center', color: '#1a2b3c' },
-      { type: 'text', text: `${n} โปรแกรม`, size: 'sm', color: '#999999', align: 'center' },
+      { type: 'box', layout: 'baseline', spacing: 'sm', contents: [
+        { type: 'icon', url: `https://flagcdn.com/w40/${iso.toLowerCase()}.png`, size: 'lg' },
+        { type: 'text', text: nameOf(iso), weight: 'bold', size: 'lg', color: '#1a2b3c', flex: 0 },
+      ] },
+      { type: 'text', text: `${n} โปรแกรม`, size: 'sm', color: '#999999' },
     ] },
     footer: { type: 'box', layout: 'vertical', contents: [
-      { type: 'button', style: 'primary', color: '#0f9d8f', height: 'sm', action: { type: 'postback', label: 'เลือก', data: pb({ s: 'country', iso }), displayText: `ทัวร์${nameOf(iso)}` } },
+      { type: 'button', style: 'primary', color: '#0f9d8f', height: 'sm', action: { type: 'postback', label: 'ดูทัวร์', data: pb({ s: 'country', iso }), displayText: `ทัวร์${nameOf(iso)}` } },
     ] },
   };
 }
 async function countryChooser() {
   const all = await fetchFeed('');
-  const counts = {}; all.forEach(t => t.country && (counts[t.country] = (counts[t.country] || 0) + 1));
-  const list = Object.entries(counts).filter(([iso, n]) => CODE_TH[iso] && n > 0).sort((a, b) => b[1] - a[1]).slice(0, 12);
+  const map = {};
+  for (const t of all) { if (!t.country) continue; if (!map[t.country]) map[t.country] = { n: 0, image: '' }; map[t.country].n++; if (!map[t.country].image && t.image) map[t.country].image = t.image; }
+  const list = Object.entries(map).filter(([iso, v]) => CODE_TH[iso] && v.n > 0).sort((a, b) => b[1].n - a[1].n).slice(0, 12);
   if (!list.length) return { type: 'text', text: 'ขออภัย ตอนนี้ยังไม่มีทัวร์ ลองใหม่อีกครั้งนะครับ 🙏' };
-  return { type: 'flex', altText: 'เลือกประเทศที่อยากไป 🌏', contents: { type: 'carousel', contents: list.map(([iso, n]) => countryBubble(iso, n)) } };
+  return { type: 'flex', altText: 'เลือกประเทศที่อยากไป 🌏', contents: { type: 'carousel', contents: list.map(([iso, v]) => countryBubble(iso, v.n, v.image)) } };
 }
 
 // ── การ์ดเลือกเมือง ──────────────────────────────────────────────
-function cityBubble(iso, label, n, city) {
+function cityBubble(iso, label, n, city, image) {
   return {
     type: 'bubble',
-    body: { type: 'box', layout: 'vertical', spacing: 'md', justifyContent: 'center', contents: [
-      { type: 'text', text: '📍', size: 'xxl', align: 'center' },
-      { type: 'text', text: label, weight: 'bold', size: 'lg', align: 'center', color: '#1a2b3c', wrap: true },
-      { type: 'text', text: `${n} โปรแกรม`, size: 'sm', color: '#999999', align: 'center' },
+    hero: heroImg(image, iso),
+    body: { type: 'box', layout: 'vertical', spacing: 'xs', contents: [
+      { type: 'text', text: `📍 ${label}`, weight: 'bold', size: 'md', color: '#1a2b3c', wrap: true },
+      { type: 'text', text: `${n} โปรแกรม`, size: 'sm', color: '#999999' },
     ] },
     footer: { type: 'box', layout: 'vertical', contents: [
       { type: 'button', style: 'primary', color: '#0f9d8f', height: 'sm', action: { type: 'postback', label: 'ดูทัวร์', data: pb({ s: 'tours', iso, city }), displayText: `ทัวร์${label}` } },
@@ -142,10 +162,13 @@ async function cityChooser(iso) {
   const feed = await fetchFeed(iso);
   const kws = REGION[iso];
   let cities = [];
-  if (kws) cities = kws.map(kw => ({ kw, n: feed.filter(t => (t.name || '').includes(kw)).length })).filter(x => x.n > 0).sort((a, b) => b.n - a.n).slice(0, 11);
+  if (kws) cities = kws.map(kw => {
+    const matches = feed.filter(t => (t.name || '').includes(kw));
+    return { kw, n: matches.length, image: matches[0]?.image || '' };
+  }).filter(x => x.n > 0).sort((a, b) => b.n - a.n).slice(0, 11);
   if (!cities.length) return tourCarousel(iso, '', feed);   // ไม่มีเมืองย่อย → ไปทัวร์เลย
-  const bubbles = [cityBubble(iso, `ทัวร์${nameOf(iso)}ทั้งหมด`, feed.length, '')];
-  cities.forEach(c => bubbles.push(cityBubble(iso, c.kw, c.n, c.kw)));
+  const bubbles = [cityBubble(iso, `ทัวร์${nameOf(iso)}ทั้งหมด`, feed.length, '', feed[0]?.image || '')];
+  cities.forEach(c => bubbles.push(cityBubble(iso, c.kw, c.n, c.kw, c.image)));
   return { type: 'flex', altText: `เลือกเมืองใน${nameOf(iso)}`, contents: { type: 'carousel', contents: bubbles.slice(0, 12) } };
 }
 
@@ -264,7 +287,7 @@ async function handleBook(ev, iso, id) {
   const list = await fetchFeed(iso);
   const t = list.find(x => x.id === id);
   const uid = ev.source?.userId || '';
-  await setSession(uid, { tour_id: t?.id || id, tour_name: t?.name || '', tour_country: iso, step: 'name' });
+  await setSession(uid, { tour_id: t?.id || id, tour_name: t?.name || '', tour_country: iso, step: 'name', uid });
   await reply(ev.replyToken, [
     { type: 'text', text: `🎫 ${t?.name || ''}\nราคาเริ่มต้น ${baht(t?.price)}\n\nเริ่มจองเลยครับ 😊 (พิมพ์ "ยกเลิก" ได้ตลอด)` },
     { type: 'text', text: STEPS.name.ask },
@@ -315,22 +338,29 @@ module.exports = async function handler(req, res) {
           else if (st.step === 'round') { st.round = text; }
           else if (st.step === 'email') { st.email = (text.trim() === '-') ? '' : text.trim(); }
           else if (st.step === 'confirm') {
+            if (/^\s*แก้ไข\s*$/.test(text)) { st.step = 'name'; await setSession(uid, st); return reply(ev.replyToken, { type: 'text', text: 'เริ่มกรอกใหม่ครับ\n\n' + STEPS.name.ask }); }
             if (/ยืนยัน|confirm|โอเค|ตกลง|ok/i.test(text)) {
               const seq = await submitBooking(st);
               await delSession(uid);
               return reply(ev.replyToken, { type: 'text',
                 text: `✅ จองเรียบร้อยแล้วครับ!${seq ? `\nเลขที่จอง: ${seq}` : ''}\n\n🎫 ${st.tour_name}\n👤 ${st.name} · ${st.phone}\n\nทีมงานได้รับแจ้งทางอีเมล + LINE แล้ว จะติดต่อกลับโดยเร็วที่สุดครับ\nขอบคุณที่ใช้บริการ WeCraft Travel 🙏` });
             }
-            return reply(ev.replyToken, { type: 'text', text: 'พิมพ์ "ยืนยัน" เพื่อจอง หรือ "ยกเลิก" ครับ 🙏' });
+            return reply(ev.replyToken, { type: 'text', text: 'แตะ "✅ ยืนยันจอง" เพื่อจอง หรือ "แก้ไข"/"ยกเลิก" ครับ 🙏' });
           }
 
           // ── ถามคำถามถัดไป / สรุป ──
           const stepInfo = STEPS[st.step];
           st.step = stepInfo ? stepInfo.next : 'confirm';
           await setSession(uid, st);
+          if (st.step === 'round') return reply(ev.replyToken, await roundQuestion(st));
           if (st.step === 'confirm') {
             return reply(ev.replyToken, { type: 'text',
-              text: `📋 ตรวจสอบข้อมูลจอง:\n\n🎫 ${st.tour_name}\n👤 ชื่อ: ${st.name}\n📱 เบอร์: ${st.phone}\n👥 จำนวน: ${st.pax || '-'}\n📅 รอบ/เดือน: ${st.round || '-'}\n📧 อีเมล: ${st.email || '-'}\n\nถูกต้องไหมครับ? พิมพ์ "ยืนยัน" เพื่อจอง (หรือ "ยกเลิก")` });
+              text: `📋 ตรวจสอบข้อมูลจอง:\n\n🎫 ${st.tour_name}\n👤 ชื่อ: ${st.name}\n📱 เบอร์: ${st.phone}\n👥 จำนวน: ${st.pax || '-'}\n📅 รอบ/เดือน: ${st.round || '-'}\n📧 อีเมล: ${st.email || '-'}\n\nถูกต้องไหมครับ?`,
+              quickReply: { items: [
+                { type: 'action', action: { type: 'message', label: '✅ ยืนยันจอง', text: 'ยืนยัน' } },
+                { type: 'action', action: { type: 'message', label: '✏️ แก้ไข', text: 'แก้ไข' } },
+                { type: 'action', action: { type: 'message', label: '❌ ยกเลิก', text: 'ยกเลิก' } },
+              ] } });
           }
           return reply(ev.replyToken, { type: 'text', text: STEPS[st.step].ask });
         }
