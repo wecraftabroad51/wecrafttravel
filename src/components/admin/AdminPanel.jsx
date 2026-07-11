@@ -628,6 +628,26 @@ export default function AdminPanel(props) {
 }
 
 // ===== ADMINS (super admin only) =====
+// ตารางสิทธิ์: super = ทำได้ทุกอย่าง · admin = ทุกอย่างยกเว้นจัดการผู้ดูแลระบบ
+const PERMISSIONS = [
+  { feature: 'ภาพรวม (Dashboard)',      super: true,  admin: true  },
+  { feature: 'จัดการทัวร์ของเรา',        super: true,  admin: true  },
+  { feature: 'ทัวร์ซัพพลายเออร์',         super: true,  admin: true  },
+  { feature: 'โปรโมชั่น',                super: true,  admin: true  },
+  { feature: 'รีวิว',                    super: true,  admin: true  },
+  { feature: 'บทความ',                   super: true,  admin: true  },
+  { feature: 'คำถามที่พบบ่อย (FAQ)',      super: true,  admin: true  },
+  { feature: 'การจอง',                   super: true,  admin: true  },
+  { feature: 'ตั้งค่าเว็บไซต์',           super: true,  admin: true  },
+  { feature: 'จัดการผู้ดูแลระบบ (Admins)', super: true,  admin: false },
+];
+
+function PermsCell({ ok }) {
+  return ok
+    ? <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 text-green-600"><Check className="w-4 h-4" /></span>
+    : <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-300"><X className="w-4 h-4" /></span>;
+}
+
 function AdminsSection({ currentEmail }) {
   const [admins, setAdmins]   = useState([]);
   const [loading, setLoading] = useState(true);
@@ -730,6 +750,40 @@ function AdminsSection({ currentEmail }) {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* ── ตารางสิทธิ์การใช้งาน ─────────────────────────────── */}
+      <div className="mt-8 max-w-2xl">
+        <div className="flex items-center gap-2 mb-3 text-slate-700 font-semibold">
+          <Shield className="w-4 h-4" /> ตารางสิทธิ์การใช้งาน
+        </div>
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600">
+                <th className="px-4 py-3 text-left text-xs uppercase tracking-wide">เมนู / สิทธิ์</th>
+                <th className="px-4 py-3 text-center text-xs">
+                  <span className="inline-block bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-bold">Super Admin</span>
+                </th>
+                <th className="px-4 py-3 text-center text-xs">
+                  <span className="inline-block bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">Admin</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {PERMISSIONS.map(p => (
+                <tr key={p.feature} className="border-b border-slate-100 last:border-none hover:bg-slate-50">
+                  <td className="px-4 py-2.5 text-slate-700">{p.feature}</td>
+                  <td className="px-4 py-2.5 text-center"><PermsCell ok={p.super} /></td>
+                  <td className="px-4 py-2.5 text-center"><PermsCell ok={p.admin} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-xs text-slate-400 mt-3">
+          <strong>Super Admin</strong> จัดการผู้ดูแลระบบได้ (เพิ่ม/ลบสิทธิ์) · <strong>Admin</strong> เข้าถึงทุกเมนูจัดการเนื้อหาได้ ยกเว้นการจัดการผู้ดูแลระบบ
+        </p>
       </div>
     </div>
   );
