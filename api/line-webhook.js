@@ -81,18 +81,26 @@ module.exports = async function handler(req, res) {
   await Promise.all(events.map(async (ev) => {
     try {
       if (ev.type === 'follow') {
-        await reply(ev.replyToken, [
-          { type: 'text', text: 'ยินดีต้อนรับสู่ WeCraft Travel 🎉\nทัวร์คุณภาพ ครบทุกเส้นทาง' },
-          countryChooser('อยากไปเที่ยวประเทศไหนดีครับ? 😊 เลือกได้เลย 👇'),
-        ]);
+        // แอดเพื่อนใหม่ — ทักทายเฉยๆ ไม่เด้งปุ่ม (ให้กดเมนู "จองจอยทัวร์" เอง)
+        await reply(ev.replyToken, {
+          type: 'text',
+          text: 'ยินดีต้อนรับสู่ WeCraft Travel 🎉\nทัวร์คุณภาพ ครบทุกเส้นทาง\n\nกดเมนู "จองจอยทัวร์" ด้านล่างเพื่อเลือกทัวร์ได้เลยครับ 😊',
+        });
         return;
       }
       if (ev.type === 'message' && ev.message?.type === 'text') {
         const text = (ev.message.text || '').trim();
         const hit = COUNTRIES.find(c => text.includes(c.th));
-        if (hit) await reply(ev.replyToken, await carouselForCountry(hit.iso, hit.th));
-        else if (/ทัวร์|เมนู|ดูทัวร์|สวัสดี|hello|hi|เริ่ม/i.test(text)) await reply(ev.replyToken, countryChooser('อยากไปเที่ยวประเทศไหนดีครับ? 😊 เลือกได้เลย 👇'));
-        else await reply(ev.replyToken, countryChooser('พิมพ์ชื่อประเทศ หรือเลือกจากปุ่มด้านล่างได้เลยครับ 👇'));
+        // 1) เลือกประเทศแล้ว → ส่งการ์ด
+        if (hit) {
+          await reply(ev.replyToken, await carouselForCountry(hit.iso, hit.th));
+        // 2) กด "จองจอยทัวร์" (หรือคีย์เวิร์ดทัวร์) → ขึ้นปุ่มเลือกประเทศ
+        } else if (/จองจอยทัวร์|จอยทัวร์|ดูทัวร์|เลือกทัวร์|ทัวร์/i.test(text)) {
+          await reply(ev.replyToken, countryChooser('อยากไปเที่ยวประเทศไหนดีครับ? 😊 เลือกได้เลย 👇'));
+        // 3) ข้อความอื่น → ตอบสั้นๆ ไม่เด้งปุ่ม
+        } else {
+          await reply(ev.replyToken, { type: 'text', text: 'สนใจดูทัวร์ กดเมนู "จองจอยทัวร์" ด้านล่างได้เลยครับ 😊' });
+        }
       }
     } catch (e) { console.error('[LINE] event error:', e.message); }
   }));
