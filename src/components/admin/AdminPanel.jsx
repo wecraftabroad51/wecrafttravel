@@ -1045,41 +1045,43 @@ function SupplierTourModal({ tour, fmt, onClose }) {
 
   return (
     <Modal title={`รายละเอียดทัวร์ · ${tour._sourceName || 'ซัพพลายเออร์'}`} onClose={onClose} xl>
-      <div className="space-y-5">
-        {/* Banner — แสดงเต็มไม่บิดสัดส่วน */}
-        {tour.image && (
-          <div className="w-full rounded-xl border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center" style={{ height: 240 }}>
-            <img src={tour.image} alt="" className="max-w-full max-h-full object-contain" />
-          </div>
-        )}
-
-        {/* Name */}
-        <div>
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className="bg-slate-800 text-white text-xs font-bold px-2 py-0.5 rounded-full">{tour._sourceName}</span>
-            {tour.code && <span className="font-mono text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-600">{tour.code}</span>}
-            <span className="inline-flex items-center gap-1 text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full">🔒 อ่านอย่างเดียว (แก้ไขไม่ได้)</span>
-          </div>
-          <h3 className="text-lg font-bold text-slate-800 leading-snug">{tour.name?.th || tour.name?.en}</h3>
-        </div>
-
-        {/* Info grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {info.map(x => (
-            <div key={x.label} className="bg-slate-50 rounded-xl px-3 py-2 border border-slate-100">
-              <div className="text-[11px] text-slate-400 font-semibold uppercase tracking-wide">{x.label}</div>
-              <div className={`text-sm font-bold ${x.red ? 'text-red-600' : 'text-slate-700'}`}>{x.val}</div>
+      <div className="space-y-6">
+        {/* ── หัว: รูปซ้าย · รายละเอียดขวา ─────────────────────── */}
+        <div className="flex flex-col md:flex-row gap-5">
+          {/* รูป (ซ้าย) */}
+          {tour.image && (
+            <div className="md:w-72 md:shrink-0 rounded-xl border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center" style={{ minHeight: 180 }}>
+              <img src={tour.image} alt="" className="w-full h-full object-contain" style={{ maxHeight: 240 }} />
             </div>
-          ))}
-        </div>
+          )}
 
-        {/* PDF */}
-        {tour.pdfUrl && (
-          <a href={tour.pdfUrl} target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold px-4 py-2 rounded-xl">
-            📄 ดาวน์โหลดโปรแกรม (PDF)
-          </a>
-        )}
+          {/* รายละเอียด (ขวา) */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-2">
+              <span className="bg-slate-800 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">{tour._sourceName}</span>
+              {tour.code && <span className="font-mono text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-500">{tour.code}</span>}
+              <span className="inline-flex items-center gap-1 text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full">อ่านอย่างเดียว</span>
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 leading-snug mb-4">{tour.name?.th || tour.name?.en}</h3>
+
+            {/* Info list (แนวขวา ประหยัดพื้นที่) */}
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+              {info.map(x => (
+                <div key={x.label} className="border-b border-slate-100 pb-2">
+                  <div className="text-[11px] text-slate-400 font-semibold uppercase tracking-wide mb-0.5">{x.label}</div>
+                  <div className={`text-sm font-semibold ${x.red ? 'text-red-600' : 'text-slate-700'}`}>{x.val}</div>
+                </div>
+              ))}
+            </div>
+
+            {tour.pdfUrl && (
+              <a href={tour.pdfUrl} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 mt-4 bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold px-4 py-2 rounded-lg">
+                ดาวน์โหลดโปรแกรม (PDF)
+              </a>
+            )}
+          </div>
+        </div>
 
         {/* Departures */}
         {tour.departures?.length > 0 && (
@@ -1127,25 +1129,45 @@ function SupplierTourModal({ tour, fmt, onClose }) {
 }
 
 // ===== DASHBOARD =====
+const STAT_TINTS = {
+  teal:   { bg: 'bg-teal-50',   fg: 'text-teal-600',   bar: 'bg-teal-500' },
+  blue:   { bg: 'bg-blue-50',   fg: 'text-blue-600',   bar: 'bg-blue-500' },
+  indigo: { bg: 'bg-indigo-50', fg: 'text-indigo-600', bar: 'bg-indigo-500' },
+  amber:  { bg: 'bg-amber-50',  fg: 'text-amber-600',  bar: 'bg-amber-500' },
+  red:    { bg: 'bg-red-50',    fg: 'text-red-600',    bar: 'bg-red-500' },
+};
+
 function DashboardSection({ tours, supplierTours = [], articles, bookings, messages, reviews }) {
+  const pendingReviews = reviews.filter(r => !r.approved).length;
+  const newBookings    = messages.filter(m => !m.read).length;
   const stats = [
-    { label: 'ทัวร์ของเรา',    value: tours.length,                             color: 'bg-teal-500' },
-    { label: 'ทัวร์ซัพพลายเออร์', value: supplierTours.length,                 color: 'bg-blue-500' },
-    { label: 'การจองทั้งหมด',  value: messages.length,                          color: 'bg-indigo-500' },
-    { label: 'รีวิวรอ',        value: reviews.filter(r => !r.approved).length,  color: 'bg-amber-500' },
-    { label: 'การจองใหม่',     value: messages.filter(m => !m.read).length,     color: 'bg-red-500' },
+    { label: 'ทัวร์ของเรา',       value: tours.length,        icon: Globe,     tint: 'teal',   sub: 'รายการที่สร้างเอง' },
+    { label: 'ทัวร์ซัพพลายเออร์', value: supplierTours.length, icon: Building2, tint: 'blue',   sub: 'ดึงจาก API 5 เจ้า' },
+    { label: 'การจองทั้งหมด',     value: messages.length,      icon: Plane,     tint: 'indigo', sub: 'สะสมทั้งหมด' },
+    { label: 'รีวิวรออนุมัติ',     value: pendingReviews,       icon: Star,      tint: 'amber',  sub: 'รอตรวจสอบ' },
+    { label: 'การจองใหม่',        value: newBookings,          icon: Mail,      tint: 'red',    sub: 'ยังไม่ได้อ่าน' },
   ];
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-slate-800 mb-6">Dashboard</h2>
+      <h2 className="text-2xl font-bold text-slate-800 mb-1">ภาพรวมระบบ</h2>
+      <p className="text-sm text-slate-500 mb-6">สรุปข้อมูลสำคัญของเว็บไซต์</p>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-        {stats.map(s => (
-          <div key={s.label} className="bg-white rounded-2xl p-4 shadow-sm text-center">
-            <div className={`text-3xl font-bold text-white ${s.color} rounded-xl py-2 mb-2`}>{s.value}</div>
-            <div className="text-xs text-slate-500">{s.label}</div>
-          </div>
-        ))}
+        {stats.map(s => {
+          const t = STAT_TINTS[s.tint];
+          const Icon = s.icon;
+          return (
+            <div key={s.label} className="relative bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+              <span className={`absolute left-0 top-0 h-full w-1 ${t.bar}`} />
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${t.bg} mb-3`}>
+                <Icon className={`w-5 h-5 ${t.fg}`} />
+              </div>
+              <div className="text-3xl font-bold text-slate-800 leading-none tabular-nums">{s.value.toLocaleString()}</div>
+              <div className="text-sm font-medium text-slate-600 mt-1.5">{s.label}</div>
+              <div className="text-[11px] text-slate-400 mt-0.5">{s.sub}</div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
