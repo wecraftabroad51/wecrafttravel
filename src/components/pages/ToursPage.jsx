@@ -197,7 +197,6 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
         groupCountries.some(gc => t(tr.destination)?.includes(gc))
       );
     }
-    list = list.filter(tr => !tr.price || (tr.price >= 3000 && tr.price <= priceMax));
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(tr => {
@@ -264,88 +263,6 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
         </div>
       )}
 
-      {/* Sticky filter bar */}
-      <section style={{
-        position: 'sticky', top: 76, zIndex: 30,
-        background: 'var(--canvas)', borderBottom: '1px solid var(--line)',
-        padding: '14px 0',
-      }}>
-        <div className="wrap-wide" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-          {/* Continent pills */}
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {continents.map(c => (
-              <button key={c} onClick={() => { setContinent(c); setCountry(''); clearGroupFilter(); }}
-                style={{
-                  padding: '7px 14px', borderRadius: 999,
-                  border: `1px solid ${continent === c ? 'var(--primary)' : 'var(--line)'}`,
-                  background: continent === c ? 'var(--primary)' : 'var(--card)',
-                  color: continent === c ? '#fff' : 'var(--ink)',
-                  fontSize: 12, fontWeight: 500, cursor: 'pointer',
-                }}>
-                {c === 'All' ? (lang === 'th' ? 'ทั้งหมด' : 'All') : (lang === 'en' ? (CONTINENT_EN[c] || c) : (CONTINENT_TH[c] || c))}
-              </button>
-            ))}
-          </div>
-
-          {/* Search */}
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 200,
-            padding: '8px 12px 8px 14px',
-            border: '1px solid var(--line)', borderRadius: 999, background: 'var(--card)',
-          }}>
-            <Icon name="search" size={15} />
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder={t ? t({ th: 'ค้นหาทัวร์...', en: 'Search tours…' }) : 'Search tours…'}
-              style={{ border: 'none', padding: 0, background: 'transparent', fontSize: 13, width: '100%' }}
-            />
-          </div>
-
-          {/* Budget */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--muted)' }}>
-            <span style={{ letterSpacing: '.08em', textTransform: 'uppercase', fontWeight: 600 }}>{lang === 'th' ? 'งบประมาณ' : 'Budget'}</span>
-            <input
-              type="range" min={3000} max={100000} step={1000} value={priceMax}
-              onChange={e => setPriceMax(+e.target.value)}
-              style={{ width: 120, accentColor: 'var(--ink)' }}
-            />
-            <span className="tabular" style={{ color: 'var(--ink)', fontWeight: 600, minWidth: 72 }}>
-              ≤ ฿{(priceMax / 1000).toFixed(0)}k
-            </span>
-          </div>
-
-          {/* Sort + view toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <select
-              value={sort} onChange={e => setSort(e.target.value)}
-              style={{
-                padding: '9px 14px', border: '1px solid var(--line)',
-                borderRadius: 999, background: 'var(--card)', fontSize: 13,
-                cursor: 'pointer', width: 'auto',
-              }}
-            >
-              <option value="popular">{lang === 'th' ? 'ยอดนิยม' : 'Popular'}</option>
-              <option value="price-low">{lang === 'th' ? 'ราคา (ต่ำ→สูง)' : 'Price ↑'}</option>
-              <option value="price-high">{lang === 'th' ? 'ราคา (สูง→ต่ำ)' : 'Price ↓'}</option>
-              <option value="duration">{lang === 'th' ? 'ระยะเวลา ↓' : 'Duration ↓'}</option>
-            </select>
-            <div style={{ display: 'flex', border: '1px solid var(--line)', borderRadius: 999, padding: 3, background: 'var(--card)' }}>
-              {['grid', 'list'].map(v => (
-                <button key={v} onClick={() => setView(v)}
-                  style={{
-                    padding: '6px 10px', border: 'none', borderRadius: 999,
-                    background: view === v ? 'var(--ink)' : 'transparent',
-                    color: view === v ? 'var(--canvas)' : 'var(--ink)', cursor: 'pointer',
-                  }}>
-                  <Icon name={v} size={14} />
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Results */}
       <section style={{ padding: '32px 0 80px' }}>
         <div className="wrap-wide">
@@ -355,7 +272,7 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
                 {t ? t({ th: 'ไม่พบทัวร์', en: 'No tours match these filters.' }) : 'No tours match.'}
               </div>
               <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 8 }}>
-                {lang === 'th' ? 'ลองเลือกทวีปหรือปรับงบประมาณใหม่' : 'Try broadening continent or budget.'}
+                {lang === 'th' ? 'ลองเลือกประเทศหรือหมวดอื่นจากเมนูด้านบน' : 'Try another country or category from the menu.'}
               </div>
             </div>
           ) : view === 'grid' ? (
