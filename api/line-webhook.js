@@ -47,14 +47,18 @@ function bubble(t) {
 }
 
 function seeAllBubble() {
+  // ต้องขนาดเท่าการ์ดทัวร์ (LINE ห้ามผสมขนาดในคารูเซล)
   return {
-    type: 'bubble', size: 'micro',
+    type: 'bubble',
     body: { type: 'box', layout: 'vertical', justifyContent: 'center', alignItems: 'center', spacing: 'md',
       action: { type: 'uri', uri: `${SITE}/cards` }, contents: [
-        { type: 'text', text: 'ดูทัวร์', size: 'sm', color: '#0f9d8f', align: 'center', weight: 'bold' },
-        { type: 'text', text: 'ทั้งหมด', size: 'sm', color: '#0f9d8f', align: 'center', weight: 'bold' },
-        { type: 'text', text: '→', size: 'xxl', color: '#0f9d8f', align: 'center' },
+        { type: 'text', text: '🎫', size: 'xxl', align: 'center' },
+        { type: 'text', text: 'ดูทัวร์ทั้งหมด', size: 'md', color: '#0f9d8f', align: 'center', weight: 'bold', wrap: true },
+        { type: 'text', text: 'ปัดดูเพิ่มเติมในเว็บ →', size: 'xs', color: '#999999', align: 'center', wrap: true },
       ] },
+    footer: { type: 'box', layout: 'vertical', contents: [
+      { type: 'button', style: 'secondary', height: 'sm', action: { type: 'uri', label: 'เปิดดู', uri: `${SITE}/cards` } },
+    ] },
   };
 }
 
