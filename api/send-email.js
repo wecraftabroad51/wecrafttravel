@@ -200,6 +200,35 @@ async function sendLine(formData, seqNo, sheetUrl) {
   ));
 }
 
+// ── Push a friendly confirmation to the CUSTOMER's own LINE (จองผ่านไลน์) ──
+async function sendCustomerLine(formData, seqNo) {
+  const f = formData || {};
+  const token  = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  const userId = f.lineUserId;
+  if (!token || !userId) { console.log('Customer LINE skipped: no token/userId'); return; }
+  const pax = [];
+  if (Number(f.adults))   pax.push(`ผู้ใหญ่ ${f.adults}`);
+  if (Number(f.children)) pax.push(`เด็ก ${f.children}`);
+  if (Number(f.infants))  pax.push(`ทารก ${f.infants}`);
+  const text = [
+    '✅ รับการจองของคุณเรียบร้อยแล้วครับ!',
+    seqNo ? `เลขที่จอง: ${seqNo}` : null,
+    '━━━━━━━━━━━━━━━━━━',
+    f.tourName ? `🎫 ${f.tourName}` : null,
+    f.tourCode ? `รหัส: ${f.tourCode}` : null,
+    f.depDate  ? `📅 เดินทาง: ${f.depDate}${f.retDate ? ` - ${f.retDate}` : ''}` : null,
+    pax.length ? `👥 ${pax.join(' · ')}` : null,
+    '━━━━━━━━━━━━━━━━━━',
+    'ทีมงานได้รับข้อมูลแล้ว จะติดต่อกลับเพื่อยืนยันรายละเอียดและการชำระเงินโดยเร็วที่สุดครับ',
+    'ขอบคุณที่ใช้บริการ WeCraft Travel 🙏',
+  ].filter(Boolean).join('\n');
+  const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+  await httpsPost('api.line.me', '/v2/bot/message/push', headers,
+    JSON.stringify({ to: userId, messages: [{ type: 'text', text }] }))
+    .then(() => console.log(`Customer LINE OK → ${userId.slice(0, 8)}...`))
+    .catch(e  => console.error('Customer LINE FAILED:', e.message));
+}
+
 // ── Send Email ─────────────────────────────────────────────────
 async function sendEmail(subject, html, seqNo, sheetUrl) {
   const user = process.env.GMAIL_USER;
@@ -585,6 +614,12 @@ module.exports = async function handler(req, res) {
       ? sendCustomerConfirmation(customerEmail, seqNo, formData)
           .then(() => { results.customerEmail = 'ok'; })
           .catch(e => { results.customerEmail = e.message; console.error('CustomerEmail:', e.message); })
+      : Promise.resolve(),
+
+    (formData && formData.lineUserId)
+      ? sendCustomerLine(formData, seqNo)
+          .then(() => { results.customerLine = 'ok'; })
+          .catch(e => { results.customerLine = e.message; console.error('CustomerLine:', e.message); })
       : Promise.resolve(),
   ]);
 

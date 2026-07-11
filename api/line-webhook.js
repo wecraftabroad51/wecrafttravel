@@ -208,10 +208,15 @@ function infoRow(label, val) {
     { type: 'text', text: label, size: 'sm', color: '#999999', flex: 2 },
     { type: 'text', text: String(val), size: 'sm', color: '#333333', flex: 4, weight: 'bold', wrap: true, align: 'end' } ] };
 }
-async function tourDetail(iso, id) {
+async function tourDetail(iso, id, uid) {
   const t = (await fetchFeed(iso)).find(x => x.id === id);
   if (!t) return { type: 'text', text: 'ไม่พบข้อมูลทัวร์นี้ ลองเลือกใหม่นะครับ 🙏' };
-  return renderDetail(t);
+  return renderDetail(t, uid);
+}
+// ลิงก์ฟอร์มจอง (เปิดในเบราว์เซอร์ในไลน์) — พก id/iso/uid ไปเติมให้อัตโนมัติ
+function bookUrl(id, iso, uid) {
+  const q = new URLSearchParams({ id: id || '', iso: iso || '', uid: uid || '' });
+  return `${SITE}/line-book.html?${q.toString()}`;
 }
 // ค้นทัวร์จากรหัสโปรแกรม (ยืดหยุ่น — ตัดขีด/เว้นวรรคออกเทียบ)
 async function findByCode(q) {
@@ -223,7 +228,7 @@ async function findByCode(q) {
     || (Q.length >= 4 ? all.find(t => norm(t.code).includes(Q)) : null)
     || (Q.length >= 4 ? all.find(t => norm(t.code) && Q.includes(norm(t.code))) : null);
 }
-function renderDetail(t) {
+function renderDetail(t, uid) {
   const iso = t.country || '';
   const id = t.id;
   const body = [
@@ -255,27 +260,29 @@ function renderDetail(t) {
       { type: 'text', text: hl, size: 'xs', color: '#555555', wrap: true });
   }
 
-  // ตารางรอบเดินทาง + ราคา (ผู้ใหญ่/เด็ก/พักเดี่ยว/ที่นั่ง)
+  // ตารางรอบเดินทาง + ราคา (ผู้ใหญ่/เด็ก/พักเดี่ยว/ที่นั่ง) — แสดงครบทุกรอบจนจบ
   if (t.deps?.length) {
     body.push({ type: 'separator', margin: 'md' },
-      { type: 'text', text: '📅 รอบเดินทาง / ราคา', size: 'sm', weight: 'bold', color: '#0f9d8f', margin: 'md' });
-    for (const d of t.deps.slice(0, 6)) {
+      { type: 'text', text: `📅 รอบเดินทาง / ราคา (${t.deps.length} รอบ)`, size: 'sm', weight: 'bold', color: '#0f9d8f', margin: 'md' });
+    const showDeps = t.deps.slice(0, 40);
+    for (const d of showDeps) {
       const sub = [];
       if (d.child) sub.push(`เด็ก ${baht(d.child)}`);
       if (d.single) sub.push(`พักเดี่ยว +${baht(d.single)}`);
       if (d.seat != null) sub.push(`ว่าง ${d.seat}`);
       body.push({ type: 'box', layout: 'vertical', margin: 'sm', spacing: 'none', contents: [
         { type: 'box', layout: 'baseline', contents: [
-          { type: 'text', text: fmtDate(d.date) + (d.ret ? `-${fmtDate(d.ret)}` : ''), size: 'sm', color: '#333333', flex: 5, weight: 'bold' },
+          { type: 'text', text: fmtDate(d.date) + (d.ret ? ` - ${fmtDate(d.ret)}` : ''), size: 'sm', color: '#333333', flex: 5, weight: 'bold', wrap: true },
           { type: 'text', text: baht(d.adult), size: 'sm', color: '#e2231a', weight: 'bold', align: 'end', flex: 3 } ] },
         sub.length ? { type: 'text', text: sub.join(' · '), size: 'xxs', color: '#999999' } : { type: 'filler' },
       ] });
     }
+    if (t.deps.length > 40) body.push({ type: 'text', text: `+ อีก ${t.deps.length - 40} รอบ — ดูในโปรแกรมเต็ม (PDF)`, size: 'xxs', color: '#999999', margin: 'sm', wrap: true });
     body.push({ type: 'text', text: 'ราคาผู้ใหญ่ (พักคู่) · ภาษาไทย', size: 'xxs', color: '#bbbbbb', margin: 'sm' });
   }
 
   const footerBtns = [
-    { type: 'button', style: 'primary', color: '#e2231a', height: 'sm', action: { type: 'postback', label: 'สนใจจองทัวร์นี้', data: pb({ s: 'book', iso, id }), displayText: '🎫 สนใจจองทัวร์นี้' } },
+    { type: 'button', style: 'primary', color: '#e2231a', height: 'sm', action: { type: 'uri', label: '🎫 จองทัวร์นี้', uri: bookUrl(id, iso, uid) } },
   ];
   if (t.pdf) footerBtns.push({ type: 'button', style: 'secondary', height: 'sm', action: { type: 'uri', label: 'โปรแกรมเต็ม (PDF)', uri: t.pdf } });
   footerBtns.push({ type: 'button', style: 'link', height: 'sm', action: { type: 'postback', label: '← ดูทัวร์อื่น', data: pb({ s: 'tours', iso, city: '' }), displayText: 'ดูทัวร์อื่น' } });
@@ -319,9 +326,10 @@ module.exports = async function handler(req, res) {
       // ── Postback (กดปุ่มในการ์ด) ──
       if (ev.type === 'postback') {
         const d = unpb(ev.postback?.data);
+        const uid = ev.source?.userId || '';
         if (d.s === 'country') return reply(ev.replyToken, await cityChooser(d.iso));
         if (d.s === 'tours')   return reply(ev.replyToken, await tourCarousel(d.iso, d.city || ''));
-        if (d.s === 'detail')  return reply(ev.replyToken, await tourDetail(d.iso, d.id));
+        if (d.s === 'detail')  return reply(ev.replyToken, await tourDetail(d.iso, d.id, uid));
         if (d.s === 'book')    return handleBook(ev, d.iso, d.id);
         return;
       }
@@ -382,7 +390,7 @@ module.exports = async function handler(req, res) {
         // 2) พิมพ์รหัสโปรแกรมทัวร์ → แสดงทัวร์นั้นเลย (ข้อความอังกฤษ/ตัวเลข ≥3)
         if (!/[฀-๿]/.test(text) && text.replace(/\s/g, '').length >= 3) {
           const t = await findByCode(text);
-          if (t) return reply(ev.replyToken, renderDetail(t));
+          if (t) return reply(ev.replyToken, renderDetail(t, uid));
           return reply(ev.replyToken, { type: 'text', text: `ไม่พบทัวร์รหัส "${text}" ครับ 🙏\nลองตรวจสอบรหัสอีกครั้ง หรือกดเมนู "จองจอยทัวร์" เพื่อเลือกทัวร์` });
         }
 
