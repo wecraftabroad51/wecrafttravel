@@ -66,35 +66,38 @@ async function getSession(uid) {
   if (!SB_URL || !uid) return null;
   try { const a = await (await fetch(`${SB_URL}/rest/v1/line_sessions?user_id=eq.${encodeURIComponent(uid)}&select=*`, { headers: sbH })).json(); return Array.isArray(a) ? a[0] : null; } catch { return null; }
 }
-async function setSession(uid, obj) {
+async function setSession(uid, state) {
   if (!SB_URL || !uid) return;
-  try { await fetch(`${SB_URL}/rest/v1/line_sessions`, { method: 'POST', headers: { ...sbH, Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ user_id: uid, ...obj, created_at: new Date().toISOString() }) }); } catch {}
+  try { await fetch(`${SB_URL}/rest/v1/line_sessions`, { method: 'POST', headers: { ...sbH, Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ user_id: uid, state, created_at: new Date().toISOString() }) }); } catch {}
 }
 async function delSession(uid) {
   if (!SB_URL || !uid) return;
   try { await fetch(`${SB_URL}/rest/v1/line_sessions?user_id=eq.${encodeURIComponent(uid)}`, { method: 'DELETE', headers: sbH }); } catch {}
 }
 
-// ── ฟอร์มจอง + parse + ส่งเข้าระบบเดิม (Sheet + อีเมล + LINE) ─────
-const BOOK_FORM = '📝 กรอกข้อมูลจอง — คัดลอกข้อความนี้ แล้วเติมข้อมูล ส่งกลับมาได้เลยครับ\n\nชื่อ-นามสกุล: \nเบอร์โทร: \nจำนวนผู้เดินทาง: \nรอบ/เดือนที่สะดวก: \nอีเมล (ถ้ามี): ';
-function parseBooking(text) {
-  const g = (labels) => { for (const l of labels) { const m = text.match(new RegExp(l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*[:：]\\s*(.*)')); if (m && m[1].trim()) return m[1].trim(); } return ''; };
-  return { name: g(['ชื่อ-นามสกุล', 'ชื่อ']), phone: g(['เบอร์โทร', 'เบอร์', 'โทร']), pax: g(['จำนวนผู้เดินทาง', 'จำนวน']), round: g(['รอบ/เดือนที่สะดวก', 'รอบ', 'เดือน']), email: g(['อีเมล', 'email', 'Email']) };
-}
-async function submitBooking(sess, f) {
+// ── Wizard ถามทีละข้อ ────────────────────────────────────────────
+// ลำดับคำถาม: name → phone → pax → round → email → confirm
+const STEPS = {
+  name:  { next: 'phone', ask: '(1/5) กรุณาพิมพ์ 👤 ชื่อ-นามสกุล ผู้จองครับ' },
+  phone: { next: 'pax',   ask: '(2/5) ขอ 📱 เบอร์โทรติดต่อครับ' },
+  pax:   { next: 'round', ask: '(3/5) เดินทางกี่ท่านครับ? 👥 (เช่น 2 ผู้ใหญ่)' },
+  round: { next: 'email', ask: '(4/5) สนใจเดินทาง 📅 รอบ/เดือนไหนครับ? (เช่น ธันวาคม)' },
+  email: { next: 'confirm', ask: '(5/5) 📧 อีเมล (ถ้าไม่มี พิมพ์ - เพื่อข้าม)' },
+};
+async function submitBooking(st) {
   const formData = {
-    _type: 'join-tour', fullName: f.name, phone: f.phone, email: f.email || '',
-    tourCode: sess.tour_id || '', tourName: sess.tour_name || '', adults: f.pax || '',
-    note: `รอบ/เดือน: ${f.round || '-'} | ช่องทาง: LINE OA`,
+    _type: 'join-tour', fullName: st.name, phone: st.phone, email: st.email || '',
+    tourCode: st.tour_id || '', tourName: st.tour_name || '', adults: st.pax || '',
+    note: `รอบ/เดือน: ${st.round || '-'} | ช่องทาง: LINE OA`,
   };
   const html = `<h3>🌏 จองจอยทัวร์ (ผ่าน LINE OA)</h3>
-    <p><b>ทัวร์:</b> ${sess.tour_name || '-'}<br>
-    <b>ชื่อ:</b> ${f.name}<br><b>เบอร์:</b> ${f.phone}<br>
-    <b>จำนวน:</b> ${f.pax || '-'}<br><b>รอบ/เดือน:</b> ${f.round || '-'}<br>
-    <b>อีเมล:</b> ${f.email || '-'}</p>`;
+    <p><b>ทัวร์:</b> ${st.tour_name || '-'}<br>
+    <b>ชื่อ:</b> ${st.name}<br><b>เบอร์:</b> ${st.phone}<br>
+    <b>จำนวน:</b> ${st.pax || '-'}<br><b>รอบ/เดือน:</b> ${st.round || '-'}<br>
+    <b>อีเมล:</b> ${st.email || '-'}</p>`;
   try {
     const j = await (await fetch(`${SITE}/api/send-email`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subject: `[LINE] จองจอยทัวร์ - ${sess.tour_name || ''}`, html, formData, customerEmail: f.email || undefined }) })).json();
+      body: JSON.stringify({ subject: `[LINE] จองจอยทัวร์ - ${st.tour_name || ''}`, html, formData, customerEmail: st.email || undefined }) })).json();
     return j.seqNo || null;
   } catch { return null; }
 }
@@ -246,15 +249,15 @@ async function tourDetail(iso, id) {
   };
 }
 
-// ── กด "จองทัวร์นี้" → เปิดฟอร์มจองในไลน์ ────────────────────────
+// ── กด "จองทัวร์นี้" → เริ่ม wizard ถามทีละข้อ ───────────────────
 async function handleBook(ev, iso, id) {
   const list = await fetchFeed(iso);
   const t = list.find(x => x.id === id);
   const uid = ev.source?.userId || '';
-  await setSession(uid, { tour_id: t?.id || id, tour_name: t?.name || '', tour_country: iso });
+  await setSession(uid, { tour_id: t?.id || id, tour_name: t?.name || '', tour_country: iso, step: 'name' });
   await reply(ev.replyToken, [
-    { type: 'text', text: `🎫 ${t?.name || ''}\nราคาเริ่มต้น ${baht(t?.price)}` },
-    { type: 'text', text: BOOK_FORM },
+    { type: 'text', text: `🎫 ${t?.name || ''}\nราคาเริ่มต้น ${baht(t?.price)}\n\nเริ่มจองเลยครับ 😊 (พิมพ์ "ยกเลิก" ได้ตลอด)` },
+    { type: 'text', text: STEPS.name.ask },
   ]);
 }
 
@@ -289,16 +292,37 @@ module.exports = async function handler(req, res) {
         const text = (ev.message.text || '').trim();
         const uid = ev.source?.userId;
 
-        // 0) กำลังกรอกฟอร์มจองอยู่ → รับข้อมูล + ส่งเข้าระบบ
+        // 0) กำลังจองอยู่ → wizard ถามทีละข้อ
         const sess = await getSession(uid);
-        if (sess) {
-          if (/ยกเลิก|cancel/i.test(text)) { await delSession(uid); return reply(ev.replyToken, { type: 'text', text: 'ยกเลิกการจองแล้วครับ 🙏 กดเมนู "จองจอยทัวร์" เพื่อเริ่มใหม่ได้เลย' }); }
-          const f = parseBooking(text);
-          if (!f.name || !f.phone) return reply(ev.replyToken, { type: 'text', text: 'กรุณาระบุอย่างน้อย "ชื่อ" และ "เบอร์โทร" ครับ 🙏\n(หรือพิมพ์ "ยกเลิก")' });
-          const seq = await submitBooking(sess, f);
-          await delSession(uid);
-          return reply(ev.replyToken, { type: 'text',
-            text: `✅ รับข้อมูลจองเรียบร้อยแล้ว!${seq ? `\nเลขที่จอง: ${seq}` : ''}\n\n🎫 ${sess.tour_name}\n👤 ${f.name} · ${f.phone}${f.pax ? ` · ${f.pax} ท่าน` : ''}\n\nทีมงานได้รับแจ้งทางอีเมล + LINE แล้ว จะติดต่อกลับโดยเร็วครับ\nขอบคุณที่ใช้บริการ WeCraft Travel 🙏` });
+        if (sess && sess.state) {
+          const st = sess.state;
+          if (/^\s*ยกเลิก\s*$|^cancel$/i.test(text)) { await delSession(uid); return reply(ev.replyToken, { type: 'text', text: 'ยกเลิกการจองแล้วครับ 🙏 กดเมนู "จองจอยทัวร์" เพื่อเริ่มใหม่ได้เลย' }); }
+
+          // ── รับคำตอบตาม step ──
+          if (st.step === 'name')  { st.name = text; }
+          else if (st.step === 'phone') { if (text.replace(/\D/g, '').length < 9) return reply(ev.replyToken, { type: 'text', text: 'เบอร์โทรไม่ถูกต้องครับ 🙏 พิมพ์เบอร์ใหม่อีกครั้ง (เช่น 0812345678)' }); st.phone = text.replace(/[^\d]/g, ''); }
+          else if (st.step === 'pax')   { st.pax = text; }
+          else if (st.step === 'round') { st.round = text; }
+          else if (st.step === 'email') { st.email = (text.trim() === '-') ? '' : text.trim(); }
+          else if (st.step === 'confirm') {
+            if (/ยืนยัน|confirm|โอเค|ตกลง|ok/i.test(text)) {
+              const seq = await submitBooking(st);
+              await delSession(uid);
+              return reply(ev.replyToken, { type: 'text',
+                text: `✅ จองเรียบร้อยแล้วครับ!${seq ? `\nเลขที่จอง: ${seq}` : ''}\n\n🎫 ${st.tour_name}\n👤 ${st.name} · ${st.phone}\n\nทีมงานได้รับแจ้งทางอีเมล + LINE แล้ว จะติดต่อกลับโดยเร็วที่สุดครับ\nขอบคุณที่ใช้บริการ WeCraft Travel 🙏` });
+            }
+            return reply(ev.replyToken, { type: 'text', text: 'พิมพ์ "ยืนยัน" เพื่อจอง หรือ "ยกเลิก" ครับ 🙏' });
+          }
+
+          // ── ถามคำถามถัดไป / สรุป ──
+          const stepInfo = STEPS[st.step];
+          st.step = stepInfo ? stepInfo.next : 'confirm';
+          await setSession(uid, st);
+          if (st.step === 'confirm') {
+            return reply(ev.replyToken, { type: 'text',
+              text: `📋 ตรวจสอบข้อมูลจอง:\n\n🎫 ${st.tour_name}\n👤 ชื่อ: ${st.name}\n📱 เบอร์: ${st.phone}\n👥 จำนวน: ${st.pax || '-'}\n📅 รอบ/เดือน: ${st.round || '-'}\n📧 อีเมล: ${st.email || '-'}\n\nถูกต้องไหมครับ? พิมพ์ "ยืนยัน" เพื่อจอง (หรือ "ยกเลิก")` });
+          }
+          return reply(ev.replyToken, { type: 'text', text: STEPS[st.step].ask });
         }
 
         // 1) เลือกประเทศ / เมนู

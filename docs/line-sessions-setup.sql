@@ -1,15 +1,16 @@
 -- ══════════════════════════════════════════════════════════════
--- WeCraft Travel — ตาราง line_sessions (จำว่าลูกค้ากำลังจองทัวร์ไหนใน LINE)
--- เก็บแค่ tour_id / tour_name ชั่วคราว · ไม่เก็บข้อมูลส่วนตัว
+-- WeCraft Travel — ตาราง line_sessions (state การจองใน LINE แบบ wizard)
+-- เก็บชั่วคราวระหว่างถามทีละข้อ · ลบทันทีเมื่อจองเสร็จ/ยกเลิก
 -- รันใน Supabase → SQL Editor → New query → วาง → Run
+-- (ถ้าเคยสร้างตารางเวอร์ชันเก่าไว้ สคริปต์นี้ drop แล้วสร้างใหม่ให้เลย)
 -- ══════════════════════════════════════════════════════════════
 
-create table if not exists public.line_sessions (
-  user_id      text primary key,
-  tour_id      text,
-  tour_name    text,
-  tour_country text,
-  created_at   timestamptz not null default now()
+drop table if exists public.line_sessions;
+
+create table public.line_sessions (
+  user_id    text primary key,
+  state      jsonb,
+  created_at timestamptz not null default now()
 );
 
 alter table public.line_sessions enable row level security;
