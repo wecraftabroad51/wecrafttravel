@@ -141,3 +141,82 @@ export function normalizeZegoTours(list, source = 'zego', sourceName = 'Zego') {
   if (!Array.isArray(list)) return [];
   return list.map(t => normalizeZegoTour(t, source, sourceName));
 }
+
+// ── หา ISO code จากข้อความไทย (เช่น P_TAG "ทัวร์ญี่ปุ่น") ──────────
+const TTN_ALIAS = { 'เกาหลี': 'KR', 'ดูไบ': 'AE', 'อังกฤษ': 'GB', 'อเมริกา': 'US' };
+export function codeFromThaiText(text) {
+  if (!text) return null;
+  const t = String(text);
+  for (const [name, code] of Object.entries(TTN_ALIAS)) if (t.includes(name)) return code;
+  const pairs = Object.entries(COUNTRY_CODE_NAME_TH).sort((a, b) => b[1].length - a[1].length);
+  for (const [code, th] of pairs) if (th && t.includes(th)) return code;
+  return null;
+}
+
+// ── TTN Tour (online.ttnconnect.com) ─────────────────────────────
+// get-allprogram → [{ program:[{ P_ID, P_CODE, P_NAME, ..., Period:[{ ..., Price:[...] }] }] }]
+export function normalizeTtnTour(p, source = 'ttn', sourceName = 'TTN Tour') {
+  const iso2      = codeFromThaiText(p.P_TAG) || codeFromThaiText(p.P_NAME) || '';
+  const continent = CODE_TO_CONTINENT[iso2] || 'Asia-East';
+  const nameTh    = COUNTRY_CODE_NAME_TH[iso2] || iso2;
+
+  const periods = Array.isArray(p.Period) ? p.Period : [];
+  const deps = periods.map(per => {
+    const prices = Array.isArray(per.Price) ? per.Price : [];
+    const pr = prices.find(x => x.P_STATUS === 'Open' && parseFloat(x.P_ADULT_PRICE) > 0)
+            || prices.find(x => parseFloat(x.P_ADULT_PRICE) > 0)
+            || prices[0] || {};
+    const total  = Number(pr.P_VOLUME)  || 0;
+    const booked = Number(pr.P_BOOKING) || 0;
+    const avail  = pr.P_AVAILABLE != null && pr.P_AVAILABLE !== 0
+      ? Number(pr.P_AVAILABLE) : Math.max(0, total - booked);
+    return {
+      date:             per.P_DUE_START,
+      returnDate:       per.P_DUE_END,
+      price:            parseFloat(pr.P_ADULT_PRICE)     || 0,
+      infantPrice:      parseFloat(pr.P_INFANT_PRICE)    || null,
+      singleSupplement: parseFloat(pr.P_SINGLE_PRICE)    || null,
+      joinPrice:        parseFloat(pr.P_JOINLAND_PRICE)  || null,
+      available:        avail,
+      totalSeats:       total,
+      bookedSeats:      booked,
+      periodId:         per.P_ID,
+    };
+  }).filter(d => d.date && d.price > 0);
+
+  const prices   = deps.map(d => d.price).filter(n => n > 0);
+  const minPrice = prices.length ? Math.min(...prices) : (parseFloat(p.P_PRICE) || 0);
+
+  return {
+    id:          `sup_${source}_${p.P_ID}`,
+    code:        p.P_CODE || '',
+    name:        { th: p.P_NAME, en: p.P_NAME },
+    destination: { th: nameTh, en: iso2 },
+    continent,
+    country:     iso2,
+    image:       p.BANNER || '',
+    price:       minPrice,
+    duration:    Number(p.P_DAY) || 0,
+    tourType:    'outbound',
+    featured:    false,
+    airline:     p.P_AIRLINE_NAME || '',
+    departures:  deps,
+    groupSize:   deps[0]?.totalSeats || null,
+    pdfUrl:      p.PDF || null,
+
+    _source:     source,
+    _sourceName: sourceName,
+    _pbId:       p.P_ID,
+    _night:      Number(p.P_NIGHT) || 0,
+    _hotelStars: p.P_HOTEL_STAR || null,
+  };
+}
+
+export function normalizeTtnTours(list, source = 'ttn', sourceName = 'TTN Tour') {
+  if (!Array.isArray(list)) return [];
+  // แผ่ [{program:[...]}] → [program...]
+  const progs = list.flatMap(x =>
+    Array.isArray(x?.program) ? x.program : (x?.P_ID ? [x] : [])
+  );
+  return progs.map(p => normalizeTtnTour(p, source, sourceName));
+}

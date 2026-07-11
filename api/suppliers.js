@@ -9,11 +9,15 @@ const https = require('https');
 // ── Supplier config (whitelist กัน SSRF) ─────────────────────────
 // base   = path prefix ของ API
 // auth   = (optional) { header, tokenEnv } สำหรับเจ้าที่ต้อง token
+// list   = path รายการทัวร์ทั้งหมด
+// detail = ฟังก์ชันสร้าง path รายละเอียดจาก id
 const SUPPLIERS = {
-  probooking:  { host: 'api.probooking.co.th',    base: '/v1' },
-  wondergroup: { host: 'api.wondergrouptour.com', base: '/v1' },
-  gs25tour:    { host: 'api.gs25tour.com',         base: '/v1' },
-  zego:        { host: 'www.zegoapi.com', base: '/v1.5', auth: { header: 'auth-token', tokenEnv: 'ZEGO_API_TOKEN' } },
+  probooking:  { host: 'api.probooking.co.th',    base: '/v1',   list: '/programtours', detail: id => `/programtours/${id}` },
+  wondergroup: { host: 'api.wondergrouptour.com', base: '/v1',   list: '/programtours', detail: id => `/programtours/${id}` },
+  gs25tour:    { host: 'api.gs25tour.com',         base: '/v1',   list: '/programtours', detail: id => `/programtours/${id}` },
+  zego:        { host: 'www.zegoapi.com',          base: '/v1.5', list: '/programtours', detail: id => `/programtours/${id}`,
+                 auth: { header: 'auth-token', tokenEnv: 'ZEGO_API_TOKEN' } },
+  ttn:         { host: 'online.ttnconnect.com',    base: '/api/agency', list: '/get-allprogram', detail: id => `/program/${id}` },
 };
 
 function supFetch(cfg, path) {
@@ -57,7 +61,7 @@ module.exports = async function handler(req, res) {
   if (!cfg) return res.status(400).json({ error: 'ไม่รู้จักซัพพลายเออร์: ' + supplier });
 
   try {
-    const path = id ? `/programtours/${encodeURIComponent(id)}` : '/programtours';
+    const path = id ? cfg.detail(encodeURIComponent(id)) : cfg.list;
     const data = await supFetch(cfg, path);
     return res.status(200).json(data);
   } catch (e) {
