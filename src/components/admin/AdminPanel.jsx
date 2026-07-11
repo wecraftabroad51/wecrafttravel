@@ -61,12 +61,15 @@ function Modal({ title, onClose, children, wide, xl }) {
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div
-        className={`bg-white rounded-2xl shadow-2xl w-full ${xl ? 'max-w-4xl' : wide ? 'max-w-2xl' : 'max-w-lg'} max-h-[92vh] overflow-y-auto`}
+        className={`bg-white rounded-2xl shadow-2xl w-full ${xl ? 'max-w-4xl' : wide ? 'max-w-2xl' : 'max-w-lg'} max-h-[92vh] overflow-y-auto nice-scroll`}
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-5 border-b border-slate-100">
-          <h3 className="font-bold text-slate-800 text-lg">{title}</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-700"><X className="w-5 h-5" /></button>
+        <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-slate-100 bg-white/95 backdrop-blur rounded-t-2xl">
+          <h3 className="font-bold text-slate-800 text-lg pr-3">{title}</h3>
+          <button onClick={onClose} aria-label="ปิด"
+            className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors">
+            <X className="w-5 h-5" />
+          </button>
         </div>
         <div className="p-5">{children}</div>
       </div>
@@ -1043,9 +1046,11 @@ function SupplierTourModal({ tour, fmt, onClose }) {
   return (
     <Modal title={`รายละเอียดทัวร์ · ${tour._sourceName || 'ซัพพลายเออร์'}`} onClose={onClose} xl>
       <div className="space-y-5">
-        {/* Banner */}
+        {/* Banner — แสดงเต็มไม่บิดสัดส่วน */}
         {tour.image && (
-          <img src={tour.image} alt="" className="w-full max-h-64 object-cover rounded-xl border border-slate-200 bg-slate-100" />
+          <div className="w-full rounded-xl border border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center" style={{ height: 240 }}>
+            <img src={tour.image} alt="" className="max-w-full max-h-full object-contain" />
+          </div>
         )}
 
         {/* Name */}
@@ -1080,7 +1085,7 @@ function SupplierTourModal({ tour, fmt, onClose }) {
         {tour.departures?.length > 0 && (
           <div>
             <div className="font-semibold text-slate-700 text-sm mb-2">วันเดินทางและราคา ({tour.departures.length} รอบ)</div>
-            <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto max-h-80 overflow-y-auto">
+            <div className="border border-slate-200 rounded-xl overflow-auto max-h-80 nice-scroll">
               <table className="w-full text-sm">
                 <thead className="sticky top-0">
                   <tr className="bg-slate-100 text-slate-600 text-xs">
