@@ -80,6 +80,9 @@ const MENU = [
   },
 ];
 
+// นับ key ซ้ำ — กลุ่มทัวร์ใช้ key 'tours' ร่วมกัน จึงไม่ควรขีดเส้น "หน้าปัจจุบัน" พร้อมกันทุกอัน
+const KEY_COUNTS = MENU.reduce((acc, m) => { acc[m.key] = (acc[m.key] || 0) + 1; return acc; }, {});
+
 // Quick links in teal top bar
 const QUICK_LINKS = [
   { label: 'หน้าหลัก',        labelEn: 'Home',           key: 'home' },
@@ -529,7 +532,10 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
 
           {/* Desktop nav — spread full width */}
           <nav className="nav-desktop" style={{ display: 'flex', alignItems: 'stretch', gap: 0, height: '100%', flex: 1, justifyContent: 'space-evenly' }}>
-            {MENU.map((m, i) => (
+            {MENU.map((m, i) => {
+              // hover = ขึ้นเส้นเสมอ · "หน้าปัจจุบัน" = ขึ้นเฉพาะเมนู key ไม่ซ้ำ (กันเส้นค้างหลายอันในกลุ่มทัวร์)
+              const active = activeMenu === i || (page === m.key && KEY_COUNTS[m.key] === 1);
+              return (
               <div key={i} style={{ position: 'relative', display: 'flex', alignItems: 'stretch', flex: 1 }}
                 onMouseEnter={() => openMenu(i)}
                 onMouseLeave={closeMenu}
@@ -538,8 +544,8 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
                   onClick={() => { navigate(m.key, null, m.tourType ? { tourType: m.tourType } : null); setActiveMenu(null); }}
                   style={{
                     padding: '0 6px', border: 'none', width: '100%',
-                    borderBottom: activeMenu === i || page === m.key ? '3px solid var(--primary)' : '3px solid transparent',
-                    color: activeMenu === i || page === m.key ? 'var(--primary)' : 'var(--ink-2)',
+                    borderBottom: active ? '3px solid var(--primary)' : '3px solid transparent',
+                    color: active ? 'var(--primary)' : 'var(--ink-2)',
                     background: 'transparent',
                     fontSize: 16, fontWeight: 700,
                     cursor: 'pointer', fontFamily: 'inherit',
@@ -561,7 +567,8 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
                   </div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </nav>
 
           {/* Mobile: ขอราคากรุ๊ปเหมา shortcut */}
