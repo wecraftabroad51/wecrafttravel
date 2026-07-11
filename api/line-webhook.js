@@ -51,6 +51,46 @@ async function fetchFeed(iso) {
 const pb = (obj) => 'a=' + encodeURIComponent(JSON.stringify(obj));
 const unpb = (data) => { try { return JSON.parse(decodeURIComponent((data || '').replace(/^a=/, ''))); } catch { return {}; } };
 
+// ── Supabase session (จำว่าลูกค้ากำลังจองทัวร์ไหน — ไม่เก็บข้อมูลส่วนตัว) ──
+const SB_URL = process.env.VITE_SUPABASE_URL, SB_KEY = process.env.VITE_SUPABASE_ANON_KEY;
+const sbH = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' };
+async function getSession(uid) {
+  if (!SB_URL || !uid) return null;
+  try { const a = await (await fetch(`${SB_URL}/rest/v1/line_sessions?user_id=eq.${encodeURIComponent(uid)}&select=*`, { headers: sbH })).json(); return Array.isArray(a) ? a[0] : null; } catch { return null; }
+}
+async function setSession(uid, obj) {
+  if (!SB_URL || !uid) return;
+  try { await fetch(`${SB_URL}/rest/v1/line_sessions`, { method: 'POST', headers: { ...sbH, Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ user_id: uid, ...obj, created_at: new Date().toISOString() }) }); } catch {}
+}
+async function delSession(uid) {
+  if (!SB_URL || !uid) return;
+  try { await fetch(`${SB_URL}/rest/v1/line_sessions?user_id=eq.${encodeURIComponent(uid)}`, { method: 'DELETE', headers: sbH }); } catch {}
+}
+
+// ── ฟอร์มจอง + parse + ส่งเข้าระบบเดิม (Sheet + อีเมล + LINE) ─────
+const BOOK_FORM = '📝 กรอกข้อมูลจอง — คัดลอกข้อความนี้ แล้วเติมข้อมูล ส่งกลับมาได้เลยครับ\n\nชื่อ-นามสกุล: \nเบอร์โทร: \nจำนวนผู้เดินทาง: \nรอบ/เดือนที่สะดวก: \nอีเมล (ถ้ามี): ';
+function parseBooking(text) {
+  const g = (labels) => { for (const l of labels) { const m = text.match(new RegExp(l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*[:：]\\s*(.*)')); if (m && m[1].trim()) return m[1].trim(); } return ''; };
+  return { name: g(['ชื่อ-นามสกุล', 'ชื่อ']), phone: g(['เบอร์โทร', 'เบอร์', 'โทร']), pax: g(['จำนวนผู้เดินทาง', 'จำนวน']), round: g(['รอบ/เดือนที่สะดวก', 'รอบ', 'เดือน']), email: g(['อีเมล', 'email', 'Email']) };
+}
+async function submitBooking(sess, f) {
+  const formData = {
+    _type: 'join-tour', fullName: f.name, phone: f.phone, email: f.email || '',
+    tourCode: sess.tour_id || '', tourName: sess.tour_name || '', adults: f.pax || '',
+    note: `รอบ/เดือน: ${f.round || '-'} | ช่องทาง: LINE OA`,
+  };
+  const html = `<h3>🌏 จองจอยทัวร์ (ผ่าน LINE OA)</h3>
+    <p><b>ทัวร์:</b> ${sess.tour_name || '-'}<br>
+    <b>ชื่อ:</b> ${f.name}<br><b>เบอร์:</b> ${f.phone}<br>
+    <b>จำนวน:</b> ${f.pax || '-'}<br><b>รอบ/เดือน:</b> ${f.round || '-'}<br>
+    <b>อีเมล:</b> ${f.email || '-'}</p>`;
+  try {
+    const j = await (await fetch(`${SITE}/api/send-email`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subject: `[LINE] จองจอยทัวร์ - ${sess.tour_name || ''}`, html, formData, customerEmail: f.email || undefined }) })).json();
+    return j.seqNo || null;
+  } catch { return null; }
+}
+
 // ── การ์ดเลือกประเทศ (ธง) ────────────────────────────────────────
 function countryBubble(iso, n) {
   return {
@@ -158,17 +198,16 @@ async function tourDetail(iso, id) {
   };
 }
 
-// ── สนใจจอง → แจ้งแอดมิน + ตอบลูกค้า (จบในไลน์) ──────────────────
+// ── กด "จองทัวร์นี้" → เปิดฟอร์มจองในไลน์ ────────────────────────
 async function handleBook(ev, iso, id) {
   const list = await fetchFeed(iso);
   const t = list.find(x => x.id === id);
   const uid = ev.source?.userId || '';
-  const dName = uid ? await getName(uid) : '';
-  await pushAdmin(`🔔 ลูกค้าสนใจจองทัวร์ (จาก LINE)\n\n🎫 ${t?.name || id}\n💰 เริ่มต้น ${baht(t?.price)}\n🌏 ${nameOf(iso)}\n\n👤 ${dName || 'ลูกค้า'}\nuserId: ${uid}\n\n👉 ตอบกลับลูกค้าทางแชท OA ได้เลยครับ`);
-  await reply(ev.replyToken, {
-    type: 'text',
-    text: `ขอบคุณที่สนใจครับ 🙏\n\n🎫 ${t?.name || ''}\n\nแอดมินได้รับข้อมูลแล้ว จะรีบติดต่อกลับโดยเร็วที่สุด\n\nระหว่างนี้พิมพ์ ชื่อ · เบอร์ · จำนวนคน · เดือนที่สะดวก ทิ้งไว้ได้เลยครับ 😊`,
-  });
+  await setSession(uid, { tour_id: t?.id || id, tour_name: t?.name || '', tour_country: iso });
+  await reply(ev.replyToken, [
+    { type: 'text', text: `🎫 ${t?.name || ''}\nราคาเริ่มต้น ${baht(t?.price)}` },
+    { type: 'text', text: BOOK_FORM },
+  ]);
 }
 
 // ── Handler ──────────────────────────────────────────────────────
@@ -200,6 +239,21 @@ module.exports = async function handler(req, res) {
       // ── ข้อความ ──
       if (ev.type === 'message' && ev.message?.type === 'text') {
         const text = (ev.message.text || '').trim();
+        const uid = ev.source?.userId;
+
+        // 0) กำลังกรอกฟอร์มจองอยู่ → รับข้อมูล + ส่งเข้าระบบ
+        const sess = await getSession(uid);
+        if (sess) {
+          if (/ยกเลิก|cancel/i.test(text)) { await delSession(uid); return reply(ev.replyToken, { type: 'text', text: 'ยกเลิกการจองแล้วครับ 🙏 กดเมนู "จองจอยทัวร์" เพื่อเริ่มใหม่ได้เลย' }); }
+          const f = parseBooking(text);
+          if (!f.name || !f.phone) return reply(ev.replyToken, { type: 'text', text: 'กรุณาระบุอย่างน้อย "ชื่อ" และ "เบอร์โทร" ครับ 🙏\n(หรือพิมพ์ "ยกเลิก")' });
+          const seq = await submitBooking(sess, f);
+          await delSession(uid);
+          return reply(ev.replyToken, { type: 'text',
+            text: `✅ รับข้อมูลจองเรียบร้อยแล้ว!${seq ? `\nเลขที่จอง: ${seq}` : ''}\n\n🎫 ${sess.tour_name}\n👤 ${f.name} · ${f.phone}${f.pax ? ` · ${f.pax} ท่าน` : ''}\n\nทีมงานได้รับแจ้งทางอีเมล + LINE แล้ว จะติดต่อกลับโดยเร็วครับ\nขอบคุณที่ใช้บริการ WeCraft Travel 🙏` });
+        }
+
+        // 1) เลือกประเทศ / เมนู
         const hitIso = Object.keys(CODE_TH).sort((a, b) => CODE_TH[b].length - CODE_TH[a].length).find(iso => text.includes(CODE_TH[iso]));
         if (hitIso) return reply(ev.replyToken, await cityChooser(hitIso));
         if (/จองจอยทัวร์|จอยทัวร์|ดูทัวร์|เลือกทัวร์|ทัวร์/i.test(text)) return reply(ev.replyToken, await countryChooser());
