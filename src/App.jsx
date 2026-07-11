@@ -737,8 +737,8 @@ function AppInner() {
       <Footer lang={lang} t={t} navigate={navigate} settings={settings} />
       <FloatingContact settings={settings} />
 
-      {/* ── Sticky Group Quote Float Button ──────────────────── */}
-      {!location.pathname.startsWith('/group-quote') && (
+      {/* ── Sticky Group Quote Float Button — เฉพาะหน้าแรก ───── */}
+      {location.pathname === '/' && (
         <GroupQuoteFloat navigate={navigate} lang={lang} />
       )}
 
