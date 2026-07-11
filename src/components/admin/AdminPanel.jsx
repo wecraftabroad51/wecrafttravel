@@ -517,7 +517,12 @@ export default function AdminPanel(props) {
     try { await signInWithGoogle(); }
     catch (e) { alert(e.message || 'เข้าสู่ระบบไม่สำเร็จ'); setSigningIn(false); }
   };
-  const handleSignOut = async () => { await signOut(); onLogout(); };
+  // ออกจากระบบ → กลับมาหน้า login ของ admin (ไม่เด้งออกไปหน้าเว็บลูกค้า)
+  const handleSignOut = async () => {
+    await signOut();
+    setAuthStatus('anon'); setAuthUser(null); setAdminRole(null);
+    setSection('dashboard');
+  };
 
   // ── หน้า Loading เต็มจอ (กัน flash การ์ด login) ────────────────
   if (authStatus === 'loading') {
