@@ -19,22 +19,28 @@ function normalize(id, fmt, data) {
       const code = (t.countries || [])[0]?.code || '';
       const open = (t.periods || []).filter(p => p.status === 'Open');
       const price = open.length ? Math.min(...open.map(p => p.price)) : (t.price || 0);
-      if (t.banner) out.push({ id: `sup_${id}_${t.id}`, name: t.name, image: t.banner, price, country: code });
+      const deps = open.slice(0, 6).map(p => ({ date: p.start, price: p.price }));
+      if (t.banner) out.push({ id: `sup_${id}_${t.id}`, name: t.name, image: t.banner, price, country: code, days: Number(t.day) || 0, airline: '', deps });
     }
   } else if (fmt === 'zego' && Array.isArray(data)) {
     for (const t of data) {
       const book = (t.Periods || []).filter(p => p.PeriodStatus === 'Book');
       const prices = book.map(p => p.Price).filter(n => n > 0);
       const price = prices.length ? Math.min(...prices) : (t.Periods?.[0]?.Price || 0);
-      if (t.URLImage) out.push({ id: `sup_zego_${t.ProductCode}`, name: t.ProductName, image: t.URLImage, price, country: t.CountryCodeISO2 || '' });
+      const deps = book.slice(0, 6).map(p => ({ date: p.PeriodStartDate, price: p.Price }));
+      if (t.URLImage) out.push({ id: `sup_zego_${t.ProductCode}`, name: t.ProductName, image: t.URLImage, price, country: t.CountryCodeISO2 || '', days: Number(t.Days) || 0, airline: t.AirlineName || '', deps });
     }
   } else if (fmt === 'ttn' && Array.isArray(data)) {
     const progs = data.flatMap(x => x.program || []);
     for (const p of progs) {
       const iso = isoFromThai(p.P_TAG) || isoFromThai(p.P_NAME);
-      const prices = (p.Period || []).flatMap(per => (per.Price || []).map(pr => parseFloat(pr.P_ADULT_PRICE))).filter(n => n > 0);
-      const price = prices.length ? Math.min(...prices) : (parseFloat(p.P_PRICE) || 0);
-      if (p.BANNER) out.push({ id: `sup_ttn_${p.P_ID}`, name: p.P_NAME, image: p.BANNER, price, country: iso });
+      const deps = [];
+      for (const per of (p.Period || [])) {
+        const pr = (per.Price || []).find(x => parseFloat(x.P_ADULT_PRICE) > 0);
+        if (pr && per.P_DUE_START) deps.push({ date: per.P_DUE_START, price: parseFloat(pr.P_ADULT_PRICE) });
+      }
+      const price = deps.length ? Math.min(...deps.map(d => d.price)) : (parseFloat(p.P_PRICE) || 0);
+      if (p.BANNER) out.push({ id: `sup_ttn_${p.P_ID}`, name: p.P_NAME, image: p.BANNER, price, country: iso, days: Number(p.P_DAY) || 0, airline: p.P_AIRLINE_NAME || '', deps: deps.slice(0, 6) });
     }
   }
   return out;
