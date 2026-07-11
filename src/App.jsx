@@ -337,6 +337,15 @@ function AppInner() {
   // Minimum splash duration
   useEffect(() => { const t = setTimeout(() => setMinDelay(false), 2800); return () => clearTimeout(t); }, []);
 
+  // Safety: กันหน้าโหลดค้าง (เช่นเน็ตมือถือแฮงค์) — ปิด splash ภายใน 10 วิเสมอ
+  useEffect(() => { const t = setTimeout(() => setLoading(false), 10000); return () => clearTimeout(t); }, []);
+
+  // รีเฟรช/เปิดลิงก์ตรง → เด้งกลับหน้าแรกเสมอ (ยกเว้นหลังบ้าน /admin)
+  useEffect(() => {
+    const p = window.location.pathname;
+    if (p !== '/' && !p.startsWith('/admin')) routerNav('/', { replace: true });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Load supplier tours — โหลดทีละเจ้า เจ้าไหนเสร็จโชว์ก่อน ────
   useEffect(() => {
     let cancelled = false;
