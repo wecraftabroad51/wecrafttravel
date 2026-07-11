@@ -585,7 +585,7 @@ export default function AdminPanel(props) {
 
   // เมนู admins แสดงเฉพาะ Super Admin
   const menuItems = adminRole === 'super'
-    ? [...MENU, { key: 'admins', label: 'Admins', labelTh: 'ผู้ดูแลระบบ', icon: Shield }]
+    ? [...MENU, { key: 'admins', label: 'User Management', labelTh: 'จัดการผู้ใช้งาน', icon: Shield }]
     : MENU;
 
   return (
@@ -721,7 +721,7 @@ function AdminsSection({ currentEmail }) {
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-800">ผู้ดูแลระบบ (Admins)</h2>
+        <h2 className="text-2xl font-bold text-slate-800">จัดการผู้ใช้งาน</h2>
         <p className="text-sm text-slate-500 mt-1">จัดการสิทธิ์เข้าถึงหลังบ้าน · เฉพาะ Super Admin เท่านั้น</p>
       </div>
 
