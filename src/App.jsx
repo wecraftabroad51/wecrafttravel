@@ -337,23 +337,25 @@ function AppInner() {
   // Minimum splash duration
   useEffect(() => { const t = setTimeout(() => setMinDelay(false), 2800); return () => clearTimeout(t); }, []);
 
-  // ── Load supplier tours (live, ทุกเจ้าพร้อมกัน) ───────────────
+  // ── Load supplier tours — โหลดทีละเจ้า เจ้าไหนเสร็จโชว์ก่อน ────
   useEffect(() => {
     let cancelled = false;
-    Promise.all(
-      ENABLED_SUPPLIERS.map(sup =>
-        fetch(`/api/suppliers?supplier=${sup.id}`)
-          .then(r => r.ok ? r.json() : Promise.reject(r.status))
-          .then(data => {
-            if (!Array.isArray(data)) return [];
-            if (sup.format === 'zego') return normalizeZegoTours(data, sup.id, sup.name);
-            if (sup.format === 'ttn')  return normalizeTtnTours(data, sup.id, sup.name);
-            return normalizePbTours(data, sup.id, sup.name);
-          })
-          .catch(err => { console.warn(`[${sup.name}] fetch failed:`, err); return []; })
-      )
-    ).then(results => {
-      if (!cancelled) setSupplierTours(results.flat());
+    setSupplierTours([]);
+    ENABLED_SUPPLIERS.forEach(sup => {
+      fetch(`/api/suppliers?supplier=${sup.id}`)
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+          if (!Array.isArray(data)) return [];
+          if (sup.format === 'zego') return normalizeZegoTours(data, sup.id, sup.name);
+          if (sup.format === 'ttn')  return normalizeTtnTours(data, sup.id, sup.name);
+          return normalizePbTours(data, sup.id, sup.name);
+        })
+        .then(tours => {
+          if (cancelled || !tours.length) return;
+          // append เฉพาะเจ้านี้ (กันซ้ำถ้าเผลอ re-run)
+          setSupplierTours(prev => [...prev.filter(t => t._source !== sup.id), ...tours]);
+        })
+        .catch(err => console.warn(`[${sup.name}] fetch failed:`, err));
     });
     return () => { cancelled = true; };
   }, []);

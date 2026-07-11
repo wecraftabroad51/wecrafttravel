@@ -63,6 +63,9 @@ module.exports = async function handler(req, res) {
   try {
     const path = id ? cfg.detail(encodeURIComponent(id)) : cfg.list;
     const data = await supFetch(cfg, path);
+    // Cache ที่ CDN edge: สด 5 นาที · เสิร์ฟของเก่าได้อีก 30 นาทีระหว่าง refresh เบื้องหลัง
+    // → คนแรกช้า (รอซัพ) คนถัดไปได้ทันที ข้อมูลไม่เก่าเกิน ~5 นาที
+    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=1800');
     return res.status(200).json(data);
   } catch (e) {
     console.error(`[Supplier proxy: ${supplier}]`, e.message);
