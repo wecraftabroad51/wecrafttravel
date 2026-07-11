@@ -63,6 +63,9 @@ export const COUNTRIES = {
   RO: { flag: '🇷🇴', th: 'โรมาเนีย',      en: 'Romania',      group: 'europe' },
   BG: { flag: '🇧🇬', th: 'บัลแกเรีย',     en: 'Bulgaria',     group: 'europe' },
   MT: { flag: '🇲🇹', th: 'มอลตา',         en: 'Malta',        group: 'europe' },
+  GE: { flag: '🇬🇪', th: 'จอร์เจีย',      en: 'Georgia',      group: 'europe' },
+  EU: { flag: '🇪🇺', th: 'ยุโรป (หลายประเทศ)', en: 'Europe (multi)', group: 'europe' },
+  SCA:{ flag: '🧭',  th: 'สแกนดิเนเวีย',  en: 'Scandinavia',  group: 'europe' },
 
   // ── อเมริกา ─────────────────────────────────────────────
   US: { flag: '🇺🇸', th: 'อเมริกา',       en: 'USA',          group: 'americas' },

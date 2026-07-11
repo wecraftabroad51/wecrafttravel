@@ -64,9 +64,11 @@ function Accordion({ title, icon, badge, defaultOpen = false, children }) {
 }
 
 export default function TourDetailPage({ lang, t, navigate, tours, supplierTours = [], reviews, setBookings, setReviews, tourId, compareList, toggleCompare }) {
-  // supplier tour id = "sup_<source>_<pbId>"
+  // supplier tour id = "sup_<source>_<code>" (code อาจมี '_' ได้ → rejoin)
   const isPb = String(tourId).startsWith('sup_');
-  const [, pbSource, pbId] = isPb ? String(tourId).split('_') : [];
+  const _parts  = isPb ? String(tourId).split('_') : [];
+  const pbSource = _parts[1];
+  const pbId     = _parts.slice(2).join('_');
 
   // ── Fetch supplier full detail (plans, include/notInclude) ────
   const [pbDetail, setPbDetail] = useState(null);

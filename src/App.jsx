@@ -14,7 +14,7 @@ import {
   REVIEWS_DATA, SITE_SETTINGS_DEFAULT, BOOKINGS_DATA, MESSAGES_DATA, CHAT_SESSIONS_DEFAULT,
 } from './data.js';
 import { LEGAL_DEFAULTS } from './lib/legalDefaults.js';
-import { normalizePbTours } from './lib/supplierUtils.js';
+import { normalizePbTours, normalizeZegoTours } from './lib/supplierUtils.js';
 import { ENABLED_SUPPLIERS } from './lib/suppliers.js';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
@@ -342,7 +342,12 @@ function AppInner() {
       ENABLED_SUPPLIERS.map(sup =>
         fetch(`/api/suppliers?supplier=${sup.id}`)
           .then(r => r.ok ? r.json() : Promise.reject(r.status))
-          .then(data => Array.isArray(data) ? normalizePbTours(data, sup.id, sup.name) : [])
+          .then(data => {
+            if (!Array.isArray(data)) return [];
+            return sup.format === 'zego'
+              ? normalizeZegoTours(data, sup.id, sup.name)
+              : normalizePbTours(data, sup.id, sup.name);
+          })
           .catch(err => { console.warn(`[${sup.name}] fetch failed:`, err); return []; })
       )
     ).then(results => {
