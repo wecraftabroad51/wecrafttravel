@@ -43,6 +43,11 @@
   .otp-row { display:flex; gap:8px; align-items:stretch; }
   .otp-row input { flex:1; letter-spacing:5px; font-weight:800; text-align:center; }
   .okmsg { color:var(--ok); font-size:13px; font-weight:700; margin-top:7px; }
+  .pp-row { display:flex; align-items:center; gap:8px; margin-top:8px; padding:8px; border:1.5px solid var(--line); border-radius:11px; background:#fbfcfd; }
+  .pp-row .pp-name { flex:1; font-size:13px; color:#5b6572; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pp-row .pp-pick { white-space:nowrap; }
+  .pp-row .pp-st { font-size:12px; white-space:nowrap; }
+  .pp-row .pp-rm { border:0; background:#f0f3f5; color:#b3261e; width:30px; height:30px; border-radius:8px; font-size:15px; font-weight:800; flex:none; }
   .warnmsg { color:var(--red); font-size:12.5px; margin-top:6px; }
   .submit { width:calc(100% - 24px); margin:18px 12px 0; padding:16px; background:var(--red); color:#fff;
     border:0; border-radius:14px; font-size:17px; font-weight:800; box-shadow:0 6px 16px rgba(226,35,26,.28); }
@@ -86,8 +91,9 @@ const P = {
   date:qs.get('date')||'', ret:qs.get('returnDate')||'', name:qs.get('name')||'', price:qs.get('price')||'',
 };
 const app = document.getElementById('app');
-let TOUR=null, DEPS=[], selIdx=-1;
+let TOUR=null, DEPS=[], selIdx=-1, cfg=null;
 const otp = { sent:false, token:'', target:'', verified:false };
+const pp = { rows:0, files:{} }; // files: { rowId: {name,url} }
 
 (async function init(){
   try{
@@ -106,6 +112,7 @@ const otp = { sent:false, token:'', target:'', verified:false };
     }
     DEPS = (TOUR&&TOUR.deps)?TOUR.deps:[];
     if(P.date) selIdx = DEPS.findIndex(d=>sameDate(d.date,P.date));
+    fetch('/api/public-config').then(r=>r.json()).then(c=>{cfg=c;}).catch(()=>{});
     renderForm();
   }catch(e){ app.innerHTML='<div class="err">โหลดข้อมูลทัวร์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</div>'; }
 })();
@@ -154,6 +161,11 @@ function renderForm(){
       <label>เลขพาสปอร์ต (ถ้ามี)</label>
       <input name="passportNo" placeholder="กรอกภายหลังได้">
 
+      <label>แนบไฟล์พาสปอร์ต / รูปถ่าย (ถ้ามี)</label>
+      <div id="ppList"></div>
+      <button type="button" class="btn btn-line" id="ppAdd" style="margin-top:8px">＋ เพิ่มไฟล์</button>
+      <div class="hint">แนบสำเนาพาสปอร์ตของผู้เดินทางแต่ละท่านได้ (JPG / PNG / PDF) · กด "เพิ่มไฟล์" เพื่อแนบทีละไฟล์</div>
+
       <label>หมายเหตุเพิ่มเติม</label>
       <textarea name="note" placeholder="เช่น ขอที่นั่งติดกัน, แพ้อาหาร ฯลฯ"></textarea>
 
@@ -163,6 +175,8 @@ function renderForm(){
     </form>`;
   wireSteppers();
   renderOtp();
+  document.getElementById('ppAdd').addEventListener('click', addPpRow);
+  addPpRow(); // เริ่มด้วย 1 แถว
   document.getElementById('phone').addEventListener('input', ()=>{ // เปลี่ยนเบอร์ → รีเซ็ตการยืนยัน
     const cur = document.getElementById('phone').value.replace(/\D/g,'');
     if(otp.verified && cur!==otp.target){ otp.verified=false; otp.sent=false; otp.token=''; renderOtp(); }
@@ -215,6 +229,42 @@ async function verifyOtp(){
   }catch(e){ btn.disabled=false; btn.textContent='ยืนยัน'; otpMsg(e.message||'รหัสไม่ถูกต้อง',true); }
 }
 
+// ── แนบไฟล์พาสปอร์ตทีละแถว (อัปโหลดขึ้น Supabase Storage) ──
+function addPpRow(){
+  const id = ++pp.rows;
+  const list = document.getElementById('ppList'); if(!list) return;
+  const row = document.createElement('div');
+  row.className = 'pp-row'; row.dataset.id = id;
+  row.innerHTML = `
+    <input type="file" accept="image/*,application/pdf" style="display:none">
+    <button type="button" class="btn btn-line pp-pick">📎 เลือกไฟล์</button>
+    <span class="pp-name"></span>
+    <span class="pp-st"></span>
+    <button type="button" class="pp-rm" title="ลบ">✕</button>`;
+  list.appendChild(row);
+  const input = row.querySelector('input');
+  row.querySelector('.pp-pick').onclick = ()=>input.click();
+  row.querySelector('.pp-rm').onclick = ()=>{ delete pp.files[id]; row.remove(); };
+  input.addEventListener('change', ()=>{ if(input.files&&input.files[0]) uploadPp(id, input.files[0], row); });
+}
+async function uploadPp(id, file, row){
+  const nameEl=row.querySelector('.pp-name'), stEl=row.querySelector('.pp-st'), pickEl=row.querySelector('.pp-pick');
+  nameEl.textContent=file.name; stEl.textContent='⏳'; pickEl.disabled=true;
+  if(!cfg||!cfg.url||!cfg.key){ stEl.textContent='⚠ อัปโหลดไม่ได้'; return; }
+  if(file.size > 15*1024*1024){ stEl.textContent='⚠ ไฟล์ใหญ่เกิน 15MB'; pickEl.disabled=false; return; }
+  try{
+    const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+    const path=`${(P.uid||'web')}_${Date.now()}-${safe}`;
+    const r=await fetch(`${cfg.url}/storage/v1/object/passports/${path}`,{
+      method:'POST',
+      headers:{ apikey:cfg.key, Authorization:'Bearer '+cfg.key, 'Content-Type':file.type||'application/octet-stream', 'x-upsert':'false' },
+      body:file });
+    if(!r.ok) throw new Error(String(r.status));
+    pp.files[id]={ name:safe, url:`${cfg.url}/storage/v1/object/public/passports/${path}` };
+    stEl.textContent='✅';
+  }catch(e){ stEl.textContent='⚠ ไม่สำเร็จ'; pickEl.disabled=false; delete pp.files[id]; }
+}
+
 function stepper(nm,label,def,cls){
   return `<div class="${cls||''}"><label style="margin-top:0">${label}</label>
     <div class="stepper">
@@ -248,11 +298,12 @@ async function submit(e){
   } else { roundLabel=g('roundText'); }
 
   const email=g('email'), isLine=!!P.uid;
+  const driveFiles=Object.values(pp.files).filter(f=>f&&f.url);
   const formData={
     _type:'join-tour', fullName, phone, email,
     tourCode:TOUR?(TOUR.code||''):'', tourName:TOUR?(TOUR.name||''):'',
     depDate, retDate, adults, children, infants, totalPax:adults+children+infants,
-    passportNo:g('passportNo'),
+    passportNo:g('passportNo'), driveFiles,
     note:[g('note'), roundLabel&&!DEPS.length?`รอบที่สนใจ: ${roundLabel}`:'', 'ช่องทาง: '+(isLine?'จองผ่าน LINE':'จองผ่านเว็บ')].filter(Boolean).join(' | '),
     lineUserId:P.uid||'',
   };
