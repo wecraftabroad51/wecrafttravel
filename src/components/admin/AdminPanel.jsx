@@ -849,6 +849,7 @@ function AdminsSection({ currentEmail }) {
 function SuppliersSection({ supplierTours }) {
   const [search, setSearch]     = useState('');
   const [supFilter, setSupFilter] = useState('all');
+  const [viewTour, setViewTour] = useState(null);
   const MONTHS_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
   const fmt = (d) => {
     if (!d) return '-';
@@ -963,9 +964,8 @@ function SuppliersSection({ supplierTours }) {
                           <tbody>
                             {tours.map((tour, i) => {
                               const nextDep = tour.departures?.[0];
-                              const openDetail = () => window.open(`/tours/${tour.id}`, '_blank', 'noopener');
                               return (
-                                <tr key={tour.id} onClick={openDetail} title="คลิกเพื่อดูรายละเอียด (อ่านอย่างเดียว)"
+                                <tr key={tour.id} onClick={() => setViewTour(tour)} title="คลิกเพื่อดูรายละเอียด (อ่านอย่างเดียว)"
                                   className={`border-b border-slate-100 hover:bg-teal-50/50 cursor-pointer transition-colors ${i === tours.length-1 ? 'border-none' : ''}`}>
                                   <td className="px-4 py-2.5">
                                     {tour.image
@@ -995,7 +995,7 @@ function SuppliersSection({ supplierTours }) {
                                     ) : '-'}
                                   </td>
                                   <td className="px-4 py-2.5 text-center">
-                                    <button onClick={e => { e.stopPropagation(); openDetail(); }} title="ดูรายละเอียด"
+                                    <button onClick={e => { e.stopPropagation(); setViewTour(tour); }} title="ดูรายละเอียด"
                                       className="text-teal-600 hover:text-teal-800 inline-flex items-center justify-center">
                                       <Eye className="w-4 h-4" />
                                     </button>
@@ -1014,7 +1014,110 @@ function SuppliersSection({ supplierTours }) {
           })}
         </div>
       )}
+
+      {/* ── Popup รายละเอียดทัวร์ (อ่านอย่างเดียว) ─────────────── */}
+      {viewTour && <SupplierTourModal tour={viewTour} fmt={fmt} onClose={() => setViewTour(null)} />}
     </div>
+  );
+}
+
+// ── Modal รายละเอียดทัวร์ซัพพลายเออร์ (read-only) ────────────────
+function SupplierTourModal({ tour, fmt, onClose }) {
+  const info = [
+    { label: 'รหัสทัวร์',    val: tour.code || '-' },
+    { label: 'ประเทศ',       val: tour.destination?.th || tour.country || '-' },
+    { label: 'ราคาเริ่มต้น',  val: `฿${(tour.price || 0).toLocaleString()}`, red: true },
+    { label: 'จำนวนวัน',     val: `${tour.duration || '-'} วัน / ${tour._night || (tour.duration ? tour.duration - 1 : '-')} คืน` },
+    { label: 'สายการบิน',    val: tour.airline || '-' },
+    { label: 'ระดับโรงแรม',  val: tour._hotelStars ? '⭐'.repeat(tour._hotelStars) : '-' },
+    { label: 'จำนวนรอบเดินทาง', val: `${tour.departures?.length || 0} รอบ` },
+  ];
+  const depStatus = (d) => {
+    if (!d.totalSeats) return { t: 'ว่าง', c: 'bg-green-100 text-green-700' };
+    const a = d.totalSeats - (d.bookedSeats || 0);
+    if (a <= 0) return { t: 'เต็ม', c: 'bg-red-100 text-red-600' };
+    if (a <= 5) return { t: `เหลือ ${a}`, c: 'bg-amber-100 text-amber-700' };
+    return { t: `ว่าง ${a}`, c: 'bg-green-100 text-green-700' };
+  };
+
+  return (
+    <Modal title={`รายละเอียดทัวร์ · ${tour._sourceName || 'ซัพพลายเออร์'}`} onClose={onClose} xl>
+      <div className="space-y-5">
+        {/* Banner */}
+        {tour.image && (
+          <img src={tour.image} alt="" className="w-full max-h-64 object-cover rounded-xl border border-slate-200 bg-slate-100" />
+        )}
+
+        {/* Name */}
+        <div>
+          <div className="flex items-center gap-2 flex-wrap mb-1">
+            <span className="bg-slate-800 text-white text-xs font-bold px-2 py-0.5 rounded-full">{tour._sourceName}</span>
+            {tour.code && <span className="font-mono text-xs bg-slate-100 px-2 py-0.5 rounded text-slate-600">{tour.code}</span>}
+            <span className="inline-flex items-center gap-1 text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full">🔒 อ่านอย่างเดียว (แก้ไขไม่ได้)</span>
+          </div>
+          <h3 className="text-lg font-bold text-slate-800 leading-snug">{tour.name?.th || tour.name?.en}</h3>
+        </div>
+
+        {/* Info grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {info.map(x => (
+            <div key={x.label} className="bg-slate-50 rounded-xl px-3 py-2 border border-slate-100">
+              <div className="text-[11px] text-slate-400 font-semibold uppercase tracking-wide">{x.label}</div>
+              <div className={`text-sm font-bold ${x.red ? 'text-red-600' : 'text-slate-700'}`}>{x.val}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* PDF */}
+        {tour.pdfUrl && (
+          <a href={tour.pdfUrl} target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold px-4 py-2 rounded-xl">
+            📄 ดาวน์โหลดโปรแกรม (PDF)
+          </a>
+        )}
+
+        {/* Departures */}
+        {tour.departures?.length > 0 && (
+          <div>
+            <div className="font-semibold text-slate-700 text-sm mb-2">วันเดินทางและราคา ({tour.departures.length} รอบ)</div>
+            <div className="border border-slate-200 rounded-xl overflow-hidden overflow-x-auto max-h-80 overflow-y-auto">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0">
+                  <tr className="bg-slate-100 text-slate-600 text-xs">
+                    <th className="px-3 py-2 text-left">วันเดินทาง</th>
+                    <th className="px-3 py-2 text-right">ผู้ใหญ่</th>
+                    <th className="px-3 py-2 text-right">เด็กทารก</th>
+                    <th className="px-3 py-2 text-right">พักเดี่ยว</th>
+                    <th className="px-3 py-2 text-right">จอยแลนด์</th>
+                    <th className="px-3 py-2 text-center">สถานะ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tour.departures.map((d, idx) => {
+                    const st = depStatus(d);
+                    const money = (n) => n ? Number(n).toLocaleString() : '-';
+                    return (
+                      <tr key={d.periodId || idx} className="border-t border-slate-100">
+                        <td className="px-3 py-2 font-medium text-slate-700 whitespace-nowrap">
+                          {fmt(d.date)}{d.returnDate ? ` – ${fmt(d.returnDate)}` : ''}
+                        </td>
+                        <td className="px-3 py-2 text-right font-bold text-red-600">{money(d.price)}</td>
+                        <td className="px-3 py-2 text-right text-slate-500">{money(d.infantPrice)}</td>
+                        <td className="px-3 py-2 text-right text-slate-500">{d.singleSupplement ? `+${money(d.singleSupplement)}` : '-'}</td>
+                        <td className="px-3 py-2 text-right text-slate-500">{money(d.joinPrice)}</td>
+                        <td className="px-3 py-2 text-center">
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${st.c}`}>{st.t}</span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </Modal>
   );
 }
 
