@@ -218,6 +218,10 @@ function bookUrl(id, iso, uid) {
   const q = new URLSearchParams({ id: id || '', iso: iso || '', uid: uid || '' });
   return `${SITE}/line-book.html?${q.toString()}`;
 }
+// ลิงก์ PDF ผ่านพร็อกซีเรา — ซ่อน URL ต้นทางของซัพพลายเออร์
+function pdfProxy(pdf) {
+  return `${SITE}/api/tour-pdf?u=${Buffer.from(String(pdf || '')).toString('base64url')}`;
+}
 // ค้นทัวร์จากรหัสโปรแกรม (ยืดหยุ่น — ตัดขีด/เว้นวรรคออกเทียบ)
 async function findByCode(q) {
   const norm = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -284,7 +288,7 @@ function renderDetail(t, uid) {
   const footerBtns = [
     { type: 'button', style: 'primary', color: '#e2231a', height: 'sm', action: { type: 'uri', label: '🎫 จองทัวร์นี้', uri: bookUrl(id, iso, uid) } },
   ];
-  if (t.pdf) footerBtns.push({ type: 'button', style: 'secondary', height: 'sm', action: { type: 'uri', label: 'โปรแกรมเต็ม (PDF)', uri: t.pdf } });
+  if (t.pdf) footerBtns.push({ type: 'button', style: 'secondary', height: 'sm', action: { type: 'uri', label: 'โปรแกรมเต็ม (PDF)', uri: pdfProxy(t.pdf) } });
   footerBtns.push({ type: 'button', style: 'link', height: 'sm', action: { type: 'postback', label: '← ดูทัวร์อื่น', data: pb({ s: 'tours', iso, city: '' }), displayText: 'ดูทัวร์อื่น' } });
 
   return {

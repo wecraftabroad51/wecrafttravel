@@ -1,0 +1,52 @@
+// ── พร็อกซี PDF โปรแกรมทัวร์ ผ่านโดเมนเราเอง (ซ่อน URL ต้นทางของซัพพลายเออร์) ──
+// เปิดที่ /api/tour-pdf?u=<base64url ของ url ต้นทาง>
+// ใช้ Edge runtime + streaming เพราะ PDF บางไฟล์ใหญ่ >4.5MB (เกินลิมิต serverless)
+export const config = { runtime: 'edge' };
+
+// อนุญาตเฉพาะโดเมนซัพพลายเออร์ที่รู้จัก (กัน SSRF / open-proxy)
+const ALLOW = [
+  'probooking.co.th',
+  'wondergrouptour.com',
+  'booking.gs25tour.com',
+  'zegotravel.com',
+  'drive.google.com',
+  'drive.usercontent.google.com',
+];
+
+function b64urlDecode(s) {
+  s = String(s || '').replace(/-/g, '+').replace(/_/g, '/');
+  while (s.length % 4) s += '=';
+  return atob(s); // URL เป็น ASCII → ปลอดภัย
+}
+
+export default async function handler(req) {
+  const enc = new URL(req.url).searchParams.get('u') || '';
+  let target;
+  try { target = b64urlDecode(enc); } catch { return new Response('bad ref', { status: 400 }); }
+
+  let host;
+  try { host = new URL(target).host.toLowerCase(); } catch { return new Response('bad url', { status: 400 }); }
+  if (!ALLOW.some(h => host === h || host.endsWith('.' + h))) return new Response('forbidden', { status: 403 });
+
+  // Google Drive: ลิงก์ /view คืนหน้า HTML → แปลงเป็น direct download
+  if (host.includes('drive.google.com') || host.includes('drive.usercontent.google.com')) {
+    const m = target.match(/[-\w]{25,}/);
+    if (m) target = 'https://drive.google.com/uc?export=download&id=' + m[0];
+  }
+
+  let upstream;
+  try { upstream = await fetch(target, { redirect: 'follow' }); }
+  catch { return new Response('upstream error', { status: 502 }); }
+  if (!upstream.ok || !upstream.body) return new Response('ไม่พบไฟล์', { status: 502 });
+
+  // สตรีมกลับเป็น PDF โดยไม่โชว์ปลายทาง (address bar เห็นแค่ wecraft-travel.com)
+  return new Response(upstream.body, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'inline; filename="wecraft-travel-tour.pdf"',
+      'Cache-Control': 's-maxage=3600, stale-while-revalidate=86400',
+      'Access-Control-Allow-Origin': '*',
+    },
+  });
+}
