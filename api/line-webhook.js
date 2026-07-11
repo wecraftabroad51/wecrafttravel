@@ -180,10 +180,20 @@ function infoRow(label, val) {
     { type: 'text', text: String(val), size: 'sm', color: '#333333', flex: 4, weight: 'bold', wrap: true, align: 'end' } ] };
 }
 async function tourDetail(iso, id) {
-  const list = await fetchFeed(iso);
-  const t = list.find(x => x.id === id);
+  const t = (await fetchFeed(iso)).find(x => x.id === id);
   if (!t) return { type: 'text', text: 'ไม่พบข้อมูลทัวร์นี้ ลองเลือกใหม่นะครับ 🙏' };
-
+  return renderDetail(t);
+}
+// ค้นทัวร์จากรหัสโปรแกรม (พิมพ์รหัสในแชท)
+async function findByCode(q) {
+  const Q = String(q).trim().toUpperCase();
+  const all = await fetchFeed('');
+  return all.find(t => (t.code || '').toUpperCase() === Q)
+    || (Q.length >= 4 ? all.find(t => (t.code || '').toUpperCase().includes(Q)) : null);
+}
+function renderDetail(t) {
+  const iso = t.country || '';
+  const id = t.id;
   const body = [
     { type: 'text', text: t.name, weight: 'bold', size: 'md', wrap: true },
   ];
@@ -329,6 +339,14 @@ module.exports = async function handler(req, res) {
         const hitIso = Object.keys(CODE_TH).sort((a, b) => CODE_TH[b].length - CODE_TH[a].length).find(iso => text.includes(CODE_TH[iso]));
         if (hitIso) return reply(ev.replyToken, await cityChooser(hitIso));
         if (/จองจอยทัวร์|จอยทัวร์|ดูทัวร์|เลือกทัวร์|ทัวร์/i.test(text)) return reply(ev.replyToken, await countryChooser());
+
+        // 2) พิมพ์รหัสโปรแกรมทัวร์ → แสดงทัวร์นั้นเลย
+        if (/^[A-Za-z0-9][\w-]{3,}$/.test(text)) {
+          const t = await findByCode(text);
+          if (t) return reply(ev.replyToken, renderDetail(t));
+          return reply(ev.replyToken, { type: 'text', text: `ไม่พบทัวร์รหัส "${text}" ครับ 🙏\nลองตรวจสอบรหัสอีกครั้ง หรือกดเมนู "จองจอยทัวร์" เพื่อเลือกทัวร์` });
+        }
+
         return reply(ev.replyToken, { type: 'text', text: 'สนใจดูทัวร์ กดเมนู "จองจอยทัวร์" ด้านล่างได้เลยครับ 😊' });
       }
     } catch (e) { console.error('[LINE] event error:', e.message); }
