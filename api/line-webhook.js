@@ -124,8 +124,9 @@ async function submitBooking(st) {
 
 // ── การ์ดเลือกประเทศ (รูปสถานที่จริง + ธง) ───────────────────────
 function heroImg(image, iso) {
+  // URL แลนด์มาร์ก (Wikimedia) encode สมบูรณ์แล้ว → ห้ามผ่าน img()/encodeURI ซ้ำ (จะ double-encode %→%25 แล้ว 404)
   return image
-    ? { type: 'image', url: img(image), size: 'full', aspectRatio: '20:13', aspectMode: 'cover' }
+    ? { type: 'image', url: image, size: 'full', aspectRatio: '20:13', aspectMode: 'cover' }
     : { type: 'image', url: `https://flagcdn.com/w400/${iso.toLowerCase()}.png`, size: 'full', aspectRatio: '20:13', aspectMode: 'fit', backgroundColor: '#f4f4f5' };
 }
 function countryBubble(iso, n) {
