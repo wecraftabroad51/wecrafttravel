@@ -415,7 +415,7 @@ module.exports = async function handler(req, res) {
         if (!/[฀-๿]/.test(text) && text.replace(/\s/g, '').length >= 3) {
           const t = await findByCode(text);
           if (t) return reply(ev.replyToken, renderDetail(t, uid));
-          return reply(ev.replyToken, { type: 'text', text: `ไม่พบทัวร์รหัส "${text}" ครับ 🙏\nลองตรวจสอบรหัสอีกครั้ง หรือกดเมนู "จองจอยทัวร์" เพื่อเลือกทัวร์` });
+          return reply(ev.replyToken, { type: 'text', text: `ไม่พบทัวร์รหัส "${text}" ที่เปิดจองอยู่ครับ 🙏\n\nอาจเป็นเพราะรอบนี้ปิดรับ/เดินทางไปแล้ว หรือพิมพ์รหัสไม่ตรง\nลองกดเมนู "จองจอยทัวร์" เพื่อดูทัวร์ที่เปิดจองล่าสุดได้เลยครับ 😊` });
         }
 
         return reply(ev.replyToken, { type: 'text', text: 'สนใจดูทัวร์ กดเมนู "จองจอยทัวร์" ด้านล่างได้เลยครับ 😊' });

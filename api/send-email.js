@@ -229,6 +229,35 @@ async function sendCustomerLine(formData, seqNo) {
     .catch(e  => console.error('Customer LINE FAILED:', e.message));
 }
 
+// ── บันทึกการจอง join-tour ลง Supabase (ให้โผล่ในหลังบ้าน AdminPanel) ──
+async function insertBookingRow(formData, seqNo) {
+  const f = formData || {};
+  if (f._type !== 'join-tour') return;
+  const url = process.env.VITE_SUPABASE_URL;
+  const key = process.env.VITE_SUPABASE_ANON_KEY;
+  if (!url || !key) { console.log('Supabase booking skipped: no config'); return; }
+  const channel = f.lineUserId ? 'LINE' : 'เว็บ';
+  const row = {
+    name:         f.fullName || '',
+    email:        f.email || '',
+    phone:        f.phone || '',
+    tour_id:      f.tourCode || '',
+    tour_name:    { th: f.tourName || '', en: f.tourName || '' },
+    tier:         seqNo ? `${channel} · ${seqNo}` : channel,
+    travelers:    Number(f.totalPax) || (Number(f.adults || 0) + Number(f.children || 0) + Number(f.infants || 0)) || 1,
+    departure_id: f.depDate || '',
+    total_price:  0,
+    status:       'pending',
+    date:         f.depDate || '',
+  };
+  const r = await fetch(`${url}/rest/v1/bookings`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: key, Authorization: `Bearer ${key}`, Prefer: 'return=minimal' },
+    body: JSON.stringify(row),
+  });
+  if (!r.ok) throw new Error(`Supabase ${r.status}: ${(await r.text()).slice(0, 160)}`);
+}
+
 // ── Send Email ─────────────────────────────────────────────────
 async function sendEmail(subject, html, seqNo, sheetUrl) {
   const user = process.env.GMAIL_USER;
@@ -620,6 +649,12 @@ module.exports = async function handler(req, res) {
       ? sendCustomerLine(formData, seqNo)
           .then(() => { results.customerLine = 'ok'; })
           .catch(e => { results.customerLine = e.message; console.error('CustomerLine:', e.message); })
+      : Promise.resolve(),
+
+    (formData && formData._type === 'join-tour')
+      ? insertBookingRow(formData, seqNo)
+          .then(() => { results.booking = 'ok'; })
+          .catch(e => { results.booking = e.message; console.error('Booking insert:', e.message); })
       : Promise.resolve(),
   ]);
 
