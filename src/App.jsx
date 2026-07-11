@@ -37,6 +37,7 @@ import TicketBookingPage from './components/pages/TicketBookingPage.jsx';
 import JoinTourPage from './components/pages/JoinTourPage.jsx';
 import CarRentalPage from './components/pages/CarRentalPage.jsx';
 import LegalPage from './components/pages/LegalPage.jsx';
+import CardExplorePage from './components/pages/CardExplorePage.jsx';
 
 const SETTINGS_DEFAULT = {
   contact: { address: { th: '', en: '' }, phone: '', email: '', line: '' },
@@ -340,10 +341,11 @@ function AppInner() {
   // Safety: กันหน้าโหลดค้าง (เช่นเน็ตมือถือแฮงค์) — ปิด splash ภายใน 10 วิเสมอ
   useEffect(() => { const t = setTimeout(() => setLoading(false), 10000); return () => clearTimeout(t); }, []);
 
-  // รีเฟรช/เปิดลิงก์ตรง → เด้งกลับหน้าแรกเสมอ (ยกเว้นหลังบ้าน /admin)
+  // รีเฟรช/เปิดลิงก์ตรง → เด้งกลับหน้าแรก (ยกเว้น /admin และตอนเปิดในแอป LINE/LIFF)
   useEffect(() => {
     const p = window.location.pathname;
-    if (p !== '/' && !p.startsWith('/admin')) routerNav('/', { replace: true });
+    const inLine = /Line\//i.test(navigator.userAgent) || window.location.search.includes('liff');
+    if (p !== '/' && !p.startsWith('/admin') && !inLine) routerNav('/', { replace: true });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Load supplier tours — โหลดทีละเจ้า เจ้าไหนเสร็จโชว์ก่อน ────
@@ -469,6 +471,7 @@ function AppInner() {
       'ticket-booking': '/ticket-booking',
       'join-tour':      '/join-tour',
       'car-rental':     '/car-rental',
+      cards:            '/cards',
       'legal-privacy':  '/privacy',
       'legal-terms':    '/terms',
       'legal-booking':  '/booking-terms',
@@ -739,6 +742,7 @@ function AppInner() {
           <Route path="/ticket-booking" element={<TicketBookingPage {...pageProps} />} />
           <Route path="/join-tour"     element={<JoinTourPage lang={pageProps.lang} navigate={navigate} />} />
           <Route path="/car-rental"     element={<CarRentalPage {...pageProps} />} />
+          <Route path="/cards"          element={<CardExplorePage {...pageProps} />} />
           <Route path="/privacy"        element={<LegalPage lang={lang} navigate={navigate} settings={settings} type="privacy" />} />
           <Route path="/terms"          element={<LegalPage lang={lang} navigate={navigate} settings={settings} type="terms" />} />
           <Route path="/booking-terms"  element={<LegalPage lang={lang} navigate={navigate} settings={settings} type="booking" />} />
