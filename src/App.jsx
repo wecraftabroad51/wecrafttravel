@@ -345,7 +345,7 @@ function AppInner() {
   useEffect(() => {
     const p = window.location.pathname;
     const inLine = /Line\//i.test(navigator.userAgent) || window.location.search.includes('liff');
-    if (p !== '/' && !p.startsWith('/admin') && !inLine) routerNav('/', { replace: true });
+    if (p !== '/' && !p.startsWith('/admin') && p !== '/cards' && !inLine) routerNav('/', { replace: true });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Load supplier tours — โหลดทีละเจ้า เจ้าไหนเสร็จโชว์ก่อน ────
