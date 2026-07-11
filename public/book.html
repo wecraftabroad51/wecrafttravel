@@ -92,7 +92,8 @@ const P = {
 };
 const app = document.getElementById('app');
 let TOUR=null, DEPS=[], selIdx=-1, cfg=null;
-const otp = { sent:false, token:'', target:'', verified:false };
+const otp = { sent:false, token:'', target:'', verified:false, cooldown:0 };
+let cdTimer=null;
 const pp = { rows:0, files:{} }; // files: { rowId: {name,url} }
 
 (async function init(){
@@ -192,7 +193,7 @@ function renderOtp(){
     document.getElementById('otpReq').onclick=requestOtp;
   } else {
     a.innerHTML=`
-      <div class="hint" style="margin-top:8px">ส่งรหัส 6 หลักไปที่ ${esc(otp.target)} แล้ว (หมดอายุใน 5 นาที)</div>
+      <div class="hint" style="margin-top:8px">📨 ส่งรหัส 6 หลักไปที่ ${esc(otp.target)} แล้ว · SMS อาจใช้เวลา 10-30 วินาที (หมดอายุใน 5 นาที)</div>
       <div class="otp-row" style="margin-top:6px">
         <input id="otpCode" inputmode="numeric" maxlength="6" placeholder="______">
         <button type="button" class="btn btn-teal" id="otpVerify">ยืนยัน</button>
@@ -202,20 +203,40 @@ function renderOtp(){
     document.getElementById('otpCode').addEventListener('input',e=>{ e.target.value=e.target.value.replace(/\D/g,'').slice(0,6); });
     document.getElementById('otpVerify').onclick=verifyOtp;
     document.getElementById('otpResend').onclick=requestOtp;
+    tickCooldown(); // ถ้ายัง cooldown อยู่ ให้ปุ่มขอใหม่แสดงนับถอยหลัง
   }
+}
+// นับถอยหลังปุ่ม "ขอรหัสใหม่" — อัปเดตเฉพาะปุ่ม ไม่ re-render (กันช่องกรอกรหัสหาย)
+function tickCooldown(){
+  const b=document.getElementById('otpResend'); if(!b) return;
+  if(otp.cooldown>0){ b.disabled=true; b.textContent=`ขอรหัสใหม่ได้ใน ${otp.cooldown} วิ`; }
+  else { b.disabled=false; b.textContent='ขอรหัสใหม่'; }
+}
+function startCooldown(secs){
+  otp.cooldown=secs; tickCooldown();
+  clearInterval(cdTimer);
+  cdTimer=setInterval(()=>{ otp.cooldown--; tickCooldown(); if(otp.cooldown<=0) clearInterval(cdTimer); },1000);
 }
 function otpMsg(m,warn){ const e=document.getElementById('otpMsg'); if(e) e.innerHTML = m?`<div class="${warn?'warnmsg':'okmsg'}">${m}</div>`:''; }
 
 async function requestOtp(){
+  if(otp.cooldown>0) return; // กัน spam ระหว่างนับถอยหลัง
   const phone=document.getElementById('phone').value.replace(/\D/g,'');
   if(phone.length<9){ otpMsg('กรุณากรอกเบอร์โทรให้ถูกต้องก่อนขอ OTP',true); return; }
+  const isFirst=!otp.sent;
   const btn=document.getElementById('otpReq')||document.getElementById('otpResend'); if(btn){btn.disabled=true;btn.textContent='กำลังส่ง...';}
   try{
     const r=await fetch('/api/otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'send',type:'phone',target:phone})});
     const j=await r.json().catch(()=>({}));
     if(!r.ok) throw new Error(j.error||'ส่ง OTP ไม่สำเร็จ');
-    otp.sent=true; otp.token=j.token; otp.target=phone; renderOtp(); otpMsg('ส่งรหัสแล้ว ตรวจสอบ SMS ได้เลยครับ');
-  }catch(e){ if(btn){btn.disabled=false;} otpMsg(e.message||'ส่ง OTP ไม่สำเร็จ',true); }
+    otp.sent=true; otp.token=j.token; otp.target=phone;
+    if(isFirst) renderOtp();  // สลับเป็นช่องกรอกรหัส (เฉพาะครั้งแรก กันช่องรหัสหาย)
+    startCooldown(30);
+    otpMsg('ส่งรหัสแล้ว รอรับ SMS สักครู่ครับ');
+  }catch(e){
+    if(btn){ btn.disabled=false; btn.textContent = isFirst ? '📲 ขอรหัส OTP ทาง SMS' : 'ขอรหัสใหม่'; }
+    otpMsg(e.message||'ส่ง OTP ไม่สำเร็จ',true);
+  }
 }
 async function verifyOtp(){
   const code=(document.getElementById('otpCode').value||'').trim();

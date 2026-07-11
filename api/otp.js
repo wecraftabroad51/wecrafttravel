@@ -111,6 +111,8 @@ async function sendSMS(phone, otp) {
       console.error('[SMSMKT] Request error:', e.message);
       reject(e);
     });
+    // กัน SMSMKT ค้าง → ไม่ให้คำขอแขวนจน function timeout (ครั้งแรกเหมือนไม่ทำงาน)
+    req.setTimeout(15000, () => req.destroy(new Error('SMSMKT ตอบช้าเกินไป กรุณาลองใหม่')));
     req.write(postData);
     req.end();
   });
