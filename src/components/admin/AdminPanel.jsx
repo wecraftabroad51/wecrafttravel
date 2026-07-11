@@ -479,18 +479,37 @@ export default function AdminPanel(props) {
   // ── ตรวจสอบ session + สิทธิ์ ──────────────────────────────────
   useEffect(() => {
     let active = true;
-    const evalUser = async (u) => {
+    // กำลัง redirect กลับจาก Google → รอ session ห้ามโชว์หน้า login แว๊บ
+    const returningFromOAuth = /[#&](access_token|error)=/.test(window.location.hash);
+
+    const evalUser = async (u, event) => {
       if (!active) return;
       setAuthUser(u);
-      if (!u) { setAuthStatus('anon'); setAdminRole(null); return; }
+      if (!u) {
+        // ระหว่างรอ OAuth ยังไม่ตัดสินว่า anon (กันหน้า login แว๊บ)
+        if (returningFromOAuth && event !== 'SIGNED_OUT') return;
+        setAuthStatus('anon'); setAdminRole(null);
+        return;
+      }
       const res = await checkAdminAccess(u.email);
       if (!active) return;
       if (res.ok) { setAuthStatus('ok'); setAdminRole(res.role); }
       else        { setAuthStatus('denied'); setAdminRole(null); }
+      // ล้าง token ออกจาก URL ให้สะอาด
+      if (window.location.hash) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
     };
-    getCurrentUser().then(evalUser);
+
     const unsub = onAuthChange(evalUser);
-    return () => { active = false; unsub(); };
+    getCurrentUser().then(u => evalUser(u, 'INITIAL'));
+
+    // กันค้างหน้าโหลด ถ้า OAuth ล้มเหลว/ช้าเกิน 8 วิ
+    const safety = setTimeout(() => {
+      if (active) setAuthStatus(s => (s === 'loading' ? 'anon' : s));
+    }, 8000);
+
+    return () => { active = false; unsub(); clearTimeout(safety); };
   }, []);
 
   const handleSignIn = async () => {
@@ -499,6 +518,21 @@ export default function AdminPanel(props) {
     catch (e) { alert(e.message || 'เข้าสู่ระบบไม่สำเร็จ'); setSigningIn(false); }
   };
   const handleSignOut = async () => { await signOut(); onLogout(); };
+
+  // ── หน้า Loading เต็มจอ (กัน flash การ์ด login) ────────────────
+  if (authStatus === 'loading') {
+    return (
+      <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center gap-4">
+        <div className="w-14 h-14 bg-teal-700 rounded-2xl flex items-center justify-center shadow-lg">
+          <Shield className="w-7 h-7 text-white" />
+        </div>
+        <div className="flex items-center gap-2 text-slate-500 text-sm">
+          <span className="inline-block w-4 h-4 border-2 border-slate-300 border-t-teal-600 rounded-full animate-spin" />
+          กำลังตรวจสอบสิทธิ์…
+        </div>
+      </div>
+    );
+  }
 
   // ── หน้า Login / สถานะ ─────────────────────────────────────────
   if (authStatus !== 'ok') {
@@ -510,10 +544,6 @@ export default function AdminPanel(props) {
           </div>
           <h1 className="text-xl font-bold text-slate-800 mb-1">WeCraft Travel Admin</h1>
           <p className="text-sm text-slate-500 mb-6">ระบบจัดการหลังบ้าน</p>
-
-          {authStatus === 'loading' && (
-            <div className="py-4 text-slate-400 text-sm">กำลังตรวจสอบสิทธิ์…</div>
-          )}
 
           {authStatus === 'anon' && (
             <button onClick={handleSignIn} disabled={signingIn}
