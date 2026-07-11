@@ -1,0 +1,63 @@
+// ── รูปแลนด์มาร์กประเทศ/เมือง (จาก Wikimedia Commons — ฟรี เสถียร) ──
+// ใช้ในการ์ดเลือกประเทศ/เมืองของ LINE bot (แทนรูปแบนเนอร์ทัวร์)
+// เมืองที่ไม่มีในนี้ → fallback ไปรูปประเทศ · ประเทศที่ไม่มี → ธง
+
+const COUNTRY_IMG = {
+  JP: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/View_of_Mount_Fuji_from_%C5%8Cwakudani_20211202.jpg/640px-View_of_Mount_Fuji_from_%C5%8Cwakudani_20211202.jpg',
+  CN: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/The_Great_Wall_of_China_at_Jinshanling-edit.jpg/640px-The_Great_Wall_of_China_at_Jinshanling-edit.jpg',
+  KR: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/%EA%B4%91%ED%99%94%EB%AC%B8_%EC%9B%94%EB%8C%80.jpg/640px-%EA%B4%91%ED%99%94%EB%AC%B8_%EC%9B%94%EB%8C%80.jpg',
+  TW: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Jiuqudong_2003-01.jpg/640px-Jiuqudong_2003-01.jpg',
+  HK: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Hong_Kong_Skyline_viewed_from_Victoria_Peak.jpg/640px-Hong_Kong_Skyline_viewed_from_Victoria_Peak.jpg',
+  VN: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Ha_Long_Bay_in_2019.jpg/640px-Ha_Long_Bay_in_2019.jpg',
+  SG: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Marina_Bay_Sands_%28I%29.jpg/640px-Marina_Bay_Sands_%28I%29.jpg',
+  MM: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Shwedagon_Pagoda_2017.jpg/640px-Shwedagon_Pagoda_2017.jpg',
+  IN: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Taj_Mahal_%28Edited%29.jpeg/640px-Taj_Mahal_%28Edited%29.jpeg',
+  KZ: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Astana_Esil_view.jpg/640px-Astana_Esil_view.jpg',
+  TR: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Hagia_Sophia_%28228968325%29.jpeg/640px-Hagia_Sophia_%28228968325%29.jpeg',
+  GE: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/View_of_Tbilisi_from_Tabori_Church_2023-10-08-2.jpg/640px-View_of_Tbilisi_from_Tabori_Church_2023-10-08-2.jpg',
+  EG: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Pyramids_of_the_Giza_Necropolis.jpg/640px-Pyramids_of_the_Giza_Necropolis.jpg',
+  FR: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques%2C_Paris_ao%C3%BBt_2014_%282%29.jpg/640px-La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques%2C_Paris_ao%C3%BBt_2014_%282%29.jpg',
+  IT: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Colosseo_2020.jpg/640px-Colosseo_2020.jpg',
+  GB: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Elizabeth_Tower%2C_June_2022.jpg/640px-Elizabeth_Tower%2C_June_2022.jpg',
+  EU: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Prague_%286365119737%29.jpg/640px-Prague_%286365119737%29.jpg',
+  AE: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Burj_Khalifa_%28worlds_tallest_building%29_and_the_Dubai_skyline_%2825781049892%29.jpg/640px-Burj_Khalifa_%28worlds_tallest_building%29_and_the_Dubai_skyline_%2825781049892%29.jpg',
+};
+
+const CITY_IMG = {
+  'เฉิงตู': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/%E9%9B%AA%E5%B1%B1%E4%B8%8B%E7%9A%84%E6%88%90%E9%83%BD%E5%B8%82%E5%A4%A9%E9%99%85%E7%BA%BF_Chengdu_skyline_with_snow_capped_mountains.jpg/640px-%E9%9B%AA%E5%B1%B1%E4%B8%8B%E7%9A%84%E6%88%90%E9%83%BD%E5%B8%82%E5%A4%A9%E9%99%85%E7%BA%BF_Chengdu_skyline_with_snow_capped_mountains.jpg',
+  'เซี่ยงไฮ้': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Huangpu_Park_20124-Shanghai_%2832208802494%29.jpg/640px-Huangpu_Park_20124-Shanghai_%2832208802494%29.jpg',
+  'ฉงชิ่ง': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Chongqing_Nightscape.jpg/640px-Chongqing_Nightscape.jpg',
+  'ชิงเต่า': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Qingdao_Harbour_51341-Qingdao_%2849055637186%29.jpg/640px-Qingdao_Harbour_51341-Qingdao_%2849055637186%29.jpg',
+  'ปักกิ่ง': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Skyline_of_Beijing_CBD_with_B-5906_approaching_%2820211016171955%29_%281%29.jpg/640px-Skyline_of_Beijing_CBD_with_B-5906_approaching_%2820211016171955%29_%281%29.jpg',
+  'จางเจียเจี้ย': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/1_tianzishan_wulingyuan_zhangjiajie_2012.jpg/640px-1_tianzishan_wulingyuan_zhangjiajie_2012.jpg',
+  'คุนหมิง': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/%E4%BA%94%E5%8D%8E%E5%8C%BA%E4%B8%8E%E7%9B%98%E9%BE%99%E5%8C%BA%E5%A4%A9%E9%99%85%E7%BA%BF_-_%E8%88%AA%E6%8B%8D_-_2025-05-16_03.jpg/640px-%E4%BA%94%E5%8D%8E%E5%8C%BA%E4%B8%8E%E7%9B%98%E9%BE%99%E5%8C%BA%E5%A4%A9%E9%99%85%E7%BA%BF_-_%E8%88%AA%E6%8B%8D_-_2025-05-16_03.jpg',
+  'จิ่วจ้ายโกว': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/28/1_jiuzhaigou_valley_wu_hua_hai_2011b.jpg/640px-1_jiuzhaigou_valley_wu_hua_hai_2011b.jpg',
+  'ซินเจียง': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Urumqi_Skyline_July_2019.jpg/640px-Urumqi_Skyline_July_2019.jpg',
+  'ซีอาน': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/51714-Terracota-Army.jpg/640px-51714-Terracota-Army.jpg',
+  'ลี่เจียง': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Lijiang_-_panoramio_%286%29.jpg/640px-Lijiang_-_panoramio_%286%29.jpg',
+  'ฮาร์บิน': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/West_facade_of_St._Sophia_Cathedral%2C_Harbin_%2820230721150450%29.jpg/640px-West_facade_of_St._Sophia_Cathedral%2C_Harbin_%2820230721150450%29.jpg',
+  'แชงกรีล่า': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/%E6%9D%BE%E8%B5%9E%E6%9E%97%E5%AF%BA_-_%E5%85%A8%E6%99%AF_-_2025-05-07_09_%28cropped%29.jpg/640px-%E6%9D%BE%E8%B5%9E%E6%9E%97%E5%AF%BA_-_%E5%85%A8%E6%99%AF_-_2025-05-07_09_%28cropped%29.jpg',
+  'กวางโจว': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Canton_Tower_20241027_%28cropped%29.jpg/640px-Canton_Tower_20241027_%28cropped%29.jpg',
+  'ซูโจว': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/%E4%B8%9C%E6%96%B9%E4%B9%8B%E9%97%A81.jpg/640px-%E4%B8%9C%E6%96%B9%E4%B9%8B%E9%97%A81.jpg',
+  'หางโจว': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/West_Lake%2C_Hangzhou_2025.jpg/640px-West_Lake%2C_Hangzhou_2025.jpg',
+  'ฉางซา': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/%E7%88%B1%E6%99%9A%E4%BA%AD%EF%BC%88%E7%A7%8B-%E4%BE%A7%E9%9D%A2%EF%BC%89.jpg/640px-%E7%88%B1%E6%99%9A%E4%BA%AD%EF%BC%88%E7%A7%8B-%E4%BE%A7%E9%9D%A2%EF%BC%89.jpg',
+  'โตเกียว': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Skyscrapers_of_Shinjuku_2009_January.jpg/640px-Skyscrapers_of_Shinjuku_2009_January.jpg',
+  'โอซาก้า': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Osaka_Castle_03bs3200.jpg/640px-Osaka_Castle_03bs3200.jpg',
+  'ฟูจิ': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/View_of_Mount_Fuji_from_%C5%8Cwakudani_20211202.jpg/640px-View_of_Mount_Fuji_from_%C5%8Cwakudani_20211202.jpg',
+  'ฮอกไกโด': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/SapporoCity_Skylines2020.jpg/640px-SapporoCity_Skylines2020.jpg',
+  'เกียวโต': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Kiyomizu.jpg/640px-Kiyomizu.jpg',
+  'ชิราคาวาโก': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Ogi_Shirakawa-g%C5%8D%2C_Gifu%2C_Japan.jpg/640px-Ogi_Shirakawa-g%C5%8D%2C_Gifu%2C_Japan.jpg',
+  'ทาคายาม่า': 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Takayama%27s_Early_Winter_Welcome_%28NE%29.jpg/640px-Takayama%27s_Early_Winter_Welcome_%28NE%29.jpg',
+  'โอกินาว่า': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Naha_Okinawa_Japan_Shuri-Castle-01.jpg/640px-Naha_Okinawa_Japan_Shuri-Castle-01.jpg',
+  'คามาคุระ': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/230128_Kamakura_Daibutsu_Japan04s3.jpg/640px-230128_Kamakura_Daibutsu_Japan04s3.jpg',
+  'ไทจง': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Kaohsiung_Skyline_2020_%28cropped%29.jpg/640px-Kaohsiung_Skyline_2020_%28cropped%29.jpg',
+  'เกาสง': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Kaohsiung_Skyline_2020_%28cropped%29.jpg/640px-Kaohsiung_Skyline_2020_%28cropped%29.jpg',
+  'ฮัวเหลียน': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Jiuqudong_2003-01.jpg/640px-Jiuqudong_2003-01.jpg',
+  'ฟูก๊วก': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Bai-sao-phu-quoc-tuonglamphotos.jpg/640px-Bai-sao-phu-quoc-tuonglamphotos.jpg',
+  'ดาลัด': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Xuan_Huong_Lake_11.jpg/640px-Xuan_Huong_Lake_11.jpg',
+  'ฮาลอง': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Ha_Long_Bay_in_2019.jpg/640px-Ha_Long_Bay_in_2019.jpg',
+  'โซล': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/%EA%B4%91%ED%99%94%EB%AC%B8_%EC%9B%94%EB%8C%80.jpg/640px-%EA%B4%91%ED%99%94%EB%AC%B8_%EC%9B%94%EB%8C%80.jpg',
+  'เชจู': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Jeju_Island.jpg/640px-Jeju_Island.jpg',
+};
+
+module.exports = { COUNTRY_IMG, CITY_IMG };

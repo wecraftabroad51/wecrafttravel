@@ -1,5 +1,6 @@
 // ── LINE Webhook — บอทจบในไลน์: ประเทศ→เมือง→ทัวร์→รายละเอียด→จอง ──
 const crypto = require('crypto');
+const { COUNTRY_IMG, CITY_IMG } = require('./_landmarks.js');
 
 const TOKEN    = process.env.LINE_CHANNEL_ACCESS_TOKEN || process.env.LINE_CHANNEL_TOKEN;
 const SECRET   = process.env.LINE_CHANNEL_SECRET;
@@ -127,10 +128,10 @@ function heroImg(image, iso) {
     ? { type: 'image', url: img(image), size: 'full', aspectRatio: '20:13', aspectMode: 'cover' }
     : { type: 'image', url: `https://flagcdn.com/w400/${iso.toLowerCase()}.png`, size: 'full', aspectRatio: '20:13', aspectMode: 'fit', backgroundColor: '#f4f4f5' };
 }
-function countryBubble(iso, n, image) {
+function countryBubble(iso, n) {
   return {
     type: 'bubble',
-    hero: heroImg(image, iso),
+    hero: heroImg(COUNTRY_IMG[iso], iso),
     body: { type: 'box', layout: 'vertical', spacing: 'xs', contents: [
       { type: 'box', layout: 'baseline', spacing: 'sm', contents: [
         { type: 'icon', url: `https://flagcdn.com/w40/${iso.toLowerCase()}.png`, size: 'lg' },
@@ -145,18 +146,17 @@ function countryBubble(iso, n, image) {
 }
 async function countryChooser() {
   const all = await fetchFeed('');
-  const map = {};
-  for (const t of all) { if (!t.country) continue; if (!map[t.country]) map[t.country] = { n: 0, image: '' }; map[t.country].n++; if (!map[t.country].image && t.image) map[t.country].image = t.image; }
-  const list = Object.entries(map).filter(([iso, v]) => CODE_TH[iso] && v.n > 0).sort((a, b) => b[1].n - a[1].n).slice(0, 12);
+  const counts = {}; all.forEach(t => t.country && (counts[t.country] = (counts[t.country] || 0) + 1));
+  const list = Object.entries(counts).filter(([iso, n]) => CODE_TH[iso] && n > 0).sort((a, b) => b[1] - a[1]).slice(0, 12);
   if (!list.length) return { type: 'text', text: 'ขออภัย ตอนนี้ยังไม่มีทัวร์ ลองใหม่อีกครั้งนะครับ 🙏' };
-  return { type: 'flex', altText: 'เลือกประเทศที่อยากไป 🌏', contents: { type: 'carousel', contents: list.map(([iso, v]) => countryBubble(iso, v.n, v.image)) } };
+  return { type: 'flex', altText: 'เลือกประเทศที่อยากไป 🌏', contents: { type: 'carousel', contents: list.map(([iso, n]) => countryBubble(iso, n)) } };
 }
 
 // ── การ์ดเลือกเมือง ──────────────────────────────────────────────
-function cityBubble(iso, label, n, city, image) {
+function cityBubble(iso, label, n, city) {
   return {
     type: 'bubble',
-    hero: heroImg(image, iso),
+    hero: heroImg(CITY_IMG[city] || COUNTRY_IMG[iso], iso),
     body: { type: 'box', layout: 'vertical', spacing: 'xs', contents: [
       { type: 'text', text: `📍 ${label}`, weight: 'bold', size: 'md', color: '#1a2b3c', wrap: true },
       { type: 'text', text: `${n} โปรแกรม`, size: 'sm', color: '#999999' },
@@ -170,13 +170,10 @@ async function cityChooser(iso) {
   const feed = await fetchFeed(iso);
   const kws = REGION[iso];
   let cities = [];
-  if (kws) cities = kws.map(kw => {
-    const matches = feed.filter(t => (t.name || '').includes(kw));
-    return { kw, n: matches.length, image: matches[0]?.image || '' };
-  }).filter(x => x.n > 0).sort((a, b) => b.n - a.n).slice(0, 11);
+  if (kws) cities = kws.map(kw => ({ kw, n: feed.filter(t => (t.name || '').includes(kw)).length })).filter(x => x.n > 0).sort((a, b) => b.n - a.n).slice(0, 11);
   if (!cities.length) return tourCarousel(iso, '', feed);   // ไม่มีเมืองย่อย → ไปทัวร์เลย
-  const bubbles = [cityBubble(iso, `ทัวร์${nameOf(iso)}ทั้งหมด`, feed.length, '', feed[0]?.image || '')];
-  cities.forEach(c => bubbles.push(cityBubble(iso, c.kw, c.n, c.kw, c.image)));
+  const bubbles = [cityBubble(iso, `ทัวร์${nameOf(iso)}ทั้งหมด`, feed.length, '')];
+  cities.forEach(c => bubbles.push(cityBubble(iso, c.kw, c.n, c.kw)));
   return { type: 'flex', altText: `เลือกเมืองใน${nameOf(iso)}`, contents: { type: 'carousel', contents: bubbles.slice(0, 12) } };
 }
 
