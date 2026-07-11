@@ -6,6 +6,8 @@
     "api/parse-tour-program.js": { "maxDuration": 300, "memory": 1024 },
     "api/otp.js":          { "maxDuration": 30 },
     "api/suppliers.js":    { "maxDuration": 15 },
-    "api/notify-admin.js": { "maxDuration": 20 }
+    "api/notify-admin.js": { "maxDuration": 20 },
+    "api/tour-feed.js":    { "maxDuration": 30 },
+    "api/line-webhook.js": { "maxDuration": 30 }
   }
 }
