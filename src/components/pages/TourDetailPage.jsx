@@ -83,7 +83,6 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
   const allTours = [...tours, ...supplierTours];
   const tour = allTours.find(tr => String(tr.id) === String(tourId));
 
-  const [saved, setSaved]           = useState(false);
   const [lightbox, setLightbox]     = useState(null);
   const [reviewForm, setReviewForm] = useState({ name: '', email: '', rating: 5, text: '' });
   const [reviewSent, setReviewSent] = useState(false);
@@ -324,32 +323,6 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
               {/* Divider */}
               <div style={{ height: 1, background: '#f1f5f9', margin: '16px 0' }} />
 
-              {/* PDF Banner (prominent) */}
-              {tour.pdfUrl && (
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  background: 'linear-gradient(135deg,#fff7ed,#ffedd5)',
-                  border: '1.5px solid #fed7aa', borderRadius: 10,
-                  padding: '10px 16px', marginBottom: 14,
-                }}>
-                  <span style={{ fontSize: 31, lineHeight: 1 }}>📄</span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 15, fontWeight: 800, color: '#9a3412', marginBottom: 2 }}>
-                      {th ? 'ไฟล์โปรแกรมทัวร์' : 'Tour Program PDF'}
-                    </div>
-                    <div style={{ fontSize: 14, color: '#c2410c' }}>
-                      {th ? 'ดาวน์โหลดรายละเอียดโปรแกรมฉบับเต็ม' : 'Download the full tour program details'}
-                    </div>
-                  </div>
-                  <a href={tour.pdfUrl} download target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', flexShrink: 0 }}>
-                    <button className="td-btn" style={{ background: 'linear-gradient(135deg,#ea580c,#c2410c)', color: '#fff', padding: '8px 16px', fontSize: 15 }}>
-                      <Icon name="download" size={14} />
-                      {th ? 'ดาวน์โหลด' : 'Download'}
-                    </button>
-                  </a>
-                </div>
-              )}
-
               {/* Action buttons */}
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
                 <a href="tel:0618686889" style={{ textDecoration: 'none' }}>
@@ -361,21 +334,17 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
                 <a href="https://line.me/R/ti/p/@wecrafttravel" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
                   <button className="td-btn" style={{ background: 'linear-gradient(135deg,#06c755,#04a845)', color: '#fff' }}>
                     <Icon name="line" size={15} />
-                    {th ? 'จองไลน์' : 'LINE'}
+                    {th ? 'จองผ่าน LINE' : 'Book via LINE'}
                   </button>
                 </a>
                 {tour.pdfUrl && (
-                  <a href={tour.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                  <a href={tour.pdfUrl} download target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
                     <button className="td-btn" style={{ background: 'linear-gradient(135deg,#e65c00,#c74b00)', color: '#fff' }}>
-                      <Icon name="file-text" size={15} />
-                      {th ? 'ดูโปรแกรมทั้งวัน' : 'Full Program'}
+                      <Icon name="download" size={15} />
+                      {th ? 'ดาวน์โหลดโปรแกรม (PDF)' : 'Download Program (PDF)'}
                     </button>
                   </a>
                 )}
-                <button className={`td-save${saved ? ' active' : ''}`} onClick={() => setSaved(!saved)}>
-                  <Icon name={saved ? 'bookmark-fill' : 'bookmark'} size={14} />
-                  {saved ? (th ? 'บันทึกแล้ว ✓' : 'Saved ✓') : (th ? 'กาวตรา' : 'Save')}
-                </button>
               </div>
             </div>
           </div>
