@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import TourCard from '../TourCard.jsx';
 import { resolveCountryCode, COUNTRIES, flagUrl } from '../../lib/countries.js';
 
@@ -148,6 +148,15 @@ const CONTINENT_EN = {
   'All': 'All',
 };
 
+// เมือง/เส้นทางย่อยต่อประเทศ (เรียงตามความนิยม) — จับจากชื่อทัวร์
+const REGION_KEYWORDS = {
+  CN: ['เฉิงตู','เซี่ยงไฮ้','ฉงชิ่ง','ชิงเต่า','ปักกิ่ง','จางเจียเจี้ย','คุนหมิง','จิ่วจ้ายโกว','ซินเจียง','ซีอาน','ลี่เจียง','ฮาร์บิน','แชงกรีล่า','ต้าหลี่','กวางโจว','ซูโจว','หางโจว','ฉางซา','คานาสือ'],
+  JP: ['โตเกียว','โอซาก้า','ฟูจิ','ฮอกไกโด','เกียวโต','ชิราคาวาโก','ทาคายาม่า','โอกินาว่า','คามาคุระ','นิกโก้','อิบารากิ','คิวชู','ฟุกุโอกะ','นาโกย่า','นารา'],
+  TW: ['ไทเป','ไทจง','อาลีซาน','เกาสง','จิ่วเฟิ่น','ฮัวเหลียน'],
+  VN: ['ดานัง','ฮอยอัน','ฮานอย','โฮจิมินห์','ซาปา','บานาฮิลล์','ฟูก๊วก','ดาลัด','ญาจาง','ฮาลอง'],
+  KR: ['โซล','ปูซาน','เกาะเชจู','เชจู'],
+};
+
 export default function ToursPage({ lang, t, navigate, tours, supplierTours = [], promotions, faqs, reviews, settings, compareList, toggleCompare, setBookings, setReviews, setMessages, initialFilters }) {
   const [tourType,  setTourType]  = useState(initialFilters?.tourType  || 'all');
   const [continent, setContinent] = useState(initialFilters?.continent || 'All');
@@ -159,6 +168,10 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
   const [search, setSearch]       = useState(initialFilters?.search    || '');
   const [sort, setSort]           = useState('popular');
   const [priceMax, setPriceMax]   = useState(100000);
+  const [region, setRegion]       = useState('');   // เมืองย่อยที่เลือก
+
+  // เปลี่ยนประเทศ → ล้างเมืองย่อย
+  useEffect(() => { setRegion(''); }, [country]);
 
   // รวมทัวร์ของเรา + ทัวร์ซัพพลายเออร์ (ลูกค้าไม่รู้ว่ามาจากไหน)
   const allTours = useMemo(() => [...tours, ...supplierTours], [tours, supplierTours]);
@@ -179,11 +192,11 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
     tourpackage: ['tourpackage', 'package'],
   };
 
-  const filtered = useMemo(() => {
+  // ── ชั้นที่ 1: กรองทุกอย่างยกเว้น "เมืองย่อย" และ sort ──────────
+  const baseList = useMemo(() => {
     let list = [...allTours];
     if (tourType !== 'all') {
       if (tourType === 'hottour') {
-        // ทัวร์ไฟไหม้ = tourType เป็น hottour/hotdeal หรือ ติก Featured ไว้
         list = list.filter(tr => tr.tourType === 'hottour' || tr.tourType === 'hotdeal' || tr.featured === true);
       } else {
         const accepted = LEGACY[tourType] || [tourType];
@@ -191,7 +204,6 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
       }
     }
     if (continent !== 'All') list = list.filter(tr => tr.continent === continent);
-    // country อาจเป็น ISO code (จากเมนู) หรือชื่อไทย (จากหน้าแรก) — รองรับทั้งคู่
     if (country) list = list.filter(tr =>
       resolveCountryCode(tr) === country ||
       tr.country === country ||
@@ -214,12 +226,29 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
         return code.includes(q) || name.toLowerCase().includes(q) || dest.toLowerCase().includes(q) || desc.toLowerCase().includes(q);
       });
     }
+    return list;
+  }, [allTours, tourType, continent, country, groupCountries, search, lang]);
+
+  // ── เมืองย่อยของประเทศที่เลือก (เฉพาะที่มีทัวร์จริง) ────────────
+  const nameHas = (tr, kw) => (tr.name?.th || '').includes(kw) || (t(tr.destination) || '').includes(kw);
+  const regionChips = useMemo(() => {
+    const kws = REGION_KEYWORDS[country];
+    if (!kws) return [];
+    return kws
+      .map(kw => ({ kw, count: baseList.filter(tr => nameHas(tr, kw)).length }))
+      .filter(x => x.count > 0)
+      .sort((a, b) => b.count - a.count);
+  }, [country, baseList]);
+
+  // ── ชั้นที่ 2: กรองเมืองย่อย + sort ───────────────────────────
+  const filtered = useMemo(() => {
+    let list = region ? baseList.filter(tr => nameHas(tr, region)) : baseList;
     if (sort === 'price-low')  list = [...list].sort((a, b) => (a.price || 0) - (b.price || 0));
     if (sort === 'price-high') list = [...list].sort((a, b) => (b.price || 0) - (a.price || 0));
     if (sort === 'duration')   list = [...list].sort((a, b) => (b.duration || 0) - (a.duration || 0));
     if (sort === 'popular')    list = [...list].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
     return list;
-  }, [allTours, tourType, continent, country, groupCountries, priceMax, search, sort, lang]);
+  }, [baseList, region, sort]);
 
   const clearGroupFilter = () => { setGroupCountries(null); setGroupLabel(''); };
 
@@ -346,6 +375,31 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
               );
             })}
           </div>
+
+          {/* Row 4: sub-region chips (เมืองย่อย) — โผล่เมื่อประเทศมีเส้นทางเยอะ */}
+          {regionChips.length > 0 && (
+            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, alignItems: 'center' }} className="no-scrollbar">
+              <span style={{ flexShrink: 0, fontSize: 12, color: 'var(--muted)', fontWeight: 600, paddingRight: 2 }}>
+                {lang === 'th' ? 'เมือง/เส้นทาง:' : 'City:'}
+              </span>
+              <button onClick={() => setRegion('')}
+                style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 999, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                  border: `1px solid ${!region ? 'var(--accent, #e65c00)' : 'var(--line)'}`, background: !region ? 'var(--accent, #e65c00)' : 'var(--card)', color: !region ? '#fff' : 'var(--ink-2)' }}>
+                {lang === 'th' ? 'ทั้งหมด' : 'All'}
+              </button>
+              {regionChips.map(r => {
+                const on = region === r.kw;
+                return (
+                  <button key={r.kw} onClick={() => setRegion(on ? '' : r.kw)}
+                    style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 999, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                      border: `1px solid ${on ? 'var(--accent, #e65c00)' : 'var(--line)'}`, background: on ? '#fff3ec' : 'var(--card)', color: on ? 'var(--accent, #e65c00)' : 'var(--ink-2)' }}>
+                    {r.kw}
+                    <span style={{ fontSize: 11, fontWeight: 700, opacity: .6 }}>{r.count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
@@ -359,6 +413,7 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
               <span style={{ color: 'var(--ink)', fontWeight: 700 }}>{filtered.length}</span>
               {lang === 'th' ? ' ทัวร์' : ' tours'}
               {activeCountry && <span> · {lang === 'th' ? activeCountry.th : activeCountry.en}</span>}
+              {region && <span> · {region}</span>}
             </div>
             {(activeCountry || tourType !== 'all' || search) && (
               <button onClick={() => { setCountry(''); setTourType('all'); setSearch(''); clearGroupFilter(); }}
