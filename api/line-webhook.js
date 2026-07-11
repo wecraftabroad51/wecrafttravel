@@ -26,6 +26,14 @@ const REGION = {
 const M_TH = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 function fmtDate(s) { if (!s) return ''; const [y,m,d] = String(s).split('-').map(Number); if (!y||!m||!d) return s; return `${d} ${M_TH[m-1]} ${String(y+543).slice(-2)}`; }
 const baht = (n) => '฿' + Number(n || 0).toLocaleString();
+// ถอด HTML/entity ออกจากข้อความ (ไฮไลต์บางเจ้าเป็น HTML)
+function stripHtml(s) {
+  return String(s || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n))
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+    .replace(/\s+/g, ' ').trim();
+}
 
 // ── LINE API ─────────────────────────────────────────────────────
 async function reply(replyToken, messages) {
@@ -194,8 +202,9 @@ async function tourDetail(iso, id) {
   if (t.deps?.length) body.push(infoRow('รอบเดินทาง', `${t.deps.length}+ รอบ`));
 
   // ไฮไลต์ (ถ้ามี)
-  if (t.highlight) {
-    const hl = String(t.highlight).replace(/\s*,\s*/g, ' · ').slice(0, 160);
+  const cleanHl = stripHtml(t.highlight);
+  if (cleanHl) {
+    const hl = cleanHl.replace(/\s*,\s*/g, ' · ').slice(0, 180);
     body.push({ type: 'separator', margin: 'md' },
       { type: 'text', text: '✨ ไฮไลต์', size: 'sm', weight: 'bold', color: '#0f9d8f', margin: 'md' },
       { type: 'text', text: hl, size: 'xs', color: '#555555', wrap: true });
