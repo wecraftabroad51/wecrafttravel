@@ -5,7 +5,7 @@ import { LogOut, LayoutDashboard, Globe, Tag, Star, FileText, HelpCircle,
   Shield, Users } from 'lucide-react';
 import {
   signInWithGoogle, signOut, getCurrentUser, onAuthChange, checkAdminAccess,
-  listAdmins, addAdmin, removeAdmin, SUPER_ADMIN_EMAIL,
+  listAdmins, addAdmin, removeAdmin, SUPER_ADMIN_EMAIL, isMissingTable,
 } from '../../lib/auth.js';
 import {
   upsertTour, deleteTour, toggleTourFeatured, toggleTourActive,
@@ -684,10 +684,12 @@ function AdminsSection({ currentEmail }) {
   const [email, setEmail]     = useState('');
   const [busy, setBusy]       = useState(false);
   const [msg, setMsg]         = useState(null);
+  const [needsSetup, setNeedsSetup] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    try { setAdmins(await listAdmins()); } catch { setAdmins([]); }
+    try { setAdmins(await listAdmins()); setNeedsSetup(false); }
+    catch (e) { setAdmins([]); if (isMissingTable(e)) setNeedsSetup(true); }
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -717,6 +719,25 @@ function AdminsSection({ currentEmail }) {
         <h2 className="text-2xl font-bold text-slate-800">ผู้ดูแลระบบ (Admins)</h2>
         <p className="text-sm text-slate-500 mt-1">จัดการสิทธิ์เข้าถึงหลังบ้าน · เฉพาะ Super Admin เท่านั้น</p>
       </div>
+
+      {/* Setup banner — ยังไม่ได้สร้างตาราง admins */}
+      {needsSetup && (
+        <div className="bg-amber-50 border border-amber-300 rounded-2xl p-5 mb-6 max-w-2xl">
+          <div className="font-bold text-amber-800 mb-1">⚙️ ยังตั้งค่าไม่เสร็จ — ต้องสร้างตาราง admins ก่อน</div>
+          <p className="text-sm text-amber-700 mb-3">
+            ระบบยังหาตาราง <code className="bg-amber-100 px-1 rounded">admins</code> ใน Supabase ไม่เจอ
+            (คุณเข้าได้เพราะเป็น Super Admin แต่ยังเพิ่ม admin คนอื่นไม่ได้จนกว่าจะสร้างตาราง)
+          </p>
+          <ol className="text-sm text-amber-800 list-decimal list-inside space-y-1 mb-2">
+            <li>เปิด Supabase Dashboard → <strong>SQL Editor</strong> → New query</li>
+            <li>วางสคริปต์จากไฟล์ <code className="bg-amber-100 px-1 rounded">docs/admins-setup.sql</code> → กด <strong>Run</strong></li>
+            <li>กลับมาหน้านี้แล้วกด "โหลดใหม่" ด้านล่าง</li>
+          </ol>
+          <button onClick={load} className="mt-1 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-4 py-2 rounded-xl">
+            🔄 โหลดใหม่
+          </button>
+        </div>
+      )}
 
       {/* Add admin */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5 mb-6 max-w-2xl">

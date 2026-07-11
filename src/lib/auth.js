@@ -48,9 +48,16 @@ export async function checkAdminAccess(email) {
 }
 
 // ── Admins management (super admin only) ─────────────────────────
+// error บ่งบอกว่ายังไม่ได้สร้างตาราง admins
+export function isMissingTable(err) {
+  const m = (err?.message || err?.code || String(err || '')).toLowerCase();
+  return /42p01|schema cache|could not find the table|does not exist|relation .* does not exist/.test(m);
+}
+
 export async function listAdmins() {
   if (!supabase) return [];
-  const { data } = await supabase.from('admins').select('*').order('created_at', { ascending: true });
+  const { data, error } = await supabase.from('admins').select('*').order('created_at', { ascending: true });
+  if (error) { const e = new Error(error.message); e.code = error.code; throw e; }
   return data || [];
 }
 
