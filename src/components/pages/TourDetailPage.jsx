@@ -301,10 +301,6 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
                 {[
                   { icon: '🔖', label: th ? 'รหัสทัวร์' : 'Tour Code',    val: <span style={{ fontFamily: 'monospace', background: '#f1f5f9', padding: '2px 8px', borderRadius: 6, fontSize: 15 }}>{tourCode}</span> },
                   { icon: '🏷️', label: th ? 'ประเภท' : 'Type',            val: tour.tourType || '-' },
-                  { icon: '📅', label: th ? 'กำหนดการเดินทาง' : 'Travel Period',
-                    val: tour.departures?.length > 0
-                      ? formatDepRange(tour.departures[0].date, tour.departures[tour.departures.length-1].returnDate || tour.departures[tour.departures.length-1].date)
-                      : (th ? 'ติดต่อสอบถาม' : 'Contact us') },
                   { icon: '⏱️', label: th ? 'จำนวนวัน' : 'Duration',       val: tour.duration ? `${tour.duration} ${th ? 'วัน' : 'days'}` : '-' },
                   { icon: '💰', label: th ? 'ราคาเริ่มต้น' : 'Starting Price',
                     val: <span style={{ color: '#dc2626', fontWeight: 800, fontSize: 20 }}>
