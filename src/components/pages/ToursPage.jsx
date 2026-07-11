@@ -346,7 +346,7 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
               {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>}
             </div>
             <select value={sort} onChange={e => setSort(e.target.value)}
-              style={{ padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--card)', fontSize: 13, cursor: 'pointer', flexShrink: 0 }}>
+              style={{ width: 'auto', minWidth: 128, flex: '0 0 auto', padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--card)', fontSize: 13, cursor: 'pointer' }}>
               <option value="popular">{lang === 'th' ? 'ยอดนิยม' : 'Popular'}</option>
               <option value="price-low">{lang === 'th' ? 'ราคาต่ำ→สูง' : 'Price ↑'}</option>
               <option value="price-high">{lang === 'th' ? 'ราคาสูง→ต่ำ' : 'Price ↓'}</option>
