@@ -1,7 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import DateRangePicker from '../DateRangePicker.jsx';
 import { LogOut, LayoutDashboard, Globe, Tag, Star, FileText, HelpCircle,
-  Mail, Settings, Plane, Check, X, Eye, Trash2, Plus, Edit2, MessageSquare, Building2 } from 'lucide-react';
+  Mail, Settings, Plane, Check, X, Eye, Trash2, Plus, Edit2, MessageSquare, Building2,
+  Shield, Users } from 'lucide-react';
+import {
+  signInWithGoogle, signOut, getCurrentUser, onAuthChange, checkAdminAccess,
+  listAdmins, addAdmin, removeAdmin, SUPER_ADMIN_EMAIL,
+} from '../../lib/auth.js';
 import {
   upsertTour, deleteTour, toggleTourFeatured, toggleTourActive,
   upsertArticle, deleteArticle,
@@ -459,8 +464,10 @@ function RichEditor({ value, onChange, placeholder, minHeight = 320 }) {
 
 // ── Admin Panel ───────────────────────────────────────────────
 export default function AdminPanel(props) {
-  const [loginForm, setLoginForm] = useState({ user: '', pass: '' });
-  const [loggedIn, setLoggedIn]   = useState(false);
+  const [authUser, setAuthUser]   = useState(null);
+  const [authStatus, setAuthStatus] = useState('loading'); // loading | anon | denied | ok
+  const [adminRole, setAdminRole] = useState(null);         // 'super' | 'admin'
+  const [signingIn, setSigningIn] = useState(false);
   const [section, setSection]     = useState('dashboard');
   const [sideOpen, setSideOpen]   = useState(true);
 
@@ -469,36 +476,70 @@ export default function AdminPanel(props) {
     bookings, setBookings, messages, setMessages,
     settings, setSettings, onLogout } = props;
 
-  const ADMIN_USER = import.meta.env.VITE_ADMIN_USER || 'admin';
-  const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASS || 'admin123';
-  const checkLogin = () => {
-    if (loginForm.user === ADMIN_USER && loginForm.pass === ADMIN_PASS) setLoggedIn(true);
-    else alert('Username หรือ Password ไม่ถูกต้อง');
-  };
+  // ── ตรวจสอบ session + สิทธิ์ ──────────────────────────────────
+  useEffect(() => {
+    let active = true;
+    const evalUser = async (u) => {
+      if (!active) return;
+      setAuthUser(u);
+      if (!u) { setAuthStatus('anon'); setAdminRole(null); return; }
+      const res = await checkAdminAccess(u.email);
+      if (!active) return;
+      if (res.ok) { setAuthStatus('ok'); setAdminRole(res.role); }
+      else        { setAuthStatus('denied'); setAdminRole(null); }
+    };
+    getCurrentUser().then(evalUser);
+    const unsub = onAuthChange(evalUser);
+    return () => { active = false; unsub(); };
+  }, []);
 
-  if (!loggedIn) {
+  const handleSignIn = async () => {
+    setSigningIn(true);
+    try { await signInWithGoogle(); }
+    catch (e) { alert(e.message || 'เข้าสู่ระบบไม่สำเร็จ'); setSigningIn(false); }
+  };
+  const handleSignOut = async () => { await signOut(); onLogout(); };
+
+  // ── หน้า Login / สถานะ ─────────────────────────────────────────
+  if (authStatus !== 'ok') {
     return (
-      <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-teal-700 rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <LayoutDashboard className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-xl font-bold text-slate-800">Admin Login</h1>
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm text-center">
+          <div className="w-16 h-16 bg-teal-700 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <Shield className="w-8 h-8 text-white" />
           </div>
-          <div className="space-y-3">
-            <input className={inp} placeholder="Username" value={loginForm.user}
-              onChange={e => setLoginForm(p => ({ ...p, user: e.target.value }))} />
-            <input type="password" className={inp} placeholder="Password" value={loginForm.pass}
-              onChange={e => setLoginForm(p => ({ ...p, pass: e.target.value }))}
-              onKeyDown={e => { if (e.key === 'Enter') checkLogin(); }} />
-            <button
-              onClick={checkLogin}
-              className="w-full bg-teal-700 hover:bg-teal-600 text-white py-3 rounded-xl font-semibold transition-colors">
-              Login
+          <h1 className="text-xl font-bold text-slate-800 mb-1">WeCraft Travel Admin</h1>
+          <p className="text-sm text-slate-500 mb-6">ระบบจัดการหลังบ้าน</p>
+
+          {authStatus === 'loading' && (
+            <div className="py-4 text-slate-400 text-sm">กำลังตรวจสอบสิทธิ์…</div>
+          )}
+
+          {authStatus === 'anon' && (
+            <button onClick={handleSignIn} disabled={signingIn}
+              className="w-full flex items-center justify-center gap-3 border border-slate-300 hover:bg-slate-50 py-3 rounded-xl font-semibold text-slate-700 transition-colors disabled:opacity-60">
+              <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.5-2.1 14.3-5.6l-6.6-5.6c-2 1.5-4.7 2.4-7.7 2.4-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.6 5.6C41.4 36.2 44 30.6 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
+              {signingIn ? 'กำลังเปิด Google…' : 'เข้าสู่ระบบด้วย Google'}
             </button>
-          </div>
-          <button onClick={onLogout} className="w-full mt-3 text-slate-400 hover:text-slate-600 text-sm transition-colors">← Back to Website</button>
+          )}
+
+          {authStatus === 'denied' && (
+            <div>
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4 text-left">
+                <div className="font-bold text-red-700 text-sm mb-1">⛔ ไม่มีสิทธิ์เข้าถึง</div>
+                <div className="text-xs text-red-600">
+                  บัญชี <strong>{authUser?.email}</strong> ยังไม่ได้รับสิทธิ์ผู้ดูแลระบบ
+                  กรุณาติดต่อ Super Admin เพื่อขอเพิ่มสิทธิ์
+                </div>
+              </div>
+              <button onClick={handleSignOut}
+                className="w-full border border-slate-300 hover:bg-slate-50 py-2.5 rounded-xl font-semibold text-slate-600 text-sm transition-colors">
+                ออกจากระบบ / เปลี่ยนบัญชี
+              </button>
+            </div>
+          )}
+
+          <button onClick={onLogout} className="w-full mt-3 text-slate-400 hover:text-slate-600 text-sm transition-colors">← กลับหน้าเว็บไซต์</button>
         </div>
       </div>
     );
@@ -506,6 +547,11 @@ export default function AdminPanel(props) {
 
   const unreadMsg      = messages.filter(m => !m.read).length;
   const pendingReviews = reviews.filter(r => !r.approved).length;
+
+  // เมนู admins แสดงเฉพาะ Super Admin
+  const menuItems = adminRole === 'super'
+    ? [...MENU, { key: 'admins', label: 'Admins', labelTh: 'ผู้ดูแลระบบ', icon: Shield }]
+    : MENU;
 
   return (
     <div className="min-h-screen bg-slate-100 flex">
@@ -518,7 +564,7 @@ export default function AdminPanel(props) {
           {sideOpen && <span className="font-bold text-sm truncate">WeCraftTravel Admin</span>}
         </div>
         <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
-          {MENU.map(({ key, label, labelTh, icon: Icon }) => (
+          {menuItems.map(({ key, label, labelTh, icon: Icon }) => (
             <button key={key} onClick={() => setSection(key)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
                 section === key ? 'bg-teal-700 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
@@ -534,10 +580,10 @@ export default function AdminPanel(props) {
           ))}
         </nav>
         <div className="p-2 border-t border-slate-700">
-          <button onClick={onLogout}
+          <button onClick={handleSignOut}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
             <LogOut className="w-4 h-4 shrink-0" />
-            {sideOpen && <span>Exit Admin</span>}
+            {sideOpen && <span>ออกจากระบบ</span>}
           </button>
         </div>
       </div>
@@ -553,7 +599,13 @@ export default function AdminPanel(props) {
               className="text-xs border border-slate-200 px-2 py-1 rounded-lg text-slate-600 hover:bg-slate-50">
               {lang === 'th' ? 'EN' : 'TH'}
             </button>
-            <div className="w-8 h-8 bg-teal-700 rounded-full flex items-center justify-center text-white text-xs font-bold">A</div>
+            <div className="hidden sm:flex flex-col items-end leading-tight">
+              <span className="text-xs font-semibold text-slate-700">{authUser?.email}</span>
+              {adminRole === 'super' && <span className="text-[10px] text-teal-600 font-bold">SUPER ADMIN</span>}
+            </div>
+            {authUser?.user_metadata?.avatar_url
+              ? <img src={authUser.user_metadata.avatar_url} alt="" className="w-8 h-8 rounded-full" referrerPolicy="no-referrer" />
+              : <div className="w-8 h-8 bg-teal-700 rounded-full flex items-center justify-center text-white text-xs font-bold">{(authUser?.email || 'A')[0].toUpperCase()}</div>}
           </div>
         </div>
 
@@ -568,7 +620,116 @@ export default function AdminPanel(props) {
           {section === 'bookings'   && <BookingsSection bookings={bookings} setBookings={setBookings} tours={tours} t={t} />}
           {section === 'messages'   && <MessagesSection messages={messages} setMessages={setMessages} />}
           {section === 'settings'   && <SettingsSection settings={settings} setSettings={setSettings} t={t} />}
+          {section === 'admins'     && adminRole === 'super' && <AdminsSection currentEmail={authUser?.email} />}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ===== ADMINS (super admin only) =====
+function AdminsSection({ currentEmail }) {
+  const [admins, setAdmins]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [email, setEmail]     = useState('');
+  const [busy, setBusy]       = useState(false);
+  const [msg, setMsg]         = useState(null);
+
+  const load = async () => {
+    setLoading(true);
+    try { setAdmins(await listAdmins()); } catch { setAdmins([]); }
+    setLoading(false);
+  };
+  useEffect(() => { load(); }, []);
+
+  const handleAdd = async () => {
+    setMsg(null); setBusy(true);
+    try {
+      await addAdmin(email, currentEmail);
+      setMsg({ ok: true, text: `เพิ่ม ${email.trim().toLowerCase()} แล้ว · ส่งอีเมลแจ้งเรียบร้อย` });
+      setEmail('');
+      await load();
+    } catch (e) {
+      setMsg({ ok: false, text: e.message || 'เพิ่มไม่สำเร็จ' });
+    }
+    setBusy(false);
+  };
+
+  const handleRemove = async (em) => {
+    if (!confirm(`ลบสิทธิ์ admin ของ ${em}?`)) return;
+    try { await removeAdmin(em); await load(); }
+    catch (e) { alert(e.message || 'ลบไม่สำเร็จ'); }
+  };
+
+  return (
+    <div>
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-slate-800">ผู้ดูแลระบบ (Admins)</h2>
+        <p className="text-sm text-slate-500 mt-1">จัดการสิทธิ์เข้าถึงหลังบ้าน · เฉพาะ Super Admin เท่านั้น</p>
+      </div>
+
+      {/* Add admin */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-5 mb-6 max-w-2xl">
+        <div className="flex items-center gap-2 mb-3 text-slate-700 font-semibold text-sm">
+          <Users className="w-4 h-4" /> เพิ่มผู้ดูแลระบบใหม่
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          <input
+            type="email" value={email} onChange={e => setEmail(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && !busy) handleAdd(); }}
+            placeholder="กรอกอีเมล Google ของผู้ดูแลใหม่..."
+            className="flex-1 min-w-[240px] border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+          />
+          <button onClick={handleAdd} disabled={busy || !email.trim()}
+            className="bg-teal-700 hover:bg-teal-600 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2">
+            <Plus className="w-4 h-4" /> {busy ? 'กำลังเพิ่ม…' : 'เพิ่ม + ส่งอีเมล'}
+          </button>
+        </div>
+        {msg && (
+          <div className={`mt-3 text-sm rounded-lg px-3 py-2 ${msg.ok ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+            {msg.ok ? '✅ ' : '⚠️ '}{msg.text}
+          </div>
+        )}
+        <p className="text-xs text-slate-400 mt-3">
+          ผู้ที่ถูกเพิ่มต้องเข้าสู่ระบบด้วยบัญชี Google ที่ตรงกับอีเมลนี้ · ระบบจะส่งอีเมลแจ้งอัตโนมัติ
+        </p>
+      </div>
+
+      {/* List */}
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden max-w-2xl">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-slate-50 border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+              <th className="px-4 py-3">อีเมล</th>
+              <th className="px-4 py-3">สิทธิ์</th>
+              <th className="px-4 py-3 text-right">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* Super admin (fixed) */}
+            <tr className="border-b border-slate-100 bg-teal-50/40">
+              <td className="px-4 py-3 font-medium text-slate-800">{SUPER_ADMIN_EMAIL}</td>
+              <td className="px-4 py-3"><span className="bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full text-xs font-bold">Super Admin</span></td>
+              <td className="px-4 py-3 text-right text-slate-300 text-xs">ล็อคไว้</td>
+            </tr>
+            {loading ? (
+              <tr><td colSpan={3} className="px-4 py-6 text-center text-slate-400">กำลังโหลด…</td></tr>
+            ) : admins.length === 0 ? (
+              <tr><td colSpan={3} className="px-4 py-6 text-center text-slate-400">ยังไม่มีผู้ดูแลเพิ่มเติม</td></tr>
+            ) : admins.map(a => (
+              <tr key={a.email} className="border-b border-slate-100 hover:bg-slate-50">
+                <td className="px-4 py-3 text-slate-700">{a.email}</td>
+                <td className="px-4 py-3"><span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-xs font-semibold">Admin</span></td>
+                <td className="px-4 py-3 text-right">
+                  <button onClick={() => handleRemove(a.email)}
+                    className="text-red-500 hover:text-red-700 inline-flex items-center gap-1 text-xs font-semibold">
+                    <Trash2 className="w-3.5 h-3.5" /> ลบ
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
