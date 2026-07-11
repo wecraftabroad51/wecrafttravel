@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>จองจอยทัวร์ · WeCraft Travel</title>
+<style>
+  :root { --teal:#0f9d8f; --teal-d:#0b7d72; --red:#e2231a; --ink:#1a2b3c; --muted:#8a94a0; --line:#e6e9ee; --bg:#f4f6f8; --ok:#16a34a; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { margin:0; padding:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans Thai",Tahoma,sans-serif; }
+  .wrap { max-width:520px; margin:0 auto; padding:0 0 40px; }
+  .brand { display:flex; align-items:center; gap:8px; padding:12px 16px; font-weight:800; color:var(--teal-d); font-size:15px; }
+  .brand .dot { width:9px;height:9px;border-radius:50%;background:var(--teal); }
+  .hero { position:relative; }
+  .hero img { width:100%; height:180px; object-fit:cover; display:block; background:#dfe4ea; }
+  .hero .badge { position:absolute; left:12px; bottom:12px; background:rgba(15,157,143,.95);
+    color:#fff; font-size:12px; font-weight:700; padding:5px 10px; border-radius:20px; }
+  .card { background:#fff; margin:12px; border-radius:16px; padding:16px 16px 18px;
+    box-shadow:0 2px 14px rgba(20,40,60,.06); }
+  h1 { font-size:17px; line-height:1.35; margin:0 0 6px; }
+  .price { color:var(--red); font-weight:800; font-size:20px; }
+  .price small { color:var(--muted); font-weight:500; font-size:12px; }
+  label { display:block; font-size:13px; font-weight:700; margin:14px 0 6px; color:#33424f; }
+  label .req { color:var(--red); }
+  input,select,textarea { width:100%; font-size:16px; padding:12px 12px; border:1.5px solid var(--line);
+    border-radius:11px; background:#fbfcfd; color:var(--ink); font-family:inherit; outline:none; }
+  input:focus,select:focus,textarea:focus { border-color:var(--teal); background:#fff; }
+  input:disabled { background:#eef1f4; color:#5b6572; }
+  textarea { resize:vertical; min-height:60px; }
+  .hint { font-size:11.5px; color:var(--muted); margin-top:5px; }
+  .stepper { display:flex; align-items:center; gap:0; border:1.5px solid var(--line); border-radius:11px; overflow:hidden; background:#fbfcfd; }
+  .stepper button { width:48px; height:48px; border:0; background:#f0f3f5; color:var(--teal-d);
+    font-size:22px; font-weight:700; line-height:1; }
+  .stepper button:active { background:#e2e8ec; }
+  .stepper input { border:0; text-align:center; background:transparent; font-weight:700; }
+  .paxrow { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .paxrow .full { grid-column:1 / -1; }
+  .btn { border:0; border-radius:11px; font-family:inherit; font-weight:700; font-size:14px; padding:11px 14px; }
+  .btn-teal { background:var(--teal); color:#fff; }
+  .btn-teal:disabled { background:#c9ced4; }
+  .btn-line { background:#eef6f5; color:var(--teal-d); border:1.5px solid #cfe8e4; }
+  .otp-row { display:flex; gap:8px; align-items:stretch; }
+  .otp-row input { flex:1; letter-spacing:5px; font-weight:800; text-align:center; }
+  .okmsg { color:var(--ok); font-size:13px; font-weight:700; margin-top:7px; }
+  .warnmsg { color:var(--red); font-size:12.5px; margin-top:6px; }
+  .submit { width:calc(100% - 24px); margin:18px 12px 0; padding:16px; background:var(--red); color:#fff;
+    border:0; border-radius:14px; font-size:17px; font-weight:800; box-shadow:0 6px 16px rgba(226,35,26,.28); }
+  .submit:disabled { background:#c9ced4; box-shadow:none; }
+  .foot { text-align:center; color:var(--muted); font-size:12px; margin:16px 12px 0; line-height:1.6; }
+  .spin { width:34px;height:34px;border:3px solid #dfe4ea;border-top-color:var(--teal);border-radius:50%;
+    animation:sp .8s linear infinite; margin:60px auto; }
+  @keyframes sp { to { transform:rotate(360deg); } }
+  .ok { text-align:center; padding:40px 22px; }
+  .ok .tick { width:76px;height:76px;border-radius:50%;background:var(--teal);color:#fff;font-size:42px;
+    line-height:76px; margin:0 auto 16px; }
+  .ok h2 { margin:0 0 6px; font-size:20px; }
+  .ok .ref { display:inline-block; background:#eaf7f5; color:var(--teal-d); font-weight:800;
+    padding:6px 14px; border-radius:20px; margin:10px 0; font-size:15px; }
+  .err { background:#fdeaea; color:#b3261e; border-radius:11px; padding:12px; font-size:13px; margin:12px 12px 0; }
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="spin"></div>
+</div>
+
+<script>
+const TH_MON = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+function parseDate(s){
+  if(!s) return null; s=String(s).trim(); let y,m,d,mt;
+  if((mt=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))){ y=+mt[1]; m=+mt[2]; d=+mt[3]; }
+  else if((mt=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/))){ d=+mt[1]; m=+mt[2]; y=+mt[3]; }
+  if(!y) { const t=Date.parse(s); if(!isNaN(t)){ const dt=new Date(t); y=dt.getFullYear(); m=dt.getMonth()+1; d=dt.getDate(); } }
+  if(!y) return null; if(y>2400) y-=543; return { y, m, d };
+}
+function fmtDate(s){ const o=parseDate(s); if(!o) return s||''; const yy=String((o.y+543)%100).padStart(2,'0'); return `${o.d} ${TH_MON[o.m-1]||''} ${yy}`; }
+function sameDate(a,b){ const x=parseDate(a),y=parseDate(b); return !!x&&!!y&&x.y===y.y&&x.m===y.m&&x.d===y.d; }
+function baht(n){ n=Number(n)||0; return '฿'+n.toLocaleString('en-US'); }
+function esc(s){ return String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+function normCode(s){ return String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,''); }
+
+const qs = new URLSearchParams(location.search);
+const P = {
+  id:qs.get('id')||'', code:qs.get('code')||'', iso:qs.get('iso')||'', uid:qs.get('uid')||'',
+  date:qs.get('date')||'', ret:qs.get('returnDate')||'', name:qs.get('name')||'', price:qs.get('price')||'',
+};
+const app = document.getElementById('app');
+let TOUR=null, DEPS=[], selIdx=-1;
+const otp = { sent:false, token:'', target:'', verified:false };
+
+(async function init(){
+  try{
+    let url='/api/tour-feed';
+    if(P.id && P.iso) url='/api/tour-feed?c='+encodeURIComponent(P.iso);
+    else if(P.code)   url='/api/tour-feed?code='+encodeURIComponent(P.code);
+    const list = await fetch(url).then(r=>r.json()).catch(()=>[]);
+    const arr = Array.isArray(list)?list:[];
+    TOUR = (P.id && arr.find(t=>t.id===P.id))
+        || (P.code && arr.find(t=>normCode(t.code)===normCode(P.code)))
+        || (P.code && arr.find(t=>normCode(t.code).includes(normCode(P.code))))
+        || null;
+    if(!TOUR && (P.code||P.name)){ // fallback: ใช้ข้อมูลจาก URL (จองผ่านเว็บ)
+      TOUR = { name:P.name||'จองจอยทัวร์', code:P.code||'', image:'', price:+P.price||0,
+               deps: P.date ? [{ date:P.date, ret:P.ret, adult:+P.price||0 }] : [] };
+    }
+    DEPS = (TOUR&&TOUR.deps)?TOUR.deps:[];
+    if(P.date) selIdx = DEPS.findIndex(d=>sameDate(d.date,P.date));
+    renderForm();
+  }catch(e){ app.innerHTML='<div class="err">โหลดข้อมูลทัวร์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</div>'; }
+})();
+
+function renderForm(){
+  const img=TOUR&&TOUR.image?TOUR.image:'', name=TOUR?TOUR.name:'จองจอยทัวร์', code=TOUR?(TOUR.code||''):'', price=TOUR?TOUR.price:0;
+  const roundOpts = DEPS.map((d,i)=>{
+    const label = fmtDate(d.date)+(d.ret?' - '+fmtDate(d.ret):'')+' · '+baht(d.adult)+(d.seat!=null?` (ว่าง ${d.seat})`:'');
+    return `<option value="${i}"${i===selIdx?' selected':''}>${esc(label)}</option>`;
+  }).join('');
+
+  app.innerHTML = `
+    <div class="brand"><span class="dot"></span> WeCraft Travel · จองจอยทัวร์</div>
+    <div class="hero">${img?`<img src="${esc(img)}" alt="">`:''}${code?`<span class="badge">${esc(code)}</span>`:''}</div>
+    <div class="card">
+      <h1>${esc(name)}</h1>
+      ${price?`<div class="price">${baht(price)} <small>/ ท่าน (เริ่มต้น)</small></div>`:''}
+    </div>
+    <form id="f" class="card" novalidate>
+      <label>ชื่อ-นามสกุล ผู้จอง <span class="req">*</span></label>
+      <input name="fullName" autocomplete="name" placeholder="เช่น สมชาย ใจดี" required>
+
+      <label>เบอร์โทรติดต่อ <span class="req">*</span> <span style="font-weight:500;color:#8a94a0">(ยืนยันด้วย OTP)</span></label>
+      <input name="phone" id="phone" inputmode="tel" autocomplete="tel" placeholder="08xxxxxxxx" required>
+      <div id="otpArea"></div>
+
+      ${DEPS.length?`
+      <label>รอบเดินทาง (วันไป - วันกลับ) <span class="req">*</span></label>
+      <select name="roundIdx" required>
+        ${selIdx<0?'<option value="" disabled selected>— เลือกรอบเดินทาง —</option>':''}
+        ${roundOpts}
+      </select>`:`
+      <label>รอบ / เดือนที่สนใจ</label>
+      <input name="roundText" value="${esc(P.date?fmtDate(P.date)+(P.ret?' - '+fmtDate(P.ret):''):'')}" placeholder="เช่น ธันวาคม 2568">`}
+
+      <label>จำนวนผู้เดินทาง <span class="req">*</span></label>
+      <div class="paxrow">
+        ${stepper('adults','ผู้ใหญ่',1)}
+        ${stepper('children','เด็ก',0)}
+        ${stepper('infants','ทารก (อายุ < 2 ปี)',0,'full')}
+      </div>
+
+      <label>อีเมล (ถ้ามี — สำหรับส่งใบยืนยัน)</label>
+      <input name="email" inputmode="email" autocomplete="email" placeholder="you@email.com">
+
+      <label>เลขพาสปอร์ต (ถ้ามี)</label>
+      <input name="passportNo" placeholder="กรอกภายหลังได้">
+
+      <label>หมายเหตุเพิ่มเติม</label>
+      <textarea name="note" placeholder="เช่น ขอที่นั่งติดกัน, แพ้อาหาร ฯลฯ"></textarea>
+
+      <button type="submit" class="submit" id="btn">ยืนยันการจอง</button>
+      <div id="ferr"></div>
+      <div class="foot">ทีมงาน WeCraft Travel จะติดต่อกลับเพื่อยืนยันรายละเอียด<br>และการชำระเงินโดยเร็วที่สุด 🙏</div>
+    </form>`;
+  wireSteppers();
+  renderOtp();
+  document.getElementById('phone').addEventListener('input', ()=>{ // เปลี่ยนเบอร์ → รีเซ็ตการยืนยัน
+    const cur = document.getElementById('phone').value.replace(/\D/g,'');
+    if(otp.verified && cur!==otp.target){ otp.verified=false; otp.sent=false; otp.token=''; renderOtp(); }
+  });
+  document.getElementById('f').addEventListener('submit', submit);
+}
+
+function renderOtp(){
+  const a=document.getElementById('otpArea'); if(!a) return;
+  if(otp.verified){ a.innerHTML=`<div class="okmsg">✅ ยืนยันเบอร์โทรเรียบร้อยแล้ว</div>`; return; }
+  if(!otp.sent){
+    a.innerHTML=`<div style="margin-top:8px"><button type="button" class="btn btn-line" id="otpReq">📲 ขอรหัส OTP ทาง SMS</button></div><div id="otpMsg"></div>`;
+    document.getElementById('otpReq').onclick=requestOtp;
+  } else {
+    a.innerHTML=`
+      <div class="hint" style="margin-top:8px">ส่งรหัส 6 หลักไปที่ ${esc(otp.target)} แล้ว (หมดอายุใน 5 นาที)</div>
+      <div class="otp-row" style="margin-top:6px">
+        <input id="otpCode" inputmode="numeric" maxlength="6" placeholder="______">
+        <button type="button" class="btn btn-teal" id="otpVerify">ยืนยัน</button>
+      </div>
+      <div style="margin-top:6px"><button type="button" class="btn btn-line" id="otpResend">ขอรหัสใหม่</button></div>
+      <div id="otpMsg"></div>`;
+    document.getElementById('otpCode').addEventListener('input',e=>{ e.target.value=e.target.value.replace(/\D/g,'').slice(0,6); });
+    document.getElementById('otpVerify').onclick=verifyOtp;
+    document.getElementById('otpResend').onclick=requestOtp;
+  }
+}
+function otpMsg(m,warn){ const e=document.getElementById('otpMsg'); if(e) e.innerHTML = m?`<div class="${warn?'warnmsg':'okmsg'}">${m}</div>`:''; }
+
+async function requestOtp(){
+  const phone=document.getElementById('phone').value.replace(/\D/g,'');
+  if(phone.length<9){ otpMsg('กรุณากรอกเบอร์โทรให้ถูกต้องก่อนขอ OTP',true); return; }
+  const btn=document.getElementById('otpReq')||document.getElementById('otpResend'); if(btn){btn.disabled=true;btn.textContent='กำลังส่ง...';}
+  try{
+    const r=await fetch('/api/otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'send',type:'phone',target:phone})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j.error||'ส่ง OTP ไม่สำเร็จ');
+    otp.sent=true; otp.token=j.token; otp.target=phone; renderOtp(); otpMsg('ส่งรหัสแล้ว ตรวจสอบ SMS ได้เลยครับ');
+  }catch(e){ if(btn){btn.disabled=false;} otpMsg(e.message||'ส่ง OTP ไม่สำเร็จ',true); }
+}
+async function verifyOtp(){
+  const code=(document.getElementById('otpCode').value||'').trim();
+  if(code.length<6){ otpMsg('กรอกรหัส 6 หลัก',true); return; }
+  const btn=document.getElementById('otpVerify'); btn.disabled=true; btn.textContent='...';
+  try{
+    const r=await fetch('/api/otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'verify',target:otp.target,otp:code,token:otp.token})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||!j.ok) throw new Error(j.error||'รหัสไม่ถูกต้อง');
+    otp.verified=true; const ph=document.getElementById('phone'); if(ph) ph.disabled=true; renderOtp();
+  }catch(e){ btn.disabled=false; btn.textContent='ยืนยัน'; otpMsg(e.message||'รหัสไม่ถูกต้อง',true); }
+}
+
+function stepper(nm,label,def,cls){
+  return `<div class="${cls||''}"><label style="margin-top:0">${label}</label>
+    <div class="stepper">
+      <button type="button" data-step="${nm}" data-dir="-1">−</button>
+      <input name="${nm}" type="number" inputmode="numeric" value="${def}" min="0" readonly>
+      <button type="button" data-step="${nm}" data-dir="1">+</button>
+    </div></div>`;
+}
+function wireSteppers(){
+  document.querySelectorAll('[data-step]').forEach(b=>b.addEventListener('click',()=>{
+    const inp=document.querySelector(`input[name="${b.dataset.step}"]`);
+    let v=(parseInt(inp.value,10)||0)+(b.dataset.dir==='1'?1:-1);
+    const min=b.dataset.step==='adults'?1:0; if(v<min)v=min; if(v>99)v=99; inp.value=v;
+  }));
+}
+
+async function submit(e){
+  e.preventDefault();
+  const f=e.target, btn=document.getElementById('btn');
+  const g=n=>(f.elements[n]?f.elements[n].value.trim():'');
+  const fullName=g('fullName'), phone=(document.getElementById('phone').value||'').replace(/\D/g,'');
+  if(!fullName) return showErr('กรุณากรอกชื่อ-นามสกุล');
+  if(phone.length<9) return showErr('กรุณากรอกเบอร์โทรให้ถูกต้อง');
+  if(!otp.verified) return showErr('กรุณายืนยันเบอร์โทรด้วย OTP ก่อนครับ');
+  const adults=+g('adults')||0, children=+g('children')||0, infants=+g('infants')||0;
+
+  let depDate='',retDate='',roundLabel='';
+  if(DEPS.length){
+    const idx=g('roundIdx'); if(idx==='') return showErr('กรุณาเลือกรอบเดินทาง');
+    const d=DEPS[+idx]; depDate=d.date||''; retDate=d.ret||''; roundLabel=fmtDate(depDate)+(retDate?' - '+fmtDate(retDate):'');
+  } else { roundLabel=g('roundText'); }
+
+  const email=g('email'), isLine=!!P.uid;
+  const formData={
+    _type:'join-tour', fullName, phone, email,
+    tourCode:TOUR?(TOUR.code||''):'', tourName:TOUR?(TOUR.name||''):'',
+    depDate, retDate, adults, children, infants, totalPax:adults+children+infants,
+    passportNo:g('passportNo'),
+    note:[g('note'), roundLabel&&!DEPS.length?`รอบที่สนใจ: ${roundLabel}`:'', 'ช่องทาง: '+(isLine?'จองผ่าน LINE':'จองผ่านเว็บ')].filter(Boolean).join(' | '),
+    lineUserId:P.uid||'',
+  };
+  const html=`<h3>🌏 จองจอยทัวร์ (${isLine?'ฟอร์ม LINE':'เว็บไซต์'})</h3>
+    <p><b>ทัวร์:</b> ${esc(formData.tourName)} (${esc(formData.tourCode)})<br>
+    <b>ชื่อ:</b> ${esc(fullName)}<br><b>เบอร์:</b> ${esc(phone)} (ยืนยัน OTP)<br>
+    <b>รอบ:</b> ${esc(roundLabel||'-')}<br>
+    <b>จำนวน:</b> ผู้ใหญ่ ${adults} / เด็ก ${children} / ทารก ${infants}<br>
+    <b>อีเมล:</b> ${esc(email||'-')}<br><b>พาสปอร์ต:</b> ${esc(formData.passportNo||'-')}</p>`;
+
+  btn.disabled=true; btn.textContent='กำลังส่ง...';
+  try{
+    const body={ subject:`[${isLine?'LINE':'เว็บ'}] จองจอยทัวร์ - ${formData.tourName}`, html, formData };
+    if(!isLine && email) body.customerEmail=email; // เว็บ+มีอีเมล → ส่งใบยืนยันอีเมล
+    const r=await fetch('/api/send-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j.error||'ส่งไม่สำเร็จ');
+    success(j.seqNo, formData, roundLabel);
+  }catch(err){ btn.disabled=false; btn.textContent='ยืนยันการจอง'; showErr('ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่ หรือทักแชทหาทีมงานได้เลยครับ'); }
+}
+function showErr(m){ const e=document.getElementById('ferr'); if(e){ e.innerHTML=`<div class="err">${m}</div>`; e.scrollIntoView({behavior:'smooth',block:'center'}); } }
+
+function success(seq,fd,roundLabel){
+  const pax=[fd.adults?`ผู้ใหญ่ ${fd.adults}`:'',fd.children?`เด็ก ${fd.children}`:'',fd.infants?`ทารก ${fd.infants}`:''].filter(Boolean).join(' · ');
+  const isLine=!!P.uid;
+  app.innerHTML=`
+    <div class="card ok">
+      <div class="tick">✓</div>
+      <h2>จองสำเร็จแล้ว!</h2>
+      ${seq?`<div class="ref">เลขที่จอง: ${esc(seq)}</div>`:''}
+      <p style="color:#5b6572;font-size:14px;line-height:1.7;margin:6px 0 0">
+        🎫 ${esc(fd.tourName)}<br>${roundLabel?`📅 ${esc(roundLabel)}<br>`:''}${pax?`👥 ${esc(pax)}`:''}
+      </p>
+      <p style="color:#8a94a0;font-size:13px;margin-top:18px;line-height:1.7">
+        ทีมงานได้รับข้อมูลแล้ว${isLine?' และส่งข้อความยืนยันไปที่แชท LINE ของคุณด้วยครับ<br>กดปิด (✕) มุมขวาบน เพื่อกลับไปที่แชท':' จะติดต่อกลับโดยเร็วที่สุดครับ'}
+      </p>
+    </div>`;
+  try{ if(window.liff&&liff.isInClient&&liff.isInClient()) setTimeout(()=>liff.closeWindow(),2500); }catch(e){}
+}
+</script>
+</body>
+</html>

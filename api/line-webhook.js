@@ -195,11 +195,31 @@ function tourBubble(t, iso) {
     ] },
   };
 }
-async function tourCarousel(iso, city, feed) {
+// การ์ด "ดูทัวร์เพิ่มเติม" (บับเบิลสุดท้าย เมื่อทัวร์เกิน 1 หน้า)
+function moreBubble(iso, city, nextPage, remaining) {
+  return {
+    type: 'bubble',
+    body: { type: 'box', layout: 'vertical', justifyContent: 'center', alignItems: 'center', spacing: 'md', contents: [
+      { type: 'text', text: '➕', size: '3xl', align: 'center' },
+      { type: 'text', text: `ดูทัวร์เพิ่มเติม`, weight: 'bold', size: 'lg', color: '#0f9d8f', align: 'center', wrap: true },
+      { type: 'text', text: `เหลืออีก ${remaining} โปรแกรม`, size: 'sm', color: '#999999', align: 'center' },
+    ] },
+    footer: { type: 'box', layout: 'vertical', contents: [
+      { type: 'button', style: 'primary', color: '#0f9d8f', height: 'sm', action: { type: 'postback', label: 'ดูเพิ่มเติม →', data: pb({ s: 'tours', iso, city, p: nextPage }), displayText: 'ดูทัวร์เพิ่มเติม' } },
+    ] },
+  };
+}
+async function tourCarousel(iso, city, feed, page) {
   const list = feed || await fetchFeed(iso);
   const filtered = city ? list.filter(t => (t.name || '').includes(city)) : list;
   if (!filtered.length) return { type: 'text', text: 'ยังไม่มีทัวร์เส้นทางนี้ ลองเลือกใหม่นะครับ 🙏' };
-  return { type: 'flex', altText: `ทัวร์${city || nameOf(iso)}`, contents: { type: 'carousel', contents: filtered.slice(0, 12).map(t => tourBubble(t, iso)) } };
+  const PER = 11, pg = Math.max(0, +page || 0), start = pg * PER;
+  const bubbles = filtered.slice(start, start + PER).map(t => tourBubble(t, iso));
+  const remaining = filtered.length - (start + PER);
+  if (remaining > 0) bubbles.push(moreBubble(iso, city, pg + 1, remaining));
+  if (!bubbles.length) return { type: 'text', text: 'ดูครบทุกโปรแกรมแล้วครับ 🙏' };
+  const shown = Math.min(start + PER, filtered.length);
+  return { type: 'flex', altText: `ทัวร์${city || nameOf(iso)} (${start + 1}-${shown}/${filtered.length})`, contents: { type: 'carousel', contents: bubbles } };
 }
 
 // ── รายละเอียดทัวร์ (ในไลน์ · ละเอียดเหมือนเว็บ) ─────────────────
@@ -216,7 +236,7 @@ async function tourDetail(iso, id, uid) {
 // ลิงก์ฟอร์มจอง (เปิดในเบราว์เซอร์ในไลน์) — พก id/iso/uid ไปเติมให้อัตโนมัติ
 function bookUrl(id, iso, uid) {
   const q = new URLSearchParams({ id: id || '', iso: iso || '', uid: uid || '' });
-  return `${SITE}/line-book.html?${q.toString()}`;
+  return `${SITE}/book.html?${q.toString()}`;
 }
 // ลิงก์ PDF ผ่านพร็อกซีเรา — ซ่อน URL ต้นทางของซัพพลายเออร์
 function pdfProxy(pdf) {
@@ -332,7 +352,7 @@ module.exports = async function handler(req, res) {
         const d = unpb(ev.postback?.data);
         const uid = ev.source?.userId || '';
         if (d.s === 'country') return reply(ev.replyToken, await cityChooser(d.iso));
-        if (d.s === 'tours')   return reply(ev.replyToken, await tourCarousel(d.iso, d.city || ''));
+        if (d.s === 'tours')   return reply(ev.replyToken, await tourCarousel(d.iso, d.city || '', null, d.p || 0));
         if (d.s === 'detail')  return reply(ev.replyToken, await tourDetail(d.iso, d.id, uid));
         if (d.s === 'book')    return handleBook(ev, d.iso, d.id);
         return;

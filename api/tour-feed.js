@@ -56,6 +56,12 @@ module.exports = async function handler(req, res) {
     }));
     let all = results.flat().filter(t => t.name && t.price > 0);
     if (wanted) all = all.filter(t => t.country === wanted);
+    const wantedCode = req.query?.code || '';
+    if (wantedCode) {
+      const norm = s => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const q = norm(wantedCode);
+      if (q.length >= 3) all = all.filter(t => norm(t.code) === q || (q.length >= 4 && norm(t.code).includes(q)));
+    }
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=1800');
     return res.status(200).json(all);
   } catch (e) {

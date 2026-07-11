@@ -118,6 +118,17 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
     if (isNaN(y) || isNaN(m) || isNaN(d)) return null;
     return { d, m, y: y < 2400 ? y + 543 : y };
   };
+  // ไปหน้าจองเดียวกับที่จองผ่าน LINE (ฟอร์มรวม) พร้อม default รอบที่ลูกค้าเลือก
+  const goBook = (tour, dep) => {
+    const nm = th ? (tour.name?.th || tour.name?.en || '') : (tour.name?.en || tour.name?.th || '');
+    const p = new URLSearchParams();
+    if (tour.code)        p.set('code', tour.code);
+    if (nm)               p.set('name', nm);
+    if (dep.date)         p.set('date', dep.date);
+    if (dep.returnDate)   p.set('returnDate', dep.returnDate);
+    if (dep.price)        p.set('price', dep.price);
+    window.location.href = '/book.html?' + p.toString();
+  };
   const formatDepRange = (dateStr, returnDateStr) => {
     const a = parseDate(dateStr);
     const b = parseDate(returnDateStr);
@@ -428,14 +439,8 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
                           {st === 'full'
                             ? <span className="td-full">🔴 {th ? 'ปิดรับ' : 'Full'}</span>
                             : st === 'hurry'
-                            ? <span className="td-hurry" onClick={() => navigate('join-tour', null, {
-                                code: tour.code || '', name: th ? (tour.name?.th || tour.name?.en || '') : (tour.name?.en || tour.name?.th || ''),
-                                date: dep.date || '', returnDate: dep.returnDate || '', price: dep.price || '',
-                              })}>⚡ {th ? 'จองด่วน!' : 'Book fast!'}</span>
-                            : <span className="td-open" onClick={() => navigate('join-tour', null, {
-                                code: tour.code || '', name: th ? (tour.name?.th || tour.name?.en || '') : (tour.name?.en || tour.name?.th || ''),
-                                date: dep.date || '', returnDate: dep.returnDate || '', price: dep.price || '',
-                              })}>✓ {th ? 'จองด่วน' : 'Book now'}</span>
+                            ? <span className="td-hurry" onClick={() => goBook(tour, dep)}>⚡ {th ? 'จองด่วน!' : 'Book fast!'}</span>
+                            : <span className="td-open" onClick={() => goBook(tour, dep)}>✓ {th ? 'จองด่วน' : 'Book now'}</span>
                           }
                         </td>
                       </tr>
