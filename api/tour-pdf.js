@@ -34,10 +34,12 @@ export default async function handler(req) {
     if (m) target = 'https://drive.google.com/uc?export=download&id=' + m[0];
   }
 
+  // บางโฮสต์ (zego/gs25) บล็อก Edge → fallback ไป serverless (Node, IP/TLS ต่างกัน)
+  const fallback = () => Response.redirect(new URL('/api/tour-pdf-alt?u=' + enc, req.url).href, 302);
   let upstream;
   try { upstream = await fetch(target, { redirect: 'follow' }); }
-  catch { return new Response('upstream error', { status: 502 }); }
-  if (!upstream.ok || !upstream.body) return new Response('ไม่พบไฟล์', { status: 502 });
+  catch { return fallback(); }
+  if (!upstream.ok || !upstream.body) return fallback();
 
   // สตรีมกลับเป็น PDF โดยไม่โชว์ปลายทาง (address bar เห็นแค่ wecraft-travel.com)
   return new Response(upstream.body, {
