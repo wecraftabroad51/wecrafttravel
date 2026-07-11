@@ -173,6 +173,19 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
   // เปลี่ยนประเทศ → ล้างเมืองย่อย
   useEffect(() => { setRegion(''); }, [country]);
 
+  // วัดความสูง navbar → ให้แถบ filter ค้างพอดีใต้ navbar (sticky)
+  const [navH, setNavH] = useState(64);
+  useEffect(() => {
+    const header = document.querySelector('header');
+    if (!header) return;
+    const measure = () => setNavH(header.offsetHeight);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(header);
+    window.addEventListener('resize', measure);
+    return () => { ro.disconnect(); window.removeEventListener('resize', measure); };
+  }, []);
+
   // รวมทัวร์ของเรา + ทัวร์ซัพพลายเออร์ (ลูกค้าไม่รู้ว่ามาจากไหน)
   const allTours = useMemo(() => [...tours, ...supplierTours], [tours, supplierTours]);
 
@@ -319,8 +332,8 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
         </div>
       )}
 
-      {/* ── Filter bar ────────────────────────────────────────── */}
-      <section style={{ background: 'var(--canvas)', borderBottom: '1px solid var(--line)', padding: '12px 0 10px', marginTop: 12 }}>
+      {/* ── Filter bar (ค้างใต้ navbar เวลาเลื่อน) ───────────────── */}
+      <section style={{ position: 'sticky', top: navH, zIndex: 20, background: 'var(--canvas)', borderBottom: '1px solid var(--line)', boxShadow: '0 4px 10px rgba(0,0,0,.04)', padding: '12px 0 10px', marginTop: 12 }}>
         <div className="wrap-wide" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
 
           {/* Row 1: search + sort */}
