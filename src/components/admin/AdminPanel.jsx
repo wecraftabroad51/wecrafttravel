@@ -2898,11 +2898,13 @@ function getMsgType(msg) {
   // 1. ตรวจจาก tour_interest ที่แต่ละ form ตั้งค่าไว้ชัดเจน
   if (ti.startsWith('รถเช่า') || ti.includes('รถเช่า'))          return 'car';
   if (ti === 'จองตั๋วเครื่องบิน' || ti.startsWith('จองตั๋ว'))     return 'ticket';
+  if (ti.startsWith('จองโรงแรม') || ti.includes('โรงแรม'))      return 'hotel';
 
   // 2. ตรวจจาก body ด้วย pattern เจาะจง (ป้องกัน false positive)
   if (body.includes('=== ขอราคากรุ๊ปเหมา') || body.includes('หมายเลขอ้างอิง: GI')) return 'group';
   if (body.includes('ประเภท: จองตั๋วเครื่องบิน') || body.includes('หมายเลขอ้างอิง: TK')) return 'ticket';
   if (body.includes('ประเภท: รถเช่า') || body.includes('หมายเลขอ้างอิง: RC'))          return 'car';
+  if (body.includes('ประเภท: จองโรงแรม') || body.includes('หมายเลขอ้างอิง: HT'))       return 'hotel';
 
   return 'contact';
 }
@@ -2937,6 +2939,7 @@ function MessagesSection({ messages, setMessages }) {
     { key: 'group',   icon: '🎯', label: 'กรุ๊ปเหมา' },
     { key: 'ticket',  icon: '🎫', label: 'จองตั๋ว'  },
     { key: 'car',     icon: '🚗', label: 'รถเช่า'   },
+    { key: 'hotel',   icon: '🏨', label: 'จองโรงแรม' },
     { key: 'contact', icon: '💬', label: 'ติดต่อ'   },
   ];
 

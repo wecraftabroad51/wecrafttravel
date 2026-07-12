@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { insertMessage } from '../../lib/db.js';
 import FileUploadRows from '../FileUploadRows.jsx';
 import BookNext from '../BookNext.jsx';
 
@@ -174,6 +175,27 @@ export default function HotelBookingPage({ lang = 'th', navigate }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'ส่งไม่สำเร็จ');
+      // เขียนลงตาราง messages เพื่อให้ขึ้นในเมนู "การจอง" หลังบ้าน (ไม่บล็อกถ้าล้ม)
+      try {
+        await insertMessage({
+          name: form.fullName, email: form.email || '', phone: form.phone,
+          tour_interest: `จองโรงแรม — ${form.destination}`,
+          message: [
+            'ประเภท: จองโรงแรม',
+            data.seqNo ? `หมายเลขอ้างอิง: ${data.seqNo}` : '',
+            `ปลายทาง: ${form.destination}`,
+            form.hotelName ? `โรงแรม: ${form.hotelName}` : '',
+            `เช็คอิน-เอาท์: ${form.checkIn} → ${form.checkOut} (${nights} คืน)`,
+            `ห้อง: ${form.rooms} ห้อง · ${roomTypeLabel}`,
+            `ผู้เข้าพัก: ผู้ใหญ่ ${form.adults} / เด็ก ${form.children}`,
+            form.stars ? `ระดับโรงแรม: ${starLabel}` : '',
+            form.budget ? `งบ/คืน: ${form.budget}` : '',
+            form.note ? `หมายเหตุ: ${form.note}` : '',
+            driveFiles.length ? `เอกสาร: ${driveFiles.map(f => f.url).join(', ')}` : '',
+          ].filter(Boolean).join('\n'),
+          date: new Date().toISOString().split('T')[0],
+        });
+      } catch (_) { /* ไม่บล็อกการจอง */ }
       setSeqNo(data.seqNo || '');
       setSuccess(true);
     } catch (err) {
