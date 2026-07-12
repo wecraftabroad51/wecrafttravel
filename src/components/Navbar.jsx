@@ -212,8 +212,8 @@ function CountryMegaDropdown({ groups, navigate, onClose, topOffset, lang }) {
   const en = lang === 'en';
   if (!groups.length) {
     return (
-      <div style={{ position: 'fixed', top: topOffset, left: 0, right: 0, background: '#fff',
-        borderTop: '3px solid var(--primary)', boxShadow: '0 8px 32px rgba(0,0,0,.15)', zIndex: 200, padding: '28px 0' }}
+      <div style={{ position: 'fixed', top: topOffset, left: 0, right: 0, background: 'linear-gradient(165deg, #edfbf4, #d8f0e6)',
+        borderTop: '3px solid var(--primary)', boxShadow: '0 12px 36px rgba(6,70,52,.2)', zIndex: 200, padding: '28px 0' }}
         onMouseLeave={onClose}>
         <div className="wrap" style={{ textAlign: 'center', color: 'var(--muted)', fontSize: 14 }}>
           {en ? 'Loading tours…' : 'กำลังโหลดรายการทัวร์…'}
@@ -225,9 +225,10 @@ function CountryMegaDropdown({ groups, navigate, onClose, topOffset, lang }) {
     <div
       style={{
         position: 'fixed', top: topOffset, left: 0, right: 0,
-        background: '#fff', borderTop: '3px solid var(--primary)',
-        boxShadow: '0 8px 32px rgba(0,0,0,.15)', zIndex: 200,
-        padding: '24px 0', maxHeight: `calc(100vh - ${topOffset}px)`, overflowY: 'auto',
+        background: 'linear-gradient(165deg, #edfbf4 0%, #daf1e7 55%, #cdeddf 100%)',
+        borderTop: '3px solid var(--primary)',
+        boxShadow: '0 12px 36px rgba(6,70,52,.20)', zIndex: 200,
+        padding: '26px 0', maxHeight: `calc(100vh - ${topOffset}px)`, overflowY: 'auto',
       }}
       onMouseLeave={onClose}
     >
@@ -257,7 +258,7 @@ function CountryMegaDropdown({ groups, navigate, onClose, topOffset, lang }) {
                   fontSize: 15.5, fontWeight: 800, color: 'var(--primary)',
                   textTransform: 'uppercase', letterSpacing: '.05em',
                   marginBottom: 10, paddingBottom: 9,
-                  borderBottom: '2px solid var(--primary-light)',
+                  borderBottom: '2px solid rgba(13,124,95,.28)',
                 }}
                 onMouseEnter={e => (e.currentTarget.style.color = 'var(--ink)')}
                 onMouseLeave={e => (e.currentTarget.style.color = 'var(--primary)')}
@@ -280,13 +281,13 @@ function CountryMegaDropdown({ groups, navigate, onClose, topOffset, lang }) {
                     }}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 11,
-                      background: 'none', border: 'none', textAlign: 'left',
+                      background: 'rgba(255,255,255,.62)', border: '1px solid rgba(255,255,255,.9)', textAlign: 'left',
                       padding: '9px 10px', fontSize: 16, fontWeight: 600, color: 'var(--ink-2)',
-                      cursor: 'pointer', borderRadius: 8, fontFamily: 'inherit',
-                      transition: 'background .12s, color .12s',
+                      cursor: 'pointer', borderRadius: 9, fontFamily: 'inherit',
+                      transition: 'background .12s, color .12s, box-shadow .12s',
                     }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-light)'; e.currentTarget.style.color = 'var(--primary)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--ink-2)'; }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.boxShadow = '0 3px 12px rgba(6,80,60,.16)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,.62)'; e.currentTarget.style.color = 'var(--ink-2)'; e.currentTarget.style.boxShadow = 'none'; }}
                   >
                     <Flag code={c.code} emoji={c.flag} w={30} />
                     <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -620,7 +621,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
               </button>
               {/* Mobile: dynamic country menu (ธง + จำนวน) */}
               {m.dynamic === 'country' && (
-                <div style={{ background: '#fafafa', padding: '8px 20px 12px' }}>
+                <div style={{ background: 'linear-gradient(165deg, #edfbf4, #d8f0e6)', padding: '10px 18px 14px' }}>
                   {outboundGroups.map((g) => (
                     <div key={g.id} style={{ marginBottom: 12 }}>
                       <button
@@ -632,7 +633,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
                         {g.countries.map(c => (
                           <button key={c.code}
                             onClick={() => { navigate('tours', null, { country: c.code }); setMobileOpen(false); }}
-                            style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', fontSize: 15.5, fontWeight: 600, color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'inherit', padding: '8px 4px', textAlign: 'left', borderRadius: 8 }}>
+                            style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'rgba(255,255,255,.78)', border: '1px solid rgba(255,255,255,.9)', fontSize: 15.5, fontWeight: 600, color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'inherit', padding: '9px 10px', textAlign: 'left', borderRadius: 9 }}>
                             <Flag code={c.code} emoji={c.flag} w={27} />
                             <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lang === 'en' ? c.en : c.th}</span>
                             <span style={{ fontSize: 13.5, fontWeight: 800, color: 'var(--primary)', background: 'var(--primary-light)', borderRadius: 20, padding: '2px 9px', minWidth: 28, textAlign: 'center' }}>{c.count}</span>
