@@ -87,6 +87,7 @@ const KEY_COUNTS = MENU.reduce((acc, m) => { acc[m.key] = (acc[m.key] || 0) + 1;
 const QUICK_LINKS = [
   { label: 'หน้าหลัก',        labelEn: 'Home',           key: 'home' },
   { label: 'ขอราคากรุ๊ปเหมา', labelEn: 'Group Quote',    key: 'group-quote' },
+  { label: 'จองโรงแรม',        labelEn: 'Hotel',          key: 'hotel-booking' },
   { label: 'บริการยื่นวีซ่า',  labelEn: 'Visa Service',   key: 'visa' },
   { label: 'บทความท่องเที่ยว', labelEn: 'Travel Blog',    key: 'articles' },
   { label: 'ผลงานที่ผ่านมา',   labelEn: 'Gallery',        key: 'gallery' },
@@ -177,7 +178,8 @@ function MegaDropdown({ menu, navigate, onClose, topOffset, lang }) {
               {group.countries.map(c => (
                 <button key={c}
                   onClick={() => {
-                    if (menu.key === 'ticket-booking') {
+                    if (c === 'จองโรงแรม') { navigate('hotel-booking'); }
+                    else if (menu.key === 'ticket-booking') {
                       if (group.continent === 'รถเช่า') { navigate('car-rental'); }
                       else { navigate('ticket-booking'); }
                     } else {

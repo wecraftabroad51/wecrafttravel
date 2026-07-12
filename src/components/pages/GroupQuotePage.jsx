@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { insertMessage } from '../../lib/db.js';
+import BookNext from '../BookNext.jsx';
 
 // ─── OTP helpers ────────────────────────────────────────────────
 const INIT_OTP = { sent: false, token: '', code: '', verified: false, loading: false, error: '', countdown: 0 };
@@ -356,7 +357,7 @@ const inputStyle = {
   transition: 'border-color .15s',
 };
 
-export default function GroupQuotePage({ lang, setMessages }) {
+export default function GroupQuotePage({ lang, setMessages, navigate }) {
   const [form, setForm] = useState(EMPTY);
   const [sent, setSent] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -629,6 +630,7 @@ export default function GroupQuotePage({ lang, setMessages }) {
             }}>
             ส่งข้อมูลอีกครั้ง
           </button>
+          {navigate && <div style={{ maxWidth: 480, margin: '0 auto' }}><BookNext current="group-quote" navigate={navigate} lang={lang} /></div>}
         </div>
       </div>
     );

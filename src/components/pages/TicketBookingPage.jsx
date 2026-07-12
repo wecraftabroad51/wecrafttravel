@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { insertMessage } from '../../lib/db.js';
 import DateRangePicker from '../DateRangePicker.jsx';
 import FileUploadRows from '../FileUploadRows.jsx';
+import BookNext from '../BookNext.jsx';
 
 const TIME_SLOTS = ['00.01-06.00', '06.01-12.00', '12.01-18.00', '18.00-00.00'];
 const AIRLINE_TYPES = [
@@ -379,6 +380,7 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
             style={{ marginTop: 24, background: 'var(--primary, #e65c00)', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 28px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
             {lang === 'th' ? 'กลับหน้าหลัก' : 'Back to Home'}
           </button>
+          <BookNext current="ticket-booking" navigate={navigate} lang={lang} />
         </div>
       </main>
     );

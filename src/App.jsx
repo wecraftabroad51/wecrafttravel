@@ -35,6 +35,7 @@ import VisaPage from './components/pages/VisaPage.jsx';
 import AdminPanel from './components/admin/AdminPanel.jsx';
 import TicketBookingPage from './components/pages/TicketBookingPage.jsx';
 import CarRentalPage from './components/pages/CarRentalPage.jsx';
+import HotelBookingPage from './components/pages/HotelBookingPage.jsx';
 import LegalPage from './components/pages/LegalPage.jsx';
 import CardExplorePage from './components/pages/CardExplorePage.jsx';
 
@@ -344,7 +345,9 @@ function AppInner() {
   useEffect(() => {
     const p = window.location.pathname;
     const inLine = /Line\//i.test(navigator.userAgent) || window.location.search.includes('liff');
-    if (p !== '/' && !p.startsWith('/admin') && p !== '/cards' && !inLine) routerNav('/', { replace: true });
+    // หน้าที่เปิดตรง (deep-link) ได้ — รวมหน้าจองต่างๆ เพื่อให้ปุ่ม "จองอะไรต่อ" ลิงก์ตรงได้
+    const DIRECT_OK = ['/cards', '/group-quote', '/ticket-booking', '/car-rental', '/hotel-booking'];
+    if (p !== '/' && !p.startsWith('/admin') && !DIRECT_OK.includes(p) && !inLine) routerNav('/', { replace: true });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Load supplier tours — โหลดทีละเจ้า เจ้าไหนเสร็จโชว์ก่อน ────
@@ -469,6 +472,7 @@ function AppInner() {
       visa:             '/visa',
       'ticket-booking': '/ticket-booking',
       'car-rental':     '/car-rental',
+      'hotel-booking':  '/hotel-booking',
       cards:            '/cards',
       'legal-privacy':  '/privacy',
       'legal-terms':    '/terms',
@@ -724,11 +728,12 @@ function AppInner() {
           <Route path="/promotions"  element={<PromotionsPage {...pageProps} />} />
           <Route path="/faq"         element={<FAQPage {...pageProps} />} />
           <Route path="/contact"      element={<ContactPage {...pageProps} />} />
-          <Route path="/group-quote" element={<GroupQuotePage lang={pageProps.lang} setMessages={pageProps.setMessages} />} />
+          <Route path="/group-quote" element={<GroupQuotePage lang={pageProps.lang} setMessages={pageProps.setMessages} navigate={navigate} />} />
           <Route path="/about"       element={<AboutPage lang={pageProps.lang} navigate={navigate} />} />
           <Route path="/visa"           element={<VisaPage lang={pageProps.lang} navigate={navigate} />} />
           <Route path="/ticket-booking" element={<TicketBookingPage {...pageProps} />} />
           <Route path="/car-rental"     element={<CarRentalPage {...pageProps} />} />
+          <Route path="/hotel-booking"  element={<HotelBookingPage lang={pageProps.lang} navigate={navigate} />} />
           <Route path="/cards"          element={<CardExplorePage {...pageProps} />} />
           <Route path="/privacy"        element={<LegalPage lang={lang} navigate={navigate} settings={settings} type="privacy" />} />
           <Route path="/terms"          element={<LegalPage lang={lang} navigate={navigate} settings={settings} type="terms" />} />

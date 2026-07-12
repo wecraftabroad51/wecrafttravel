@@ -63,6 +63,11 @@
   .ok .ref { display:inline-block; background:#eaf7f5; color:var(--teal-d); font-weight:800;
     padding:6px 14px; border-radius:20px; margin:10px 0; font-size:15px; }
   .err { background:#fdeaea; color:#b3261e; border-radius:11px; padding:12px; font-size:13px; margin:12px 12px 0; }
+  .xnext { margin-top:22px; padding-top:18px; border-top:1px dashed #e2e2e2; }
+  .xnext .xt { font-size:14px; font-weight:800; color:#444; margin-bottom:12px; }
+  .xrow { display:flex; flex-wrap:wrap; gap:9px; justify-content:center; }
+  .xbtn { display:inline-flex; align-items:center; gap:7px; background:#fff; border:1.5px solid #e4e4e4;
+    border-radius:12px; padding:10px 15px; font-size:14px; font-weight:700; color:#333; text-decoration:none; }
 </style>
 </head>
 <body>
@@ -361,6 +366,15 @@ function success(seq,fd,roundLabel){
       <p style="color:#8a94a0;font-size:13px;margin-top:18px;line-height:1.7">
         ทีมงานได้รับข้อมูลแล้ว${isLine?' และส่งข้อความยืนยันไปที่แชท LINE ของคุณด้วยครับ<br>กดปิด (✕) มุมขวาบน เพื่อกลับไปที่แชท':' จะติดต่อกลับโดยเร็วที่สุดครับ'}
       </p>
+      <div class="xnext">
+        <div class="xt">✨ สนใจจองอะไรต่อ?</div>
+        <div class="xrow">
+          <a class="xbtn" href="https://wecraft-travel.com/group-quote">🎯 กรุ๊ปเหมา</a>
+          <a class="xbtn" href="https://wecraft-travel.com/ticket-booking">🎫 จองตั๋วเครื่องบิน</a>
+          <a class="xbtn" href="https://wecraft-travel.com/car-rental">🚗 จองรถ</a>
+          <a class="xbtn" href="https://wecraft-travel.com/hotel-booking">🏨 จองโรงแรม</a>
+        </div>
+      </div>
     </div>`;
   try{ if(window.liff&&liff.isInClient&&liff.isInClient()) setTimeout(()=>liff.closeWindow(),2500); }catch(e){}
 }

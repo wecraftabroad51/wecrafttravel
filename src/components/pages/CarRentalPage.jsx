@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { insertMessage } from '../../lib/db.js';
 import DateRangePicker from '../DateRangePicker.jsx';
+import FileUploadRows from '../FileUploadRows.jsx';
+import BookNext from '../BookNext.jsx';
 
 const RENTAL_TYPES = [
   { value: 'domestic',  th: 'ในประเทศ',       en: 'Domestic' },
@@ -132,6 +134,7 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
     passengers: 1,
     note: '',
   });
+  const [driveFiles, setDriveFiles] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -289,7 +292,7 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
       await sendNotifications(
         `[รถเช่า] ${form.fullName} — ${rentalLabel} ${form.pickupDate}`,
         emailHtml,
-        { ...form, _type: 'car-rental', rentalLabel, carLabel, _seqNo: seqNo || undefined },
+        { ...form, _type: 'car-rental', rentalLabel, carLabel, driveFiles, _seqNo: seqNo || undefined },
         form.email || undefined
       );
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -318,6 +321,7 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
             style={{ marginTop: 24, background: 'var(--primary, #e65c00)', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 28px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
             {lang === 'th' ? 'กลับหน้าหลัก' : 'Back to Home'}
           </button>
+          <BookNext current="car-rental" navigate={navigate} lang={lang} />
         </div>
       </main>
     );
@@ -426,6 +430,15 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
                   onChange={e => set('passengers', parseInt(e.target.value) || 1)} />
               </div>
             </div>
+          </div>
+
+          {/* Documents */}
+          <div style={{ background: '#fff', borderRadius: 12, padding: '28px 24px', boxShadow: '0 2px 12px rgba(0,0,0,.06)', marginBottom: 20 }}>
+            <h3 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 800, color: 'var(--primary, #e65c00)', borderBottom: '2px solid #fff3e0', paddingBottom: 10 }}>
+              {lang === 'th' ? 'แนบเอกสาร' : 'Upload Documents'}
+            </h3>
+            <Label th="ใบขับขี่ / ใบขับขี่สากล / พาสปอร์ต (ถ้ามี)" en="Driver's license / International license / Passport (optional)" lang={lang} />
+            <FileUploadRows onChange={setDriveFiles} lang={lang} prefix={form.fullName || 'car'} accent="#e65c00" />
           </div>
 
           {/* Notes */}

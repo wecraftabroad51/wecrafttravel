@@ -28,6 +28,7 @@ function sheetNameFor(type) {
   if (type === 'ticket')     return 'จองตั๋ว';
   if (type === 'car-rental') return 'รถเช่า';
   if (type === 'join-tour')  return 'จอยทัวร์';
+  if (type === 'hotel')      return 'จองโรงแรม';
   return 'กรุ๊ปเหมา';
 }
 
@@ -36,6 +37,7 @@ function seqPrefixFor(type) {
   if (type === 'ticket')     return 'TK';
   if (type === 'car-rental') return 'RC';
   if (type === 'join-tour')  return 'JT';
+  if (type === 'hotel')      return 'HT';
   return 'GI';
 }
 
@@ -109,6 +111,30 @@ async function sendLine(formData, seqNo, sheetUrl) {
       `📍 สถานที่รับ: ${f.pickupLocation}`,
       `🚗 ประเภทรถ: ${f.carLabel || f.carType}`,
       `👥 จำนวนผู้โดยสาร: ${f.passengers} คน`,
+      f.note ? `💬 หมายเหตุ: ${f.note}` : null,
+      ...(f.driveFiles?.length
+        ? ['━━━━━━━━━━━━━━━━━━', '📎 เอกสาร (ใบขับขี่/พาสปอร์ต):', ...f.driveFiles.map(d => `• ${d.name}\n  ${d.url}`)]
+        : []),
+      '━━━━━━━━━━━━━━━━━━',
+      '⚡ รีบตอบกลับภายใน 24 ชั่วโมง!',
+    ].filter(Boolean).join('\n');
+
+  } else if (f._type === 'hotel') {
+    text = [
+      '🏨 มาแล้วๆ!! คำขอจองโรงแรม!!',
+      seqNo ? `🔢 หมายเลขอ้างอิง: ${seqNo}` : null,
+      '━━━━━━━━━━━━━━━━━━',
+      `👤 ชื่อ: ${f.fullName}`,
+      `📞 โทร: ${f.phone}`,
+      f.email ? `📧 อีเมล: ${f.email}` : null,
+      '━━━━━━━━━━━━━━━━━━',
+      `📍 เมือง/ปลายทาง: ${f.destination || '-'}`,
+      f.hotelName ? `🏨 โรงแรมที่สนใจ: ${f.hotelName}` : null,
+      `📅 เช็คอิน: ${f.checkIn || '-'}  →  เช็คเอาท์: ${f.checkOut || '-'}${f.nights ? `  (${f.nights} คืน)` : ''}`,
+      `🛏️ ห้อง: ${f.rooms || 1} ห้อง · ${f.roomType || '-'}`,
+      `👥 ผู้เข้าพัก: ผู้ใหญ่ ${f.adults || 0} / เด็ก ${f.children || 0}`,
+      f.stars ? `⭐ ระดับ: ${f.stars}` : null,
+      f.budget ? `💰 งบ/คืน: ${f.budget}` : null,
       f.note ? `💬 หมายเหตุ: ${f.note}` : null,
       '━━━━━━━━━━━━━━━━━━',
       '⚡ รีบตอบกลับภายใน 24 ชั่วโมง!',
@@ -349,6 +375,27 @@ async function sendCustomerConfirmation(customerEmail, seqNo, formData) {
            <td style="padding:8px 14px;color:#333;font-weight:600;font-size:13px;">${v}</td></tr>`
     ).join('');
 
+  } else if (f._type === 'hotel') {
+    const rows = [
+      ['เมือง/ปลายทาง',   f.destination || '-'],
+      f.hotelName ? ['โรงแรมที่สนใจ', f.hotelName] : null,
+      ['เช็คอิน',          f.checkIn  || '-'],
+      ['เช็คเอาท์',        f.checkOut || '-'],
+      f.nights ? ['จำนวนคืน', `${f.nights} คืน`] : null,
+      ['จำนวนห้อง',        `${f.rooms || 1} ห้อง`],
+      ['ประเภทห้อง',       f.roomType || '-'],
+      ['ผู้เข้าพัก',       `ผู้ใหญ่ ${f.adults||0} / เด็ก ${f.children||0}`],
+      f.stars  ? ['ระดับโรงแรม', f.stars]  : null,
+      f.budget ? ['งบประมาณ/คืน', f.budget] : null,
+      ['ชื่อผู้ติดต่อ',    f.fullName],
+      ['โทรศัพท์',         f.phone],
+      f.note ? ['หมายเหตุ', f.note] : null,
+    ].filter(Boolean);
+    detailRows = rows.map(([k, v]) =>
+      `<tr><td style="padding:8px 14px;color:#888;width:140px;vertical-align:top;font-size:13px;">${k}</td>
+           <td style="padding:8px 14px;color:#333;font-weight:600;font-size:13px;">${v}</td></tr>`
+    ).join('');
+
   } else if (f._type === 'join-tour') {
     const rows = [
       ['รหัสทัวร์',          f.tourCode || '-'],
@@ -411,6 +458,7 @@ async function sendCustomerConfirmation(customerEmail, seqNo, formData) {
                      : f._type === 'ticket'     ? '🎫 ได้รับคำขอจองตั๋วแล้ว!'
                      : f._type === 'car-rental' ? '🚗 ได้รับคำขอเช่ารถแล้ว!'
                      : f._type === 'join-tour'  ? '🌏 ได้รับคำขอจองจอยทัวร์แล้ว!'
+                     : f._type === 'hotel'      ? '🏨 ได้รับคำขอจองโรงแรมแล้ว!'
                      : '✅ ได้รับคำขอของคุณแล้ว!';
 
   const html = `
@@ -514,6 +562,29 @@ async function appendToSheet(formData, seqNo, sheets, sheetId, sheetName) {
       f.carLabel || f.carType || '',
       f.passengers      || '',
       f.note            || '',
+      (f.driveFiles || []).map(d => d.url).join('\n') || '',
+    ];
+
+  } else if (f._type === 'hotel') {
+    row = [
+      seqNo,
+      now,
+      f.fullName    || '',
+      f.phone       || '',
+      f.email       || '',
+      f.destination || '',
+      f.hotelName   || '',
+      f.checkIn     || '',
+      f.checkOut    || '',
+      f.nights      || '',
+      f.rooms       || '',
+      f.roomType    || '',
+      f.adults      || 0,
+      f.children    || 0,
+      f.stars       || '',
+      f.budget      || '',
+      f.note        || '',
+      (f.driveFiles || []).map(d => d.url).join('\n') || '',
     ];
 
   } else if (f._type === 'join-tour') {
