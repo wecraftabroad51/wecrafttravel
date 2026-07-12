@@ -1,29 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { insertMessage, uploadPassport } from '../../lib/db.js';
+import { insertMessage } from '../../lib/db.js';
 import DateRangePicker from '../DateRangePicker.jsx';
-
-// ── Compress image before upload (max 800px, quality 0.6) ─────
-function compressImage(file, maxPx = 800, quality = 0.6) {
-  return new Promise((resolve) => {
-    if (!file.type.startsWith('image/')) return resolve(file); // PDF → ไม่ compress
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      let { width, height } = img;
-      if (width > maxPx || height > maxPx) {
-        if (width > height) { height = Math.round(height * maxPx / width); width = maxPx; }
-        else                 { width = Math.round(width * maxPx / height); height = maxPx; }
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = width; canvas.height = height;
-      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-      canvas.toBlob(blob => resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' })), 'image/jpeg', quality);
-    };
-    img.onerror = () => resolve(file);
-    img.src = url;
-  });
-}
+import FileUploadRows from '../FileUploadRows.jsx';
 
 const TIME_SLOTS = ['00.01-06.00', '06.01-12.00', '12.01-18.00', '18.00-00.00'];
 const AIRLINE_TYPES = [
@@ -179,10 +157,7 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
     seatClass: 'economy',
     note: '',
   });
-  const [files, setFiles] = useState([]);
-  const [filePreviews, setFilePreviews] = useState([]);
-  const [uploadStatus, setUploadStatus] = useState(null); // null | 'uploading' | 'ok' | 'warn'
-  const [uploadMsg, setUploadMsg] = useState('');
+  const [driveFiles, setDriveFiles] = useState([]); // ไฟล์ที่อัปโหลดแล้ว [{name,url}]
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -304,32 +279,7 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
         console.warn('gen-seqno failed:', e.message);
       }
 
-      // ── 2. อัพโหลดไฟล์พาสปอร์ตไปยัง Supabase Storage ──────────
-      let driveFiles = [];
-      if (files.length > 0) {
-        setUploadStatus('uploading');
-        setUploadMsg('');
-        try {
-          const compressed = await Promise.all(files.map(f => compressImage(f)));
-          const results = await Promise.all(
-            compressed.map(f => uploadPassport(f, seqNo || form.fullName))
-          );
-          const failed = results.filter(r => r.error);
-          const succeeded = results.filter(r => !r.error);
-          driveFiles = succeeded.map(r => ({ name: r.name, url: r.url }));
-          if (failed.length > 0) {
-            setUploadStatus('warn');
-            setUploadMsg(`อัพโหลดสำเร็จ ${succeeded.length}/${results.length} ไฟล์ — ${failed[0].error}`);
-          } else {
-            setUploadStatus('ok');
-            setUploadMsg(`อัพโหลดสำเร็จ ${driveFiles.length} ไฟล์`);
-          }
-        } catch (uploadErr) {
-          console.warn('Upload error (continuing):', uploadErr.message);
-          setUploadStatus('warn');
-          setUploadMsg(`อัพโหลดไม่สำเร็จ: ${uploadErr.message}`);
-        }
-      }
+      // ── ไฟล์ถูกอัปโหลดไว้แล้วตอนเลือก (FileUploadRows) ──────────
 
       // ── 2. บันทึกลง Supabase ────────────────────────────────────
       const airlineLabelMsg = AIRLINE_TYPES.find(a => a.value === form.airlineType)?.th || form.airlineType;
@@ -562,76 +512,7 @@ export default function TicketBookingPage({ lang, t, navigate, setBookings }) {
               {lang === 'th' ? 'อัพโหลดเอกสาร' : 'Upload Documents'}
             </h3>
             <Label th={`สำเนาพาสปอร์ต (${totalPax} คน)`} en={`Passport Copies (${totalPax} passenger${totalPax !== 1 ? 's' : ''})`} lang={lang} />
-            <div style={{ border: '2px dashed #ddd', borderRadius: 8, padding: '20px', textAlign: 'center', background: '#fafafa' }}>
-              <input type="file" multiple accept=".png,.jpg,.jpeg,.pdf"
-                onChange={e => {
-                  const selected = Array.from(e.target.files);
-                  setFiles(selected);
-                  setUploadStatus(null);
-                  setUploadMsg('');
-                  // Reset previews เสมอก่อน แล้วค่อย fill ใหม่
-                  const initPreviews = selected.map(f => ({ name: f.name, type: f.type, url: null }));
-                  setFilePreviews(initPreviews);
-                  selected.forEach((f, i) => {
-                    if (f.type.startsWith('image/')) {
-                      const reader = new FileReader();
-                      reader.onload = ev => {
-                        setFilePreviews(prev => {
-                          const next = [...prev];
-                          next[i] = { name: f.name, type: f.type, url: ev.target.result };
-                          return next;
-                        });
-                      };
-                      reader.readAsDataURL(f);
-                    }
-                  });
-                }}
-                style={{ display: 'block', margin: '0 auto', fontSize: 13 }} />
-              <div style={{ fontSize: 12, color: '#aaa', marginTop: 8 }}>
-                {lang === 'th' ? 'รองรับ .PNG .JPG .PDF' : 'Accepts .PNG .JPG .PDF'}
-              </div>
-            </div>
-            {uploadStatus === 'uploading' && (
-              <div style={{ marginTop: 10, fontSize: 13, color: '#1a73e8' }}>
-                ⏳ กำลังอัพโหลดไปยัง Google Drive...
-              </div>
-            )}
-            {uploadStatus === 'ok' && (
-              <div style={{ marginTop: 10, fontSize: 13, color: '#2e7d32', fontWeight: 600 }}>
-                ✅ {uploadMsg}
-              </div>
-            )}
-            {uploadStatus === 'warn' && (
-              <div style={{ marginTop: 10, fontSize: 12, color: '#c62828', background: '#ffebee', borderRadius: 6, padding: '8px 12px', wordBreak: 'break-all' }}>
-                ⚠️ {uploadMsg}<br/>
-                <span style={{ color: '#888', fontWeight: 400 }}>(ยังสามารถส่งฟอร์มได้ — เจ้าหน้าที่จะติดต่อขอเอกสารภายหลัง)</span>
-              </div>
-            )}
-            {filePreviews.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 14 }}>
-                {filePreviews.map((f, i) => (
-                  <div key={i} style={{ position: 'relative', width: 90, height: 90, borderRadius: 8, overflow: 'hidden', border: '1px solid #ddd', background: '#f5f5f5', flexShrink: 0 }}>
-                    {f.url
-                      ? <img src={f.url} alt={f.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-                          <span style={{ fontSize: 28 }}>📄</span>
-                          <span style={{ fontSize: 10, color: '#888', textAlign: 'center', padding: '0 6px', wordBreak: 'break-all', lineHeight: 1.3 }}>{f.name}</span>
-                        </div>
-                    }
-                    <button type="button"
-                      onClick={() => {
-                        const newFiles = files.filter((_, idx) => idx !== i);
-                        const newPrev = filePreviews.filter((_, idx) => idx !== i);
-                        setFiles(newFiles);
-                        setFilePreviews(newPrev);
-                      }}
-                      style={{ position: 'absolute', top: 3, right: 3, width: 20, height: 20, borderRadius: '50%', background: 'rgba(0,0,0,.55)', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            <FileUploadRows onChange={setDriveFiles} lang={lang} prefix={form.fullName} accent="#e65c00" />
             <div style={{ marginTop: 16 }}>
               <Label th="ข้อมูลเพิ่มเติม" en="Additional Notes" lang={lang} />
               <textarea value={form.note} onChange={e => set('note', e.target.value)}

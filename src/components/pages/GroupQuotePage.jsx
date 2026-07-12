@@ -723,7 +723,7 @@ export default function GroupQuotePage({ lang, setMessages }) {
             * กรุณากรอกข้อมูลที่จำเป็นให้ครบ
           </p>
 
-          <div className="gq-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 24px' }}>
+          <div className="gq-fgrid" style={{ display: 'grid', gap: '16px 20px' }}>
 
             {/* ชื่อ-นามสกุล */}
             <Field label="ชื่อผู้ติดต่อ" required error={errors.firstName}>
@@ -933,8 +933,10 @@ export default function GroupQuotePage({ lang, setMessages }) {
 
       {/* Mobile responsive */}
       <style>{`
+        .gq-fgrid { grid-template-columns: 1fr 1fr; }
         @media (max-width: 640px) {
-          .gq-grid { grid-template-columns: 1fr !important; }
+          .gq-grid  { grid-template-columns: 1fr !important; }
+          .gq-fgrid { grid-template-columns: 1fr; }
         }
       `}</style>
     </div>
