@@ -393,13 +393,16 @@ export const uploadFile = async (file, folder = 'pdfs') => {
 // ── PASSPORT UPLOAD (Supabase Storage → passports bucket) ────
 export const uploadPassport = async (file, prefix = '') => {
   if (!supabase) return { url: null, name: file.name, error: 'offline' }
-  const ext      = file.name.split('.').pop().toLowerCase()
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-  const path     = `${prefix ? prefix + '_' : ''}${Date.now()}-${safeName}`
+  // Supabase Storage key รับเฉพาะ ASCII — ต้อง sanitize ทั้งชื่อไฟล์และ prefix
+  // (prefix มักเป็นชื่อลูกค้าภาษาไทย+เว้นวรรค → ทำให้ key พัง InvalidKey)
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/_+/g, '_')
+  const safePrefix = String(prefix || '')
+    .replace(/[^a-zA-Z0-9._-]/g, '_').replace(/_+/g, '_').replace(/^_+|_+$/g, '').slice(0, 30)
+  const path = `${safePrefix ? safePrefix + '_' : ''}${Date.now()}-${safeName || 'file'}`
   const { error: upErr } = await supabase.storage
     .from('passports')
-    .upload(path, file, { cacheControl: '3600', upsert: false })
+    .upload(path, file, { cacheControl: '3600', upsert: false, contentType: file.type || undefined })
   if (upErr) return { url: null, name: file.name, error: upErr.message || String(upErr) }
   const { data } = supabase.storage.from('passports').getPublicUrl(path)
-  return { url: data.publicUrl, name: safeName, error: null }
+  return { url: data.publicUrl, name: file.name, error: null }
 }
