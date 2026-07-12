@@ -515,12 +515,13 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
 
       {/* ── Row 3: main nav ──────────────────────────────── */}
       <div style={{
-        background: '#fff',
+        background: 'linear-gradient(180deg, #fffaf4 0%, #fff0e0 100%)',
+        borderTop: '1px solid rgba(230,92,0,.14)',
         borderBottom: '3px solid var(--primary)',
-        boxShadow: scrolled ? '0 2px 12px rgba(0,0,0,.1)' : 'none',
+        boxShadow: scrolled ? '0 4px 16px rgba(0,0,0,.12)' : '0 2px 10px rgba(230,92,0,.10)',
         transition: 'box-shadow .2s',
       }}>
-        <div className="wrap" style={{ display: 'flex', alignItems: 'center', height: 50, gap: 0 }}>
+        <div className="wrap" style={{ display: 'flex', alignItems: 'center', height: 56, gap: 0 }}>
 
           {/* Mobile-only logo (Row 2 is hidden on mobile) */}
           <button onClick={() => navigate('home')} className="mobile-menu-btn"

@@ -27,24 +27,6 @@ const SLIDES = [
     img:   '/hero-banner-1.jpg',
     link:  'tours',
   },
-  {
-    plain: true,
-    alt:   { th: 'เที่ยวญี่ปุ่น ซากุระบาน ครบทุกซีซั่น', en: 'Japan Tours' },
-    img:   '/hero-japan.svg',
-    link:  'tours', filters: { tourType: 'outbound', country: 'ญี่ปุ่น' },
-  },
-  {
-    plain: true,
-    alt:   { th: 'เที่ยวจีน มหัศจรรย์ สุดอลังการ', en: 'China Tours' },
-    img:   '/hero-china.svg',
-    link:  'tours', filters: { tourType: 'outbound', country: 'จีน' },
-  },
-  {
-    plain: true,
-    alt:   { th: 'เที่ยวยุโรป หลายประเทศ ครบทุกเส้นทาง', en: 'Europe Tours' },
-    img:   '/hero-europe.svg',
-    link:  'tours', filters: { tourType: 'outbound', continent: 'Europe' },
-  },
 ];
 
 // ─── HERO (full-width carousel) ───────────────────────────────
@@ -111,21 +93,23 @@ function HeroSection({ navigate, lang }) {
         </div>
       </div>
       )}
-      {/* Arrows */}
-      <button aria-label="ก่อนหน้า" onClick={() => go(idx - 1)} style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', zIndex: 5, width: 48, height: 48, borderRadius: '50%', background: 'rgba(0,0,0,.32)', backdropFilter: 'blur(2px)', border: '1.5px solid rgba(255,255,255,.7)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(0,0,0,.25)' }}>
-        <Icon name="arrow-l" size={20} color="#fff" />
-      </button>
-      <button aria-label="ถัดไป" onClick={() => go(idx + 1)} style={{ position: 'absolute', right: 18, top: '50%', transform: 'translateY(-50%)', zIndex: 5, width: 48, height: 48, borderRadius: '50%', background: 'rgba(0,0,0,.32)', backdropFilter: 'blur(2px)', border: '1.5px solid rgba(255,255,255,.7)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(0,0,0,.25)' }}>
-        <Icon name="arrow-r" size={20} color="#fff" />
-      </button>
-      {/* Dots */}
-      <div style={{ position: 'absolute', bottom: 18, left: '50%', transform: 'translateX(-50%)', zIndex: 5, display: 'flex', gap: 8 }}>
-        {SLIDES.map((_, i) => <button key={i} className={`carousel-dot${i === idx ? ' active' : ''}`} onClick={() => go(i)} />)}
-      </div>
-      {/* Counter */}
-      <div style={{ position: 'absolute', top: 16, right: 20, background: 'rgba(0,0,0,.45)', color: '#fff', padding: '4px 12px', borderRadius: 999, fontSize: 12, fontWeight: 600 }}>
-        {idx + 1} / {SLIDES.length}
-      </div>
+      {/* Arrows / Dots / Counter — เฉพาะเมื่อมีมากกว่า 1 สไลด์ */}
+      {SLIDES.length > 1 && (
+        <>
+          <button aria-label="ก่อนหน้า" onClick={() => go(idx - 1)} style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', zIndex: 5, width: 48, height: 48, borderRadius: '50%', background: 'rgba(0,0,0,.32)', backdropFilter: 'blur(2px)', border: '1.5px solid rgba(255,255,255,.7)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(0,0,0,.25)' }}>
+            <Icon name="arrow-l" size={20} color="#fff" />
+          </button>
+          <button aria-label="ถัดไป" onClick={() => go(idx + 1)} style={{ position: 'absolute', right: 18, top: '50%', transform: 'translateY(-50%)', zIndex: 5, width: 48, height: 48, borderRadius: '50%', background: 'rgba(0,0,0,.32)', backdropFilter: 'blur(2px)', border: '1.5px solid rgba(255,255,255,.7)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(0,0,0,.25)' }}>
+            <Icon name="arrow-r" size={20} color="#fff" />
+          </button>
+          <div style={{ position: 'absolute', bottom: 18, left: '50%', transform: 'translateX(-50%)', zIndex: 5, display: 'flex', gap: 8 }}>
+            {SLIDES.map((_, i) => <button key={i} className={`carousel-dot${i === idx ? ' active' : ''}`} onClick={() => go(i)} />)}
+          </div>
+          <div style={{ position: 'absolute', top: 16, right: 20, background: 'rgba(0,0,0,.45)', color: '#fff', padding: '4px 12px', borderRadius: 999, fontSize: 12, fontWeight: 600 }}>
+            {idx + 1} / {SLIDES.length}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -209,21 +193,21 @@ function SearchSidebar({ navigate, lang }) {
       top: 116,
     }}>
       {/* Header */}
-      <div style={{ background: 'var(--primary)', color: '#fff', padding: '14px 18px', fontSize: 15, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Icon name="search" size={17} color="#fff" /> {lang === 'th' ? 'ค้นหาทัวร์ที่ต้องการ' : 'Find Your Tour'}
+      <div style={{ background: 'linear-gradient(135deg, var(--primary), #ff8c33)', color: '#fff', padding: '18px 20px', fontSize: 18.5, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 9, letterSpacing: '.01em' }}>
+        <Icon name="search" size={22} color="#fff" /> {lang === 'th' ? 'ค้นหาทัวร์ที่ต้องการ' : 'Find Your Tour'}
       </div>
-      <div style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ padding: '20px 20px', display: 'flex', flexDirection: 'column', gap: 15 }}>
         {/* ช่องค้นหารหัส / ชื่อทัวร์ */}
         <div>
-          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'รหัสทัวร์ / ชื่อทัวร์' : 'Tour Code / Name'}</label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#fff', border: '1.5px solid var(--line)', borderRadius: 6, padding: '0 10px' }}>
-            <Icon name="search" size={14} />
+          <label style={{ display: 'block', marginBottom: 7, fontSize: 14, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'รหัสทัวร์ / ชื่อทัวร์' : 'Tour Code / Name'}</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fff', border: '1.5px solid var(--line)', borderRadius: 8, padding: '0 12px' }}>
+            <Icon name="search" size={17} />
             <input
               value={codeSearch}
               onChange={e => setCodeSearch(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
               placeholder={lang === 'th' ? 'พิมพ์รหัสหรือชื่อทัวร์...' : 'Enter code or tour name...'}
-              style={{ border: 'none', padding: '9px 0', background: 'transparent', fontSize: 13, width: '100%', fontFamily: 'inherit' }}
+              style={{ border: 'none', padding: '12px 0', background: 'transparent', fontSize: 15.5, width: '100%', fontFamily: 'inherit' }}
             />
             {codeSearch && (
               <button onClick={() => setCodeSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 16, lineHeight: 1, padding: 0 }}>×</button>
@@ -231,47 +215,47 @@ function SearchSidebar({ navigate, lang }) {
           </div>
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'ประเภทการเดินทาง' : 'Tour Type'}</label>
+          <label style={{ display: 'block', marginBottom: 7, fontSize: 14, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'ประเภทการเดินทาง' : 'Tour Type'}</label>
           <select value={tourType} onChange={e => setTourType(e.target.value)}>
             <option value="">{lang === 'th' ? '-- ทุกประเภท --' : '-- All Types --'}</option>
             {TOUR_TYPE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{lang === 'en' ? opt.labelEn : opt.label}</option>)}
           </select>
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'โซน / ทวีป' : 'Zone / Continent'}</label>
+          <label style={{ display: 'block', marginBottom: 7, fontSize: 14, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'โซน / ทวีป' : 'Zone / Continent'}</label>
           <select value={zone} onChange={e => { setZone(e.target.value); setCountry(''); }}>
             <option value="">{lang === 'th' ? '-- เลือกโซน --' : '-- Select Zone --'}</option>
             {ZONE_OPTIONS.map(z => <option key={z.value} value={z.value}>{lang === 'en' ? z.labelEn : z.label}</option>)}
           </select>
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'ประเทศ / จังหวัด' : 'Country / Province'}</label>
+          <label style={{ display: 'block', marginBottom: 7, fontSize: 14, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'ประเทศ / จังหวัด' : 'Country / Province'}</label>
           <select value={country} onChange={e => setCountry(e.target.value)} disabled={!zone}>
             <option value="">{lang === 'th' ? '-- เลือกประเทศ --' : '-- Select Country --'}</option>
             {countries.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'สายการบิน' : 'Airline'}</label>
+          <label style={{ display: 'block', marginBottom: 7, fontSize: 14, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'สายการบิน' : 'Airline'}</label>
           <select value={airline} onChange={e => setAirline(e.target.value)}>
             <option value="">{lang === 'th' ? '-- ทุกสายการบิน --' : '-- All Airlines --'}</option>
             {AIRLINES.map(a => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 5, fontSize: 12, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'เดือนที่เดินทาง' : 'Travel Month'}</label>
+          <label style={{ display: 'block', marginBottom: 7, fontSize: 14, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'เดือนที่เดินทาง' : 'Travel Month'}</label>
           <select value={month} onChange={e => setMonth(e.target.value)}>
             <option value="">{lang === 'th' ? '-- ทุกเดือน --' : '-- Any Month --'}</option>
             {monthOptions.map((m, i) => <option key={i} value={m}>{m}</option>)}
           </select>
         </div>
         <button onClick={handleSearch} style={{
-          background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 6,
-          padding: '12px 0', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-          boxShadow: '0 3px 10px rgba(230,92,0,.3)', marginTop: 2,
+          background: 'linear-gradient(135deg, var(--primary), #ff8c33)', color: '#fff', border: 'none', borderRadius: 9,
+          padding: '15px 0', fontSize: 16.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          boxShadow: '0 4px 14px rgba(230,92,0,.36)', marginTop: 4,
         }}>
-          <Icon name="search" size={15} color="#fff" /> {lang === 'th' ? 'ค้นหาทัวร์' : 'Search Tours'}
+          <Icon name="search" size={18} color="#fff" /> {lang === 'th' ? 'ค้นหาทัวร์' : 'Search Tours'}
         </button>
         {/* Quick links */}
         <div style={{ borderTop: '1px solid var(--line)', paddingTop: 10 }}>

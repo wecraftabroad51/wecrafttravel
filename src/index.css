@@ -210,23 +210,23 @@ html { scroll-behavior: smooth; }
 input, select, textarea, button { font-family: inherit; }
 input[type="text"], input[type="email"], input[type="tel"], input[type="number"], textarea {
   width: 100%;
-  padding: 10px 14px;
-  border: 1px solid var(--line);
+  padding: 12px 14px;
+  border: 1.5px solid var(--line);
   border-radius: var(--r-sm);
   background: var(--card);
   color: var(--ink);
-  font-size: 14px;
+  font-size: 15px;
   outline: none;
   transition: border-color .15s;
 }
 select {
   width: 100%;
-  padding: 10px 14px;
-  border: 1px solid var(--line);
+  padding: 12px 14px;
+  border: 1.5px solid var(--line);
   border-radius: var(--r-sm);
   background: var(--card);
   color: var(--ink);
-  font-size: 14px;
+  font-size: 15px;
   outline: none;
   cursor: pointer;
 }
@@ -389,6 +389,15 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
 
 /* Hero — เต็มเฟรมขอบซ้ายขวา + จำกัดสูงไม่ให้ล้นจอ (จอกว้างมากตัดบน-ล่างเล็กน้อยพอดีจอ) */
 .hero-wrap { aspect-ratio: 12 / 5; width: 100%; max-height: 68vh; }
+
+/* Main nav — เพิ่มมิติให้แถบเมนู (เส้นคั่น + hover ยกเด่น ไม่โล่ง) */
+.nav-desktop > div { transition: background .15s; }
+.nav-desktop > div:not(:last-child)::after {
+  content: ""; position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+  height: 24px; width: 1px; background: rgba(230,92,0,.18); pointer-events: none;
+}
+.nav-desktop > div:hover { background: rgba(255,255,255,.75); box-shadow: inset 0 -3px 0 var(--primary); }
+.nav-desktop > div:hover > button { color: var(--primary) !important; }
 
 /* Stats strip */
 .stats-strip-grid {
