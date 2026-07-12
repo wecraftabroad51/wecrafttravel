@@ -273,26 +273,44 @@ async function sendCustomerLine(formData, seqNo) {
     .catch(e  => console.error('Customer LINE FAILED:', e.message));
 }
 
-// ── บันทึกการจอง join-tour ลง Supabase (ให้โผล่ในหลังบ้าน AdminPanel) ──
+// ── บันทึกการจอง (จอยทัวร์/โรงแรม) ลง Supabase (ให้โผล่ในหลังบ้าน AdminPanel) ──
+const BOOKING_TYPES = ['join-tour', 'hotel'];
 async function insertBookingRow(formData, seqNo) {
   const f = formData || {};
-  if (f._type !== 'join-tour') return;
+  if (!BOOKING_TYPES.includes(f._type)) return;
   const url = process.env.VITE_SUPABASE_URL;
   const key = process.env.VITE_SUPABASE_ANON_KEY;
   if (!url || !key) { console.log('Supabase booking skipped: no config'); return; }
   const channel = f.lineUserId ? 'LINE' : 'เว็บ';
+  const num = (...v) => v.reduce((s, x) => s + (Number(x) || 0), 0);
+
+  let title, tag, tourId, travelers, departure;
+  if (f._type === 'hotel') {
+    tag = 'จองโรงแรม';
+    title = `🏨 ${f.destination || 'โรงแรม'}${f.hotelName ? ' · ' + f.hotelName : ''}${f.checkIn ? ` (${f.checkIn}${f.checkOut ? '→' + f.checkOut : ''})` : ''}`;
+    tourId = '';
+    travelers = num(f.adults, f.children) || 1;
+    departure = f.checkIn || '';
+  } else { // join-tour
+    tag = 'จอยทัวร์';
+    title = f.tourName || 'จอยทัวร์';
+    tourId = f.tourCode || '';
+    travelers = Number(f.totalPax) || num(f.adults, f.children, f.infants) || 1;
+    departure = f.depDate || '';
+  }
+
   const row = {
     name:         f.fullName || '',
     email:        f.email || '',
     phone:        f.phone || '',
-    tour_id:      f.tourCode || '',
-    tour_name:    { th: f.tourName || '', en: f.tourName || '' },
-    tier:         seqNo ? `${channel} · ${seqNo}` : channel,
-    travelers:    Number(f.totalPax) || (Number(f.adults || 0) + Number(f.children || 0) + Number(f.infants || 0)) || 1,
-    departure_id: f.depDate || '',
+    tour_id:      tourId,
+    tour_name:    { th: title, en: title },
+    tier:         `${tag} · ${channel}${seqNo ? ' · ' + seqNo : ''}`,
+    travelers,
+    departure_id: departure,
     total_price:  0,
     status:       'pending',
-    date:         f.depDate || '',
+    date:         departure,
   };
   const r = await fetch(`${url}/rest/v1/bookings`, {
     method: 'POST',
@@ -741,7 +759,7 @@ module.exports = async function handler(req, res) {
           .catch(e => { results.customerLine = e.message; console.error('CustomerLine:', e.message); })
       : Promise.resolve(),
 
-    (formData && formData._type === 'join-tour')
+    (formData && BOOKING_TYPES.includes(formData._type))
       ? insertBookingRow(formData, seqNo)
           .then(() => { results.booking = 'ok'; })
           .catch(e => { results.booking = e.message; console.error('Booking insert:', e.message); })
