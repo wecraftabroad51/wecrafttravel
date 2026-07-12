@@ -184,7 +184,11 @@ module.exports = async function handler(req, res) {
       if (e.message === 'SMS_NOT_CONFIGURED') {
         return res.status(503).json({ error: 'ระบบ SMS ยังไม่พร้อมใช้งาน กรุณาติดต่อผู้ดูแลระบบ' });
       }
-      return res.status(500).json({ error: e.message });
+      // ปัญหาฝั่งผู้ให้บริการ SMS (เครดิตหมด/ผู้ส่งไม่ผ่าน ฯลฯ) — ไม่โชว์ข้อความดิบให้ลูกค้า
+      if (type === 'phone' && /credit|balance|sender|not enough|can't send/i.test(e.message)) {
+        return res.status(503).json({ error: 'ขออภัย ระบบส่ง OTP ทาง SMS ขัดข้องชั่วคราว 🙏 กรุณาทักแชท LINE @wecrafttravel เพื่อให้ทีมงานยืนยันการจองให้ได้เลยครับ', smsDown: true });
+      }
+      return res.status(500).json({ error: type === 'phone' ? 'ส่ง OTP ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง' : e.message });
     }
   }
 
