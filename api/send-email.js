@@ -41,6 +41,24 @@ function seqPrefixFor(type) {
   return 'GI';
 }
 
+// ── Header row per worksheet (ใช้ตอนสร้างชีตใหม่อัตโนมัติ) ──────
+const SHEET_HEADERS = {
+  'จองโรงแรม': ['เลขที่', 'เวลา', 'ชื่อ', 'โทร', 'อีเมล', 'เมือง/ปลายทาง', 'โรงแรม', 'เช็คอิน', 'เช็คเอาท์', 'จำนวนคืน', 'ห้อง', 'ประเภทห้อง', 'ผู้ใหญ่', 'เด็ก', 'ระดับ', 'งบ/คืน', 'หมายเหตุ', 'ไฟล์แนบ'],
+};
+
+// ── สร้าง worksheet ให้อัตโนมัติถ้ายังไม่มี (self-healing) ─────────
+async function ensureSheet(sheets, sheetId, sheetName) {
+  if (!sheetName) return;
+  try {
+    const meta = await sheets.spreadsheets.get({ spreadsheetId: sheetId, fields: 'sheets.properties.title' });
+    if ((meta.data.sheets || []).some(s => s.properties.title === sheetName)) return;
+    await sheets.spreadsheets.batchUpdate({ spreadsheetId: sheetId, requestBody: { requests: [{ addSheet: { properties: { title: sheetName } } }] } });
+    const headers = SHEET_HEADERS[sheetName];
+    if (headers) await sheets.spreadsheets.values.append({ spreadsheetId: sheetId, range: `${sheetName}!A1`, valueInputOption: 'RAW', requestBody: { values: [headers] } });
+    console.log('Created worksheet:', sheetName);
+  } catch (e) { console.warn('ensureSheet failed:', e.message); }
+}
+
 // ── Generate sequence number: PREFIX-YYMMNN (พ.ศ.) ───────────
 async function generateSeqNo(sheets, sheetId, sheetName, type) {
   const nowDate      = new Date();
@@ -674,6 +692,7 @@ module.exports = async function handler(req, res) {
         scopes: ['https://www.googleapis.com/auth/spreadsheets'],
       });
       sheetsClient = google.sheets({ version: 'v4', auth });
+      await ensureSheet(sheetsClient, sheetId, sheetName); // สร้างชีตให้ถ้ายังไม่มี
       // ถ้า client ส่ง seqNo มาแล้ว (gen-seqno ทำไปก่อน) ให้ใช้เลย
       if (formData._seqNo) {
         seqNo = formData._seqNo;
