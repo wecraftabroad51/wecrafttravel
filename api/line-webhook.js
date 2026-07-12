@@ -347,6 +347,10 @@ module.exports = async function handler(req, res) {
   const events = req.body?.events || [];
   await Promise.all(events.map(async (ev) => {
     try {
+      // ── ตอบเฉพาะแชท 1:1 เท่านั้น · ในกลุ่ม/รูม บอทเงียบสนิท ไม่ตอบโต้ใดๆ ──
+      // (การแจ้งเตือนการจองเข้ากลุ่มใช้ push จาก send-email แยกต่างหาก ไม่เกี่ยวกับ webhook นี้)
+      if (ev.source && ev.source.type && ev.source.type !== 'user') return;
+
       // ── Postback (กดปุ่มในการ์ด) ──
       if (ev.type === 'postback') {
         const d = unpb(ev.postback?.data);
