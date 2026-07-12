@@ -812,7 +812,7 @@ export default function GroupQuotePage({ lang, setMessages }) {
             </Field>
 
             {/* รูปแบบทัวร์ */}
-            <div style={{ gridColumn: '1' }}>
+            <div>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 10, color: '#333' }}>
                 รูปแบบทัวร์ <span style={{ color: '#e53e3e' }}>*</span>
               </label>
@@ -828,7 +828,7 @@ export default function GroupQuotePage({ lang, setMessages }) {
             </div>
 
             {/* โรงแรม */}
-            <div style={{ gridColumn: '2' }}>
+            <div>
               <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 10, color: '#333' }}>
                 ต้องการพักโรงแรม <span style={{ color: '#e53e3e' }}>*</span>
               </label>
