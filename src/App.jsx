@@ -169,86 +169,98 @@ function GroupQuotePopup({ navigate, lang }) {
         }
         .gq-overlay {
           position: fixed; inset: 0; z-index: 1100;
-          background: rgba(10,20,40,.6);
+          background: rgba(10,20,40,.62); backdrop-filter: blur(3px);
           display: flex; align-items: center; justify-content: center;
           padding: 20px;
         }
         .gq-popup {
           background: #fff;
-          border-radius: 20px;
-          max-width: 440px; width: 100%;
+          border-radius: 24px;
+          max-width: 480px; width: 100%;
           overflow: hidden;
-          box-shadow: 0 24px 80px rgba(0,0,0,.35);
+          box-shadow: 0 30px 90px rgba(0,0,0,.42);
           animation: gqPopIn .45s cubic-bezier(.34,1.56,.64,1) forwards;
           position: relative;
         }
         .gq-popup-header {
           background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
-          padding: 28px 28px 22px;
+          padding: 36px 32px 28px;
           text-align: center;
           color: #fff;
         }
         .gq-popup-badge {
           display: inline-block;
-          background: rgba(45,176,75,.25);
-          border: 1px solid rgba(45,176,75,.5);
-          color: #4ade80;
-          font-size: 11px; font-weight: 700; letter-spacing: .06em;
-          padding: 4px 12px; border-radius: 20px; margin-bottom: 14px;
+          background: rgba(45,176,75,.22);
+          border: 1px solid rgba(74,222,128,.55);
+          color: #6ee7a0;
+          font-size: 12.5px; font-weight: 800; letter-spacing: .07em;
+          padding: 6px 15px; border-radius: 20px; margin-bottom: 16px;
           text-transform: uppercase;
         }
         .gq-popup-title {
-          font-size: 22px; font-weight: 900; margin: 0 0 8px;
-          line-height: 1.25;
+          font-size: clamp(25px, 6vw, 30px); font-weight: 900; margin: 0 0 11px;
+          line-height: 1.2; letter-spacing: -.01em;
         }
         .gq-popup-sub {
-          font-size: 13px; opacity: .75; margin: 0; line-height: 1.5;
+          font-size: 15.5px; opacity: .85; margin: 0; line-height: 1.6;
+          white-space: pre-line;
         }
         .gq-popup-body {
-          padding: 22px 28px 26px;
+          padding: 28px 32px 32px;
         }
         .gq-popup-features {
           display: grid; grid-template-columns: 1fr 1fr;
-          gap: 10px; margin-bottom: 20px;
+          gap: 12px; margin-bottom: 24px;
         }
         .gq-popup-feat {
           background: #f0fdf4;
           border: 1px solid #bbf7d0;
-          border-radius: 10px;
-          padding: 10px 12px;
-          font-size: 12.5px;
-          color: #166534;
-          display: flex; align-items: center; gap: 7px;
-          font-weight: 600;
+          border-radius: 13px;
+          padding: 14px 15px;
+          font-size: 14.5px;
+          color: #15803d;
+          display: flex; align-items: center; gap: 9px;
+          font-weight: 700;
         }
         .gq-popup-cta {
           width: 100%;
           background: linear-gradient(135deg, #2db04b, #16a34a);
           color: #fff;
           border: none;
-          border-radius: 12px;
-          padding: 14px;
-          font-size: 15px; font-weight: 800;
+          border-radius: 15px;
+          padding: 17px;
+          font-size: 17px; font-weight: 800;
           cursor: pointer;
-          transition: opacity .2s;
+          transition: transform .16s, box-shadow .2s;
           letter-spacing: .01em;
+          box-shadow: 0 10px 24px rgba(22,163,74,.32);
         }
-        .gq-popup-cta:hover { opacity: .9; }
+        .gq-popup-cta:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(22,163,74,.44); }
         .gq-popup-skip {
-          display: block; text-align: center; margin-top: 12px;
-          font-size: 12px; color: #94a3b8; cursor: pointer;
-          background: none; border: none; width: 100%;
+          display: block; text-align: center; margin-top: 15px;
+          font-size: 14px; color: #94a3b8; cursor: pointer;
+          background: none; border: none; width: 100%; font-weight: 600;
         }
         .gq-popup-skip:hover { color: #64748b; }
         .gq-popup-close {
-          position: absolute; top: 14px; right: 16px;
-          background: rgba(255,255,255,.15); border: none;
-          color: #fff; width: 28px; height: 28px;
+          position: absolute; top: 16px; right: 16px;
+          background: rgba(255,255,255,.18); border: none;
+          color: #fff; width: 34px; height: 34px;
           border-radius: 50%; cursor: pointer;
-          font-size: 16px; display: flex; align-items: center; justify-content: center;
+          font-size: 18px; display: flex; align-items: center; justify-content: center;
           transition: background .2s;
         }
-        .gq-popup-close:hover { background: rgba(255,255,255,.3); }
+        .gq-popup-close:hover { background: rgba(255,255,255,.32); }
+        @media (max-width: 480px) {
+          .gq-overlay { padding: 14px; }
+          .gq-popup-header { padding: 30px 22px 24px; }
+          .gq-popup-body { padding: 22px 20px 26px; }
+          .gq-popup-title { font-size: 24px; }
+          .gq-popup-sub { font-size: 14.5px; }
+          .gq-popup-features { gap: 9px; }
+          .gq-popup-feat { padding: 12px 11px; font-size: 13.5px; }
+          .gq-popup-cta { font-size: 16px; padding: 15px; }
+        }
       `}</style>
       <div className="gq-overlay" onClick={() => setOpen(false)}>
         <div className="gq-popup" onClick={e => e.stopPropagation()}>

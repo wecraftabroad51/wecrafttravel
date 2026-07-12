@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const SOCIALS = [
   {
@@ -77,7 +77,9 @@ const LINE_ICON = (
 );
 
 export default function FloatingContact({ settings }) {
-  const [open, setOpen] = useState(true); // auto-open on load
+  const [open, setOpen] = useState(false);
+  // เปิดอัตโนมัติเฉพาะจอใหญ่ · มือถือเริ่มแบบปิด (กันบังเนื้อหา)
+  useEffect(() => { setOpen(window.innerWidth >= 768); }, []);
 
   // Merge social URLs from settings
   const socialMap = {};
@@ -99,191 +101,144 @@ export default function FloatingContact({ settings }) {
   return (
     <>
       <style>{`
-        .fc-panel {
-          position: fixed;
-          right: 24px;
-          bottom: 24px;
+        .fc-drawer {
+          position: fixed; top: 50%; right: 0;
+          transform: translateY(-50%) translateX(0);
           z-index: 9999;
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-          gap: 10px;
-          pointer-events: none;
-        }
-        .fc-popup {
-          background: #2db04b;
-          border-radius: 16px;
-          padding: 16px 14px 14px;
-          width: 200px;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-          pointer-events: all;
-          transition: transform 0.3s cubic-bezier(.4,0,.2,1), opacity 0.3s;
-          transform-origin: bottom right;
-        }
-        .fc-popup.closed {
-          transform: scale(0.85) translateY(10px);
-          opacity: 0;
-          pointer-events: none;
-        }
-        .fc-popup.open {
-          transform: scale(1) translateY(0);
-          opacity: 1;
-        }
-        .fc-tab {
-          width: 56px;
-          height: 56px;
-          background: #2db04b;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          pointer-events: all;
-          box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-          border: none;
+          width: min(288px, 86vw);
+          background: linear-gradient(165deg, #0e7c66 0%, #10996f 52%, #16a985 100%);
+          border-radius: 24px 0 0 24px;
+          box-shadow: -12px 0 48px rgba(6,50,40,.32);
+          padding: 22px 20px 20px;
           color: #fff;
-          flex-shrink: 0;
-          transition: background 0.2s, transform 0.2s;
+          max-height: 94vh; overflow-y: auto;
+          transition: transform .42s cubic-bezier(.4,0,.2,1), box-shadow .42s;
+          -webkit-overflow-scrolling: touch;
         }
-        .fc-tab:hover { background: #24a040; transform: scale(1.08); }
-        .fc-divider {
-          border: none;
-          border-top: 1px solid rgba(255,255,255,0.25);
-          margin: 12px 0;
+        .fc-drawer.fc-closed {
+          transform: translateY(-50%) translateX(calc(100% + 12px));
+          box-shadow: none;
         }
-        .fc-social-btn {
-          width: 34px; height: 34px;
-          border-radius: 50%;
+        .fc-x {
+          position: absolute; top: 12px; right: 14px;
+          width: 32px; height: 32px; border-radius: 50%;
+          background: rgba(255,255,255,.16); border: none; color: #fff;
+          cursor: pointer; font-size: 16px; line-height: 1;
           display: flex; align-items: center; justify-content: center;
-          color: #fff;
-          text-decoration: none;
-          transition: transform 0.15s, filter 0.15s;
-          flex-shrink: 0;
+          transition: background .2s;
         }
-        .fc-social-btn:hover { transform: scale(1.15); filter: brightness(1.15); }
+        .fc-x:hover { background: rgba(255,255,255,.3); }
+        .fc-divider {
+          border: none; border-top: 1px solid rgba(255,255,255,.22);
+          margin: 14px 0;
+        }
+        .fc-title { color: #fff; font-weight: 800; font-size: 18px; line-height: 1.2; }
+        .fc-sub   { color: rgba(255,255,255,.92); font-size: 13px; margin-top: 3px; }
+        .fc-id    { text-align: center; color: #fff; font-weight: 800; font-size: 16px; letter-spacing: .01em; }
+        .fc-phone { color: #fff; text-decoration: none; font-size: 16px; font-weight: 700; }
+        .fc-hours-l { color: rgba(255,255,255,.85); font-size: 12.5px; text-align: center; }
+        .fc-hours-v { color: #fff; font-size: 14px; font-weight: 800; text-align: center; margin-top: 1px; }
+        .fc-social-btn {
+          width: 38px; height: 38px; border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          color: #fff; text-decoration: none; flex-shrink: 0;
+          transition: transform .15s, filter .15s;
+        }
+        .fc-social-btn:hover { transform: scale(1.15); filter: brightness(1.12); }
         .fc-qr {
-          width: 110px; height: 110px;
-          display: block;
-          margin: 8px auto;
-          border-radius: 8px;
-          background: #fff;
-          padding: 4px;
-          object-fit: contain;
+          width: 138px; height: 138px; display: block; margin: 10px auto 4px;
+          border-radius: 12px; background: #fff; padding: 7px; object-fit: contain;
+        }
+        /* แท็บเปิดใหม่ (โผล่ตอนปิด) */
+        .fc-reopen {
+          position: fixed; top: 50%; right: 0; transform: translateY(-50%);
+          z-index: 9999; cursor: pointer; border: none;
+          background: linear-gradient(135deg, #10996f, #16a985);
+          color: #fff; border-radius: 16px 0 0 16px;
+          padding: 13px 11px 11px; font-family: inherit;
+          display: flex; flex-direction: column; align-items: center; gap: 3px;
+          box-shadow: -5px 5px 20px rgba(6,50,40,.28);
+          transition: opacity .25s .18s, transform .2s;
+        }
+        .fc-reopen span { font-size: 11px; font-weight: 800; letter-spacing: .02em; }
+        .fc-reopen:hover { transform: translateY(-50%) scale(1.06); }
+        .fc-reopen.fc-hidden {
+          opacity: 0; pointer-events: none;
+          transform: translateY(-50%) translateX(110%);
+          transition: opacity .18s, transform .18s;
+        }
+        @media (max-width: 480px) {
+          .fc-drawer { padding: 18px 16px 16px; border-radius: 20px 0 0 20px; }
+          .fc-qr { width: 128px; height: 128px; }
         }
       `}</style>
 
-      <div className="fc-panel">
-        {/* Popup panel — sits above the trigger button */}
-        <div className={`fc-popup ${open ? 'open' : 'closed'}`}>
-            {/* Logo */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 10 }}>
-            <img src="/logo.png" alt="WeCraft Travel"
-              style={{ width: 56, height: 56, objectFit: 'contain' }} />
-            <div style={{ color: '#fff', fontWeight: 800, fontSize: 13, marginTop: 4, lineHeight: 1.2, textAlign: 'center' }}>WeCraft Travel</div>
-            <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 10, textAlign: 'center' }}>WE CRAFT ABROAD</div>
-          </div>
+      {/* ── Slide drawer (ชิดขอบขวา · ปิดแล้วเลื่อนออกทางขวา) ── */}
+      <div className={`fc-drawer ${open ? '' : 'fc-closed'}`} aria-hidden={!open}>
+        <button className="fc-x" onClick={() => setOpen(false)} aria-label="ปิด">✕</button>
 
-          <hr className="fc-divider" />
-
-          {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 2, marginTop: 8 }}>
-            <span style={{
-              background: '#fff', borderRadius: 7,
-              width: 28, height: 28,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#06c755', flexShrink: 0,
-            }}>
-              {LINE_ICON}
-            </span>
-            <div style={{ color: '#fff', fontWeight: 800, fontSize: 14, lineHeight: 1.2 }}>จองผ่านไลน์</div>
-          </div>
-          <div style={{ color: 'rgba(255,255,255,0.9)', fontSize: 11, marginBottom: 4 }}>
-            ติดต่อข่าวสารโปรโมชั่นทัวร์
-          </div>
-
-          {/* QR Code */}
-          <img
-            src={`https://qr-official.line.me/sid/L/wecrafttravel.png`}
-            alt="LINE QR Code"
-            className="fc-qr"
-            onError={e => {
-              e.target.style.display = 'none';
-              e.target.nextSibling.style.display = 'flex';
-            }}
-          />
-          {/* Fallback QR placeholder */}
-          <div style={{
-            display: 'none', width: 110, height: 110,
-            background: '#fff', borderRadius: 8,
-            margin: '8px auto',
-            alignItems: 'center', justifyContent: 'center',
-            flexDirection: 'column', gap: 4,
-          }}>
-            <svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40" style={{ color: '#06c755' }}>
-              <path d="M21 11c0 4.4-4 8-9 8-1 0-2-.1-3-.4L4 20l1.5-3.6A8.4 8.4 0 0 1 3 11c0-4.4 4-8 9-8s9 3.6 9 8z"/>
-            </svg>
-            <span style={{ fontSize: 11, color: '#333' }}>LINE QR Code</span>
-          </div>
-
-          {/* LINE ID */}
-          <div style={{ textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 13, marginBottom: 4 }}>
-            {lineId}
-          </div>
-
-          <hr className="fc-divider" />
-
-          {/* Phone */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <span style={{ color: '#fff', flexShrink: 0 }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
-                <path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/>
-              </svg>
-            </span>
-            <div>
-              <a href={`tel:${phone.replace(/-/g,'')}`}
-                style={{ display: 'block', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600, lineHeight: 1.4 }}>
-                {phone}
-              </a>
-            </div>
-          </div>
-
-          {/* Hours */}
-          <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: 11, textAlign: 'center', marginBottom: 2 }}>
-            จันทร์-เสาร์ :
-          </div>
-          <div style={{ color: '#fff', fontSize: 12, fontWeight: 700, textAlign: 'center', marginBottom: 10 }}>
-            09.00 - 18.00 น.
-          </div>
-
-          <hr className="fc-divider" />
-
-          {/* Social icons */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 7, flexWrap: 'wrap' }}>
-            {socials.map(s => (
-              <a key={s.id} href={s.href}
-                target={s.href.startsWith('http') ? '_blank' : undefined}
-                rel="noopener noreferrer"
-                className="fc-social-btn"
-                style={{ background: s.color }}
-                title={s.id}
-              >
-                {s.icon}
-              </a>
-            ))}
-          </div>
+        {/* Logo */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 4 }}>
+          <img src="/logo.png" alt="WeCraft Travel" style={{ width: 62, height: 62, objectFit: 'contain' }} />
+          <div style={{ color: '#fff', fontWeight: 900, fontSize: 16, marginTop: 5, lineHeight: 1.15, textAlign: 'center' }}>WeCraft Travel</div>
+          <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, letterSpacing: '.08em', textAlign: 'center' }}>WE CRAFT ABROAD</div>
         </div>
 
-        {/* Trigger tab — always visible */}
-        <button className="fc-tab" onClick={() => setOpen(v => !v)} title={open ? 'ปิด' : 'ติดต่อเรา'}>
-          {open ? (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-              strokeLinecap="round" width="20" height="20">
-              <path d="M18 6 6 18M6 6l12 12"/>
-            </svg>
-          ) : LINE_ICON}
-        </button>
+        <hr className="fc-divider" />
+
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 3 }}>
+          <span style={{ background: '#fff', borderRadius: 9, width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#06c755', flexShrink: 0 }}>
+            {LINE_ICON}
+          </span>
+          <div>
+            <div className="fc-title">จองผ่านไลน์</div>
+          </div>
+        </div>
+        <div className="fc-sub">รับข่าวสาร โปรโมชั่นทัวร์ก่อนใคร</div>
+
+        {/* QR */}
+        <img src="https://qr-official.line.me/sid/L/wecrafttravel.png" alt="LINE QR Code" className="fc-qr"
+          onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
+        <div style={{ display: 'none', width: 138, height: 138, background: '#fff', borderRadius: 12, margin: '10px auto 4px', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 5 }}>
+          <svg viewBox="0 0 24 24" fill="currentColor" width="46" height="46" style={{ color: '#06c755' }}>
+            <path d="M21 11c0 4.4-4 8-9 8-1 0-2-.1-3-.4L4 20l1.5-3.6A8.4 8.4 0 0 1 3 11c0-4.4 4-8 9-8s9 3.6 9 8z"/>
+          </svg>
+          <span style={{ fontSize: 12, color: '#333' }}>LINE QR Code</span>
+        </div>
+
+        <div className="fc-id">{lineId}</div>
+
+        <hr className="fc-divider" />
+
+        {/* Phone + hours */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, marginBottom: 8 }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18" style={{ color: '#fff', flexShrink: 0 }}>
+            <path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/>
+          </svg>
+          <a href={`tel:${phone.replace(/-/g,'')}`} className="fc-phone">{phone}</a>
+        </div>
+        <div className="fc-hours-l">จันทร์ - เสาร์</div>
+        <div className="fc-hours-v">09.00 - 18.00 น.</div>
+
+        <hr className="fc-divider" />
+
+        {/* Socials */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 9, flexWrap: 'wrap' }}>
+          {socials.map(s => (
+            <a key={s.id} href={s.href} target={s.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer"
+              className="fc-social-btn" style={{ background: s.color }} title={s.id}>
+              {s.icon}
+            </a>
+          ))}
+        </div>
       </div>
+
+      {/* ── แท็บเปิดใหม่ (โผล่ตอนปิด) ── */}
+      <button className={`fc-reopen ${open ? 'fc-hidden' : ''}`} onClick={() => setOpen(true)} aria-label="ติดต่อเรา">
+        {LINE_ICON}
+        <span>ติดต่อ</span>
+      </button>
     </>
   );
 }
