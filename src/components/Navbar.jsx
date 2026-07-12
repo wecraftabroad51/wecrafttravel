@@ -233,8 +233,8 @@ function CountryMegaDropdown({ groups, navigate, onClose, topOffset, lang }) {
     >
       <div className="wrap" style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))',
-        gap: '4px 28px',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))',
+        gap: '8px 34px',
         alignItems: 'start',
       }}>
         {groups.map((g) => {
@@ -252,11 +252,11 @@ function CountryMegaDropdown({ groups, navigate, onClose, topOffset, lang }) {
                   onClose();
                 }}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 6, width: '100%', textAlign: 'left',
+                  display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left',
                   background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-                  fontSize: 12.5, fontWeight: 800, color: 'var(--primary)',
-                  textTransform: 'uppercase', letterSpacing: '.06em',
-                  marginBottom: 8, paddingBottom: 7,
+                  fontSize: 15.5, fontWeight: 800, color: 'var(--primary)',
+                  textTransform: 'uppercase', letterSpacing: '.05em',
+                  marginBottom: 10, paddingBottom: 9,
                   borderBottom: '2px solid var(--primary-light)',
                 }}
                 onMouseEnter={e => (e.currentTarget.style.color = 'var(--ink)')}
@@ -264,14 +264,14 @@ function CountryMegaDropdown({ groups, navigate, onClose, topOffset, lang }) {
                 title={en ? `View all ${g.en} tours` : `ดูทัวร์ทั้งหมดในภูมิภาค${g.th}`}
               >
                 {en ? g.en : g.th}
-                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)' }}>
+                <span style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--muted)' }}>
                   ({g.countries.reduce((n, c) => n + c.count, 0)})
                 </span>
-                <span style={{ marginLeft: 'auto', fontSize: 12 }}>›</span>
+                <span style={{ marginLeft: 'auto', fontSize: 18, lineHeight: 1 }}>›</span>
               </button>
 
               {/* Countries grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: '1px 14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: '2px 16px' }}>
                 {g.countries.map(c => (
                   <button key={c.code}
                     onClick={() => {
@@ -279,23 +279,23 @@ function CountryMegaDropdown({ groups, navigate, onClose, topOffset, lang }) {
                       onClose();
                     }}
                     style={{
-                      display: 'flex', alignItems: 'center', gap: 8,
+                      display: 'flex', alignItems: 'center', gap: 11,
                       background: 'none', border: 'none', textAlign: 'left',
-                      padding: '5px 7px', fontSize: 13.5, color: 'var(--ink-2)',
-                      cursor: 'pointer', borderRadius: 5, fontFamily: 'inherit',
+                      padding: '9px 10px', fontSize: 16, fontWeight: 600, color: 'var(--ink-2)',
+                      cursor: 'pointer', borderRadius: 8, fontFamily: 'inherit',
                       transition: 'background .12s, color .12s',
                     }}
                     onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-light)'; e.currentTarget.style.color = 'var(--primary)'; }}
                     onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--ink-2)'; }}
                   >
-                    <Flag code={c.code} emoji={c.flag} w={22} />
+                    <Flag code={c.code} emoji={c.flag} w={30} />
                     <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {en ? c.en : c.th}
                     </span>
                     <span style={{
-                      flexShrink: 0, minWidth: 26, textAlign: 'center',
-                      fontSize: 11.5, fontWeight: 700, color: 'var(--primary)',
-                      background: 'var(--primary-light)', borderRadius: 20, padding: '1px 8px',
+                      flexShrink: 0, minWidth: 32, textAlign: 'center',
+                      fontSize: 13.5, fontWeight: 800, color: 'var(--primary)',
+                      background: 'var(--primary-light)', borderRadius: 20, padding: '3px 10px',
                     }}>
                       {c.count}
                     </span>
@@ -609,11 +609,11 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
                 onClick={() => { navigate(m.key, null, m.tourType ? { tourType: m.tourType } : null); setMobileOpen(false); }}
                 style={{
                   display: 'block', width: '100%', textAlign: 'left',
-                  padding: '13px 20px', border: 'none',
+                  padding: '16px 20px', border: 'none',
                   borderBottom: '1px solid var(--line)',
                   background: page === m.key ? 'var(--primary-light)' : '#fff',
                   color: page === m.key ? 'var(--primary)' : 'var(--ink-2)',
-                  fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                  fontSize: 16.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                 }}
               >
                 {lang === 'en' ? (m.labelEn || m.label) : m.label}
@@ -625,17 +625,17 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
                     <div key={g.id} style={{ marginBottom: 12 }}>
                       <button
                         onClick={() => { navigate('tours', null, { continentLabel: lang === 'en' ? g.en : g.th, countries: g.countries.map(c => c.code) }); setMobileOpen(false); }}
-                        style={{ background: 'none', border: 'none', fontSize: 11.5, fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: 6, cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>
+                        style={{ background: 'none', border: 'none', fontSize: 14, fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: 8, cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}>
                         {lang === 'en' ? g.en : g.th} ›
                       </button>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 10px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3px 12px' }}>
                         {g.countries.map(c => (
                           <button key={c.code}
                             onClick={() => { navigate('tours', null, { country: c.code }); setMobileOpen(false); }}
-                            style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'inherit', padding: '3px 0', textAlign: 'left' }}>
-                            <Flag code={c.code} emoji={c.flag} w={18} />
+                            style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', fontSize: 15.5, fontWeight: 600, color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'inherit', padding: '8px 4px', textAlign: 'left', borderRadius: 8 }}>
+                            <Flag code={c.code} emoji={c.flag} w={27} />
                             <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{lang === 'en' ? c.en : c.th}</span>
-                            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)' }}>{c.count}</span>
+                            <span style={{ fontSize: 13.5, fontWeight: 800, color: 'var(--primary)', background: 'var(--primary-light)', borderRadius: 20, padding: '2px 9px', minWidth: 28, textAlign: 'center' }}>{c.count}</span>
                           </button>
                         ))}
                       </div>
@@ -649,12 +649,12 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
                 <div style={{ background: '#fafafa', padding: '8px 20px 12px' }}>
                   {m.mega.map((g, gi) => (
                     <div key={gi} style={{ marginBottom: 10 }}>
-                      <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: 4 }}>{g.continent}</div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px' }}>
+                      <div style={{ fontSize: 13.5, fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: 6 }}>{g.continent}</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 14px' }}>
                         {g.countries.map(c => (
                           <button key={c}
                             onClick={() => { navigate(m.key, null, m.tourType ? { tourType: m.tourType, country: c } : null); setMobileOpen(false); }}
-                            style={{ background: 'none', border: 'none', fontSize: 13, color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'inherit', padding: '2px 0' }}>
+                            style={{ background: 'none', border: 'none', fontSize: 15.5, fontWeight: 600, color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'inherit', padding: '6px 2px' }}>
                             {c}
                           </button>
                         ))}
