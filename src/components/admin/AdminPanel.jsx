@@ -2888,6 +2888,7 @@ const MSG_TYPES = {
   group:   { label: '🎯 กรุ๊ปเหมา', color: '#e65c00', bg: '#fff3e0', border: '#fb923c' },
   ticket:  { label: '🎫 จองตั๋ว',   color: '#1565c0', bg: '#e3f2fd', border: '#3b82f6' },
   car:     { label: '🚗 รถเช่า',    color: '#166534', bg: '#dcfce7', border: '#22c55e' },
+  hotel:   { label: '🏨 จองโรงแรม', color: '#b45309', bg: '#fff7ed', border: '#f59e0b' },
   contact: { label: '💬 ติดต่อ',    color: '#6b21a8', bg: '#f3e8ff', border: '#a855f7' },
 };
 
@@ -2992,7 +2993,7 @@ function MessagesSection({ messages, setMessages }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {filtered.map(msg => {
           const type   = getMsgType(msg);
-          const cfg    = MSG_TYPES[type];
+          const cfg    = MSG_TYPES[type] || MSG_TYPES.contact;
           const body   = msg.message || msg.body || '';
           const pairs  = parseMsg(body);
           const open   = expanded === msg.id;
