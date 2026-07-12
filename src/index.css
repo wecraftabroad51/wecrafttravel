@@ -387,8 +387,8 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
 .navbar-topbar { display: flex; }
 .navbar-topbar-phone { display: flex; }
 
-/* Hero — สัดส่วนตรงกับแบนเนอร์ (1920x800 = 12/5) เต็มเฟรม ไม่ครอป ไม่แหว่ง */
-.hero-wrap { aspect-ratio: 12 / 5; width: 100%; height: auto; }
+/* Hero — เต็มเฟรมขอบซ้ายขวา + จำกัดสูงไม่ให้ล้นจอ (จอกว้างมากตัดบน-ล่างเล็กน้อยพอดีจอ) */
+.hero-wrap { aspect-ratio: 12 / 5; width: 100%; max-height: 72vh; }
 
 /* Stats strip */
 .stats-strip-grid {

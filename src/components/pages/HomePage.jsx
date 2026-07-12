@@ -72,7 +72,7 @@ function HeroSection({ navigate, lang }) {
             >
               {/* แบนเนอร์เต็มเฟรม ขอบซ้าย-ขวาชิดเบราว์เซอร์ */}
               <img src={sl.img} alt={(sl.alt?.[lang] || sl.alt?.th) || ''}
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', zIndex: 1 }} />
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
             </div>
           ) : (
             <>
@@ -112,14 +112,14 @@ function HeroSection({ navigate, lang }) {
       </div>
       )}
       {/* Arrows */}
-      <button onClick={() => go(idx - 1)} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', width: 42, height: 42, borderRadius: '50%', background: 'rgba(255,255,255,.22)', border: '1px solid rgba(255,255,255,.5)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Icon name="arrow-l" size={18} color="#fff" />
+      <button aria-label="ก่อนหน้า" onClick={() => go(idx - 1)} style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', zIndex: 5, width: 48, height: 48, borderRadius: '50%', background: 'rgba(0,0,0,.32)', backdropFilter: 'blur(2px)', border: '1.5px solid rgba(255,255,255,.7)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(0,0,0,.25)' }}>
+        <Icon name="arrow-l" size={20} color="#fff" />
       </button>
-      <button onClick={() => go(idx + 1)} style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', width: 42, height: 42, borderRadius: '50%', background: 'rgba(255,255,255,.22)', border: '1px solid rgba(255,255,255,.5)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Icon name="arrow-r" size={18} color="#fff" />
+      <button aria-label="ถัดไป" onClick={() => go(idx + 1)} style={{ position: 'absolute', right: 18, top: '50%', transform: 'translateY(-50%)', zIndex: 5, width: 48, height: 48, borderRadius: '50%', background: 'rgba(0,0,0,.32)', backdropFilter: 'blur(2px)', border: '1.5px solid rgba(255,255,255,.7)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 10px rgba(0,0,0,.25)' }}>
+        <Icon name="arrow-r" size={20} color="#fff" />
       </button>
       {/* Dots */}
-      <div style={{ position: 'absolute', bottom: 18, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 8 }}>
+      <div style={{ position: 'absolute', bottom: 18, left: '50%', transform: 'translateX(-50%)', zIndex: 5, display: 'flex', gap: 8 }}>
         {SLIDES.map((_, i) => <button key={i} className={`carousel-dot${i === idx ? ' active' : ''}`} onClick={() => go(i)} />)}
       </div>
       {/* Counter */}
