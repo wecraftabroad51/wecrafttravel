@@ -70,12 +70,9 @@ function HeroSection({ navigate, lang }) {
               onClick={() => navigate(sl.link || 'tours', null, sl.filters || null)}
               style={{ position: 'absolute', inset: 0, cursor: 'pointer', background: '#e6f2f0' }}
             >
-              {/* ขอบข้างเบลอโทนเดียวกัน เนียนบนจอกว้าง */}
-              <img src={sl.img} alt="" aria-hidden="true"
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(24px)', transform: 'scale(1.12)' }} />
-              {/* แบนเนอร์เต็มใบ */}
+              {/* แบนเนอร์เต็มเฟรม ขอบซ้าย-ขวาชิดเบราว์เซอร์ */}
               <img src={sl.img} alt={(sl.alt?.[lang] || sl.alt?.th) || ''}
-                style={{ position: 'relative', width: '100%', height: '100%', objectFit: 'contain', zIndex: 1 }} />
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', zIndex: 1 }} />
             </div>
           ) : (
             <>

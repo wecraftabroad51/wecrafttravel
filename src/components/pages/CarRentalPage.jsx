@@ -20,7 +20,7 @@ const CAR_TYPES = [
 
 function Label({ th, en, lang, required }) {
   return (
-    <label style={{ display: 'block', marginBottom: 5, fontSize: 13, fontWeight: 700, color: '#444' }}>
+    <label style={{ display: 'block', marginBottom: 6, fontSize: 14.5, fontWeight: 700, color: '#3a4653' }}>
       {lang === 'en' ? en : th}{required && <span style={{ color: '#e65c00', marginLeft: 3 }}>*</span>}
     </label>
   );
@@ -30,8 +30,8 @@ function Input({ style, ...props }) {
   return (
     <input
       style={{
-        width: '100%', padding: '10px 12px', border: '1px solid #ddd',
-        borderRadius: 6, fontSize: 14, fontFamily: 'inherit',
+        width: '100%', padding: '13px 14px', border: '1.5px solid #dde2e8',
+        borderRadius: 9, fontSize: 15.5, fontFamily: 'inherit',
         boxSizing: 'border-box', ...style,
       }}
       {...props}
@@ -331,8 +331,8 @@ export default function CarRentalPage({ lang, t, navigate, setBookings }) {
     <main style={{ background: '#f8f8f8', minHeight: '100vh' }}>
       {/* Header */}
       <div style={{ background: 'linear-gradient(135deg, #1a5276, var(--primary, #e65c00))', color: '#fff', padding: '40px 20px', textAlign: 'center' }}>
-        <div style={{ fontSize: 44, marginBottom: 8 }}>🚗</div>
-        <h1 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 800 }}>
+        <div className="bk-hero-icon" style={{ fontSize: 56, marginBottom: 10 }}>🚗</div>
+        <h1 className="bk-hero-title" style={{ margin: '0 0 8px', fontSize: 'clamp(28px,4.5vw,38px)', fontWeight: 900 }}>
           {lang === 'th' ? 'บริการรถเช่า' : 'Car Rental Service'}
         </h1>
         <p style={{ margin: 0, opacity: 0.9, fontSize: 15 }}>

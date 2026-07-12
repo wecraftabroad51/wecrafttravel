@@ -434,10 +434,10 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
           {/* Logo */}
           <button onClick={() => navigate('home')}
             style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'none', border: 'none', cursor: 'pointer', padding: '6px 0', flexShrink: 0, marginRight: 32 }}>
-            <img src="/logo.png" alt="WeCraft Travel" style={{ width: 76, height: 76, objectFit: 'contain', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.12))' }} />
-            <div style={{ lineHeight: 1.3 }}>
-              <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--primary)', letterSpacing: '-0.01em' }}>WeCraft Travel</div>
-              <div style={{ fontSize: 13, color: 'var(--muted)', letterSpacing: '.12em', textTransform: 'uppercase', marginTop: 2 }}>WE CRAFT ABROAD</div>
+            <img src="/logo.png" alt="WeCraft Travel" style={{ width: 94, height: 94, objectFit: 'contain', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.12))' }} />
+            <div style={{ lineHeight: 1.25, textAlign: 'center' }}>
+              <div style={{ fontSize: 27, fontWeight: 900, color: 'var(--primary)', letterSpacing: '-0.01em' }}>WeCraft Travel</div>
+              <div style={{ fontSize: 13.5, color: 'var(--muted)', letterSpacing: '.28em', textTransform: 'uppercase', marginTop: 3 }}>WE CRAFT ABROAD</div>
             </div>
           </button>
 

@@ -234,8 +234,26 @@ input:focus, textarea:focus, select:focus { border-color: var(--primary); }
 label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
 
 /* containers */
-.wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-.wrap-wide { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+.wrap { max-width: 1340px; margin: 0 auto; padding: 0 28px; }
+.wrap-wide { max-width: 1500px; margin: 0 auto; padding: 0 28px; }
+
+/* หัวข้อการจอง — เด่น ดึงสายตา (ไอคอนเต้น + เรืองแสง) */
+@keyframes bkPulse {
+  0%,100% { transform: scale(1);   filter: drop-shadow(0 0 0 rgba(255,213,79,0)); }
+  50%     { transform: scale(1.14); filter: drop-shadow(0 0 10px rgba(255,213,79,.75)); }
+}
+@keyframes bkShine {
+  0% { background-position: -160% 0; }
+  100% { background-position: 260% 0; }
+}
+.bk-hero-icon { display:inline-block; animation: bkPulse 1.5s ease-in-out infinite; }
+.bk-hero-title {
+  background: linear-gradient(100deg,#fff 30%,#FFE9A8 45%,#fff 60%);
+  background-size: 220% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: bkShine 3.2s linear infinite;
+}
 
 /* sections */
 .section { padding: 40px 0; }
