@@ -220,3 +220,70 @@ export function normalizeTtnTours(list, source = 'ttn', sourceName = 'TTN Tour')
   );
   return progs.map(p => normalizeTtnTour(p, source, sourceName));
 }
+
+// ── TTN Plus (www.ttnplus.co.th/api/program) ─────────────────────
+// response เป็น object keyed by number · period[] มี P_NEWPRICE (ลดราคา), P_status
+const TTNPLUS_LOC = { CHINA:'CN', VIETNAM:'VN', TAIWAN:'TW', JAPAN:'JP', KOREA:'KR', 'SOUTH KOREA':'KR',
+  HONGKONG:'HK', 'HONG KONG':'HK', EUROPE:'EU', SINGAPORE:'SG', MALAYSIA:'MY', MYANMAR:'MM', INDIA:'IN',
+  DUBAI:'AE', UAE:'AE', TURKEY:'TR', GEORGIA:'GE', EGYPT:'EG', LAOS:'LA', CAMBODIA:'KH', INDONESIA:'ID',
+  MACAU:'MO', MACAO:'MO', MALDIVES:'MV', KAZAKHSTAN:'KZ' };
+
+export function normalizeTtnPlusTour(p, source = 'ttnplus', sourceName = 'TTN Plus') {
+  const iso2      = TTNPLUS_LOC[String(p.P_LOCATION || '').toUpperCase().trim()] || codeFromThaiText(p.P_NAME) || '';
+  const continent = CODE_TO_CONTINENT[iso2] || 'Asia-East';
+  const nameTh    = COUNTRY_CODE_NAME_TH[iso2] || iso2;
+
+  const deps = (Array.isArray(p.period) ? p.period : []).map(per => {
+    const newP   = parseFloat(per.P_NEWPRICE) || 0;
+    const adult  = newP > 0 ? newP : (parseFloat(per.P_ADULT) || 0);
+    const total  = Number(per.P_VOLUME)  || 0;
+    const booked = Number(per.P_BOOKING) || 0;
+    const avail  = per.P_AVAILABLE != null ? Number(per.P_AVAILABLE) : Math.max(0, total - booked);
+    return {
+      date:             per.P_DUE_START,
+      returnDate:       per.P_DUE_END,
+      price:            adult,
+      promoPrice:       newP > 0 ? newP : 0,
+      childPrice:       parseFloat(per.P_CHILDPRICE) || null,
+      infantPrice:      parseFloat(per.P_INFANT)     || null,
+      singleSupplement: parseFloat(per.P_SINGLE)     || null,
+      available:        avail,
+      totalSeats:       total,
+      bookedSeats:      booked,
+      periodId:         per.P_ID,
+      statusText:       per.P_status || '',
+    };
+  }).filter(d => d.date && d.price > 0);
+
+  const prices   = deps.map(d => d.price).filter(n => n > 0);
+  const minPrice = prices.length ? Math.min(...prices) : (parseFloat(p.P_PRICE) || 0);
+
+  return {
+    id:          `sup_${source}_${p.P_ID}`,
+    code:        p.P_CODE || '',
+    name:        { th: p.P_NAME, en: p.P_NAME },
+    destination: { th: nameTh, en: iso2 },
+    continent,
+    country:     iso2,
+    image:       p.banner_url || '',
+    price:       minPrice,
+    duration:    Number(p.P_DAY) || 0,
+    tourType:    'outbound',
+    featured:    false,
+    airline:     p.P_AIRLINE || '',
+    departures:  deps,
+    groupSize:   deps[0]?.totalSeats || null,
+    pdfUrl:      p.pdf_url || null,
+    itinerary:   Array.isArray(p.detail) ? p.detail.map(d => ({ day: Number(d.D_DAY) || 0, detail: d.D_ITIN || '' })) : [],
+    _source:     source,
+    _sourceName: sourceName,
+    _pbId:       p.P_ID,
+    _night:      Number(p.P_NIGHT) || 0,
+    _hotelStars: null,
+  };
+}
+
+export function normalizeTtnPlusTours(list, source = 'ttnplus', sourceName = 'TTN Plus') {
+  const arr = Array.isArray(list) ? list : (list && typeof list === 'object' ? Object.values(list) : []);
+  return arr.filter(x => x && x.P_ID).map(p => normalizeTtnPlusTour(p, source, sourceName));
+}

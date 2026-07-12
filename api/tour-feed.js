@@ -4,7 +4,13 @@
 // ดึงผ่าน proxy /api/suppliers (พิสูจน์แล้วเวิร์ค + cache) กัน auth เพี้ยน
 const SITE = 'https://wecraft-travel.com';
 
-const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', zego: 'zego', ttn: 'ttn' };
+const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus' };
+
+// TTN Plus P_LOCATION (อังกฤษ) → ISO2
+const TTNPLUS_LOC = { CHINA:'CN', VIETNAM:'VN', TAIWAN:'TW', JAPAN:'JP', KOREA:'KR', 'SOUTH KOREA':'KR',
+  HONGKONG:'HK', 'HONG KONG':'HK', EUROPE:'EU', SINGAPORE:'SG', MALAYSIA:'MY', MYANMAR:'MM', INDIA:'IN',
+  DUBAI:'AE', UAE:'AE', TURKEY:'TR', GEORGIA:'GE', EGYPT:'EG', LAOS:'LA', CAMBODIA:'KH', INDONESIA:'ID',
+  MACAU:'MO', MACAO:'MO', MALDIVES:'MV', KAZAKHSTAN:'KZ' };
 
 // Thai country name → ISO2 (สำหรับ TTN ที่ระบุประเทศใน P_TAG)
 const TH_ISO = { 'ญี่ปุ่น':'JP','เกาหลี':'KR','จีน':'CN','ฮ่องกง':'HK','มาเก๊า':'MO','ไต้หวัน':'TW',
@@ -41,6 +47,25 @@ function normalize(id, fmt, data) {
       }
       const price = deps.length ? Math.min(...deps.map(d => d.adult)) : (parseFloat(p.P_PRICE) || 0);
       if (p.BANNER) out.push({ id: `sup_ttn_${p.P_ID}`, name: p.P_NAME, image: p.BANNER, price, country: iso, code: p.P_CODE || '', days: Number(p.P_DAY) || 0, night: Number(p.P_NIGHT) || 0, airline: p.P_AIRLINE_NAME || '', hotel: Number(p.P_HOTEL_STAR) || 0, highlight: p.P_HIGHLIGHT || '', pdf: p.PDF || '', deps: deps.slice(0, 60) });
+    }
+  } else if (fmt === 'ttnplus') {
+    // response เป็น object keyed by number → แปลงเป็น array
+    const progs = Array.isArray(data) ? data : (data && typeof data === 'object' ? Object.values(data) : []);
+    const today = new Date().toISOString().slice(0, 10);
+    for (const p of progs) {
+      if (!p || !p.P_ID) continue;
+      const iso = TTNPLUS_LOC[String(p.P_LOCATION || '').toUpperCase().trim()] || isoFromThai(p.P_NAME) || '';
+      const deps = [];
+      for (const per of (p.period || [])) {
+        if (!per.P_DUE_START || per.P_DUE_START < today) continue;               // เฉพาะรอบอนาคต
+        const open = Number(per.P_AVAILABLE) > 0 || /ว่าง/.test(per.P_status || '');
+        if (!open) continue;                                                     // เฉพาะรอบที่ยังเปิดจอง
+        const newP = parseFloat(per.P_NEWPRICE) || 0;
+        const adult = newP > 0 ? newP : (parseFloat(per.P_ADULT) || 0);
+        if (adult > 0) deps.push({ date: per.P_DUE_START, ret: per.P_DUE_END, adult, child: parseFloat(per.P_CHILDPRICE) || 0, single: parseFloat(per.P_SINGLE) || 0, seat: Number(per.P_AVAILABLE) || 0 });
+      }
+      const price = deps.length ? Math.min(...deps.map(d => d.adult)) : (parseFloat(p.P_PRICE) || 0);
+      if (p.banner_url && price > 0) out.push({ id: `sup_ttnplus_${p.P_ID}`, name: p.P_NAME, image: p.banner_url, price, country: iso, code: p.P_CODE || '', days: Number(p.P_DAY) || 0, night: Number(p.P_NIGHT) || 0, airline: p.P_AIRLINE || '', hotel: 0, highlight: '', pdf: p.pdf_url || '', deps: deps.slice(0, 60) });
     }
   }
   return out;

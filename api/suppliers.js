@@ -18,6 +18,7 @@ const SUPPLIERS = {
   zego:        { host: 'www.zegoapi.com',          base: '/v1.5', list: '/programtours', detail: id => `/programtours/${id}`,
                  auth: { header: 'auth-token', tokenEnv: 'ZEGO_API_TOKEN' } },
   ttn:         { host: 'online.ttnconnect.com',    base: '/api/agency', list: '/get-allprogram', detail: id => `/program/${id}` },
+  ttnplus:     { host: 'www.ttnplus.co.th',        base: '/api',        list: '/program',        detail: id => `/program?p=${id}` },
 };
 
 function supFetch(cfg, path) {

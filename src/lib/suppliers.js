@@ -11,6 +11,7 @@ export const SUPPLIERS = [
   { id: 'gs25tour',    name: 'GS25Tour',        enabled: true, format: 'probooking' },
   { id: 'zego',        name: 'Zego',            enabled: true, format: 'zego' },
   { id: 'ttn',         name: 'TTN Tour',        enabled: true, format: 'ttn' },
+  { id: 'ttnplus',     name: 'TTN Plus',        enabled: true, format: 'ttnplus' },
 ];
 
 export const ENABLED_SUPPLIERS = SUPPLIERS.filter(s => s.enabled);

@@ -9,6 +9,8 @@ const ALLOW = [
   'wondergrouptour.com',
   'booking.gs25tour.com',
   'zegotravel.com',
+  'ttnplus.co.th',
+  'ttnconnect.com',
   'drive.google.com',
   'drive.usercontent.google.com',
 ];
