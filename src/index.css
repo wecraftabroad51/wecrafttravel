@@ -387,8 +387,8 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
 .navbar-topbar { display: flex; }
 .navbar-topbar-phone { display: flex; }
 
-/* Hero */
-.hero-wrap { height: 440px; }
+/* Hero — สัดส่วนตรงกับแบนเนอร์ (1920x800 = 12/5) เต็มเฟรม ไม่ครอป ไม่แหว่ง */
+.hero-wrap { aspect-ratio: 12 / 5; width: 100%; height: auto; }
 
 /* Stats strip */
 .stats-strip-grid {
@@ -433,7 +433,7 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
   .home-2col-main { order: 1; }
 
   /* Hero */
-  .hero-wrap { height: 280px !important; }
+  .hero-wrap { height: auto !important; }
 
   /* Navbar top bar — hide phone, keep LINE */
   .navbar-topbar-phone { display: none !important; }
@@ -454,7 +454,7 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
 
 /* ---- Small mobile ---- */
 @media (max-width: 480px) {
-  .hero-wrap { height: 220px !important; }
+  .hero-wrap { height: auto !important; }
   .home-2col { padding: 8px !important; }
   .stats-strip-grid { grid-template-columns: repeat(2, 1fr) !important; }
   .why-grid { grid-template-columns: 1fr !important; }
