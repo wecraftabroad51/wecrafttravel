@@ -12,7 +12,7 @@ import {
   upsertArticle, deleteArticle,
   upsertPromotion, deletePromotion, togglePromoActive,
   upsertFaq, deleteFaq,
-  approveReview, deleteReview,
+  approveReview, deleteReview, setReviewHidden, setReviewReply,
   updateBookingStatus, deleteBooking,
   markMessageRead, deleteMessage,
   updateSettings, uploadImage, uploadFile,
@@ -2427,10 +2427,23 @@ function PromotionsSection({ promotions, setPromotions, t }) {
 
 // ===== REVIEWS =====
 function ReviewsSection({ reviews, setReviews, tours, t }) {
+  const [replyDraft, setReplyDraft] = useState({});
   const handleApprove = async (id) => {
     const { error } = await approveReview(id, true);
     if (error) { alert('อนุมัติไม่สำเร็จ'); return; }
     setReviews(prev => prev.map(r => r.id === id ? { ...r, approved: true } : r));
+  };
+  const handleToggleHidden = async (id, hidden) => {
+    const { error } = await setReviewHidden(id, hidden);
+    if (error) { alert('ทำรายการไม่สำเร็จ (ตรวจว่ารันคอลัมน์ hidden แล้ว)'); return; }
+    setReviews(prev => prev.map(r => r.id === id ? { ...r, hidden } : r));
+  };
+  const handleSaveReply = async (id) => {
+    const reply = (replyDraft[id] ?? '').trim();
+    const { error } = await setReviewReply(id, reply);
+    if (error) { alert('บันทึกคำตอบไม่สำเร็จ (ตรวจว่ารันคอลัมน์ reply แล้ว)'); return; }
+    setReviews(prev => prev.map(r => r.id === id ? { ...r, reply } : r));
+    setReplyDraft(prev => { const n = { ...prev }; delete n[id]; return n; });
   };
   const handleReject = async (id) => {
     if (!confirm('ลบรีวิวนี้?')) return;
@@ -2445,30 +2458,52 @@ function ReviewsSection({ reviews, setReviews, tours, t }) {
       <div className="space-y-4">
         {reviews.map(review => {
           const tour = tours.find(tr => tr.id === review.tourId);
+          const draft = replyDraft[review.id] ?? review.reply ?? '';
           return (
-            <div key={review.id} className={`bg-white rounded-2xl p-5 shadow-sm border-l-4 ${review.approved ? 'border-green-400' : 'border-amber-400'}`}>
+            <div key={review.id} className={`bg-white rounded-2xl p-5 shadow-sm border-l-4 ${review.hidden ? 'border-slate-300 opacity-70' : review.approved ? 'border-green-400' : 'border-amber-400'}`}>
               <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className="font-semibold text-slate-800">{review.name}</span>
                     <span className="text-amber-400">{'★'.repeat(review.rating)}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${review.approved ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
                       {review.approved ? 'อนุมัติแล้ว' : 'รอการอนุมัติ'}
                     </span>
+                    {review.hidden && <span className="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-600">🙈 ซ่อนอยู่</span>}
                   </div>
                   <p className="text-xs text-slate-400 mb-2">{tour ? t(tour.name) : ''}</p>
                   <p className="text-sm text-slate-600">{t(review.comment || review.text || {})}</p>
                 </div>
-                <div className="flex gap-2 ml-4">
+                <div className="flex gap-2 ml-4 shrink-0">
                   {!review.approved && (
-                    <button onClick={() => handleApprove(review.id)} className="w-8 h-8 bg-green-100 hover:bg-green-200 text-green-700 rounded-full flex items-center justify-center">
+                    <button title="อนุมัติ" onClick={() => handleApprove(review.id)} className="w-8 h-8 bg-green-100 hover:bg-green-200 text-green-700 rounded-full flex items-center justify-center">
                       <Check className="w-4 h-4" />
                     </button>
                   )}
-                  <button onClick={() => handleReject(review.id)} className="w-8 h-8 bg-red-100 hover:bg-red-200 text-red-700 rounded-full flex items-center justify-center">
+                  <button title={review.hidden ? 'แสดงรีวิว' : 'ซ่อนรีวิว'} onClick={() => handleToggleHidden(review.id, !review.hidden)}
+                    className="w-8 h-8 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full flex items-center justify-center text-base">
+                    {review.hidden ? '👁️' : '🙈'}
+                  </button>
+                  <button title="ลบ" onClick={() => handleReject(review.id)} className="w-8 h-8 bg-red-100 hover:bg-red-200 text-red-700 rounded-full flex items-center justify-center">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
+              </div>
+
+              {/* ตอบกลับรีวิว (โชว์ใต้รีวิวบนหน้าเว็บ) */}
+              <div className="mt-3 pt-3 border-t border-slate-100">
+                <label className="text-xs font-semibold text-slate-500">💬 ตอบกลับจากทีมงาน (แสดงใต้รีวิวบนเว็บ)</label>
+                <div className="flex gap-2 mt-1.5">
+                  <textarea rows={2} value={draft}
+                    onChange={e => setReplyDraft(prev => ({ ...prev, [review.id]: e.target.value }))}
+                    placeholder="เช่น ขอบคุณสำหรับรีวิวดีๆ ครับ 🙏 หวังว่าจะได้ดูแลอีกครั้ง"
+                    className="flex-1 text-sm border border-slate-200 rounded-lg px-3 py-2 resize-y focus:outline-none focus:border-teal-400" />
+                  <button onClick={() => handleSaveReply(review.id)}
+                    className="shrink-0 self-start px-3 py-2 text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white rounded-lg">
+                    บันทึกคำตอบ
+                  </button>
+                </div>
+                {review.reply && <p className="text-xs text-teal-700 mt-1.5">ตอบแล้ว: “{review.reply}”</p>}
               </div>
             </div>
           );

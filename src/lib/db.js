@@ -247,6 +247,16 @@ export const approveReview = async (id, approved) => {
   return supabase.from('reviews').update({ approved }).eq('id', id)
 }
 
+export const setReviewHidden = async (id, hidden) => {
+  if (!supabase) return { error: 'offline' }
+  return supabase.from('reviews').update({ hidden }).eq('id', id)
+}
+
+export const setReviewReply = async (id, reply) => {
+  if (!supabase) return { error: 'offline' }
+  return supabase.from('reviews').update({ reply }).eq('id', id)
+}
+
 export const deleteReview = async (id) => {
   if (!supabase) return { error: 'offline' }
   return supabase.from('reviews').delete().eq('id', id)
