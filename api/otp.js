@@ -111,8 +111,8 @@ async function sendSMS(phone, otp) {
       console.error('[SMSMKT] Request error:', e.message);
       reject(e);
     });
-    // กัน SMSMKT ค้าง → ไม่ให้คำขอแขวนจน function timeout (ครั้งแรกเหมือนไม่ทำงาน)
-    req.setTimeout(15000, () => req.destroy(new Error('SMSMKT ตอบช้าเกินไป กรุณาลองใหม่')));
+    // กัน SMSMKT ค้าง → ตัดที่ 9 วิ (ต่ำกว่า function timeout 15 วิ) เพื่อคืน error ชัดๆ ก่อนถูกฆ่า
+    req.setTimeout(9000, () => req.destroy(new Error('SMSMKT ตอบช้าเกินไป (timeout)')));
     req.write(postData);
     req.end();
   });
@@ -184,8 +184,8 @@ module.exports = async function handler(req, res) {
       if (e.message === 'SMS_NOT_CONFIGURED') {
         return res.status(503).json({ error: 'ระบบ SMS ยังไม่พร้อมใช้งาน กรุณาติดต่อผู้ดูแลระบบ' });
       }
-      // ปัญหาฝั่งผู้ให้บริการ SMS (เครดิตหมด/ผู้ส่งไม่ผ่าน ฯลฯ) — ไม่โชว์ข้อความดิบให้ลูกค้า
-      if (type === 'phone' && /credit|balance|sender|not enough|can't send/i.test(e.message)) {
+      // ปัญหาฝั่งผู้ให้บริการ SMS (เครดิตหมด/ผู้ส่งไม่ผ่าน/ตอบช้า timeout) — ไม่โชว์ข้อความดิบให้ลูกค้า
+      if (type === 'phone' && /credit|balance|sender|not enough|can't send|timeout|ตอบช้า|ช้าเกิน|ECONN|socket/i.test(e.message)) {
         return res.status(503).json({ error: 'ขออภัย ระบบส่ง OTP ทาง SMS ขัดข้องชั่วคราว 🙏 กรุณาทักแชท LINE @wecrafttravel เพื่อให้ทีมงานยืนยันการจองให้ได้เลยครับ', smsDown: true });
       }
       return res.status(500).json({ error: type === 'phone' ? 'ส่ง OTP ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง' : e.message });
