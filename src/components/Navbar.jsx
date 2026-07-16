@@ -428,17 +428,17 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
         <div className="wrap" style={{
           display: 'flex',
           alignItems: 'center',
-          padding: '8px 20px',
+          padding: '4px 20px',
           gap: 0,
         }}>
 
-          {/* Logo */}
+          {/* Logo — กระชับแนวตั้ง แต่ตัวหนังสือยังเด่นอ่านง่าย */}
           <button onClick={() => navigate('home')}
-            style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'none', border: 'none', cursor: 'pointer', padding: '6px 0', flexShrink: 0, marginRight: 32 }}>
-            <img src="/logo.png" alt="WeCraft Travel" style={{ width: 94, height: 94, objectFit: 'contain', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.12))' }} />
-            <div style={{ lineHeight: 1.25, textAlign: 'center' }}>
-              <div style={{ fontSize: 27, fontWeight: 900, color: 'var(--primary)', letterSpacing: '-0.01em' }}>WeCraft Travel</div>
-              <div style={{ fontSize: 13.5, color: 'var(--muted)', letterSpacing: '.28em', textTransform: 'uppercase', marginTop: 3 }}>WE CRAFT ABROAD</div>
+            style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'none', border: 'none', cursor: 'pointer', padding: '3px 0', flexShrink: 0, marginRight: 26 }}>
+            <img src="/logo.png" alt="WeCraft Travel" style={{ width: 66, height: 66, objectFit: 'contain', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.12))' }} />
+            <div style={{ lineHeight: 1.2, textAlign: 'center' }}>
+              <div style={{ fontSize: 23, fontWeight: 900, color: 'var(--primary)', letterSpacing: '-0.01em' }}>WeCraft Travel</div>
+              <div style={{ fontSize: 11.5, color: 'var(--muted)', letterSpacing: '.22em', textTransform: 'uppercase', marginTop: 2 }}>WE CRAFT ABROAD</div>
             </div>
           </button>
 
@@ -522,7 +522,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
         boxShadow: scrolled ? '0 4px 16px rgba(0,0,0,.12)' : '0 2px 10px rgba(230,92,0,.10)',
         transition: 'box-shadow .2s',
       }}>
-        <div className="wrap" style={{ display: 'flex', alignItems: 'center', height: 56, gap: 0 }}>
+        <div className="wrap" style={{ display: 'flex', alignItems: 'center', height: 52, gap: 0 }}>
 
           {/* Mobile-only logo (Row 2 is hidden on mobile) */}
           <button onClick={() => navigate('home')} className="mobile-menu-btn"

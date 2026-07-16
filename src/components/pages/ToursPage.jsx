@@ -289,15 +289,15 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
     <main className="page-enter">
       {/* Header */}
       {/* Breadcrumb */}
-      <div className="wrap-wide" style={{ padding: '16px 0 0' }}>
-        <nav style={{ fontSize: 12, color: 'var(--muted)', display: 'flex', gap: 8, alignItems: 'center' }}>
-          <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 12, padding: 0 }}>
+      <div className="wrap-wide" style={{ padding: '10px 0 0' }}>
+        <nav style={{ fontSize: 13.5, color: 'var(--muted)', display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 13.5, padding: 0 }}>
             {lang === 'th' ? 'หน้าหลัก' : 'Home'}
           </button>
           <span>/</span>
           {groupLabel ? (
             <>
-              <button onClick={clearGroupFilter} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 12, padding: 0 }}>
+              <button onClick={clearGroupFilter} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 13.5, padding: 0 }}>
                 {lang === 'th' ? 'ทัวร์ทั้งหมด' : 'All Tours'}
               </button>
               <span>/</span>
@@ -333,8 +333,8 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
       )}
 
       {/* ── Filter bar (ค้างใต้ navbar เวลาเลื่อน) ───────────────── */}
-      <section style={{ position: 'sticky', top: navH, zIndex: 20, background: 'var(--canvas)', borderBottom: '1px solid var(--line)', boxShadow: '0 4px 10px rgba(0,0,0,.04)', padding: '12px 0 10px', marginTop: 12 }}>
-        <div className="wrap-wide" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <section style={{ position: 'sticky', top: navH, zIndex: 20, background: 'var(--canvas)', borderBottom: '1px solid var(--line)', boxShadow: '0 4px 10px rgba(0,0,0,.04)', padding: '10px 0 8px', marginTop: 8 }}>
+        <div className="wrap-wide" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 
           {/* Row 1: search + sort */}
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -342,11 +342,11 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
               <Icon name="search" size={16} />
               <input value={search} onChange={e => setSearch(e.target.value)}
                 placeholder={lang === 'th' ? 'ค้นหาประเทศ เมือง หรือรหัสทัวร์…' : 'Search country, city or code…'}
-                style={{ border: 'none', padding: 0, background: 'transparent', fontSize: 14, width: '100%', outline: 'none' }} />
+                style={{ border: 'none', padding: 0, background: 'transparent', fontSize: 15, width: '100%', outline: 'none' }} />
               {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>}
             </div>
             <select value={sort} onChange={e => setSort(e.target.value)}
-              style={{ width: 'auto', minWidth: 128, flex: '0 0 auto', padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--card)', fontSize: 13, cursor: 'pointer' }}>
+              style={{ width: 'auto', minWidth: 132, flex: '0 0 auto', padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--card)', fontSize: 14.5, cursor: 'pointer' }}>
               <option value="popular">{lang === 'th' ? 'ยอดนิยม' : 'Popular'}</option>
               <option value="price-low">{lang === 'th' ? 'ราคาต่ำ→สูง' : 'Price ↑'}</option>
               <option value="price-high">{lang === 'th' ? 'ราคาสูง→ต่ำ' : 'Price ↓'}</option>
@@ -359,7 +359,7 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
               const on = tourType === c.value;
               return (
                 <button key={c.value} onClick={() => setTourType(c.value)}
-                  style={{ flexShrink: 0, padding: '6px 14px', borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                  style={{ flexShrink: 0, padding: '6px 15px', borderRadius: 999, fontSize: 14.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
                     border: `1px solid ${on ? 'var(--ink)' : 'var(--line)'}`, background: on ? 'var(--ink)' : 'var(--card)', color: on ? 'var(--canvas)' : 'var(--ink-2)', whiteSpace: 'nowrap' }}>
                   {lang === 'th' ? c.th : c.en}
                 </button>
@@ -370,7 +370,7 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
           {/* Row 3: country quick-pick chips */}
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }} className="no-scrollbar">
             <button onClick={clearCountry}
-              style={{ flexShrink: 0, padding: '7px 14px', borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+              style={{ flexShrink: 0, padding: '7px 15px', borderRadius: 999, fontSize: 14.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
                 border: `1px solid ${!country ? 'var(--primary)' : 'var(--line)'}`, background: !country ? 'var(--primary)' : 'var(--card)', color: !country ? '#fff' : 'var(--ink-2)' }}>
               {lang === 'th' ? 'ทุกประเทศ' : 'All'}
             </button>
@@ -378,12 +378,12 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
               const on = country === c.code;
               return (
                 <button key={c.code} onClick={() => setCountry(on ? '' : c.code)}
-                  style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '6px 13px', borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                  style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '6px 14px', borderRadius: 999, fontSize: 14.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
                     border: `1px solid ${on ? 'var(--primary)' : 'var(--line)'}`, background: on ? 'var(--primary-light)' : 'var(--card)', color: on ? 'var(--primary)' : 'var(--ink-2)' }}>
-                  <img src={flagUrl(c.code, '32x24')} alt="" width={20} height={15} loading="lazy"
+                  <img src={flagUrl(c.code, '32x24')} alt="" width={22} height={16} loading="lazy"
                     style={{ borderRadius: 3, objectFit: 'cover', boxShadow: '0 0 0 1px rgba(0,0,0,.08)' }} />
                   {lang === 'th' ? c.th : c.en}
-                  <span style={{ fontSize: 11, fontWeight: 700, opacity: .65 }}>{c.count}</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, opacity: .65 }}>{c.count}</span>
                 </button>
               );
             })}
@@ -392,11 +392,11 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
           {/* Row 4: sub-region chips (เมืองย่อย) — โผล่เมื่อประเทศมีเส้นทางเยอะ */}
           {regionChips.length > 0 && (
             <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, alignItems: 'center' }} className="no-scrollbar">
-              <span style={{ flexShrink: 0, fontSize: 12, color: 'var(--muted)', fontWeight: 600, paddingRight: 2 }}>
+              <span style={{ flexShrink: 0, fontSize: 13.5, color: 'var(--muted)', fontWeight: 600, paddingRight: 2 }}>
                 {lang === 'th' ? 'เมือง/เส้นทาง:' : 'City:'}
               </span>
               <button onClick={() => setRegion('')}
-                style={{ flexShrink: 0, padding: '5px 12px', borderRadius: 999, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                style={{ flexShrink: 0, padding: '5px 13px', borderRadius: 999, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
                   border: `1px solid ${!region ? 'var(--accent, #e65c00)' : 'var(--line)'}`, background: !region ? 'var(--accent, #e65c00)' : 'var(--card)', color: !region ? '#fff' : 'var(--ink-2)' }}>
                 {lang === 'th' ? 'ทั้งหมด' : 'All'}
               </button>
@@ -404,10 +404,10 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
                 const on = region === r.kw;
                 return (
                   <button key={r.kw} onClick={() => setRegion(on ? '' : r.kw)}
-                    style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 999, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+                    style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 13px', borderRadius: 999, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
                       border: `1px solid ${on ? 'var(--accent, #e65c00)' : 'var(--line)'}`, background: on ? '#fff3ec' : 'var(--card)', color: on ? 'var(--accent, #e65c00)' : 'var(--ink-2)' }}>
                     {r.kw}
-                    <span style={{ fontSize: 11, fontWeight: 700, opacity: .6 }}>{r.count}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, opacity: .6 }}>{r.count}</span>
                   </button>
                 );
               })}
