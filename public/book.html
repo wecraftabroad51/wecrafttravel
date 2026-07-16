@@ -348,7 +348,7 @@ async function submit(e){
   btn.disabled=true; btn.textContent='กำลังส่ง...';
   try{
     const body={ subject:`[${isLine?'LINE':'เว็บ'}] จองจอยทัวร์ - ${formData.tourName}`, html, formData };
-    if(!isLine && email) body.customerEmail=email; // เว็บ+มีอีเมล → ส่งใบยืนยันอีเมล
+    if(email) body.customerEmail=email; // ส่งใบยืนยันเข้าอีเมลลูกค้าทุกช่องทาง (เว็บ + LINE)
     const r=await fetch('/api/send-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const j=await r.json().catch(()=>({}));
     if(!r.ok) throw new Error(j.error||'ส่งไม่สำเร็จ');
