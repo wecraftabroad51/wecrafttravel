@@ -1,19 +1,12 @@
 -- ══════════════════════════════════════════════════════════════════
--- WeCraft Travel — แก้หลังบ้านอัปโหลด/บันทึกไม่ได้
--- สาเหตุ: RLS อนุญาตเฉพาะ role "anon" → แอดมินที่ล็อกอิน Google
---         เป็น role "authenticated" เลยโดนบล็อกทุกการเขียน
--- วิธีใช้: Supabase → SQL Editor → New query → วางทั้งหมด → Run
--- (รันซ้ำได้ ไม่พังของเดิม — นโยบายเป็นแบบ permissive เพิ่มสิทธิ์เท่านั้น)
+-- WeCraft Travel — แก้หลังบ้านอัปโหลด/บันทึกไม่ได้ (ฉบับแยก 2 ส่วน)
+-- สาเหตุ: RLS อนุญาตเฉพาะ role "anon" → แอดมิน (authenticated) โดนบล็อก
 -- ══════════════════════════════════════════════════════════════════
 
--- 1) STORAGE: ให้แอดมินที่ล็อกอินใช้ทุก bucket ของเว็บได้ (อัปโหลด/อ่าน/ลบ)
-drop policy if exists "wecraft_authenticated_storage" on storage.objects;
-create policy "wecraft_authenticated_storage" on storage.objects
-  for all to authenticated
-  using      (bucket_id in ('tour-images','tour-files','passports'))
-  with check (bucket_id in ('tour-images','tour-files','passports'));
-
--- 2) TABLES: ให้แอดมินที่ล็อกอินเขียนทุกตารางที่หลังบ้านใช้
+-- ─────────────────────────────────────────
+-- ส่วนที่ 1: ตาราง + คอลัมน์รีวิว
+-- รันใน SQL Editor ได้เลย (ผ่านแน่นอน)
+-- ─────────────────────────────────────────
 do $$
 declare t text;
 begin
@@ -32,6 +25,18 @@ begin
   end loop;
 end $$;
 
--- 3) แถม: คอลัมน์จัดการรีวิว (ซ่อน/ตอบกลับ) ที่ยังไม่ได้รัน
 alter table public.reviews add column if not exists hidden boolean not null default false;
 alter table public.reviews add column if not exists reply  text;
+
+-- ─────────────────────────────────────────
+-- ส่วนที่ 2: STORAGE — ลองรันแยกต่างหาก
+-- ถ้าขึ้น error "must be owner of table objects"
+-- → ต้องสร้างผ่านหน้าเว็บแทน: Storage → เลือก bucket → Policies →
+--   New policy → เลือก role "authenticated" + ติ๊กทุก operation
+--   (ทำกับทั้ง 3 bucket: tour-images, tour-files, passports)
+-- ─────────────────────────────────────────
+drop policy if exists "wecraft_authenticated_storage" on storage.objects;
+create policy "wecraft_authenticated_storage" on storage.objects
+  for all to authenticated
+  using      (bucket_id in ('tour-images','tour-files','passports'))
+  with check (bucket_id in ('tour-images','tour-files','passports'));
