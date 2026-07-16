@@ -3,7 +3,9 @@
  * All functions return { data, error }
  * snake_case (DB) ↔ camelCase (JS) transform included
  */
-import { supabase } from './supabase'
+// ใช้ client แบบไม่แนบ session (anon) — กันปัญหา RLS บล็อก role authenticated
+// ตอนแอดมินล็อกอิน Google แล้วเขียน/อัปโหลดไม่ได้ (งาน auth ใช้ client หลักใน auth.js)
+import { supabaseData as supabase } from './supabase'
 
 // ── Helpers ──────────────────────────────────────────────────
 const toCamel = (obj) => {
