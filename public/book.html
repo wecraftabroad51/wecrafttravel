@@ -161,8 +161,8 @@ function renderForm(){
         ${stepper('infants','ทารก (อายุ < 2 ปี)',0,'full')}
       </div>
 
-      <label>อีเมล (ถ้ามี — สำหรับส่งใบยืนยัน)</label>
-      <input name="email" inputmode="email" autocomplete="email" placeholder="you@email.com">
+      <label>อีเมล <span class="req">*</span> <span style="font-weight:500;color:#8a94a0">(สำหรับส่งใบยืนยันการจอง)</span></label>
+      <input name="email" inputmode="email" autocomplete="email" placeholder="you@email.com" required>
 
       <label>เลขพาสปอร์ต (ถ้ามี)</label>
       <input name="passportNo" placeholder="กรอกภายหลังได้">
@@ -192,6 +192,8 @@ function renderForm(){
 
 function renderOtp(){
   const a=document.getElementById('otpArea'); if(!a) return;
+  // จองผ่าน LINE (มี uid) → ไม่ต้องยืนยัน OTP — รู้ตัวตนจากบัญชี LINE แล้ว ทีมงานยืนยันทางแชท
+  if(P.uid){ a.innerHTML=`<div class="okmsg">💚 จองผ่าน LINE ไม่ต้องยืนยัน OTP — ทีมงานจะยืนยันการจองกลับทางแชท LINE ของคุณ</div>`; return; }
   if(otp.verified){ a.innerHTML=`<div class="okmsg">✅ ยืนยันเบอร์โทรเรียบร้อยแล้ว</div>`; return; }
   if(!otp.sent){
     a.innerHTML=`<div style="margin-top:8px"><button type="button" class="btn btn-line" id="otpReq">📲 ขอรหัส OTP ทาง SMS</button></div><div id="otpMsg"></div>`;
@@ -314,7 +316,10 @@ async function submit(e){
   const fullName=g('fullName'), phone=(document.getElementById('phone').value||'').replace(/\D/g,'');
   if(!fullName) return showErr('กรุณากรอกชื่อ-นามสกุล');
   if(phone.length<9) return showErr('กรุณากรอกเบอร์โทรให้ถูกต้อง');
-  if(!otp.verified) return showErr('กรุณายืนยันเบอร์โทรด้วย OTP ก่อนครับ');
+  // จองผ่าน LINE (มี uid) → ข้าม OTP ได้ · จองผ่านเว็บ → ต้องยืนยัน OTP เหมือนเดิม
+  if(!otp.verified && !P.uid) return showErr('กรุณายืนยันเบอร์โทรด้วย OTP ก่อนครับ');
+  const emailVal=g('email');
+  if(!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailVal)) return showErr('กรุณากรอกอีเมลให้ถูกต้อง (จำเป็นสำหรับใบยืนยันการจอง)');
   const adults=+g('adults')||0, children=+g('children')||0, infants=+g('infants')||0;
 
   let depDate='',retDate='',roundLabel='';
