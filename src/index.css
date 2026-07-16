@@ -390,6 +390,9 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
 /* Hero — เต็มเฟรมขอบซ้ายขวา + จำกัดสูงไม่ให้ล้นจอ (จอกว้างมากตัดบน-ล่างเล็กน้อยพอดีจอ) */
 .hero-wrap { aspect-ratio: 12 / 5; width: 100%; max-height: 68vh; }
 
+/* โลโก้ในแถวเมนู — จอแคบซ่อนข้อความแบรนด์ เหลือแค่รูปโลโก้ (กันเมนูล้น) */
+@media (max-width: 1240px) { .nav-brand-text { display: none; } }
+
 /* Main nav — เพิ่มมิติให้แถบเมนู (เส้นคั่น + hover ยกเด่น ไม่โล่ง) */
 .nav-desktop > div { transition: background .15s; }
 .nav-desktop > div:not(:last-child)::after {

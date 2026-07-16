@@ -399,8 +399,15 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
               </span>
             ))}
           </div>
-          {/* Right: lang */}
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'flex-end' }}>
+          {/* Right: hotline + lang */}
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'flex-end' }}>
+            <a href="tel:0618686889" className="navbar-topbar-phone"
+              style={{ color: '#fff', textDecoration: 'none', fontSize: 15.5, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="15" height="15">
+                <path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/>
+              </svg>
+              061-868-6889
+            </a>
             <button onClick={() => setLang(lang === 'th' ? 'en' : 'th')}
               style={{
                 background: 'rgba(255,255,255,.15)', border: '1px solid rgba(255,255,255,.35)',
@@ -423,98 +430,7 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
         </div>
       </div>
 
-      {/* ── Row 2: logo + info bar ──────────────────────── */}
-      <div className="navbar-topbar-phone" style={{ background: '#fff', borderBottom: '1px solid #e8e8e8' }}>
-        <div className="wrap" style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '4px 20px',
-          gap: 0,
-        }}>
-
-          {/* Logo — กระชับแนวตั้ง แต่ตัวหนังสือยังเด่นอ่านง่าย */}
-          <button onClick={() => navigate('home')}
-            style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'none', border: 'none', cursor: 'pointer', padding: '3px 0', flexShrink: 0, marginRight: 26 }}>
-            <img src="/logo.png" alt="WeCraft Travel" style={{ width: 66, height: 66, objectFit: 'contain', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.12))' }} />
-            <div style={{ lineHeight: 1.2, textAlign: 'center' }}>
-              <div style={{ fontSize: 23, fontWeight: 900, color: 'var(--primary)', letterSpacing: '-0.01em' }}>WeCraft Travel</div>
-              <div style={{ fontSize: 11.5, color: 'var(--muted)', letterSpacing: '.22em', textTransform: 'uppercase', marginTop: 2 }}>WE CRAFT ABROAD</div>
-            </div>
-          </button>
-
-          {/* Divider */}
-          <div style={{ width: 1, height: 40, background: '#e8e8e8', marginRight: 28, flexShrink: 0 }} />
-
-          {/* เวลาทำการ */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginRight: 28 }}>
-            <span style={{ color: 'var(--primary)', marginTop: 2 }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
-                <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
-              </svg>
-            </span>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 15, color: '#333' }}>{lang === 'th' ? 'เวลาทำการ' : 'Office Hours'}</div>
-              <div style={{ fontSize: 14, color: '#666', marginTop: 1 }}>{lang === 'th' ? 'จันทร์-เสาร์ : 09.00-18.00 น.' : 'Mon–Sat : 09:00–18:00'}</div>
-            </div>
-          </div>
-
-          {/* Divider */}
-          <div style={{ width: 1, height: 40, background: '#e8e8e8', marginRight: 28, flexShrink: 0 }} />
-
-          {/* Hotline */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginRight: 28 }}>
-            <span style={{ color: 'var(--primary)', marginTop: 2 }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
-                <path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/>
-              </svg>
-            </span>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: 15, color: '#333' }}>
-                {lang === 'th' ? 'สายด่วน' : 'Hotline'}{' '}
-                <span style={{ color: 'var(--primary)', fontWeight: 700 }}>
-                  {lang === 'th' ? 'Hot Line 24 ชม.' : 'Hot Line 24 hrs'}
-                </span>
-              </div>
-              <a href="tel:0618686889" style={{ display: 'block', fontSize: 15, color: '#555', textDecoration: 'none', marginTop: 1 }}>
-                061-868-6889
-              </a>
-              <a href="tel:0652398915" style={{ display: 'block', fontSize: 14, color: '#555', textDecoration: 'none', marginTop: 2 }}>
-                065-239-8915
-              </a>
-            </div>
-          </div>
-
-          {/* Divider */}
-          <div style={{ width: 1, height: 40, background: '#e8e8e8', marginRight: 28, flexShrink: 0 }} />
-
-          {/* LINE */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-            <a href="https://line.me/R/ti/p/@wecrafttravel" target="_blank" rel="noopener noreferrer"
-              style={{
-                background: '#06c755', borderRadius: 8,
-                width: 36, height: 36, display: 'flex',
-                alignItems: 'center', justifyContent: 'center',
-                color: '#fff', flexShrink: 0, textDecoration: 'none',
-              }}>
-              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                <path d="M21 11c0 4.4-4 8-9 8-1 0-2-.1-3-.4L4 20l1.5-3.6A8.4 8.4 0 0 1 3 11c0-4.4 4-8 9-8s9 3.6 9 8z"/>
-              </svg>
-            </a>
-            <div>
-              <a href="https://line.me/R/ti/p/@wecrafttravel" target="_blank" rel="noopener noreferrer"
-                style={{ fontWeight: 800, fontSize: 17, color: '#06c755', textDecoration: 'none' }}>
-                @wecrafttravel
-              </a>
-              <div style={{ fontSize: 15, color: 'var(--ink)', marginTop: 1 }}>We Craft Travel · We Craft Happiness</div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      {/* ── Row 3: main nav ──────────────────────────────── */}
+      {/* ── Row 2: main nav (โลโก้รวมอยู่ในแถวนี้ · หัวเว็บเหลือ 2 แถว ~1/8 จอ) ── */}
       <div style={{
         background: 'linear-gradient(180deg, #fffaf4 0%, #fff0e0 100%)',
         borderTop: '1px solid rgba(230,92,0,.14)',
@@ -522,15 +438,15 @@ export default function Navbar({ lang, setLang, page, navigate, t, onAdminClick,
         boxShadow: scrolled ? '0 4px 16px rgba(0,0,0,.12)' : '0 2px 10px rgba(230,92,0,.10)',
         transition: 'box-shadow .2s',
       }}>
-        <div className="wrap" style={{ display: 'flex', alignItems: 'center', height: 52, gap: 0 }}>
+        <div className="wrap" style={{ display: 'flex', alignItems: 'center', height: 58, gap: 0 }}>
 
-          {/* Mobile-only logo (Row 2 is hidden on mobile) */}
-          <button onClick={() => navigate('home')} className="mobile-menu-btn"
-            style={{ alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0, marginRight: 8 }}>
-            <img src="/logo.png" alt="WeCraft Travel" style={{ width: 38, height: 38, objectFit: 'contain' }} />
-            <div style={{ lineHeight: 1.2 }}>
-              <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--primary)' }}>WeCraft Travel</div>
-              <div style={{ fontSize: 9, color: 'var(--muted)' }}>WE CRAFT ABROAD</div>
+          {/* Logo — โชว์ทุกขนาดจอ (แถวข้อมูลติดต่อเดิมถูกยุบรวมแล้ว) */}
+          <button onClick={() => navigate('home')}
+            style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0, marginRight: 14 }}>
+            <img src="/logo.png" alt="WeCraft Travel" style={{ width: 44, height: 44, objectFit: 'contain', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.12))' }} />
+            <div className="nav-brand-text" style={{ lineHeight: 1.15, textAlign: 'left' }}>
+              <div style={{ fontSize: 17.5, fontWeight: 900, color: 'var(--primary)', whiteSpace: 'nowrap' }}>WeCraft Travel</div>
+              <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '.16em' }}>WE CRAFT ABROAD</div>
             </div>
           </button>
 
