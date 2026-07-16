@@ -499,7 +499,7 @@ function PromoBanners({ promotions, navigate, t, lang }) {
 // ─── REVIEWS ─────────────────────────────────────────────────
 function ReviewsSection({ reviews, lang }) {
   const [idx, setIdx] = useState(0);
-  const approved = reviews.filter(r => r.approved && !r.hidden).slice(0, 6);
+  const approved = reviews.filter(r => r.approved && !r.text?._hidden).slice(0, 6);
   if (!approved.length) return null;
 
   return (
@@ -538,10 +538,10 @@ function ReviewsSection({ reviews, lang }) {
                   <div style={{ fontSize: 12, color: 'var(--muted)' }}>{r.tourId}</div>
                 </div>
               </div>
-              {r.reply && (
+              {r.text?._reply && (
                 <div style={{ marginTop: 2, padding: '10px 12px', background: 'var(--canvas-2)', borderRadius: 8, borderLeft: '3px solid var(--primary)' }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--primary)', marginBottom: 3 }}>💬 {lang === 'th' ? 'ตอบกลับจาก WeCraft Travel' : 'Reply from WeCraft Travel'}</div>
-                  <p style={{ margin: 0, fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.55 }}>{r.reply}</p>
+                  <p style={{ margin: 0, fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.55 }}>{r.text._reply}</p>
                 </div>
               )}
             </div>

@@ -249,14 +249,20 @@ export const approveReview = async (id, approved) => {
   return supabase.from('reviews').update({ approved }).eq('id', id)
 }
 
+// เก็บสถานะ "ซ่อน/ตอบกลับ" ไว้ในคอลัมน์ text (jsonb เดิม) เป็นคีย์ _hidden / _reply
+// → ไม่ต้องเพิ่มคอลัมน์ใหม่ใน Supabase (เลี่ยงการรัน ALTER TABLE)
 export const setReviewHidden = async (id, hidden) => {
   if (!supabase) return { error: 'offline' }
-  return supabase.from('reviews').update({ hidden }).eq('id', id)
+  const { data: cur } = await supabase.from('reviews').select('text').eq('id', id).single()
+  const text = { ...(cur?.text || {}), _hidden: !!hidden }
+  return supabase.from('reviews').update({ text }).eq('id', id)
 }
 
 export const setReviewReply = async (id, reply) => {
   if (!supabase) return { error: 'offline' }
-  return supabase.from('reviews').update({ reply }).eq('id', id)
+  const { data: cur } = await supabase.from('reviews').select('text').eq('id', id).single()
+  const text = { ...(cur?.text || {}), _reply: reply || '' }
+  return supabase.from('reviews').update({ text }).eq('id', id)
 }
 
 export const deleteReview = async (id) => {

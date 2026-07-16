@@ -2444,14 +2444,14 @@ function ReviewsSection({ reviews, setReviews, tours, t }) {
   };
   const handleToggleHidden = async (id, hidden) => {
     const { error } = await setReviewHidden(id, hidden);
-    if (error) { alert('ทำรายการไม่สำเร็จ (ตรวจว่ารันคอลัมน์ hidden แล้ว)'); return; }
-    setReviews(prev => prev.map(r => r.id === id ? { ...r, hidden } : r));
+    if (error) { alert('ทำรายการไม่สำเร็จ: ' + (error.message || JSON.stringify(error))); return; }
+    setReviews(prev => prev.map(r => r.id === id ? { ...r, text: { ...(r.text || {}), _hidden: hidden } } : r));
   };
   const handleSaveReply = async (id) => {
     const reply = (replyDraft[id] ?? '').trim();
     const { error } = await setReviewReply(id, reply);
-    if (error) { alert('บันทึกคำตอบไม่สำเร็จ (ตรวจว่ารันคอลัมน์ reply แล้ว)'); return; }
-    setReviews(prev => prev.map(r => r.id === id ? { ...r, reply } : r));
+    if (error) { alert('บันทึกคำตอบไม่สำเร็จ: ' + (error.message || JSON.stringify(error))); return; }
+    setReviews(prev => prev.map(r => r.id === id ? { ...r, text: { ...(r.text || {}), _reply: reply } } : r));
     setReplyDraft(prev => { const n = { ...prev }; delete n[id]; return n; });
   };
   const handleReject = async (id) => {
@@ -2467,9 +2467,9 @@ function ReviewsSection({ reviews, setReviews, tours, t }) {
       <div className="space-y-4">
         {reviews.map(review => {
           const tour = tours.find(tr => tr.id === review.tourId);
-          const draft = replyDraft[review.id] ?? review.reply ?? '';
+          const draft = replyDraft[review.id] ?? review.text?._reply ?? '';
           return (
-            <div key={review.id} className={`bg-white rounded-2xl p-5 shadow-sm border-l-4 ${review.hidden ? 'border-slate-300 opacity-70' : review.approved ? 'border-green-400' : 'border-amber-400'}`}>
+            <div key={review.id} className={`bg-white rounded-2xl p-5 shadow-sm border-l-4 ${review.text?._hidden ? 'border-slate-300 opacity-70' : review.approved ? 'border-green-400' : 'border-amber-400'}`}>
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -2478,7 +2478,7 @@ function ReviewsSection({ reviews, setReviews, tours, t }) {
                     <span className={`text-xs px-2 py-0.5 rounded-full ${review.approved ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
                       {review.approved ? 'อนุมัติแล้ว' : 'รอการอนุมัติ'}
                     </span>
-                    {review.hidden && <span className="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-600">🙈 ซ่อนอยู่</span>}
+                    {review.text?._hidden && <span className="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-600">🙈 ซ่อนอยู่</span>}
                   </div>
                   <p className="text-xs text-slate-400 mb-2">{tour ? t(tour.name) : ''}</p>
                   <p className="text-sm text-slate-600">{t(review.comment || review.text || {})}</p>
@@ -2489,9 +2489,9 @@ function ReviewsSection({ reviews, setReviews, tours, t }) {
                       <Check className="w-4 h-4" />
                     </button>
                   )}
-                  <button title={review.hidden ? 'แสดงรีวิว' : 'ซ่อนรีวิว'} onClick={() => handleToggleHidden(review.id, !review.hidden)}
+                  <button title={review.text?._hidden ? 'แสดงรีวิว' : 'ซ่อนรีวิว'} onClick={() => handleToggleHidden(review.id, !review.text?._hidden)}
                     className="w-8 h-8 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full flex items-center justify-center text-base">
-                    {review.hidden ? '👁️' : '🙈'}
+                    {review.text?._hidden ? '👁️' : '🙈'}
                   </button>
                   <button title="ลบ" onClick={() => handleReject(review.id)} className="w-8 h-8 bg-red-100 hover:bg-red-200 text-red-700 rounded-full flex items-center justify-center">
                     <Trash2 className="w-4 h-4" />
@@ -2512,7 +2512,7 @@ function ReviewsSection({ reviews, setReviews, tours, t }) {
                     บันทึกคำตอบ
                   </button>
                 </div>
-                {review.reply && <p className="text-xs text-teal-700 mt-1.5">ตอบแล้ว: “{review.reply}”</p>}
+                {review.text?._reply && <p className="text-xs text-teal-700 mt-1.5">ตอบแล้ว: “{review.text._reply}”</p>}
               </div>
             </div>
           );

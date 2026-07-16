@@ -101,7 +101,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
     );
   }
 
-  const tourReviews = reviews.filter(r => String(r.tourId) === String(tour.id) && r.approved && !r.hidden);
+  const tourReviews = reviews.filter(r => String(r.tourId) === String(tour.id) && r.approved && !r.text?._hidden);
   const tourName    = tv(tour.name);
   const airline     = tour.flight?.outbound?.airline || tour.airline || pbDetail?.vehicle || '';
   const basePrice   = tour.priceTiers?.[0]?.price || tour.price || 0;
