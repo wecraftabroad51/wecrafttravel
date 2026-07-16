@@ -722,7 +722,7 @@ function AdminsSection({ currentEmail }) {
   };
 
   return (
-    <div>
+    <div className="max-w-2xl mx-auto">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-slate-800">จัดการผู้ใช้งาน</h2>
         <p className="text-sm text-slate-500 mt-1">จัดการสิทธิ์เข้าถึงหลังบ้าน · เฉพาะ Super Admin เท่านั้น</p>
