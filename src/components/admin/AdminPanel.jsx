@@ -1629,7 +1629,12 @@ function ToursSection({ tours, setTours, t }) {
       // 1) อัปโหลดไฟล์ขึ้น Supabase Storage ก่อนเสมอ — เพื่อเลี่ยงข้อจำกัดขนาดคำขอ (request body)
       //    ของ Vercel Functions (~4.5MB) ทำให้รองรับไฟล์ขนาดใหญ่ได้จริง
       const { url: fileUrl, error: upErr } = await uploadFile(file, 'ai-program-uploads');
-      if (upErr || !fileUrl) throw new Error('อัปโหลดไฟล์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+      if (upErr || !fileUrl) {
+        // โชว์สาเหตุจริงจาก Supabase เพื่อวินิจฉัยได้ (RLS / network / ขนาดไฟล์ ฯลฯ)
+        const detail = typeof upErr === 'string' ? upErr : (upErr?.message || JSON.stringify(upErr) || 'ไม่ทราบสาเหตุ');
+        console.error('[AI upload] uploadFile error:', upErr);
+        throw new Error('อัปโหลดไฟล์ไม่สำเร็จ: ' + detail);
+      }
 
       // ผู้ให้บริการ AI (Claude) มีข้อจำกัดขนาดเอกสาร/รูปภาพที่วิเคราะห์ได้โดยตรงอยู่ที่ ~28MB
       const AI_ANALYZE_LIMIT = 28 * 1024 * 1024;
@@ -1667,7 +1672,11 @@ function ToursSection({ tours, setTours, t }) {
     setAiParsing(true); setAiError(null);
     try {
       const { url: fileUrl, error: upErr } = await uploadFile(file, 'ai-program-uploads');
-      if (upErr || !fileUrl) throw new Error('อัปโหลดรูปไม่สำเร็จ');
+      if (upErr || !fileUrl) {
+        const detail = typeof upErr === 'string' ? upErr : (upErr?.message || JSON.stringify(upErr) || 'ไม่ทราบสาเหตุ');
+        console.error('[AI includes-image] uploadFile error:', upErr);
+        throw new Error('อัปโหลดรูปไม่สำเร็จ: ' + detail);
+      }
       const resp = await fetch('/api/parse-tour-program', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
