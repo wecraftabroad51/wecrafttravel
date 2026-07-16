@@ -186,6 +186,20 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
     return () => { ro.disconnect(); window.removeEventListener('resize', measure); };
   }, []);
 
+  // เลื่อนลงดูโปรแกรม → ซ่อนแถบค้นหา/ตัวกรอง · เลื่อนขึ้นนิดเดียว → โชว์กลับมา
+  const [hideBar, setHideBar] = useState(false);
+  useEffect(() => {
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y > lastY + 6 && y > 220)       setHideBar(true);   // เลื่อนลง → ซ่อน
+      else if (y < lastY - 6 || y < 220)  setHideBar(false);  // เลื่อนขึ้น/ใกล้บนสุด → โชว์
+      lastY = y;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   // รวมทัวร์ของเรา + ทัวร์ซัพพลายเออร์ (ลูกค้าไม่รู้ว่ามาจากไหน)
   const allTours = useMemo(() => [...tours, ...supplierTours], [tours, supplierTours]);
 
@@ -333,7 +347,16 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
       )}
 
       {/* ── Filter bar (ค้างใต้ navbar เวลาเลื่อน) ───────────────── */}
-      <section style={{ position: 'sticky', top: navH, zIndex: 20, background: 'var(--canvas)', borderBottom: '1px solid var(--line)', boxShadow: '0 4px 10px rgba(0,0,0,.04)', padding: '10px 0 8px', marginTop: 8 }}>
+      <section style={{
+        position: 'sticky', top: navH, zIndex: 20, background: 'var(--canvas)',
+        borderBottom: '1px solid var(--line)', boxShadow: '0 4px 10px rgba(0,0,0,.04)',
+        padding: '10px 0 8px', marginTop: 8,
+        // เลื่อนลง = สไลด์ขึ้นหายไปใต้เมนู · เลื่อนขึ้น = สไลด์กลับมา
+        transform: hideBar ? 'translateY(-115%)' : 'translateY(0)',
+        opacity: hideBar ? 0 : 1,
+        pointerEvents: hideBar ? 'none' : 'auto',
+        transition: 'transform .32s ease, opacity .25s ease',
+      }}>
         <div className="wrap-wide" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 
           {/* Row 1: search + sort */}
