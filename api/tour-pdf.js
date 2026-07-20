@@ -33,6 +33,9 @@ export default async function handler(req) {
   try { host = new URL(target).host.toLowerCase(); } catch { return new Response('bad url', { status: 400 }); }
   if (!ALLOW.some(h => host === h || host.endsWith('.' + h))) return new Response('forbidden', { status: 403 });
 
+  // BEST (dev-bestconsortium.com) บล็อก IP ดาต้าเซนเตอร์ → รีไดเรกต์ให้เบราว์เซอร์ลูกค้าโหลดตรง
+  if (host.endsWith('bestconsortium.com')) return Response.redirect(target, 302);
+
   // Google Drive: ลิงก์ /view คืนหน้า HTML → แปลงเป็น direct download
   if (host.includes('drive.google.com') || host.includes('drive.usercontent.google.com')) {
     const m = target.match(/[-\w]{25,}/);

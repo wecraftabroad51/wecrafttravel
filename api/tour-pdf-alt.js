@@ -34,6 +34,8 @@ module.exports = async function handler(req, res) {
     res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
     return res.status(200).send(buf);
   } catch (e) {
-    return res.status(502).send('upstream error: ' + (e?.cause?.code || e?.message || 'unknown'));
+    // ต้นทางบล็อก IP ดาต้าเซนเตอร์ (เช่น connect timeout) → รีไดเรกต์ให้เบราว์เซอร์โหลดตรง
+    res.setHeader('Location', target);
+    return res.status(302).end();
   }
 };
