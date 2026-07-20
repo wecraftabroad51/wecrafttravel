@@ -287,3 +287,74 @@ export function normalizeTtnPlusTours(list, source = 'ttnplus', sourceName = 'TT
   const arr = Array.isArray(list) ? list : (list && typeof list === 'object' ? Object.values(list) : []);
   return arr.filter(x => x && x.P_ID).map(p => normalizeTtnPlusTour(p, source, sourceName));
 }
+
+// ── BEST International (tour-api.bestinternational.com) ───────────
+// proxy คืน { data: { data: [โปรแกรม], meta } } · period[] = รอบเดินทาง (adultPrice ฯลฯ)
+const BEST_ISO = { CHINA:'CN', JAPAN:'JP', KOREA:'KR', 'SOUTH KOREA':'KR', TAIWAN:'TW', CNXTAIWAN:'TW',
+  'HONG KONG':'HK', HONGKONG:'HK', VIETNAM:'VN', 'VIET NAM':'VN', SINGAPORE:'SG', MALAYSIA:'MY',
+  MYANMAR:'MM', LAOS:'LA', CAMBODIA:'KH', INDONESIA:'ID', PHILIPPINES:'PH', INDIA:'IN', 'SRI LANKA':'LK',
+  NEPAL:'NP', BHUTAN:'BT', MALDIVES:'MV', KAZAKHSTAN:'KZ', UZBEKISTAN:'UZ', GEORGIA:'GE', TURKEY:'TR',
+  JORDAN:'JO', EGYPT:'EG', DUBAI:'AE', UAE:'AE', 'SAUDI ARABIA':'SA', QATAR:'QA', OMAN:'OM',
+  'SOUTH AFRICA':'ZA', KENYA:'KE', MOROCCO:'MA', EUROPE:'EU', ENGLAND:'GB', UK:'GB', 'UNITED KINGDOM':'GB',
+  FRANCE:'FR', ITALY:'IT', SWITZERLAND:'CH', GERMANY:'DE', AUSTRIA:'AT', CZECH:'CZ', NORWAY:'NO',
+  RUSSIA:'RU', SPAIN:'ES', PORTUGAL:'PT', GREECE:'GR', USA:'US', AMERICA:'US', 'UNITED STATES':'US',
+  CANADA:'CA', AUSTRALIA:'AU', 'NEW ZEALAND':'NZ', ICELAND:'IS' };
+const bestDate = s => { const m = String(s || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/); return m ? `${m[3]}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}` : ''; };
+
+export function normalizeBestTour(p, source = 'best', sourceName = 'BEST International') {
+  const iso2      = BEST_ISO[String(p.country_name_eng || '').toUpperCase().trim()] || codeFromThaiText(p.country_name) || codeFromThaiText(p.name) || '';
+  const continent = CODE_TO_CONTINENT[iso2] || 'Asia-East';
+  const nameTh    = COUNTRY_CODE_NAME_TH[iso2] || (p.country_name || iso2);
+
+  const periods = Array.isArray(p.period) ? p.period : Object.values(p.period || {});
+  const deps = periods.map(per => {
+    const adult = parseFloat(per.adultPrice) || 0;
+    const oldP  = parseFloat(per.adultPrice_old) || 0;
+    return {
+      date:             bestDate(per.dateGo),
+      returnDate:       bestDate(per.dateBack),
+      price:            adult,
+      promoPrice:       (oldP > adult && adult > 0) ? adult : 0,
+      childPrice:       parseFloat(per.childWbPrice) || null,
+      infantPrice:      parseFloat(per.childNbPrice) || null,
+      singleSupplement: parseFloat(per.singlePrice)  || null,
+      available:        Number(per.avbl) || 0,
+      totalSeats:       parseInt(per.groupSize) || null,
+      bookedSeats:      Number(per.bookTotal) || 0,
+      periodId:         per.pid,
+    };
+  }).filter(d => d.date && d.price > 0);
+
+  const prices   = deps.map(d => d.price).filter(n => n > 0);
+  const minPrice = prices.length ? Math.min(...prices) : (parseFloat(p.price) || 0);
+
+  return {
+    id:          `sup_${source}_${p.id}`,
+    code:        p.code || '',
+    name:        { th: p.name, en: p.name },
+    destination: { th: nameTh, en: iso2 },
+    continent,
+    country:     iso2,
+    image:       p.bannerSq || '',
+    price:       minPrice,
+    duration:    Number(p.day) || 0,
+    tourType:    'outbound',
+    featured:    false,
+    airline:     p.airline_name || '',
+    departures:  deps,
+    groupSize:   deps[0]?.totalSeats || null,
+    pdfUrl:      p.filePdf || null,
+    itinerary:   [],
+    _source:     source,
+    _sourceName: sourceName,
+    _pbId:       p.id,
+    _night:      Number(p.night) || 0,
+    _hotelStars: null,
+  };
+}
+
+export function normalizeBestTours(payload, source = 'best', sourceName = 'BEST International') {
+  // payload = { data: { data: [...] } } จาก proxy · หรือ array ตรงๆ
+  const arr = payload?.data?.data || (Array.isArray(payload?.data) ? payload.data : (Array.isArray(payload) ? payload : []));
+  return arr.filter(x => x && x.id).map(p => normalizeBestTour(p, source, sourceName));
+}

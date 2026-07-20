@@ -11,6 +11,8 @@ const ALLOW = [
   'zegotravel.com',
   'ttnplus.co.th',
   'ttnconnect.com',
+  'bestinternational.com',
+  'bestconsortium.com',
   'drive.google.com',
   'drive.usercontent.google.com',
 ];

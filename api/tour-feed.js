@@ -4,7 +4,20 @@
 // ดึงผ่าน proxy /api/suppliers (พิสูจน์แล้วเวิร์ค + cache) กัน auth เพี้ยน
 const SITE = 'https://wecraft-travel.com';
 
-const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus' };
+const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus', best: 'best' };
+
+// BEST International: country_name_eng → ISO2
+const BEST_ISO = { CHINA:'CN', JAPAN:'JP', KOREA:'KR', 'SOUTH KOREA':'KR', TAIWAN:'TW', CNXTAIWAN:'TW',
+  'HONG KONG':'HK', HONGKONG:'HK', VIETNAM:'VN', 'VIET NAM':'VN', SINGAPORE:'SG', MALAYSIA:'MY',
+  MYANMAR:'MM', LAOS:'LA', CAMBODIA:'KH', INDONESIA:'ID', PHILIPPINES:'PH', INDIA:'IN', 'SRI LANKA':'LK',
+  NEPAL:'NP', BHUTAN:'BT', MALDIVES:'MV', KAZAKHSTAN:'KZ', UZBEKISTAN:'UZ', GEORGIA:'GE', TURKEY:'TR',
+  JORDAN:'JO', EGYPT:'EG', DUBAI:'AE', UAE:'AE', 'SAUDI ARABIA':'SA', QATAR:'QA', OMAN:'OM',
+  'SOUTH AFRICA':'ZA', KENYA:'KE', MOROCCO:'MA', EUROPE:'EU', ENGLAND:'GB', UK:'GB', 'UNITED KINGDOM':'GB',
+  FRANCE:'FR', ITALY:'IT', SWITZERLAND:'CH', GERMANY:'DE', AUSTRIA:'AT', CZECH:'CZ', NORWAY:'NO',
+  RUSSIA:'RU', SPAIN:'ES', PORTUGAL:'PT', GREECE:'GR', USA:'US', AMERICA:'US', 'UNITED STATES':'US',
+  CANADA:'CA', AUSTRALIA:'AU', 'NEW ZEALAND':'NZ', ICELAND:'IS' };
+// BEST date "MM/DD/YYYY" → "YYYY-MM-DD"
+const bestDate = s => { const m = String(s || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/); return m ? `${m[3]}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}` : ''; };
 
 // TTN Plus P_LOCATION (อังกฤษ) → ISO2
 const TTNPLUS_LOC = { CHINA:'CN', VIETNAM:'VN', TAIWAN:'TW', JAPAN:'JP', KOREA:'KR', 'SOUTH KOREA':'KR',
@@ -66,6 +79,24 @@ function normalize(id, fmt, data) {
       }
       const price = deps.length ? Math.min(...deps.map(d => d.adult)) : (parseFloat(p.P_PRICE) || 0);
       if (p.banner_url && price > 0) out.push({ id: `sup_ttnplus_${p.P_ID}`, name: p.P_NAME, image: p.banner_url, price, country: iso, code: p.P_CODE || '', days: Number(p.P_DAY) || 0, night: Number(p.P_NIGHT) || 0, airline: p.P_AIRLINE || '', hotel: 0, highlight: '', pdf: p.pdf_url || '', deps: deps.slice(0, 60) });
+    }
+  } else if (fmt === 'best') {
+    // proxy คืน { data: { data: [โปรแกรม], meta } }
+    const progs = data?.data?.data || (Array.isArray(data?.data) ? data.data : []);
+    const today = new Date().toISOString().slice(0, 10);
+    for (const p of (Array.isArray(progs) ? progs : [])) {
+      if (!p || !p.id) continue;
+      const iso = BEST_ISO[String(p.country_name_eng || '').toUpperCase().trim()] || isoFromThai(p.country_name) || isoFromThai(p.name) || '';
+      const periods = Array.isArray(p.period) ? p.period : Object.values(p.period || {});
+      const deps = [];
+      for (const per of periods) {
+        const date = bestDate(per.dateGo);
+        if (!date || date < today) continue;                          // เฉพาะรอบอนาคต
+        const adult = parseFloat(per.adultPrice) || 0;
+        if (adult > 0) deps.push({ date, ret: bestDate(per.dateBack), adult, child: parseFloat(per.childWbPrice) || 0, single: parseFloat(per.singlePrice) || 0, seat: Number(per.avbl) || 0 });
+      }
+      const price = deps.length ? Math.min(...deps.map(d => d.adult)) : (parseFloat(p.price) || 0);
+      if (p.bannerSq && price > 0) out.push({ id: `sup_best_${p.id}`, name: p.name, image: p.bannerSq, price, country: iso, code: p.code || '', days: Number(p.day) || 0, night: Number(p.night) || 0, airline: p.airline_name || '', hotel: 0, highlight: '', pdf: p.filePdf || '', deps: deps.slice(0, 60) });
     }
   }
   return out;

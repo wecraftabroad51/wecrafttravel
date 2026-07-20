@@ -12,6 +12,7 @@ export const SUPPLIERS = [
   { id: 'zego',        name: 'Zego',            enabled: true, format: 'zego' },
   { id: 'ttn',         name: 'TTN Tour',        enabled: true, format: 'ttn' },
   { id: 'ttnplus',     name: 'TTN Plus',        enabled: true, format: 'ttnplus' },
+  { id: 'best',        name: 'BEST International', enabled: true, format: 'best' },
 ];
 
 export const ENABLED_SUPPLIERS = SUPPLIERS.filter(s => s.enabled);

@@ -19,6 +19,9 @@ const SUPPLIERS = {
                  auth: { header: 'auth-token', tokenEnv: 'ZEGO_API_TOKEN' } },
   ttn:         { host: 'online.ttnconnect.com',    base: '/api/agency', list: '/get-allprogram', detail: id => `/program/${id}` },
   ttnplus:     { host: 'www.ttnplus.co.th',        base: '/api',        list: '/program',        detail: id => `/program?p=${id}` },
+  best:        { host: 'tour-api.bestinternational.com', base: '/api/public/v1', list: '/tour-programs', detail: id => `/tour-programs/${id}`,
+                 auth: { header: 'Authorization', tokenEnv: 'BEST_API_TOKEN', scheme: 'Bearer' },
+                 paginate: { limit: 50, maxPages: 20 } },   // 183 ทัวร์ · ดึงครบทุกหน้าแล้วรวม
 };
 
 function supFetch(cfg, path) {
@@ -27,7 +30,7 @@ function supFetch(cfg, path) {
     if (cfg.auth) {
       const token = process.env[cfg.auth.tokenEnv];
       if (!token) return reject(new Error(`ยังไม่ได้ตั้งค่า ${cfg.auth.tokenEnv}`));
-      headers[cfg.auth.header] = token;
+      headers[cfg.auth.header] = cfg.auth.scheme ? `${cfg.auth.scheme} ${token}` : token;
     }
     const req = https.request({
       hostname: cfg.host,
@@ -62,6 +65,22 @@ module.exports = async function handler(req, res) {
   if (!cfg) return res.status(400).json({ error: 'ไม่รู้จักซัพพลายเออร์: ' + supplier });
 
   try {
+    // ซัพที่แบ่งหน้า (best) + ขอรายการทั้งหมด → วนดึงทุกหน้าแล้วรวมเป็นก้อนเดียว
+    if (cfg.paginate && !id) {
+      let page = 1, all = [], meta = null;
+      while (page <= cfg.paginate.maxPages) {
+        const chunk = await supFetch(cfg, `${cfg.list}?page=${page}&limit=${cfg.paginate.limit}`);
+        const items = chunk?.data?.data || chunk?.data?.items || (Array.isArray(chunk?.data) ? chunk.data : []);
+        all = all.concat(items);
+        meta = chunk?.data?.meta || chunk?.meta || meta;
+        const totalPages = meta?.totalPages || 1;
+        if (page >= totalPages || items.length === 0) break;
+        page++;
+      }
+      res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=1800');
+      return res.status(200).json({ data: { data: all, meta } });
+    }
+
     const path = id ? cfg.detail(encodeURIComponent(id)) : cfg.list;
     const data = await supFetch(cfg, path);
     // Cache ที่ CDN edge: สด 5 นาที · เสิร์ฟของเก่าได้อีก 30 นาทีระหว่าง refresh เบื้องหลัง

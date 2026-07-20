@@ -14,7 +14,7 @@ import {
   REVIEWS_DATA, SITE_SETTINGS_DEFAULT, BOOKINGS_DATA, MESSAGES_DATA, CHAT_SESSIONS_DEFAULT,
 } from './data.js';
 import { LEGAL_DEFAULTS } from './lib/legalDefaults.js';
-import { normalizePbTours, normalizeZegoTours, normalizeTtnTours, normalizeTtnPlusTours } from './lib/supplierUtils.js';
+import { normalizePbTours, normalizeZegoTours, normalizeTtnTours, normalizeTtnPlusTours, normalizeBestTours } from './lib/supplierUtils.js';
 import { ENABLED_SUPPLIERS } from './lib/suppliers.js';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
@@ -370,8 +370,9 @@ function AppInner() {
       fetch(`/api/suppliers?supplier=${sup.id}`)
         .then(r => r.ok ? r.json() : Promise.reject(r.status))
         .then(data => {
-          // TTN Plus ตอบเป็น object (ไม่ใช่ array) → จัดการก่อนเช็ค Array
+          // TTN Plus / BEST ตอบเป็น object (ไม่ใช่ array) → จัดการก่อนเช็ค Array
           if (sup.format === 'ttnplus') return normalizeTtnPlusTours(data, sup.id, sup.name);
+          if (sup.format === 'best')    return normalizeBestTours(data, sup.id, sup.name);
           if (!Array.isArray(data)) return [];
           if (sup.format === 'zego') return normalizeZegoTours(data, sup.id, sup.name);
           if (sup.format === 'ttn')  return normalizeTtnTours(data, sup.id, sup.name);
