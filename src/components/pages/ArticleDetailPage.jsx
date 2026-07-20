@@ -187,6 +187,7 @@ export default function ArticleDetailPage({ lang, t, navigate, articles, article
                   border-left:4px solid var(--primary);margin:1.2em 0;padding:.7em 1.2em;
                   background:#f0fdfa;color:#0f766e;font-style:italic;border-radius:0 8px 8px 0;
                 }
+                .article-body img { max-width:100%;height:auto;border-radius:8px;margin:12px 0;display:block; }
                 .article-body hr { border:none;border-top:2px solid var(--line);margin:1.5em 0; }
                 .article-body ul { list-style:disc;padding-left:1.8em;margin:.7em 0 1.1em; }
                 .article-body ol { list-style:decimal;padding-left:1.8em;margin:.7em 0 1.1em; }

@@ -255,9 +255,36 @@ function RichEditor({ value, onChange, placeholder, minHeight = 320 }) {
     if (url) exec('createLink', url);
   };
 
-  const insertImage = () => {
-    const url = window.prompt('ใส่ URL รูปภาพ:', 'https://');
-    if (url) exec('insertImage', url);
+  // จำตำแหน่งเคอร์เซอร์ไว้ก่อนเปิดตัวเลือกไฟล์ (async upload ทำ selection หาย)
+  const savedRange = useRef(null);
+  const saveSel = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount && ref.current?.contains(sel.anchorNode)) savedRange.current = sel.getRangeAt(0);
+  };
+  const restoreSel = () => {
+    ref.current?.focus();
+    const sel = window.getSelection();
+    if (savedRange.current && sel) { sel.removeAllRanges(); sel.addRange(savedRange.current); }
+  };
+
+  const imgFileRef = useRef(null);
+  const [imgBusy, setImgBusy] = useState(false);
+  // 🖼 รูปภาพ = อัปโหลดไฟล์จริงขึ้น Supabase แล้วแทรกลิงก์ถาวร (ไม่ใช่ URL ชั่วคราวที่เปิดไม่ได้)
+  const insertImage = () => { saveSel(); imgFileRef.current?.click(); };
+  const handleImgFile = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { alert('กรุณาเลือกไฟล์รูปภาพ'); return; }
+    if (file.size > 5 * 1024 * 1024) { alert('รูปใหญ่เกินไป (สูงสุด 5MB)'); return; }
+    setImgBusy(true);
+    const { url, error } = await uploadImage(file, 'articles');
+    setImgBusy(false);
+    if (error || !url) { alert('อัปโหลดรูปไม่สำเร็จ: ' + (typeof error === 'string' ? error : (error?.message || JSON.stringify(error)))); return; }
+    restoreSel();
+    document.execCommand('insertHTML', false,
+      `<img src="${url}" alt="" style="max-width:100%;height:auto;border-radius:8px;margin:10px 0;display:block;" /><p><br></p>`);
+    onChange(ref.current?.innerHTML || '');
   };
 
   const btn = (label, title, action, extra = {}) => (
@@ -423,7 +450,8 @@ function RichEditor({ value, onChange, placeholder, minHeight = 320 }) {
         {/* Insert */}
         {btn('🔗 ลิงก์',    'แทรกลิงก์',      insertLink)}
         {btn('🔗✕ ลบลิงก์', 'ลบลิงก์',         () => exec('unlink'))}
-        {btn('🖼 รูปภาพ',   'แทรกรูปจาก URL',  insertImage)}
+        {btn(imgBusy ? '⏳ กำลังอัปโหลด…' : '🖼 อัปโหลดรูป', 'อัปโหลดรูปเข้าเนื้อหา', insertImage)}
+        <input ref={imgFileRef} type="file" accept="image/*" onChange={handleImgFile} style={{ display: 'none' }} />
       </div>
 
       {/* Editable area */}
