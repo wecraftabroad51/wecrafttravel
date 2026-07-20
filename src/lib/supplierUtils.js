@@ -356,5 +356,7 @@ export function normalizeBestTour(p, source = 'best', sourceName = 'BEST Interna
 export function normalizeBestTours(payload, source = 'best', sourceName = 'BEST International') {
   // payload = { data: { data: [...] } } จาก proxy · หรือ array ตรงๆ
   const arr = payload?.data?.data || (Array.isArray(payload?.data) ? payload.data : (Array.isArray(payload) ? payload : []));
-  return arr.filter(x => x && x.id).map(p => normalizeBestTour(p, source, sourceName));
+  return arr.filter(x => x && x.id)
+    .map(p => normalizeBestTour(p, source, sourceName))
+    .filter(t => t.departures.length > 0);   // เฉพาะทัวร์ที่มีรอบเดินทางในอนาคต
 }

@@ -95,7 +95,8 @@ function normalize(id, fmt, data) {
         const adult = parseFloat(per.adultPrice) || 0;
         if (adult > 0) deps.push({ date, ret: bestDate(per.dateBack), adult, child: parseFloat(per.childWbPrice) || 0, single: parseFloat(per.singlePrice) || 0, seat: Number(per.avbl) || 0 });
       }
-      const price = deps.length ? Math.min(...deps.map(d => d.adult)) : (parseFloat(p.price) || 0);
+      if (!deps.length) continue;                                     // ไม่มีรอบเดินทางในอนาคต → ไม่โชว์
+      const price = Math.min(...deps.map(d => d.adult));
       if (p.bannerSq && price > 0) out.push({ id: `sup_best_${p.id}`, name: p.name, image: p.bannerSq, price, country: iso, code: p.code || '', days: Number(p.day) || 0, night: Number(p.night) || 0, airline: p.airline_name || '', hotel: 0, highlight: '', pdf: p.filePdf || '', deps: deps.slice(0, 60) });
     }
   }

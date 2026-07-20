@@ -13,6 +13,7 @@ const ALLOW = [
   'ttnconnect.com',
   'bestinternational.com',
   'bestconsortium.com',
+  'dev-bestconsortium.com',
   'drive.google.com',
   'drive.usercontent.google.com',
 ];
