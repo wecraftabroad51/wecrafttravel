@@ -44,14 +44,17 @@ const TH_ISO = { 'ญี่ปุ่น':'JP','เกาหลี':'KR','จี�
   'อินเดีย':'IN','ดูไบ':'AE','ตุรกี':'TR','จอร์เจีย':'GE','อียิปต์':'EG','ยุโรป':'EU' };
 function isoFromThai(text) { for (const [th, iso] of Object.entries(TH_ISO)) if ((text||'').includes(th)) return iso; return ''; }
 
+// ISO3 → ISO2 (ซัพบางเจ้าใช้ ISO3 เช่น Real Journey: JPN, KAZ)
+const ISO3TO2 = { JPN:'JP', CHN:'CN', KOR:'KR', TWN:'TW', HKG:'HK', VNM:'VN', SGP:'SG', MYS:'MY', MMR:'MM', THA:'TH', LAO:'LA', KHM:'KH', IDN:'ID', PHL:'PH', IND:'IN', LKA:'LK', NPL:'NP', BTN:'BT', MDV:'MV', KAZ:'KZ', UZB:'UZ', GEO:'GE', AZE:'AZ', TUR:'TR', JOR:'JO', EGY:'EG', ARE:'AE', SAU:'SA', QAT:'QA', OMN:'OM', ISR:'IL', ZAF:'ZA', KEN:'KE', TZA:'TZ', MAR:'MA', RUS:'RU', GBR:'GB', FRA:'FR', ITA:'IT', CHE:'CH', DEU:'DE', AUT:'AT', CZE:'CZ', NOR:'NO', ESP:'ES', PRT:'PT', GRC:'GR', NLD:'NL', BEL:'BE', HRV:'HR', SVN:'SI', USA:'US', CAN:'CA', MEX:'MX', AUS:'AU', NZL:'NZ', BRA:'BR', ARG:'AR', PER:'PE', CHL:'CL', ISL:'IS', FIN:'FI', SWE:'SE', DNK:'DK', POL:'PL', HUN:'HU' };
+
 function normalize(id, fmt, data) {
   const out = [];
   if (fmt === 'pb' && Array.isArray(data)) {
     for (const t of data) {
       const c0 = (t.countries || [])[0] || {};
-      // code เป็น ISO2 (ProBooking/CheckIn) หรือ ISO3 (Real Journey) → ถ้า 3 ตัวแปลงผ่านชื่อไทย
+      // code เป็น ISO2 (ProBooking/CheckIn) หรือ ISO3 (Real Journey) → ถ้า 3 ตัวแปลงเป็น ISO2
       let code = c0.code || '';
-      if (code.length === 3) code = isoFromThai(c0.name_th || c0.name) || code;
+      if (code.length === 3) code = ISO3TO2[code.toUpperCase()] || isoFromThai(c0.name_th || c0.name) || code;
       const open = (t.periods || []).filter(p => p.status === 'Open');
       const price = open.length ? Math.min(...open.map(p => p.priceAdultDouble || p.price)) : (t.price || 0);
       const deps = open.slice(0, 60).map(p => ({ date: p.start, ret: p.end, adult: p.priceAdultDouble || p.price, child: p.priceChild || 0, single: p.priceSingleRoomAdd || 0, seat: p.available }));

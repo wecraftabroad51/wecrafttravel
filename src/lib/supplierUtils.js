@@ -29,11 +29,14 @@ export const COUNTRY_CODE_NAME_TH = {
   GE: 'จอร์เจีย', EU: 'ยุโรป', SCA: 'สแกนดิเนเวีย',
 };
 
+// ISO3 → ISO2 (ซัพบางเจ้าใช้ ISO3 เช่น Real Journey: JPN, KAZ)
+const ISO3TO2 = { JPN:'JP', CHN:'CN', KOR:'KR', TWN:'TW', HKG:'HK', VNM:'VN', SGP:'SG', MYS:'MY', MMR:'MM', THA:'TH', LAO:'LA', KHM:'KH', IDN:'ID', PHL:'PH', IND:'IN', LKA:'LK', NPL:'NP', BTN:'BT', MDV:'MV', KAZ:'KZ', UZB:'UZ', GEO:'GE', AZE:'AZ', TUR:'TR', JOR:'JO', EGY:'EG', ARE:'AE', SAU:'SA', QAT:'QA', OMN:'OM', ISR:'IL', ZAF:'ZA', KEN:'KE', TZA:'TZ', MAR:'MA', RUS:'RU', GBR:'GB', FRA:'FR', ITA:'IT', CHE:'CH', DEU:'DE', AUT:'AT', CZE:'CZ', NOR:'NO', ESP:'ES', PRT:'PT', GRC:'GR', NLD:'NL', BEL:'BE', HRV:'HR', SVN:'SI', USA:'US', CAN:'CA', MEX:'MX', AUS:'AU', NZL:'NZ', BRA:'BR', ARG:'AR', PER:'PE', CHL:'CL', ISL:'IS', FIN:'FI', SWE:'SE', DNK:'DK', POL:'PL', HUN:'HU' };
+
 export function normalizePbTour(t, source = 'probooking', sourceName = 'ProBooking') {
   const primaryCountry = t.countries?.[0];
   // code เป็น ISO2 (ProBooking/CheckIn) หรือ ISO3 (Real Journey) → ถ้า 3 ตัวแปลงผ่านชื่อไทย
   let countryCode = primaryCountry?.code || '';
-  if (countryCode.length === 3) countryCode = codeFromThaiText(primaryCountry?.name_th || primaryCountry?.name) || countryCode;
+  if (countryCode.length === 3) countryCode = ISO3TO2[countryCode.toUpperCase()] || codeFromThaiText(primaryCountry?.name_th || primaryCountry?.name) || countryCode;
   const continent      = CODE_TO_CONTINENT[countryCode] || 'Asia-East';
   const nameTh         = primaryCountry?.name_th || primaryCountry?.name || COUNTRY_CODE_NAME_TH[countryCode] || countryCode;
 
