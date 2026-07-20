@@ -84,6 +84,11 @@ module.exports = async function handler(req, res) {
     if (cfg.enumerate && !id) {
       const idxHtml = await rawFetch(cfg, cfg.enumerate.index);
       const ids = [...new Set([...idxHtml.matchAll(new RegExp(cfg.enumerate.re, 'g'))].map(m => m[1]))];
+      if (req.query.debug) {
+        let sampleErr = null;
+        try { await supFetch(cfg, cfg.enumerate.item(ids[0] || '1')); } catch (e) { sampleErr = e.message; }
+        return res.status(200).json({ debug: true, idxLen: idxHtml.length, idsFound: ids.length, ids: ids.slice(0, 25), sampleErr, htmlHead: idxHtml.slice(0, 200) });
+      }
       const chunks = await Promise.all(ids.map(pid => supFetch(cfg, cfg.enumerate.item(pid)).catch(() => null)));
       const all = [];
       for (const c of chunks) {
