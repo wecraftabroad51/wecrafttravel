@@ -26,6 +26,9 @@ const SUPPLIERS = {
   // Superb: 1 endpoint ต่อโปรแกรม → ดึง book.php หา id ทั้งหมด แล้วยิง apiweb ทุกตัวขนานกัน
   superb:      { host: 'www.superbholidayz.com', base: '/superb', detail: id => `/apiweb.php?id=${id}`,
                  enumerate: { index: '/book.php', re: 'apiweb\\.php\\?id=(\\d+)', item: id => `/apiweb.php?id=${id}` } },
+  // FLY de WORLD (flywholesales.com) — DataTables { data:[...] } · length ใหญ่เพื่อดึงครบ
+  flyde:       { host: 'flywholesales.com', base: '', list: '/api_datatour_new.php?draw=1&start=0&length=2000',
+                 detail: () => '/api_datatour_new.php?draw=1&start=0&length=2000' },
 };
 
 // ดึงข้อความดิบ (ใช้กับหน้า index ที่เป็น HTML ไม่ใช่ JSON)
@@ -42,7 +45,7 @@ function rawFetch(cfg, path) {
 
 function supFetch(cfg, path) {
   return new Promise((resolve, reject) => {
-    const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' };
+    const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0 (compatible; WeCraftTravel)' };
     if (cfg.auth) {
       const token = process.env[cfg.auth.tokenEnv];
       if (!token) return reject(new Error(`ยังไม่ได้ตั้งค่า ${cfg.auth.tokenEnv}`));

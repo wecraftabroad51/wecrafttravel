@@ -424,3 +424,56 @@ export function normalizeSuperbTours(payload, source = 'superb', sourceName = 'S
     };
   }).filter(t => t.departures.length > 0);
 }
+
+// ── FLY de WORLD (flywholesales.com/api_datatour_new.php) ─────────
+// DataTables { data:[...] } · period_data = string "pid|start(DD-MM-YYYY)|end|..|seat|..|price|.." คั่น ;;;
+const FLYDE_IMG = 'https://flywholesales.com/backend/';
+const flydeDate = s => { const m = String(s || '').match(/(\d{2})-(\d{2})-(\d{4})/); return m ? `${m[3]}-${m[2]}-${m[1]}` : ''; };
+
+export function normalizeFlydeTours(payload, source = 'flyde', sourceName = 'FLY de WORLD') {
+  const arr = payload?.data || (Array.isArray(payload) ? payload : []);
+  return arr.filter(p => p && p.pt_id && String(p.pt_status) !== '0').map(p => {
+    const iso2      = codeFromThaiText(p.country_names) || codeFromThaiText(p.pt_name) || '';
+    const continent = CODE_TO_CONTINENT[iso2] || 'Asia-East';
+    const nameTh    = COUNTRY_CODE_NAME_TH[iso2] || (p.country_names || iso2);
+
+    const deps = String(p.period_data || '').split(';;;').filter(Boolean).map(seg => {
+      const f = seg.split('|');
+      return {
+        date:       flydeDate(f[1]),
+        returnDate: flydeDate(f[2]),
+        price:      parseFloat(f[10]) || 0,
+        available:  Number(f[6]) || 0,
+        totalSeats: Number(f[5]) || null,
+        periodId:   f[0],
+      };
+    }).filter(d => d.date && d.price > 0);
+
+    const prices   = deps.map(d => d.price).filter(n => n > 0);
+    const minPrice = prices.length ? Math.min(...prices) : (parseFloat(p.pt_price) || 0);
+
+    return {
+      id:          `sup_${source}_${p.pt_id}`,
+      code:        p.pt_code || '',
+      name:        { th: p.pt_name, en: p.pt_name },
+      destination: { th: nameTh, en: iso2 },
+      continent,
+      country:     iso2,
+      image:       p.pt_banner ? FLYDE_IMG + p.pt_banner : '',
+      price:       minPrice,
+      duration:    Number(p.pt_day) || 0,
+      tourType:    'outbound',
+      featured:    false,
+      airline:     '',
+      departures:  deps,
+      groupSize:   deps[0]?.totalSeats || null,
+      pdfUrl:      p.pt_pdf ? FLYDE_IMG + p.pt_pdf : null,
+      itinerary:   [],
+      _source:     source,
+      _sourceName: sourceName,
+      _pbId:       p.pt_id,
+      _night:      Number(p.pt_night) || 0,
+      _hotelStars: Number(p.pt_hotelstar) || null,
+    };
+  }).filter(t => t.departures.length > 0);
+}

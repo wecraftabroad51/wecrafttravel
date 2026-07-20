@@ -4,7 +4,17 @@
 // ดึงผ่าน proxy /api/suppliers (พิสูจน์แล้วเวิร์ค + cache) กัน auth เพี้ยน
 const SITE = 'https://wecraft-travel.com';
 
-const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', checkingroup: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus', best: 'best', superb: 'superb' };
+const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', checkingroup: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus', best: 'best', superb: 'superb', flyde: 'flyde' };
+
+// FLY de WORLD: period_data = "pid|start(DD-MM-YYYY)|end|..|seat|..|price|..|price|..|note ;;; ..."
+const FLYDE_IMG = 'https://flywholesales.com/backend/';
+const flydeDate = s => { const m = String(s || '').match(/(\d{2})-(\d{2})-(\d{4})/); return m ? `${m[3]}-${m[2]}-${m[1]}` : ''; };
+function flydePeriods(str) {
+  return String(str || '').split(';;;').filter(Boolean).map(seg => {
+    const f = seg.split('|');
+    return { date: flydeDate(f[1]), ret: flydeDate(f[2]), adult: parseFloat(f[10]) || 0, seat: Number(f[6]) || 0 };
+  });
+}
 
 // Superb: promo field เป็น "NO"/"0"/ตัวเลข — แปลงเป็นเลข
 const numOr0 = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
@@ -123,6 +133,19 @@ function normalize(id, fmt, data) {
       if (!deps.length) continue;
       const price = Math.min(...deps.map(d => d.adult));
       if (p.banner) out.push({ id: `sup_superb_${k}`, name: p.title || p.titleTH || '', image: p.banner, price, country: iso, code: p.maincode || '', days: Number(p.day) || 0, night: Number(p.night) || 0, airline: (p.Airline && p.Airline !== 'NOLOGO') ? p.Airline : (p.aeycode || ''), hotel: 0, highlight: '', pdf: p.pdf || '', deps: deps.slice(0, 60) });
+    }
+  } else if (fmt === 'flyde') {
+    const progs = data?.data || (Array.isArray(data) ? data : []);
+    const today = new Date().toISOString().slice(0, 10);
+    for (const p of progs) {
+      if (!p || !p.pt_id || String(p.pt_status) === '0') continue;
+      const iso = isoFromThai(p.country_names) || isoFromThai(p.pt_name) || '';
+      const deps = flydePeriods(p.period_data)
+        .filter(d => d.date && d.date >= today && d.adult > 0)
+        .map(d => ({ date: d.date, ret: d.ret, adult: d.adult, child: 0, single: 0, seat: d.seat }));
+      if (!deps.length) continue;
+      const price = Math.min(...deps.map(d => d.adult));
+      out.push({ id: `sup_flyde_${p.pt_id}`, name: p.pt_name, image: p.pt_banner ? FLYDE_IMG + p.pt_banner : '', price, country: iso, code: p.pt_code || '', days: Number(p.pt_day) || 0, night: Number(p.pt_night) || 0, airline: '', hotel: Number(p.pt_hotelstar) || 0, highlight: '', pdf: p.pt_pdf ? FLYDE_IMG + p.pt_pdf : '', deps: deps.slice(0, 60) });
     }
   }
   return out;
