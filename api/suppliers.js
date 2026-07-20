@@ -15,6 +15,7 @@ const SUPPLIERS = {
   probooking:  { host: 'api.probooking.co.th',    base: '/v1',   list: '/programtours', detail: id => `/programtours/${id}` },
   wondergroup: { host: 'api.wondergrouptour.com', base: '/v1',   list: '/programtours', detail: id => `/programtours/${id}` },
   gs25tour:    { host: 'api.gs25tour.com',         base: '/v1',   list: '/programtours', detail: id => `/programtours/${id}` },
+  checkingroup:{ host: 'api.checkingroup.co.th',   base: '/v1',   list: '/programtours', detail: id => `/programtours/${id}` },
   zego:        { host: 'www.zegoapi.com',          base: '/v1.5', list: '/programtours', detail: id => `/programtours/${id}`,
                  auth: { header: 'auth-token', tokenEnv: 'ZEGO_API_TOKEN' } },
   ttn:         { host: 'online.ttnconnect.com',    base: '/api/agency', list: '/get-allprogram', detail: id => `/program/${id}` },

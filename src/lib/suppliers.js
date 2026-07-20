@@ -9,6 +9,7 @@ export const SUPPLIERS = [
   { id: 'probooking',  name: 'ProBooking',      enabled: true, format: 'probooking' },
   { id: 'wondergroup', name: 'WonderGroupTour', enabled: true, format: 'probooking' },
   { id: 'gs25tour',    name: 'GS25Tour',        enabled: true, format: 'probooking' },
+  { id: 'checkingroup',name: 'Check In Group',  enabled: true, format: 'probooking' },
   { id: 'zego',        name: 'Zego',            enabled: true, format: 'zego' },
   { id: 'ttn',         name: 'TTN Tour',        enabled: true, format: 'ttn' },
   { id: 'ttnplus',     name: 'TTN Plus',        enabled: true, format: 'ttnplus' },
