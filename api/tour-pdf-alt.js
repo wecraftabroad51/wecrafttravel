@@ -26,14 +26,14 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const up = await fetch(target, { redirect: 'follow', headers: { 'User-Agent': 'Mozilla/5.0 (compatible; WeCraftTravel)' } });
-    if (!up.ok) return res.status(502).send('ไม่พบไฟล์');
+    const up = await fetch(target, { redirect: 'follow', headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122 Safari/537.36' } });
+    if (!up.ok) return res.status(502).send('upstream status ' + up.status);
     const buf = Buffer.from(await up.arrayBuffer());
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'inline; filename="wecraft-travel-tour.pdf"');
     res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
     return res.status(200).send(buf);
-  } catch {
-    return res.status(502).send('upstream error');
+  } catch (e) {
+    return res.status(502).send('upstream error: ' + (e?.cause?.code || e?.message || 'unknown'));
   }
 };
