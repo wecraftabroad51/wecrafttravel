@@ -4,7 +4,7 @@
 // ดึงผ่าน proxy /api/suppliers (พิสูจน์แล้วเวิร์ค + cache) กัน auth เพี้ยน
 const SITE = 'https://wecraft-travel.com';
 
-const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', checkingroup: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus', best: 'best', superb: 'superb', flyde: 'flyde' };
+const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', checkingroup: 'pb', realjourney: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus', best: 'best', superb: 'superb', flyde: 'flyde' };
 
 // FLY de WORLD: period_data = "pid|start(DD-MM-YYYY)|end|..|seat|..|price|..|price|..|note ;;; ..."
 const FLYDE_IMG = 'https://flywholesales.com/backend/';
@@ -48,7 +48,10 @@ function normalize(id, fmt, data) {
   const out = [];
   if (fmt === 'pb' && Array.isArray(data)) {
     for (const t of data) {
-      const code = (t.countries || [])[0]?.code || '';
+      const c0 = (t.countries || [])[0] || {};
+      // code เป็น ISO2 (ProBooking/CheckIn) หรือ ISO3 (Real Journey) → ถ้า 3 ตัวแปลงผ่านชื่อไทย
+      let code = c0.code || '';
+      if (code.length === 3) code = isoFromThai(c0.name_th || c0.name) || code;
       const open = (t.periods || []).filter(p => p.status === 'Open');
       const price = open.length ? Math.min(...open.map(p => p.priceAdultDouble || p.price)) : (t.price || 0);
       const deps = open.slice(0, 60).map(p => ({ date: p.start, ret: p.end, adult: p.priceAdultDouble || p.price, child: p.priceChild || 0, single: p.priceSingleRoomAdd || 0, seat: p.available }));

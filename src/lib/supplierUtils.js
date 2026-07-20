@@ -31,9 +31,11 @@ export const COUNTRY_CODE_NAME_TH = {
 
 export function normalizePbTour(t, source = 'probooking', sourceName = 'ProBooking') {
   const primaryCountry = t.countries?.[0];
-  const countryCode    = primaryCountry?.code || '';
+  // code เป็น ISO2 (ProBooking/CheckIn) หรือ ISO3 (Real Journey) → ถ้า 3 ตัวแปลงผ่านชื่อไทย
+  let countryCode = primaryCountry?.code || '';
+  if (countryCode.length === 3) countryCode = codeFromThaiText(primaryCountry?.name_th || primaryCountry?.name) || countryCode;
   const continent      = CODE_TO_CONTINENT[countryCode] || 'Asia-East';
-  const nameTh         = primaryCountry?.name || COUNTRY_CODE_NAME_TH[countryCode] || countryCode;
+  const nameTh         = primaryCountry?.name_th || primaryCountry?.name || COUNTRY_CODE_NAME_TH[countryCode] || countryCode;
 
   const openPeriods = (t.periods || []).filter(p => p.status === 'Open');
   const minPrice    = openPeriods.length > 0

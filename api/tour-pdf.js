@@ -17,6 +17,7 @@ const ALLOW = [
   'superbholidayz.com',
   'checkingroup.co.th',
   'flywholesales.com',
+  'realjourney.co.th',
   'drive.google.com',
   'drive.usercontent.google.com',
 ];
