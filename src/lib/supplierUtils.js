@@ -360,3 +360,67 @@ export function normalizeBestTours(payload, source = 'best', sourceName = 'BEST 
     .map(p => normalizeBestTour(p, source, sourceName))
     .filter(t => t.departures.length > 0);   // เฉพาะทัวร์ที่มีรอบเดินทางในอนาคต
 }
+
+// ── Superb Holidayz (superbholidayz.com/superb/apiweb.php) ────────
+// proxy คืน { data: [rows] } · แต่ละ row = รอบเดินทาง (โปรแกรมซ้ำ) → จับกลุ่มตาม mainid
+const superbNum = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+
+export function normalizeSuperbTours(payload, source = 'superb', sourceName = 'Superb Holidayz') {
+  const rows = payload?.data || (Array.isArray(payload) ? payload : []);
+  const byMain = {};
+  for (const r of rows) { if (r && r.mainid) (byMain[r.mainid] = byMain[r.mainid] || []).push(r); }
+
+  return Object.keys(byMain).map(k => {
+    const rs = byMain[k], p = rs[0];
+    const iso2      = String(p.country_code || '').toUpperCase().trim() || codeFromThaiText(p.Country) || '';
+    const continent = CODE_TO_CONTINENT[iso2] || 'Asia-East';
+    const nameTh    = COUNTRY_CODE_NAME_TH[iso2] || (p.Country || iso2);
+
+    const deps = rs.map(r => {
+      const base  = superbNum(r.Adult);
+      const promo = Math.max(superbNum(r.PricePromotion), superbNum(r.SalePromotion));
+      const active = promo > 0 && (r.DatePromotion === 'NO' || !r.EndDatePromotion || r.EndDatePromotion === 'NO');
+      const adult = active ? Math.max(0, base - promo) : base;
+      return {
+        date:             r.Date,
+        returnDate:       r.ENDDate || '',
+        price:            adult,
+        promoPrice:       active ? adult : 0,
+        childPrice:       superbNum(r['Chd+B']) || null,
+        infantPrice:      superbNum(r.ChdNB) || null,
+        singleSupplement: superbNum(r.Single) || null,
+        available:        Number(r.AVBL) || 0,
+        totalSeats:       Number(r.Size) || null,
+        bookedSeats:      Number(r.Booking) || 0,
+        periodId:         r.pid,
+      };
+    }).filter(d => d.date && d.price > 0);
+
+    const prices   = deps.map(d => d.price).filter(n => n > 0);
+    const minPrice = prices.length ? Math.min(...prices) : (superbNum(p.startingprice) || 0);
+
+    return {
+      id:          `sup_${source}_${k}`,
+      code:        p.maincode || '',
+      name:        { th: p.title || p.titleTH || '', en: p.title || '' },
+      destination: { th: nameTh, en: iso2 },
+      continent,
+      country:     iso2,
+      image:       p.banner || p.bannerFull || '',
+      price:       minPrice,
+      duration:    Number(p.day) || 0,
+      tourType:    'outbound',
+      featured:    false,
+      airline:     (p.Airline && p.Airline !== 'NOLOGO') ? p.Airline : (p.aeycode || ''),
+      departures:  deps,
+      groupSize:   deps[0]?.totalSeats || null,
+      pdfUrl:      p.pdf || null,
+      itinerary:   [],
+      _source:     source,
+      _sourceName: sourceName,
+      _pbId:       k,
+      _night:      Number(p.night) || 0,
+      _hotelStars: null,
+    };
+  }).filter(t => t.departures.length > 0);
+}

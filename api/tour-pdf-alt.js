@@ -2,7 +2,7 @@
 // Edge จะ redirect มาที่นี่เมื่อ fetch ต้นทางล้มเหลว · ไฟล์กลุ่มนี้ < 4.5MB จึง buffer ได้
 const ALLOW = [
   'probooking.co.th', 'wondergrouptour.com', 'booking.gs25tour.com',
-  'zegotravel.com', 'ttnplus.co.th', 'ttnconnect.com', 'bestinternational.com', 'bestconsortium.com', 'dev-bestconsortium.com', 'drive.google.com', 'drive.usercontent.google.com',
+  'zegotravel.com', 'ttnplus.co.th', 'ttnconnect.com', 'bestinternational.com', 'bestconsortium.com', 'dev-bestconsortium.com', 'superbholidayz.com', 'drive.google.com', 'drive.usercontent.google.com',
 ];
 
 function b64urlDecode(s) {

@@ -4,7 +4,10 @@
 // ดึงผ่าน proxy /api/suppliers (พิสูจน์แล้วเวิร์ค + cache) กัน auth เพี้ยน
 const SITE = 'https://wecraft-travel.com';
 
-const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus', best: 'best' };
+const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus', best: 'best', superb: 'superb' };
+
+// Superb: promo field เป็น "NO"/"0"/ตัวเลข — แปลงเป็นเลข
+const numOr0 = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
 
 // BEST International: country_name_eng → ISO2
 const BEST_ISO = { CHINA:'CN', JAPAN:'JP', KOREA:'KR', 'SOUTH KOREA':'KR', TAIWAN:'TW', CNXTAIWAN:'TW',
@@ -98,6 +101,28 @@ function normalize(id, fmt, data) {
       if (!deps.length) continue;                                     // ไม่มีรอบเดินทางในอนาคต → ไม่โชว์
       const price = Math.min(...deps.map(d => d.adult));
       if (p.bannerSq && price > 0) out.push({ id: `sup_best_${p.id}`, name: p.name, image: p.bannerSq, price, country: iso, code: p.code || '', days: Number(p.day) || 0, night: Number(p.night) || 0, airline: p.airline_name || '', hotel: 0, highlight: '', pdf: p.filePdf || '', deps: deps.slice(0, 60) });
+    }
+  } else if (fmt === 'superb') {
+    // rows แต่ละ id = รอบเดินทาง (โปรแกรมซ้ำในแต่ละ row) → จับกลุ่มตาม mainid
+    const rows = data?.data || (Array.isArray(data) ? data : []);
+    const today = new Date().toISOString().slice(0, 10);
+    const byMain = {};
+    for (const r of rows) { if (r && r.mainid) (byMain[r.mainid] = byMain[r.mainid] || []).push(r); }
+    for (const k in byMain) {
+      const rs = byMain[k], p = rs[0];
+      const iso = String(p.country_code || '').toUpperCase().trim() || isoFromThai(p.Country) || '';
+      const deps = [];
+      for (const r of rs) {
+        if (!r.Date || r.Date < today) continue;                      // เฉพาะรอบอนาคต
+        const base = numOr0(r.Adult);
+        const promo = Math.max(numOr0(r.PricePromotion), numOr0(r.SalePromotion));
+        const active = promo > 0 && (r.DatePromotion === 'NO' || !r.EndDatePromotion || r.EndDatePromotion === 'NO' || today <= r.EndDatePromotion);
+        const adult = active ? Math.max(0, base - promo) : base;
+        if (adult > 0) deps.push({ date: r.Date, ret: r.ENDDate || '', adult, child: numOr0(r['Chd+B']), single: numOr0(r.Single), seat: Number(r.AVBL) || 0 });
+      }
+      if (!deps.length) continue;
+      const price = Math.min(...deps.map(d => d.adult));
+      if (p.banner) out.push({ id: `sup_superb_${k}`, name: p.title || p.titleTH || '', image: p.banner, price, country: iso, code: p.maincode || '', days: Number(p.day) || 0, night: Number(p.night) || 0, airline: (p.Airline && p.Airline !== 'NOLOGO') ? p.Airline : (p.aeycode || ''), hotel: 0, highlight: '', pdf: p.pdf || '', deps: deps.slice(0, 60) });
     }
   }
   return out;

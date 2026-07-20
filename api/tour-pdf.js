@@ -14,6 +14,7 @@ const ALLOW = [
   'bestinternational.com',
   'bestconsortium.com',
   'dev-bestconsortium.com',
+  'superbholidayz.com',
   'drive.google.com',
   'drive.usercontent.google.com',
 ];

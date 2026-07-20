@@ -22,7 +22,22 @@ const SUPPLIERS = {
   best:        { host: 'tour-api.bestinternational.com', base: '/api/public/v1', list: '/tour-programs', detail: id => `/tour-programs/${id}`,
                  auth: { header: 'Authorization', tokenEnv: 'BEST_API_TOKEN', scheme: 'Bearer' },
                  paginate: { limit: 50, maxPages: 20 } },   // 183 ทัวร์ · ดึงครบทุกหน้าแล้วรวม
+  // Superb: 1 endpoint ต่อโปรแกรม → ดึง book.php หา id ทั้งหมด แล้วยิง apiweb ทุกตัวขนานกัน
+  superb:      { host: 'superbholidayz.com', base: '/superb', detail: id => `/apiweb.php?id=${id}`,
+                 enumerate: { index: '/book.php', re: 'apiweb\\.php\\?id=(\\d+)', item: id => `/apiweb.php?id=${id}` } },
 };
+
+// ดึงข้อความดิบ (ใช้กับหน้า index ที่เป็น HTML ไม่ใช่ JSON)
+function rawFetch(cfg, path) {
+  return new Promise((resolve, reject) => {
+    const req = https.request({ hostname: cfg.host, path: `${cfg.base}${path}`, method: 'GET',
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; WeCraftTravel)' } }, (res) => {
+      let data = ''; res.on('data', c => { data += c; });
+      res.on('end', () => (res.statusCode >= 400 ? reject(new Error('HTTP ' + res.statusCode)) : resolve(data)));
+    });
+    req.on('error', reject); req.setTimeout(12000, () => req.destroy(new Error('timeout'))); req.end();
+  });
+}
 
 function supFetch(cfg, path) {
   return new Promise((resolve, reject) => {
@@ -65,6 +80,20 @@ module.exports = async function handler(req, res) {
   if (!cfg) return res.status(400).json({ error: 'ไม่รู้จักซัพพลายเออร์: ' + supplier });
 
   try {
+    // ซัพแบบ 1 endpoint/โปรแกรม (superb) → ดึง index หา id แล้วยิงทุกตัวขนาน รวมเป็นก้อนเดียว
+    if (cfg.enumerate && !id) {
+      const idxHtml = await rawFetch(cfg, cfg.enumerate.index);
+      const ids = [...new Set([...idxHtml.matchAll(new RegExp(cfg.enumerate.re, 'g'))].map(m => m[1]))];
+      const chunks = await Promise.all(ids.map(pid => supFetch(cfg, cfg.enumerate.item(pid)).catch(() => null)));
+      const all = [];
+      for (const c of chunks) {
+        if (Array.isArray(c)) all.push(...c);
+        else if (Array.isArray(c?.data)) all.push(...c.data);
+      }
+      res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=1800');
+      return res.status(200).json({ data: all });
+    }
+
     // ซัพที่แบ่งหน้า (best) + ขอรายการทั้งหมด → วนดึงทุกหน้าแล้วรวมเป็นก้อนเดียว
     if (cfg.paginate && !id) {
       let page = 1, all = [], meta = null;
