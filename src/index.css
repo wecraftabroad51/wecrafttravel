@@ -435,14 +435,15 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
 
 /* ---- Mobile responsive ---- */
 @media (max-width: 768px) {
-  /* HomePage layout — stack sidebar below content */
+  /* HomePage layout — มือถือ: ช่องค้นหาทัวร์ขึ้นก่อน แล้วค่อยดีลเด็ด */
   .home-2col {
     grid-template-columns: 1fr !important;
     padding: 12px !important;
     gap: 16px !important;
   }
-  .home-sidebar { order: 2; } /* search sidebar goes below */
-  .home-2col-main { order: 1; }
+  .home-sidebar { order: 1; }    /* search sidebar อยู่บนสุด */
+  .home-2col-main { order: 2; }
+  .home-sidebar > div { position: static !important; } /* เลิก sticky บนมือถือ กันบังเนื้อหา */
 
   /* Hero */
   .hero-wrap { height: auto !important; }

@@ -799,9 +799,6 @@ export default function HomePage({ lang, t, navigate, tours, articles, promotion
               <HotDealsSection tours={featured} navigate={navigate} t={t} compareList={compareList} toggleCompare={toggleCompare} inner lang={lang} />
             </div>
           )}
-          <div style={{ background: 'var(--canvas-2)', borderRadius: 10, padding: '24px 20px' }}>
-            <DestinationsSection navigate={navigate} inner lang={lang} />
-          </div>
         </div>
       </div>
 
