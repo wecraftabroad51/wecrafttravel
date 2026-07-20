@@ -18,6 +18,7 @@ const ALLOW = [
   'checkingroup.co.th',
   'flywholesales.com',
   'realjourney.co.th',
+  'tourfactory.co.th',
   'drive.google.com',
   'drive.usercontent.google.com',
 ];

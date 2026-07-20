@@ -11,6 +11,7 @@ export const SUPPLIERS = [
   { id: 'gs25tour',    name: 'GS25Tour',        enabled: true, format: 'probooking' },
   { id: 'checkingroup',name: 'Check In Group',  enabled: true, format: 'probooking' },
   { id: 'realjourney', name: 'Real Journey',    enabled: true, format: 'probooking' },
+  { id: 'tourfactory', name: 'Tour Factory',    enabled: true, format: 'probooking' },
   { id: 'zego',        name: 'Zego',            enabled: true, format: 'zego' },
   { id: 'ttn',         name: 'TTN Tour',        enabled: true, format: 'ttn' },
   { id: 'ttnplus',     name: 'TTN Plus',        enabled: true, format: 'ttnplus' },
