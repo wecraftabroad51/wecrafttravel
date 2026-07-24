@@ -31,6 +31,10 @@ const SUPPLIERS = {
   // FLY de WORLD (flywholesales.com) — DataTables { data:[...] } · length ใหญ่เพื่อดึงครบ
   flyde:       { host: 'flywholesales.com', base: '', list: '/api_datatour_new.php?draw=1&start=0&length=2000',
                  detail: () => '/api_datatour_new.php?draw=1&start=0&length=2000' },
+  // Formosa Journey (bs-api) — x-api-key · แบ่งหน้า page/number 50/หน้า · { success, data:[...], max_pages }
+  formosa:     { host: 'api-formosa.ht1freshdigital.com', base: '/wp-json/bs-api/v1', list: '/tours', detail: id => `/tours/${id}`,
+                 auth: { header: 'x-api-key', tokenEnv: 'FORMOSA_API_TOKEN' },
+                 paginate: { limit: 50, maxPages: 20, sizeParam: 'number' } },
 };
 
 // ดึงข้อความดิบ (ใช้กับหน้า index ที่เป็น HTML ไม่ใช่ JSON)
@@ -103,12 +107,13 @@ module.exports = async function handler(req, res) {
     // ซัพที่แบ่งหน้า (best) + ขอรายการทั้งหมด → วนดึงทุกหน้าแล้วรวมเป็นก้อนเดียว
     if (cfg.paginate && !id) {
       let page = 1, all = [], meta = null;
+      const sizeParam = cfg.paginate.sizeParam || 'limit';
       while (page <= cfg.paginate.maxPages) {
-        const chunk = await supFetch(cfg, `${cfg.list}?page=${page}&limit=${cfg.paginate.limit}`);
+        const chunk = await supFetch(cfg, `${cfg.list}?page=${page}&${sizeParam}=${cfg.paginate.limit}`);
         const items = chunk?.data?.data || chunk?.data?.items || (Array.isArray(chunk?.data) ? chunk.data : []);
         all = all.concat(items);
         meta = chunk?.data?.meta || chunk?.meta || meta;
-        const totalPages = meta?.totalPages || 1;
+        const totalPages = meta?.totalPages || chunk?.max_pages || chunk?.data?.max_pages || 1;
         if (page >= totalPages || items.length === 0) break;
         page++;
       }

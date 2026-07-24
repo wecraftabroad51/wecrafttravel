@@ -4,7 +4,7 @@
 // ดึงผ่าน proxy /api/suppliers (พิสูจน์แล้วเวิร์ค + cache) กัน auth เพี้ยน
 const SITE = 'https://wecraft-travel.com';
 
-const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', checkingroup: 'pb', realjourney: 'pb', tourfactory: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus', best: 'best', superb: 'superb', flyde: 'flyde' };
+const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', checkingroup: 'pb', realjourney: 'pb', tourfactory: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus', best: 'best', superb: 'superb', flyde: 'flyde', formosa: 'formosa' };
 
 // FLY de WORLD: period_data = "pid|start(DD-MM-YYYY)|end|..|seat|..|price|..|price|..|note ;;; ..."
 const FLYDE_IMG = 'https://flywholesales.com/backend/';
@@ -152,6 +152,22 @@ function normalize(id, fmt, data) {
       if (!deps.length) continue;
       const price = Math.min(...deps.map(d => d.adult));
       out.push({ id: `sup_flyde_${p.pt_id}`, name: p.pt_name, image: p.pt_banner ? FLYDE_IMG + p.pt_banner : '', price, country: iso, code: p.pt_code || '', days: Number(p.pt_day) || 0, night: Number(p.pt_night) || 0, airline: '', hotel: Number(p.pt_hotelstar) || 0, highlight: '', pdf: p.pt_pdf ? FLYDE_IMG + p.pt_pdf : '', deps: deps.slice(0, 60) });
+    }
+  } else if (fmt === 'formosa') {
+    const progs = data?.data?.data || (Array.isArray(data?.data) ? data.data : []);
+    const today = new Date().toISOString().slice(0, 10);
+    for (const p of progs) {
+      if (!p || !p.id || p.post_status !== 'publish') continue;
+      const cname = (Array.isArray(p.tour_country) ? p.tour_country[0]?.name : p.tour_country) || '';
+      const iso = BEST_ISO[String(cname).toUpperCase().trim()] || isoFromThai(cname) || isoFromThai(p.title) || '';
+      const price = parseFloat(p.price_start) || 0;
+      // tour_period = "YYYY-MM-DD - YYYY-MM-DD" (ช่วงวันเดินทาง) → สร้างรอบเดียวจากช่วงนี้
+      const m = String(p.tour_period || '').match(/(\d{4}-\d{2}-\d{2})\s*-\s*(\d{4}-\d{2}-\d{2})/);
+      const start = m ? m[1] : (String(p.tour_period || '').match(/\d{4}-\d{2}-\d{2}/) || [''])[0];
+      const end = m ? m[2] : start;
+      if (!(price > 0) || !end || end < today) continue;
+      const dm = String(p.number_of_days || '').match(/(\d+)\s*D\s*(\d+)\s*N/i);
+      out.push({ id: `sup_formosa_${p.id}`, name: p.title, image: p.thumbnail || '', price, country: iso, code: p.tour_id || '', days: dm ? Number(dm[1]) : 0, night: dm ? Number(dm[2]) : 0, airline: (Array.isArray(p.tour_airline) ? p.tour_airline[0]?.name : '') || '', hotel: 0, highlight: '', pdf: p.file_pdf_url || '', deps: [{ date: start || end, ret: end, adult: price, child: 0, single: 0, seat: 0 }] });
     }
   }
   return out;

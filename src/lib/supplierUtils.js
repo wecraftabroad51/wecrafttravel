@@ -482,3 +482,44 @@ export function normalizeFlydeTours(payload, source = 'flyde', sourceName = 'FLY
     };
   }).filter(t => t.departures.length > 0);
 }
+
+// ── Formosa Journey (api-formosa.ht1freshdigital.com/wp-json/bs-api) ──
+// proxy คืน { data: { data: [...] } } · tour_country ชื่ออังกฤษ · tour_period = ช่วงวันที่ · price_start
+export function normalizeFormosaTours(payload, source = 'formosa', sourceName = 'Formosa Journey') {
+  const arr = payload?.data?.data || (Array.isArray(payload?.data) ? payload.data : (Array.isArray(payload) ? payload : []));
+  return arr.filter(p => p && p.id && p.post_status === 'publish').map(p => {
+    const cname     = (Array.isArray(p.tour_country) ? p.tour_country[0]?.name : p.tour_country) || '';
+    const iso2      = BEST_ISO[String(cname).toUpperCase().trim()] || codeFromThaiText(cname) || codeFromThaiText(p.title) || '';
+    const continent = CODE_TO_CONTINENT[iso2] || 'Asia-East';
+    const nameTh    = COUNTRY_CODE_NAME_TH[iso2] || cname || iso2;
+    const price     = parseFloat(p.price_start) || 0;
+    const m = String(p.tour_period || '').match(/(\d{4}-\d{2}-\d{2})\s*-\s*(\d{4}-\d{2}-\d{2})/);
+    const start = m ? m[1] : (String(p.tour_period || '').match(/\d{4}-\d{2}-\d{2}/) || [''])[0];
+    const end = m ? m[2] : start;
+    const dm = String(p.number_of_days || '').match(/(\d+)\s*D\s*(\d+)\s*N/i);
+    const deps = (price > 0 && (start || end)) ? [{ date: start || end, returnDate: end, price, available: 0, totalSeats: null, periodId: String(p.id) }] : [];
+    return {
+      id:          `sup_${source}_${p.id}`,
+      code:        p.tour_id || '',
+      name:        { th: p.title, en: p.title },
+      destination: { th: nameTh, en: iso2 },
+      continent,
+      country:     iso2,
+      image:       p.thumbnail || '',
+      price,
+      duration:    dm ? Number(dm[1]) : 0,
+      tourType:    'outbound',
+      featured:    false,
+      airline:     (Array.isArray(p.tour_airline) ? p.tour_airline[0]?.name : '') || '',
+      departures:  deps,
+      groupSize:   null,
+      pdfUrl:      p.file_pdf_url || null,
+      itinerary:   Array.isArray(p.travel_schedule) ? p.travel_schedule.map(s => ({ day: s.travel_date || '', detail: s.schedule_details || '' })) : [],
+      _source:     source,
+      _sourceName: sourceName,
+      _pbId:       p.id,
+      _night:      dm ? Number(dm[2]) : 0,
+      _hotelStars: null,
+    };
+  }).filter(t => t.departures.length > 0);
+}

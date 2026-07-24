@@ -18,6 +18,7 @@ export const SUPPLIERS = [
   { id: 'best',        name: 'BEST International', enabled: true, format: 'best' },
   { id: 'superb',      name: 'Superb Holidayz', enabled: true, format: 'superb' },
   { id: 'flyde',       name: 'FLY de WORLD',    enabled: true, format: 'flyde' },
+  { id: 'formosa',     name: 'Formosa Journey', enabled: true, format: 'formosa' },
 ];
 
 export const ENABLED_SUPPLIERS = SUPPLIERS.filter(s => s.enabled);

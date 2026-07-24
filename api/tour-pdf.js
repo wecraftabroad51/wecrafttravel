@@ -20,6 +20,7 @@ const ALLOW = [
   'realjourney.co.th',
   'tourfactory.co.th',
   'supabase.co',
+  'ht1freshdigital.com',
   'drive.google.com',
   'drive.usercontent.google.com',
 ];
