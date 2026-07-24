@@ -169,6 +169,7 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
   const [sort, setSort]           = useState('popular');
   const [priceMax, setPriceMax]   = useState(100000);
   const [region, setRegion]       = useState(initialFilters?.region || '');   // เมืองย่อยที่เลือก
+  const [month,  setMonth]        = useState(initialFilters?.month  || '');   // YYYY-MM เดือนออกเดินทาง
 
   // เปลี่ยนประเทศ → ล้างเมืองย่อย (ยกเว้นครั้งแรกที่โหลด เพื่อคงเมืองที่มาจาก URL)
   const firstCountryRun = useRef(true);
@@ -257,8 +258,10 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
         return code.includes(q) || name.toLowerCase().includes(q) || dest.toLowerCase().includes(q) || desc.toLowerCase().includes(q);
       });
     }
+    // กรองตามเดือนออกเดินทาง (YYYY-MM) — เฉพาะทัวร์ที่มีรอบเดินทางในเดือนนั้น
+    if (month) list = list.filter(tr => (tr.departures || []).some(d => String(d.date || '').startsWith(month)));
     return list;
-  }, [allTours, tourType, continent, country, groupCountries, search, lang]);
+  }, [allTours, tourType, continent, country, groupCountries, search, month, lang]);
 
   // ── เมืองย่อยของประเทศที่เลือก (เฉพาะที่มีทัวร์จริง) ────────────
   const nameHas = (tr, kw) => (tr.name?.th || '').includes(kw) || (t(tr.destination) || '').includes(kw);

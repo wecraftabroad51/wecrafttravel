@@ -54,6 +54,7 @@ function ToursRoute(props) {
     continent: searchParams.get('continent') || '',
     country:   searchParams.get('country')   || '',
     region:    searchParams.get('region')    || '',
+    month:     searchParams.get('month')     || '',
     search:    searchParams.get('q')         || '',
     countries:      searchParams.get('countries') ? searchParams.get('countries').split(',') : null,
     continentLabel: searchParams.get('label') || '',
@@ -511,6 +512,7 @@ function AppInner() {
       if (filters.continent)         p.set('continent', filters.continent);
       if (filters.country)           p.set('country',   filters.country);
       if (filters.region)            p.set('region',    filters.region);
+      if (filters.month)             p.set('month',     filters.month);
       if (filters.search)            p.set('q',         filters.search);
       if (filters.countries?.length) p.set('countries', filters.countries.join(','));
       if (filters.continentLabel)    p.set('label',     filters.continentLabel);

@@ -158,11 +158,24 @@ const SEARCH_CITY_KEYWORDS = {
   KR: ['โซล','ปูซาน','เกาะเชจู','เชจู'],
 };
 
+const SEARCH_MONTH_NAMES = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
 function SearchSidebar({ navigate, lang, tours = [] }) {
   const [tourType, setTourType] = useState('');
   const [country, setCountry]   = useState('');   // ISO2
   const [city, setCity]         = useState('');
+  const [month, setMonth]       = useState('');   // YYYY-MM (เดือนออกเดินทาง)
   const [codeSearch, setCodeSearch] = useState('');
+
+  // 18 เดือนข้างหน้า · value = YYYY-MM (ค.ศ.) · label = เดือน + ปี พ.ศ.
+  const monthOptions = (() => {
+    const opts = []; const now = new Date();
+    for (let i = 0; i < 18; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+      opts.push({ val: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`, label: `${SEARCH_MONTH_NAMES[d.getMonth()]} ${d.getFullYear() + 543}` });
+    }
+    return opts;
+  })();
 
   // ประเทศจากทัวร์จริง (ISO2 + ชื่อไทย + จำนวน) เรียงตามจำนวนมาก→น้อย
   const countryList = useMemo(() => {
@@ -188,6 +201,7 @@ function SearchSidebar({ navigate, lang, tours = [] }) {
     if (tourType) filters.tourType = tourType;
     if (country)  filters.country  = country;
     if (city)     filters.region   = city;
+    if (month)    filters.month    = month;
     if (codeSearch.trim()) filters.search = codeSearch.trim();
     navigate('tours', null, filters);
   };
@@ -244,6 +258,13 @@ function SearchSidebar({ navigate, lang, tours = [] }) {
             style={!cityList.length ? { opacity: .55, cursor: 'not-allowed' } : undefined}>
             <option value="">{!country ? (lang === 'th' ? '-- เลือกประเทศก่อน --' : '-- Select country first --') : cityList.length ? (lang === 'th' ? '-- ทุกเมือง --' : '-- All Cities --') : (lang === 'th' ? '-- ไม่มีเมืองย่อย --' : '-- No sub-cities --')}</option>
             {cityList.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+        <div>
+          <label style={{ display: 'block', marginBottom: 7, fontSize: 14, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'เดือนที่เดินทาง' : 'Travel Month'}</label>
+          <select value={month} onChange={e => setMonth(e.target.value)}>
+            <option value="">{lang === 'th' ? '-- ทุกเดือน --' : '-- Any Month --'}</option>
+            {monthOptions.map(m => <option key={m.val} value={m.val}>{m.label}</option>)}
           </select>
         </div>
         <button onClick={handleSearch} style={{
