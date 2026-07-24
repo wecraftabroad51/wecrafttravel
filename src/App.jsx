@@ -353,13 +353,17 @@ function AppInner() {
   // Safety: กันหน้าโหลดค้าง (เช่นเน็ตมือถือแฮงค์) — ปิด splash ภายใน 10 วิเสมอ
   useEffect(() => { const t = setTimeout(() => setLoading(false), 10000); return () => clearTimeout(t); }, []);
 
-  // รีเฟรช/เปิดลิงก์ตรง → เด้งกลับหน้าแรก (ยกเว้น /admin และตอนเปิดในแอป LINE/LIFF)
+  // รีเฟรช/เปิดลิงก์ตรง (deep-link) → ให้เปิดได้ทุกหน้าที่มี route จริง (คง query filter เช่น ?country=JP)
+  // ที่ไม่รู้จักจริงๆ ปล่อยให้ Route "*" เด้งหน้าแรกเอง
   useEffect(() => {
     const p = window.location.pathname;
     const inLine = /Line\//i.test(navigator.userAgent) || window.location.search.includes('liff');
-    // หน้าที่เปิดตรง (deep-link) ได้ — รวมหน้าจองต่างๆ เพื่อให้ปุ่ม "จองอะไรต่อ" ลิงก์ตรงได้
-    const DIRECT_OK = ['/cards', '/group-quote', '/ticket-booking', '/car-rental', '/hotel-booking'];
-    if (p !== '/' && !p.startsWith('/admin') && !DIRECT_OK.includes(p) && !inLine) routerNav('/', { replace: true });
+    // เปิดตรงได้ทุกหน้าเนื้อหา + หน้าจอง (รวม sub-path เช่น /tours/:id, /articles/:id)
+    const DIRECT_OK = ['/tours', '/gallery', '/articles', '/promotions', '/faq', '/contact',
+      '/group-quote', '/about', '/visa', '/ticket-booking', '/car-rental', '/hotel-booking',
+      '/cards', '/privacy', '/terms', '/booking-terms'];
+    const okDirect = DIRECT_OK.some(base => p === base || p.startsWith(base + '/'));
+    if (p !== '/' && !p.startsWith('/admin') && !okDirect && !inLine) routerNav('/', { replace: true });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Load supplier tours — โหลดทีละเจ้า เจ้าไหนเสร็จโชว์ก่อน ────
