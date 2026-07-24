@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import TourCard from '../TourCard.jsx';
 
 function Icon({ name, size = 18, color }) {
@@ -767,6 +767,28 @@ function ContactCta({ navigate, lang }) {
 export default function HomePage({ lang, t, navigate, tours, articles, promotions, faqs, reviews, settings, compareList, toggleCompare }) {
   const featured = tours.filter(tr => tr.featured).sort((a, b) => (a.featuredOrder || 0) - (b.featuredOrder || 0));
 
+  // โปรแกรมทัวร์มาใหม่ — คัดหลากหลายจากทุกซัพ · ญี่ปุ่น/จีน แสดงเยอะกว่า
+  const diverseNew = useMemo(() => {
+    const ok = (tours || []).filter(t => t.image && t.price > 0);
+    const byNew = [...ok].sort((a, b) =>
+      (Date.parse(b.updatedAt || b.createdAt || 0) || 0) - (Date.parse(a.updatedAt || a.createdAt || 0) || 0));
+    // กระจายให้มาจากหลายซัพพลายเออร์ (round-robin ตามแหล่งที่มา)
+    const spread = (arr) => {
+      const bySrc = {}; arr.forEach(t => { const s = t._source || 'own'; (bySrc[s] = bySrc[s] || []).push(t); });
+      const srcs = Object.keys(bySrc); const res = []; let i = 0, guard = 0;
+      while (res.length < arr.length && guard++ < arr.length * 3) { const q = bySrc[srcs[i % srcs.length]]; if (q && q.length) res.push(q.shift()); i++; }
+      return res;
+    };
+    const jp   = spread(byNew.filter(t => t.country === 'JP'));
+    const cn   = spread(byNew.filter(t => t.country === 'CN'));
+    const rest = spread(byNew.filter(t => t.country !== 'JP' && t.country !== 'CN'));
+    // สัดส่วน: ญี่ปุ่น 4 · จีน 3 · ประเทศอื่น 2 (รวม 9 · กริด 3×3)
+    const out = [...jp.slice(0, 4), ...cn.slice(0, 3), ...rest.slice(0, 2)];
+    const used = new Set(out.map(t => t.id));
+    for (const t of byNew) { if (out.length >= 9) break; if (!used.has(t.id)) { out.push(t); used.add(t.id); } }
+    return out.slice(0, 9);
+  }, [tours]);
+
   return (
     <main className="page-enter" style={{ background: 'var(--canvas-2)' }}>
       {/* Hero — full width */}
@@ -785,18 +807,30 @@ export default function HomePage({ lang, t, navigate, tours, articles, promotion
         </span>
       </div>
 
-      {/* 2-column: search sidebar (left) + hot deals & categories (right) */}
+      {/* 2-column: search sidebar (left) + โปรแกรมทัวร์มาใหม่ (right) */}
       <div className="home-2col">
         {/* Left: sticky search */}
         <div className="home-sidebar">
           <SearchSidebar navigate={navigate} lang={lang} />
         </div>
 
-        {/* Right: hot deals + destinations */}
+        {/* Right: โปรแกรมทัวร์มาใหม่ — หลากหลายจากทุกซัพ (แทนที่ทัวร์ไฟไหม้) */}
         <div className="home-2col-main">
-          {featured.length > 0 && (
-            <div style={{ background: '#fff7f0', borderRadius: 10, padding: '24px 20px', borderTop: '3px solid var(--primary)' }}>
-              <HotDealsSection tours={featured} navigate={navigate} t={t} compareList={compareList} toggleCompare={toggleCompare} inner lang={lang} />
+          {diverseNew.length > 0 && (
+            <div style={{ background: '#fff', borderRadius: 10, padding: '24px 20px', borderTop: '3px solid var(--primary)' }}>
+              <SectionHeader
+                title={lang === 'th' ? 'โปรแกรมทัวร์มาใหม่' : 'New Tours'}
+                emoji="✨"
+                sub={lang === 'th' ? 'คัดโปรแกรมหลากหลายจากทุกซัพพลายเออร์ · ญี่ปุ่น จีน และอีกเพียบ' : 'Fresh picks from all suppliers — Japan, China & more'}
+                onMore={() => navigate('tours')}
+                moreLabel={lang === 'th' ? 'ดูทั้งหมด' : 'View all'}
+              />
+              <div className="grid-cols-3" style={{ gap: 16 }}>
+                {diverseNew.map(tr => (
+                  <TourCard key={tr.id} tour={tr} t={t} navigate={navigate}
+                    inCompare={compareList.includes(tr.id)} onCompare={() => toggleCompare(tr.id)} />
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -805,7 +839,6 @@ export default function HomePage({ lang, t, navigate, tours, articles, promotion
       {/* Full-width sections below */}
       <WhyUsSection lang={lang} />
       <GroupQuoteBanner navigate={navigate} lang={lang} />
-      <NewToursSection tours={tours} navigate={navigate} t={t} compareList={compareList} toggleCompare={toggleCompare} lang={lang} />
       <StatsStrip lang={lang} />
       <PromoBanners promotions={promotions} navigate={navigate} t={t} lang={lang} />
       <ArticlesSection articles={articles} navigate={navigate} t={t} lang={lang} />
