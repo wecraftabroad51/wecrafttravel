@@ -764,12 +764,12 @@ function ContactCta({ navigate, lang }) {
 }
 
 // ─── MAIN EXPORT ─────────────────────────────────────────────
-export default function HomePage({ lang, t, navigate, tours, articles, promotions, faqs, reviews, settings, compareList, toggleCompare }) {
+export default function HomePage({ lang, t, navigate, tours, supplierTours = [], articles, promotions, faqs, reviews, settings, compareList, toggleCompare }) {
   const featured = tours.filter(tr => tr.featured).sort((a, b) => (a.featuredOrder || 0) - (b.featuredOrder || 0));
 
   // โปรแกรมทัวร์มาใหม่ — คัดหลากหลายจากทุกซัพ · ญี่ปุ่น/จีน แสดงเยอะกว่า
   const diverseNew = useMemo(() => {
-    const ok = (tours || []).filter(t => t.image && t.price > 0);
+    const ok = [...(tours || []), ...(supplierTours || [])].filter(t => t.image && t.price > 0);
     const byNew = [...ok].sort((a, b) =>
       (Date.parse(b.updatedAt || b.createdAt || 0) || 0) - (Date.parse(a.updatedAt || a.createdAt || 0) || 0));
     // กระจายให้มาจากหลายซัพพลายเออร์ (round-robin ตามแหล่งที่มา)
@@ -787,7 +787,7 @@ export default function HomePage({ lang, t, navigate, tours, articles, promotion
     const used = new Set(out.map(t => t.id));
     for (const t of byNew) { if (out.length >= 9) break; if (!used.has(t.id)) { out.push(t); used.add(t.id); } }
     return out.slice(0, 9);
-  }, [tours]);
+  }, [tours, supplierTours]);
 
   return (
     <main className="page-enter" style={{ background: 'var(--canvas-2)' }}>
