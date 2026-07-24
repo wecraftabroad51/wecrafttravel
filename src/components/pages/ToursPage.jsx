@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import TourCard from '../TourCard.jsx';
 import { resolveCountryCode, COUNTRIES, flagUrl } from '../../lib/countries.js';
 
@@ -168,10 +168,14 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
   const [search, setSearch]       = useState(initialFilters?.search    || '');
   const [sort, setSort]           = useState('popular');
   const [priceMax, setPriceMax]   = useState(100000);
-  const [region, setRegion]       = useState('');   // เมืองย่อยที่เลือก
+  const [region, setRegion]       = useState(initialFilters?.region || '');   // เมืองย่อยที่เลือก
 
-  // เปลี่ยนประเทศ → ล้างเมืองย่อย
-  useEffect(() => { setRegion(''); }, [country]);
+  // เปลี่ยนประเทศ → ล้างเมืองย่อย (ยกเว้นครั้งแรกที่โหลด เพื่อคงเมืองที่มาจาก URL)
+  const firstCountryRun = useRef(true);
+  useEffect(() => {
+    if (firstCountryRun.current) { firstCountryRun.current = false; return; }
+    setRegion('');
+  }, [country]);
 
   // วัดความสูง navbar → ให้แถบ filter ค้างพอดีใต้ navbar (sticky)
   const [navH, setNavH] = useState(64);

@@ -149,35 +149,45 @@ const QUICK_LINKS = [
   { label: 'ไต้หวัน',  labelEn: 'Taiwan',    country: 'ไต้หวัน',   continent: 'Asia-East',  tourType: 'outbound'},
 ];
 
-function SearchSidebar({ navigate, lang }) {
+// เมืองยอดนิยมต่อประเทศ (ISO2) — สำหรับดรอปดาวน์เลือกเมือง
+const SEARCH_CITY_KEYWORDS = {
+  CN: ['เฉิงตู','เซี่ยงไฮ้','ฉงชิ่ง','ชิงเต่า','ปักกิ่ง','จางเจียเจี้ย','คุนหมิง','จิ่วจ้ายโกว','ซินเจียง','ซีอาน','ลี่เจียง','ฮาร์บิน','แชงกรีล่า','ต้าหลี่','กวางโจว','ซูโจว','หางโจว','ฉางซา'],
+  JP: ['โตเกียว','โอซาก้า','ฟูจิ','ฮอกไกโด','เกียวโต','ชิราคาวาโก','ทาคายาม่า','โอกินาว่า','คามาคุระ','นิกโก้','อิบารากิ','คิวชู','ฟุกุโอกะ','นาโกย่า','นารา'],
+  TW: ['ไทเป','ไทจง','อาลีซาน','เกาสง','จิ่วเฟิ่น','ฮัวเหลียน'],
+  VN: ['ดานัง','ฮอยอัน','ฮานอย','โฮจิมินห์','ซาปา','บานาฮิลล์','ฟูก๊วก','ดาลัด','ญาจาง','ฮาลอง'],
+  KR: ['โซล','ปูซาน','เกาะเชจู','เชจู'],
+};
+
+function SearchSidebar({ navigate, lang, tours = [] }) {
   const [tourType, setTourType] = useState('');
-  const [zone, setZone] = useState('');
-  const [country, setCountry] = useState('');
-  const [airline, setAirline] = useState('');
-  const [month, setMonth] = useState('');
+  const [country, setCountry]   = useState('');   // ISO2
+  const [city, setCity]         = useState('');
   const [codeSearch, setCodeSearch] = useState('');
-  const zoneObj = ZONE_OPTIONS.find(z => z.value === zone);
-  const countries = zoneObj ? zoneObj.countries : [];
-  const MONTH_NAMES = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-  const monthOptions = (() => {
-    const opts = [];
-    const now = new Date();
-    const startYear = now.getFullYear() + 543;
-    const startMonth = now.getMonth();
-    for (let y = startYear; y <= 2580; y++) {
-      const mStart = y === startYear ? startMonth : 0;
-      for (let m = mStart; m < 12; m++) {
-        opts.push(`${MONTH_NAMES[m]} ${y}`);
-      }
-    }
-    return opts;
-  })();
+
+  // ประเทศจากทัวร์จริง (ISO2 + ชื่อไทย + จำนวน) เรียงตามจำนวนมาก→น้อย
+  const countryList = useMemo(() => {
+    const map = {};
+    (tours || []).forEach(tr => {
+      const c = tr.country; if (!c) return;
+      if (!map[c]) map[c] = { code: c, name: (tr.destination?.th || tr.destination?.en || c), count: 0 };
+      map[c].count++;
+    });
+    return Object.values(map).sort((a, b) => b.count - a.count);
+  }, [tours]);
+
+  // เมืองของประเทศที่เลือก (เฉพาะเมืองที่มีทัวร์จริง)
+  const cityList = useMemo(() => {
+    const kws = SEARCH_CITY_KEYWORDS[country]; if (!kws) return [];
+    return kws.filter(kw => (tours || []).some(tr => (tr.name?.th || '').includes(kw) || (tr.destination?.th || '').includes(kw)));
+  }, [country, tours]);
+
+  useEffect(() => { setCity(''); }, [country]);   // เปลี่ยนประเทศ → ล้างเมือง
 
   const handleSearch = () => {
     const filters = {};
-    if (tourType)    filters.tourType  = tourType;
-    if (zone)        filters.continent = zone;
-    if (country)     filters.country   = country;
+    if (tourType) filters.tourType = tourType;
+    if (country)  filters.country  = country;
+    if (city)     filters.region   = city;
     if (codeSearch.trim()) filters.search = codeSearch.trim();
     navigate('tours', null, filters);
   };
@@ -222,31 +232,18 @@ function SearchSidebar({ navigate, lang }) {
           </select>
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 7, fontSize: 14, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'โซน / ทวีป' : 'Zone / Continent'}</label>
-          <select value={zone} onChange={e => { setZone(e.target.value); setCountry(''); }}>
-            <option value="">{lang === 'th' ? '-- เลือกโซน --' : '-- Select Zone --'}</option>
-            {ZONE_OPTIONS.map(z => <option key={z.value} value={z.value}>{lang === 'en' ? z.labelEn : z.label}</option>)}
+          <label style={{ display: 'block', marginBottom: 7, fontSize: 14, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'ประเทศ' : 'Country'}</label>
+          <select value={country} onChange={e => setCountry(e.target.value)}>
+            <option value="">{lang === 'th' ? '-- ทุกประเทศ --' : '-- All Countries --'}</option>
+            {countryList.map(c => <option key={c.code} value={c.code}>{c.name} ({c.count})</option>)}
           </select>
         </div>
         <div>
-          <label style={{ display: 'block', marginBottom: 7, fontSize: 14, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'ประเทศ / จังหวัด' : 'Country / Province'}</label>
-          <select value={country} onChange={e => setCountry(e.target.value)} disabled={!zone}>
-            <option value="">{lang === 'th' ? '-- เลือกประเทศ --' : '-- Select Country --'}</option>
-            {countries.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: 7, fontSize: 14, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'สายการบิน' : 'Airline'}</label>
-          <select value={airline} onChange={e => setAirline(e.target.value)}>
-            <option value="">{lang === 'th' ? '-- ทุกสายการบิน --' : '-- All Airlines --'}</option>
-            {AIRLINES.map(a => <option key={a} value={a}>{a}</option>)}
-          </select>
-        </div>
-        <div>
-          <label style={{ display: 'block', marginBottom: 7, fontSize: 14, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'เดือนที่เดินทาง' : 'Travel Month'}</label>
-          <select value={month} onChange={e => setMonth(e.target.value)}>
-            <option value="">{lang === 'th' ? '-- ทุกเดือน --' : '-- Any Month --'}</option>
-            {monthOptions.map((m, i) => <option key={i} value={m}>{m}</option>)}
+          <label style={{ display: 'block', marginBottom: 7, fontSize: 14, fontWeight: 700, color: 'var(--ink-2)' }}>{lang === 'th' ? 'เมือง / เส้นทาง' : 'City / Route'}</label>
+          <select value={city} onChange={e => setCity(e.target.value)} disabled={!cityList.length}
+            style={!cityList.length ? { opacity: .55, cursor: 'not-allowed' } : undefined}>
+            <option value="">{!country ? (lang === 'th' ? '-- เลือกประเทศก่อน --' : '-- Select country first --') : cityList.length ? (lang === 'th' ? '-- ทุกเมือง --' : '-- All Cities --') : (lang === 'th' ? '-- ไม่มีเมืองย่อย --' : '-- No sub-cities --')}</option>
+            {cityList.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <button onClick={handleSearch} style={{
@@ -767,9 +764,12 @@ function ContactCta({ navigate, lang }) {
 export default function HomePage({ lang, t, navigate, tours, supplierTours = [], articles, promotions, faqs, reviews, settings, compareList, toggleCompare }) {
   const featured = tours.filter(tr => tr.featured).sort((a, b) => (a.featuredOrder || 0) - (b.featuredOrder || 0));
 
+  // รวมทัวร์เราเอง + ทุกซัพ (ใช้ทั้งช่องค้นหา + โปรแกรมมาใหม่)
+  const homeTours = useMemo(() => [...(tours || []), ...(supplierTours || [])], [tours, supplierTours]);
+
   // โปรแกรมทัวร์มาใหม่ — คัดหลากหลายจากทุกซัพ · ญี่ปุ่น/จีน แสดงเยอะกว่า
   const diverseNew = useMemo(() => {
-    const ok = [...(tours || []), ...(supplierTours || [])].filter(t => t.image && t.price > 0);
+    const ok = homeTours.filter(t => t.image && t.price > 0);
     const byNew = [...ok].sort((a, b) =>
       (Date.parse(b.updatedAt || b.createdAt || 0) || 0) - (Date.parse(a.updatedAt || a.createdAt || 0) || 0));
     // กระจายให้มาจากหลายซัพพลายเออร์ (round-robin ตามแหล่งที่มา)
@@ -787,7 +787,7 @@ export default function HomePage({ lang, t, navigate, tours, supplierTours = [],
     const used = new Set(out.map(t => t.id));
     for (const t of byNew) { if (out.length >= 9) break; if (!used.has(t.id)) { out.push(t); used.add(t.id); } }
     return out.slice(0, 9);
-  }, [tours, supplierTours]);
+  }, [homeTours]);
 
   return (
     <main className="page-enter" style={{ background: 'var(--canvas-2)' }}>
@@ -811,7 +811,7 @@ export default function HomePage({ lang, t, navigate, tours, supplierTours = [],
       <div className="home-2col">
         {/* Left: sticky search */}
         <div className="home-sidebar">
-          <SearchSidebar navigate={navigate} lang={lang} />
+          <SearchSidebar navigate={navigate} lang={lang} tours={homeTours} />
         </div>
 
         {/* Right: โปรแกรมทัวร์มาใหม่ — หลากหลายจากทุกซัพ (แทนที่ทัวร์ไฟไหม้) */}

@@ -53,6 +53,7 @@ function ToursRoute(props) {
     tourType:  searchParams.get('type')      || '',
     continent: searchParams.get('continent') || '',
     country:   searchParams.get('country')   || '',
+    region:    searchParams.get('region')    || '',
     search:    searchParams.get('q')         || '',
     countries:      searchParams.get('countries') ? searchParams.get('countries').split(',') : null,
     continentLabel: searchParams.get('label') || '',
@@ -149,11 +150,14 @@ function GroupQuoteFloat({ navigate, lang }) {
 function GroupQuotePopup({ navigate, lang }) {
   const [open, setOpen] = useState(false);
 
+  // เด้งครั้งแรก · จากนั้นรอ 15 นาทีค่อยเด้งใหม่ (เก็บเวลาไว้ใน localStorage)
   useEffect(() => {
-    if (sessionStorage.getItem('gq-popup-shown')) return;
+    const KEY = 'gq-popup-ts';
+    const last = parseInt(localStorage.getItem(KEY) || '0', 10);
+    if (Date.now() - last < 15 * 60 * 1000) return;   // ยังไม่ครบ 15 นาที → ไม่เด้ง
     const t = setTimeout(() => {
       setOpen(true);
-      sessionStorage.setItem('gq-popup-shown', '1');
+      localStorage.setItem(KEY, String(Date.now()));
     }, 3000);
     return () => clearTimeout(t);
   }, []);
@@ -506,6 +510,7 @@ function AppInner() {
       if (filters.tourType)          p.set('type',      filters.tourType);
       if (filters.continent)         p.set('continent', filters.continent);
       if (filters.country)           p.set('country',   filters.country);
+      if (filters.region)            p.set('region',    filters.region);
       if (filters.search)            p.set('q',         filters.search);
       if (filters.countries?.length) p.set('countries', filters.countries.join(','));
       if (filters.continentLabel)    p.set('label',     filters.continentLabel);

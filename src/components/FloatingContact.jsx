@@ -78,8 +78,16 @@ const LINE_ICON = (
 
 export default function FloatingContact({ settings }) {
   const [open, setOpen] = useState(false);
-  // เปิดอัตโนมัติเฉพาะจอใหญ่ · มือถือเริ่มแบบปิด (กันบังเนื้อหา)
-  useEffect(() => { setOpen(window.innerWidth >= 768); }, []);
+  // เด้งเปิดครั้งแรก (จอใหญ่) · จากนั้นรอ 15 นาทีค่อยเด้งใหม่ · มือถือเริ่มแบบปิด (กันบังเนื้อหา)
+  useEffect(() => {
+    const KEY = 'fc-panel-ts';
+    const last = parseInt(localStorage.getItem(KEY) || '0', 10);
+    const due = Date.now() - last >= 15 * 60 * 1000;
+    if (due && window.innerWidth >= 768) {
+      setOpen(true);
+      localStorage.setItem(KEY, String(Date.now()));
+    }
+  }, []);
 
   // Merge social URLs from settings
   const socialMap = {};

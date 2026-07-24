@@ -241,7 +241,11 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
         padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,.1)',
       }}>
         <div className="wrap-wide" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <button className="td-back" onClick={() => navigate('tours')}>
+          <button className="td-back" onClick={() => {
+            // ย้อนกลับไปหน้าล่าสุด (คงตัวกรองประเทศ/เมืองที่มาจากหน้ารายการ) · ถ้าเปิดตรงไม่มีประวัติ → ไปหน้าทัวร์ทั้งหมด
+            if (window.history.length > 1 && document.referrer !== window.location.href) window.history.back();
+            else navigate('tours');
+          }}>
             <Icon name="arrow-left" size={14} />
             {th ? 'ย้อนกลับ' : 'Back'}
           </button>
