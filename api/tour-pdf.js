@@ -19,6 +19,7 @@ const ALLOW = [
   'flywholesales.com',
   'realjourney.co.th',
   'tourfactory.co.th',
+  'supabase.co',
   'drive.google.com',
   'drive.usercontent.google.com',
 ];

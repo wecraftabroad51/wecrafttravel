@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react';
 import TourCard from '../TourCard.jsx';
 
+// ── ซ่อน URL ต้นทางของซัพ → เปิด PDF ผ่านโดเมนเราเอง (/api/tour-pdf) ──
+// รองรับ URL ที่มีอักขระไทย (encode เป็น UTF-8 → base64url เหมือน Node Buffer)
+function proxyPdf(url) {
+  if (!url) return url;
+  try {
+    // ถ้าเป็นไฟล์ของเราเอง (Supabase/โดเมนเรา) หรือผ่าน proxy อยู่แล้ว ก็ห่อผ่าน proxy เหมือนกันเพื่อให้ทุกลิงก์ขึ้นต้นด้วยเว็บเรา
+    const bytes = new TextEncoder().encode(String(url));
+    let bin = ''; for (const b of bytes) bin += String.fromCharCode(b);
+    const b64url = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return `/api/tour-pdf?u=${b64url}`;
+  } catch { return url; }
+}
+
 function Icon({ name, size = 16 }) {
   const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' };
   switch (name) {
@@ -349,7 +362,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
                   </button>
                 </a>
                 {tour.pdfUrl && (
-                  <a href={tour.pdfUrl} download target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                  <a href={proxyPdf(tour.pdfUrl)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
                     <button className="td-btn" style={{ background: 'linear-gradient(135deg,#e65c00,#c74b00)', color: '#fff' }}>
                       <Icon name="download" size={15} />
                       {th ? 'ดาวน์โหลดโปรแกรม (PDF)' : 'Download Program (PDF)'}
@@ -545,7 +558,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
           {tour.pdfUrl && (
             <Accordion title={th ? 'ไฟล์โปรแกรมทัวร์ (PDF)' : 'Tour Program PDF'} icon="📄">
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
-                <a href={tour.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                <a href={proxyPdf(tour.pdfUrl)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
                   <button className="td-btn" style={{ background: 'linear-gradient(135deg,#0f3460,#1e4a7a)', color: '#fff' }}>
                     <Icon name="download" size={14} />
                     {th ? 'ดาวน์โหลด PDF' : 'Download PDF'}
@@ -554,7 +567,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
                 <span style={{ fontSize: 15, color: '#94a3b8' }}>{th ? 'รายละเอียดโปรแกรมทัวร์ฉบับเต็ม' : 'Full tour program details'}</span>
               </div>
               <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid #e2e8f0', height: 520 }}>
-                <iframe src={tour.pdfUrl} style={{ width: '100%', height: '100%', border: 'none' }} title="Tour PDF" />
+                <iframe src={proxyPdf(tour.pdfUrl)} style={{ width: '100%', height: '100%', border: 'none' }} title="Tour PDF" />
               </div>
             </Accordion>
           )}
