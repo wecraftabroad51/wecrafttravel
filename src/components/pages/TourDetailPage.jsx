@@ -233,6 +233,26 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
         .info-label { font-size:13.5px;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px; }
         .info-value { font-size:16.5px;font-weight:700;color:#1e293b;line-height:1.3; }
         .chip-cont { display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:14px;font-weight:700;letter-spacing:.02em; }
+        /* วันเดินทาง: มือถือแสดงเป็นการ์ด (ไม่ต้องเลื่อนแนวนอน) · พีซีแสดงตาราง */
+        .td-dep-cards { display:none; }
+        @media (max-width: 640px) {
+          .td-dep-table { display:none; }
+          .td-dep-cards { display:flex; flex-direction:column; gap:12px; padding:14px; background:#f8fafc; }
+          .td-depcard { background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;box-shadow:0 1px 5px rgba(0,0,0,.05); }
+          .td-depcard-top { display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap; }
+          .td-depcard-date { font-weight:800;color:#0f3460;font-size:17px;line-height:1.3; }
+          .td-depcard-badge { flex-shrink:0;padding:4px 12px;border-radius:20px;font-size:13.5px;font-weight:800;white-space:nowrap; }
+          .td-depcard-badge.full { background:#fee2e2;color:#dc2626; }
+          .td-depcard-badge.hurry { background:#fef3c7;color:#b45309; }
+          .td-depcard-badge.open { background:#dcfce7;color:#16a34a; }
+          .td-depcard-body { display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px; }
+          .td-depcard-price { display:flex;align-items:baseline;gap:8px; }
+          .td-depcard-price .lbl { font-size:14px;color:#64748b;font-weight:600; }
+          .td-depcard-price b { font-size:22px;font-weight:900;color:#dc2626; }
+          .td-depcard-sub { display:flex;gap:12px;flex-wrap:wrap;font-size:13.5px;color:#64748b;font-weight:600; }
+          .td-depcard-btn { width:100%;padding:12px;border:none;border-radius:10px;font-size:16px;font-weight:800;font-family:inherit;cursor:pointer;background:linear-gradient(135deg,#e65c00,#c74b00);color:#fff;box-shadow:0 3px 10px rgba(230,92,0,.3); }
+          .td-depcard-btn.full { background:#e2e8f0;color:#94a3b8;box-shadow:none;cursor:not-allowed; }
+        }
       `}</style>
 
       {/* ── Hero banner ────────────────────────────────────────── */}
@@ -395,7 +415,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
               </span>
             </div>
 
-            <div style={{ overflowX: 'auto' }}>
+            <div className="td-dep-table" style={{ overflowX: 'auto' }}>
               <table className="td-table">
                 <thead>
                   <tr>
@@ -465,6 +485,48 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
                   })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile: การ์ดต่อรอบ — เห็นครบในจอเดียว ไม่ต้องเลื่อนแนวนอน */}
+            <div className="td-dep-cards">
+              {tour.departures.map((dep, i) => {
+                const st      = depStatus(dep);
+                const adultP  = dep.price || basePrice;
+                const childP  = dep.childPrice || null;
+                const singleP = dep.singleSupplement || null;
+                const promoP  = dep.promoPrice > 0 && dep.promoPrice < adultP ? dep.promoPrice : null;
+                const total   = dep.totalSeats || tour.groupSize || null;
+                const avail   = dep.totalSeats ? Math.max(0, dep.totalSeats - (dep.bookedSeats || 0)) : (dep.available ?? total);
+                const fmt     = (n) => n ? n.toLocaleString() : '-';
+                return (
+                  <div key={dep.id || i} className="td-depcard">
+                    <div className="td-depcard-top">
+                      <div className="td-depcard-date">{formatDepRange(dep.date, dep.returnDate)}</div>
+                      {st === 'full'
+                        ? <span className="td-depcard-badge full">🔴 {th ? 'เต็ม' : 'Full'}</span>
+                        : typeof avail === 'number'
+                          ? <span className={`td-depcard-badge ${avail <= 5 ? 'hurry' : 'open'}`}>{avail <= 5 ? '⚡ ' : ''}{th ? `ว่าง ${avail} ที่` : `${avail} left`}</span>
+                          : <span className="td-depcard-badge open">✓ {th ? 'ว่าง' : 'Open'}</span>}
+                    </div>
+                    <div className="td-depcard-body">
+                      <div className="td-depcard-price">
+                        <span className="lbl">{th ? 'ราคาผู้ใหญ่' : 'Adult'}</span>
+                        {promoP
+                          ? <span><s style={{ color: '#94a3b8', fontWeight: 600, fontSize: 15 }}>{fmt(adultP)}</s> <b>฿{fmt(promoP)}</b></span>
+                          : <b>฿{fmt(adultP)}</b>}
+                      </div>
+                      <div className="td-depcard-sub">
+                        {childP ? <span>{th ? 'เด็ก' : 'Child'} ฿{fmt(childP)}</span> : null}
+                        {singleP ? <span>{th ? 'พักเดี่ยว' : 'Single'} +฿{fmt(singleP)}</span> : null}
+                        {total ? <span>{th ? 'กรุ๊ป' : 'Group'} {total}</span> : null}
+                      </div>
+                    </div>
+                    {st === 'full'
+                      ? <button className="td-depcard-btn full" disabled>{th ? 'เต็มแล้ว' : 'Sold out'}</button>
+                      : <button className="td-depcard-btn" onClick={() => goBook(tour, dep)}>{th ? 'จองทัวร์นี้' : 'Book this'}</button>}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Table footer note */}
