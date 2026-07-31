@@ -178,6 +178,11 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
     setRegion('');
   }, [country]);
 
+  // พิมพ์ค้นหา (รหัส/ชื่อ) → ค้นทั่วทุกซัพ: ล้างตัวกรองประเทศ/เมือง/เดือน เพื่อไม่ให้บีบผลลัพธ์
+  useEffect(() => {
+    if (search.trim()) { setCountry(''); setRegion(''); setMonth(''); }
+  }, [search]);
+
   // วัดความสูง navbar → ให้แถบ filter ค้างพอดีใต้ navbar (sticky)
   const [navH, setNavH] = useState(64);
   useEffect(() => {
@@ -249,13 +254,15 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
       );
     }
     if (search.trim()) {
-      const q = search.toLowerCase();
+      const q  = search.toLowerCase().trim();
+      const qs = q.replace(/[^a-z0-9]/g, '');   // รหัสแบบไม่สนขีด/เว้นวรรค เช่น "xj360"
       list = list.filter(tr => {
-        const name = t ? t(tr.name) : (tr.name?.en || tr.name?.th || '');
-        const dest = t ? t(tr.destination) : (tr.destination?.en || tr.destination?.th || '');
-        const desc = t ? t(tr.description) : (tr.description?.en || tr.description?.th || '');
+        const name = (t ? t(tr.name) : (tr.name?.en || tr.name?.th || '')).toLowerCase();
+        const dest = (t ? t(tr.destination) : (tr.destination?.en || tr.destination?.th || '')).toLowerCase();
+        const desc = (t ? t(tr.description) : (tr.description?.en || tr.description?.th || '')).toLowerCase();
         const code = (tr.code || '').toLowerCase();
-        return code.includes(q) || name.toLowerCase().includes(q) || dest.toLowerCase().includes(q) || desc.toLowerCase().includes(q);
+        const codeStrip = code.replace(/[^a-z0-9]/g, '');
+        return code.includes(q) || (qs && codeStrip.includes(qs)) || name.includes(q) || dest.includes(q) || desc.includes(q);
       });
     }
     // กรองตามเดือนออกเดินทาง (YYYY-MM) — เฉพาะทัวร์ที่มีรอบเดินทางในเดือนนั้น
