@@ -536,18 +536,38 @@ async function sendCustomerConfirmation(customerEmail, seqNo, formData) {
       </div>
     </div>`;
 
+  const subject = seqNo ? `[${seqNo}] WeCraft Travel — ได้รับคำขอของคุณแล้ว` : 'WeCraft Travel — ได้รับคำขอของคุณแล้ว';
+  await deliverEmail(customerEmail, subject, html);
+}
+
+// ── ส่งอีเมลลูกค้า — เลี่ยง junk ──────────────────────────────────
+// 1) ถ้าตั้งค่า RESEND_API_KEY (โดเมนยืนยัน SPF/DKIM แล้ว) → ส่งผ่าน Resend = เข้า inbox
+// 2) ถ้ายังไม่ตั้ง → ใช้ Gmail SMTP แต่เพิ่ม reply-to + ข้อความ plain-text ลดโอกาสเข้าสแปม
+async function deliverEmail(to, subject, html) {
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const from = process.env.RESEND_FROM || 'WeCraft Travel <noreply@wecraft-travel.com>';
+      const r = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + process.env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from, to, subject, html, reply_to: process.env.REPLY_TO || undefined }),
+      });
+      if (r.ok) { console.log('Customer email sent via Resend'); return; }
+      console.error('Resend failed → fallback Gmail:', r.status, (await r.text()).slice(0, 160));
+    } catch (e) { console.error('Resend error → fallback Gmail:', e.message); }
+  }
+  const user = process.env.GMAIL_USER, pass = process.env.GMAIL_APP_PASS;
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com', port: 465, secure: true,
-    auth: { user, pass },
-    tls: { rejectUnauthorized: false },
+    auth: { user, pass }, tls: { rejectUnauthorized: false },
   });
+  const text = String(html).replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   const info = await transporter.sendMail({
     from: `"WeCraft Travel" <${user}>`,
-    to: customerEmail,
-    subject: seqNo ? `[${seqNo}] WeCraft Travel — ได้รับคำขอของคุณแล้ว` : 'WeCraft Travel — ได้รับคำขอของคุณแล้ว',
-    html,
+    to, subject, html, text,
+    replyTo: process.env.REPLY_TO || user,
   });
-  console.log('Customer confirmation email sent:', info.messageId);
+  console.log('Customer email sent via Gmail:', info.messageId);
 }
 
 // ── Append row to Google Sheet ────────────────────────────────
