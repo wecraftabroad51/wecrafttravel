@@ -238,6 +238,8 @@ label { font-size: 12px; font-weight: 600; color: var(--ink-2); }
 .wrap-wide { max-width: 1500px; margin: 0 auto; padding: 0 28px; }
 
 /* หัวข้อการจอง — เด่น ดึงสายตา (ไอคอนเต้น + เรืองแสง) */
+.tp-spin { animation: tpSpin .7s linear infinite; }
+@keyframes tpSpin { to { transform: rotate(360deg); } }
 @keyframes bkPulse {
   0%,100% { transform: scale(1);   filter: drop-shadow(0 0 0 rgba(255,213,79,0)); }
   50%     { transform: scale(1.14); filter: drop-shadow(0 0 10px rgba(255,213,79,.75)); }

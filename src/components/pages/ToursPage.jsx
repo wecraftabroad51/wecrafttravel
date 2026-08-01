@@ -157,7 +157,7 @@ const REGION_KEYWORDS = {
   KR: ['โซล','ปูซาน','เกาะเชจู','เชจู'],
 };
 
-export default function ToursPage({ lang, t, navigate, tours, supplierTours = [], promotions, faqs, reviews, settings, compareList, toggleCompare, setBookings, setReviews, setMessages, initialFilters }) {
+export default function ToursPage({ lang, t, navigate, tours, supplierTours = [], suppliersLoading = 0, promotions, faqs, reviews, settings, compareList, toggleCompare, setBookings, setReviews, setMessages, initialFilters }) {
   const [tourType,  setTourType]  = useState(initialFilters?.tourType  || 'all');
   const [continent, setContinent] = useState(initialFilters?.continent || 'All');
   const [country,   setCountry]   = useState(initialFilters?.country   || '');
@@ -464,6 +464,16 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
               {lang === 'th' ? ' ทัวร์' : ' tours'}
               {activeCountry && <span> · {lang === 'th' ? activeCountry.th : activeCountry.en}</span>}
               {region && <span> · {region}</span>}
+              {suppliersLoading > 0 && (
+                <span style={{ marginLeft: 8, display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--primary)', fontWeight: 600 }}>
+                  <span className="tp-spin" style={{
+                    width: 12, height: 12, borderRadius: '50%',
+                    border: '2px solid var(--primary)', borderTopColor: 'transparent',
+                    display: 'inline-block',
+                  }} />
+                  {lang === 'th' ? 'กำลังโหลดโปรแกรมเพิ่มเติม…' : 'Loading more programs…'}
+                </span>
+              )}
             </div>
             {(activeCountry || tourType !== 'all' || search) && (
               <button onClick={() => { setCountry(''); setTourType('all'); setSearch(''); clearGroupFilter(); }}

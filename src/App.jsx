@@ -347,6 +347,7 @@ function AppInner() {
 
   const [compareList, setCompareList] = useState([]);
   const [supplierTours, setSupplierTours] = useState([]);
+  const [suppliersLoading, setSuppliersLoading] = useState(0); // จำนวนซัพที่ยังโหลดไม่เสร็จ
 
   const [loading, setLoading] = useState(true);
   const [minDelay, setMinDelay] = useState(true);   // splash shows at least 2.8s
@@ -372,31 +373,61 @@ function AppInner() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Load supplier tours — โหลดทีละเจ้า เจ้าไหนเสร็จโชว์ก่อน ────
+  // ซัพบางเจ้าตอบช้า/ล้มบ้าง (proxy timeout) → retry ให้หลายรอบ เพื่อให้โปรแกรมขึ้นครบทุกเจ้าเสมอ
   useEffect(() => {
     let cancelled = false;
     setSupplierTours([]);
-    ENABLED_SUPPLIERS.forEach(sup => {
-      fetch(`/api/suppliers?supplier=${sup.id}`)
-        .then(r => r.ok ? r.json() : Promise.reject(r.status))
-        .then(data => {
-          // TTN Plus / BEST ตอบเป็น object (ไม่ใช่ array) → จัดการก่อนเช็ค Array
-          if (sup.format === 'ttnplus') return normalizeTtnPlusTours(data, sup.id, sup.name);
-          if (sup.format === 'best')    return normalizeBestTours(data, sup.id, sup.name);
-          if (sup.format === 'superb')  return normalizeSuperbTours(data, sup.id, sup.name);
-          if (sup.format === 'flyde')   return normalizeFlydeTours(data, sup.id, sup.name);
-          if (sup.format === 'formosa') return normalizeFormosaTours(data, sup.id, sup.name);
-          if (!Array.isArray(data)) return [];
-          if (sup.format === 'zego') return normalizeZegoTours(data, sup.id, sup.name);
-          if (sup.format === 'ttn')  return normalizeTtnTours(data, sup.id, sup.name);
-          return normalizePbTours(data, sup.id, sup.name);
-        })
+    setSuppliersLoading(ENABLED_SUPPLIERS.length);
+
+    // fetch พร้อม timeout — ถ้าค้างเกิน 20 วิ ให้ยกเลิกแล้วลองใหม่ (ดีกว่าค้างยาวจนขึ้นไม่ครบ)
+    const fetchOnce = (id) => {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 20000);
+      return fetch(`/api/suppliers?supplier=${id}`, { signal: ctrl.signal })
+        .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
+        .finally(() => clearTimeout(timer));
+    };
+
+    const normalize = (sup, data) => {
+      // TTN Plus / BEST ตอบเป็น object (ไม่ใช่ array) → จัดการก่อนเช็ค Array
+      if (sup.format === 'ttnplus') return normalizeTtnPlusTours(data, sup.id, sup.name);
+      if (sup.format === 'best')    return normalizeBestTours(data, sup.id, sup.name);
+      if (sup.format === 'superb')  return normalizeSuperbTours(data, sup.id, sup.name);
+      if (sup.format === 'flyde')   return normalizeFlydeTours(data, sup.id, sup.name);
+      if (sup.format === 'formosa') return normalizeFormosaTours(data, sup.id, sup.name);
+      if (!Array.isArray(data)) return [];
+      if (sup.format === 'zego') return normalizeZegoTours(data, sup.id, sup.name);
+      if (sup.format === 'ttn')  return normalizeTtnTours(data, sup.id, sup.name);
+      return normalizePbTours(data, sup.id, sup.name);
+    };
+
+    // ลองสูงสุด 4 รอบ (รอบแรกทันที, จากนั้น backoff 1.5s/3s/5s) — เจ้าที่ล้มจะได้กลับมาครบ
+    const loadSupplier = (sup, attempt = 0) => {
+      if (cancelled) return;
+      fetchOnce(sup.id)
+        .then(data => normalize(sup, data))
         .then(tours => {
-          if (cancelled || !tours.length) return;
-          // append เฉพาะเจ้านี้ (กันซ้ำถ้าเผลอ re-run)
-          setSupplierTours(prev => [...prev.filter(t => t._source !== sup.id), ...tours]);
+          if (cancelled) return;
+          if (tours.length) {
+            // append เฉพาะเจ้านี้ (กันซ้ำถ้าเผลอ re-run)
+            setSupplierTours(prev => [...prev.filter(t => t._source !== sup.id), ...tours]);
+          }
+          setSuppliersLoading(n => Math.max(0, n - 1));
         })
-        .catch(err => console.warn(`[${sup.name}] fetch failed:`, err));
-    });
+        .catch(err => {
+          if (cancelled) return;
+          if (attempt < 3) {
+            const delay = [1500, 3000, 5000][attempt];
+            console.warn(`[${sup.name}] fetch failed (try ${attempt + 1}), retrying in ${delay}ms:`, err.message || err);
+            setTimeout(() => loadSupplier(sup, attempt + 1), delay);
+          } else {
+            console.warn(`[${sup.name}] fetch failed after retries:`, err.message || err);
+            setSuppliersLoading(n => Math.max(0, n - 1));
+          }
+        });
+    };
+
+    ENABLED_SUPPLIERS.forEach(sup => loadSupplier(sup));
     return () => { cancelled = true; };
   }, []);
 
@@ -713,7 +744,7 @@ function AppInner() {
   }
 
   const pageProps = {
-    lang, t, navigate, tours, supplierTours, articles, promotions, faqs,
+    lang, t, navigate, tours, supplierTours, suppliersLoading, articles, promotions, faqs,
     reviews, settings, compareList, toggleCompare,
     setBookings, setReviews, setMessages, setArticles,
   };
