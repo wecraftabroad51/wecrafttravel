@@ -190,7 +190,9 @@ const airlineClass = (tr) => {
 };
 
 const itinText = (tr) => (tr.itinerary || []).map(d => d.detail || d.desc || '').join(' ').toLowerCase();
-const hasFreeDay = (tr) => /อิสระ|ฟรีเดย์|free\s*day|free\s*&\s*easy/.test(tourNameLC(tr) + ' ' + itinText(tr));
+// "วันอิสระ" กับ "ฟรีเดย์" = ความหมายเดียวกัน — ควบรวมทุกแบบการเขียน (สะกด/เว้นวรรคต่างกัน)
+const FREEDAY_RE = /อิสระ|ฟรี\s*เดย?|freeday|free\s*day|free\s*&?\s*easy|free\s*and\s*easy|free\s*time|at\s*leisure/i;
+const hasFreeDay = (tr) => FREEDAY_RE.test(tourNameLC(tr) + ' ' + itinText(tr));
 const isNoShop   = (tr) => /ไม่ลงร้าน|ไม่เข้าร้าน|ไม่มีร้าน|no\s*shop/.test(tourNameLC(tr));
 const isShop     = (tr) => /ลงร้าน|เข้าร้าน/.test(tourNameLC(tr)) && !isNoShop(tr);
 
@@ -528,7 +530,7 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
                   <button onClick={() => setFFreeDay(v => !v)}
                     style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 15px', borderRadius: 999, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
                       border: `1px solid ${fFreeDay ? 'var(--primary)' : 'var(--line)'}`, background: fFreeDay ? 'var(--primary-light)' : 'var(--canvas)', color: fFreeDay ? 'var(--primary)' : 'var(--ink-2)' }}>
-                    {fFreeDay ? '✓ ' : ''}🏖️ {lang === 'th' ? 'มีวันอิสระ' : 'Has free day'} <span style={{ opacity: .6, fontWeight: 700 }}>({facets.freeDay})</span>
+                    {fFreeDay ? '✓ ' : ''}🏖️ {lang === 'th' ? 'มีวันอิสระ / ฟรีเดย์' : 'Has free day'} <span style={{ opacity: .6, fontWeight: 700 }}>({facets.freeDay})</span>
                   </button>
                 )}
                 {advCount > 0 && (
