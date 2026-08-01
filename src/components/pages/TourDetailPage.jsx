@@ -151,6 +151,36 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
     if (a.y === b.y) return `${a.d} ${MONTHS_TH_FULL[a.m]} – ${b.d} ${MONTHS_TH_FULL[b.m]} ${a.y}`;
     return `${a.d} ${MONTHS_TH_FULL[a.m]} ${a.y} – ${b.d} ${MONTHS_TH_FULL[b.m]} ${b.y}`;
   };
+  // วันในสัปดาห์ (ตัวย่อไทย) — index = getDay() : 0=อาทิตย์ … 6=เสาร์
+  const DOW_TH  = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+  const DOW_EN  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dowOf = (p) => {
+    if (!p) return '';
+    const gy = p.y > 2400 ? p.y - 543 : p.y;          // แปลง พ.ศ. → ค.ศ. ก่อนหาวัน
+    const dt = new Date(gy, p.m, p.d);
+    return isNaN(dt.getTime()) ? '' : (th ? DOW_TH : DOW_EN)[dt.getDay()];
+  };
+  // ป้ายวัน (จ–อา) วางไว้หน้าตัวเลขวันที่ ทั้งวันออกเดินทางและวันกลับ
+  const Dow = ({ v }) => v ? (
+    <span style={{
+      display: 'inline-block', background: '#dbeafe', color: '#1d4ed8',
+      fontWeight: 800, fontSize: '.66em', borderRadius: 6, padding: '1px 6px',
+      marginRight: 5, verticalAlign: 'middle', lineHeight: 1.6, letterSpacing: '.02em',
+    }}>{v}</span>
+  ) : null;
+  // เวอร์ชัน JSX ของ formatDepRange — มีป้ายวันในสัปดาห์หน้าแต่ละวันที่
+  const renderDepRange = (dateStr, returnDateStr) => {
+    const a = parseDate(dateStr);
+    const b = parseDate(returnDateStr);
+    if (!a) return dateStr || '';
+    const da = dowOf(a), db = dowOf(b);
+    if (!b) return <><Dow v={da} />{a.d} {MONTHS_TH_FULL[a.m]} {a.y}</>;
+    if (a.m === b.m && a.y === b.y)
+      return <><Dow v={da} />{a.d} – <Dow v={db} />{b.d} {MONTHS_TH_FULL[a.m]} {a.y}</>;
+    if (a.y === b.y)
+      return <><Dow v={da} />{a.d} {MONTHS_TH_FULL[a.m]} – <Dow v={db} />{b.d} {MONTHS_TH_FULL[b.m]} {a.y}</>;
+    return <><Dow v={da} />{a.d} {MONTHS_TH_FULL[a.m]} {a.y} – <Dow v={db} />{b.d} {MONTHS_TH_FULL[b.m]} {b.y}</>;
+  };
   // Robustly extract month index (0-11) from a date value of any common shape:
   // "YYYY-MM-DD", "YYYY/MM/DD", Date object, timestamp, or other parseable string.
   const monthFromDateVal = (val) => {
@@ -445,7 +475,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
                       <tr key={dep.id || i}>
                         <td>
                           <div style={{ fontWeight: 700, color: '#0f3460', fontSize: 16 }}>
-                            {formatDepRange(dep.date, dep.returnDate)}
+                            {renderDepRange(dep.date, dep.returnDate)}
                           </div>
                         </td>
                         <td>
@@ -501,7 +531,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
                 return (
                   <div key={dep.id || i} className="td-depcard">
                     <div className="td-depcard-top">
-                      <div className="td-depcard-date">{formatDepRange(dep.date, dep.returnDate)}</div>
+                      <div className="td-depcard-date">{renderDepRange(dep.date, dep.returnDate)}</div>
                       {st === 'full'
                         ? <span className="td-depcard-badge full">🔴 {th ? 'เต็ม' : 'Full'}</span>
                         : typeof avail === 'number'
