@@ -327,17 +327,38 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
     }
     // กรองตามเดือนออกเดินทาง (YYYY-MM) — เฉพาะทัวร์ที่มีรอบเดินทางในเดือนนั้น
     if (month) list = list.filter(tr => (tr.departures || []).some(d => String(d.date || '').startsWith(month)));
-
-    // ── ตัวกรองขั้นสูง ──
-    if (fHotel)   { const n = parseInt(fHotel, 10); list = list.filter(tr => { const s = hotelStarsOf(tr); return s !== null && s >= n; }); }
-    if (fAir)     list = list.filter(tr => airlineClass(tr) === fAir);
-    if (fPrice && PRICE_BUCKETS[fPrice]) list = list.filter(tr => PRICE_BUCKETS[fPrice](tr.price || 0));
-    if (fDur && DUR_BUCKETS[fDur])       list = list.filter(tr => DUR_BUCKETS[fDur](tr.duration || 0));
-    if (fShop === 'no')  list = list.filter(isNoShop);
-    if (fShop === 'yes') list = list.filter(isShop);
-    if (fFreeDay)        list = list.filter(hasFreeDay);
     return list;
-  }, [allTours, tourType, continent, country, groupCountries, search, month, lang, fHotel, fAir, fPrice, fDur, fShop, fFreeDay]);
+  }, [allTours, tourType, continent, country, groupCountries, search, month, lang]);
+
+  // ── สรุปว่าตัวกรองแต่ละแบบ "มีทัวร์จริง" กี่รายการในบริบทนี้ ──────
+  // ใช้ซ่อนตัวเลือกที่กรองแล้วเจอ 0 (เช่น ญี่ปุ่นมีแต่โรงแรม 3 ดาว → ไม่โชว์ 4/5 ดาว)
+  const facets = useMemo(() => {
+    const hotel = { 3: 0, 4: 0, 5: 0 };
+    const air = { full: 0, low: 0 };
+    const price = { lt20: 0, '20-35': 0, '35-50': 0, gt50: 0 };
+    const dur = { '3-4': 0, '5-6': 0, '7+': 0 };
+    let noShop = 0, freeDay = 0;
+    for (const tr of baseList) {
+      const s = hotelStarsOf(tr);
+      if (s !== null) { if (s >= 3) hotel[3]++; if (s >= 4) hotel[4]++; if (s >= 5) hotel[5]++; }
+      const a = airlineClass(tr); if (a) air[a]++;
+      const p = tr.price || 0;    for (const k in PRICE_BUCKETS) if (PRICE_BUCKETS[k](p)) price[k]++;
+      const d = tr.duration || 0; for (const k in DUR_BUCKETS)   if (DUR_BUCKETS[k](d))   dur[k]++;
+      if (isNoShop(tr)) noShop++;
+      if (hasFreeDay(tr)) freeDay++;
+    }
+    return { hotel, air, price, dur, noShop, freeDay };
+  }, [baseList]);
+
+  // ถ้าตัวกรองที่เลือกไว้ไม่มีทัวร์รองรับแล้ว (เช่นเปลี่ยนประเทศ) → ล้างทิ้ง กันเจอ 0
+  useEffect(() => {
+    if (fHotel && !(facets.hotel[fHotel] > 0)) setFHotel('');
+    if (fAir && !(facets.air[fAir] > 0)) setFAir('');
+    if (fPrice && !(facets.price[fPrice] > 0)) setFPrice('');
+    if (fDur && !(facets.dur[fDur] > 0)) setFDur('');
+    if (fShop === 'no' && !(facets.noShop > 0)) setFShop('');
+    if (fFreeDay && !(facets.freeDay > 0)) setFFreeDay(false);
+  }, [facets]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── เมืองย่อยของประเทศที่เลือก (เฉพาะที่มีทัวร์จริง) ────────────
   const nameHas = (tr, kw) => (tr.name?.th || '').includes(kw) || (t(tr.destination) || '').includes(kw);
@@ -350,15 +371,22 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
       .sort((a, b) => b.count - a.count);
   }, [country, baseList]);
 
-  // ── ชั้นที่ 2: กรองเมืองย่อย + sort ───────────────────────────
+  // ── ชั้นที่ 2: ตัวกรองขั้นสูง + เมืองย่อย + sort ───────────────
   const filtered = useMemo(() => {
-    let list = region ? baseList.filter(tr => nameHas(tr, region)) : baseList;
+    let list = baseList;
+    if (fHotel)  { const n = parseInt(fHotel, 10); list = list.filter(tr => { const s = hotelStarsOf(tr); return s !== null && s >= n; }); }
+    if (fAir)    list = list.filter(tr => airlineClass(tr) === fAir);
+    if (fPrice && PRICE_BUCKETS[fPrice]) list = list.filter(tr => PRICE_BUCKETS[fPrice](tr.price || 0));
+    if (fDur && DUR_BUCKETS[fDur])       list = list.filter(tr => DUR_BUCKETS[fDur](tr.duration || 0));
+    if (fShop === 'no') list = list.filter(isNoShop);
+    if (fFreeDay)       list = list.filter(hasFreeDay);
+    if (region) list = list.filter(tr => nameHas(tr, region));
     if (sort === 'price-low')  list = [...list].sort((a, b) => (a.price || 0) - (b.price || 0));
     if (sort === 'price-high') list = [...list].sort((a, b) => (b.price || 0) - (a.price || 0));
     if (sort === 'duration')   list = [...list].sort((a, b) => (b.duration || 0) - (a.duration || 0));
     if (sort === 'popular')    list = [...list].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
     return list;
-  }, [baseList, region, sort]);
+  }, [baseList, region, sort, fHotel, fAir, fPrice, fDur, fShop, fFreeDay]);
 
   const clearGroupFilter = () => { setGroupCountries(null); setGroupLabel(''); };
 
@@ -471,29 +499,38 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
           {/* Row 1.5: แผงตัวกรองขั้นสูง (พับได้) */}
           {showFilters && (
             <div style={{ border: '1px solid var(--line)', borderRadius: 12, background: 'var(--card)', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(148px, 1fr))', gap: 10 }}>
-                {[
-                  { val: fHotel, set: setFHotel, th: 'โรงแรม', en: 'Hotel', opts: [['', 'ทั้งหมด', 'All'], ['5', '5 ดาว', '5-star'], ['4', '4 ดาวขึ้นไป', '4-star+'], ['3', '3 ดาวขึ้นไป', '3-star+']] },
-                  { val: fAir, set: setFAir, th: 'สายการบิน', en: 'Airline', opts: [['', 'ทั้งหมด', 'All'], ['full', 'ฟูลเซอร์วิส', 'Full-service'], ['low', 'โลว์คอสต์', 'Low-cost']] },
-                  { val: fShop, set: setFShop, th: 'ช้อปปิ้ง', en: 'Shopping', opts: [['', 'ทั้งหมด', 'All'], ['no', 'ไม่ลงร้าน', 'No shopping']] },
-                  { val: fPrice, set: setFPrice, th: 'ช่วงราคา', en: 'Price', opts: [['', 'ทั้งหมด', 'All'], ['lt20', 'ต่ำกว่า 20,000', 'Under 20,000'], ['20-35', '20,000–35,000', '20,000–35,000'], ['35-50', '35,000–50,000', '35,000–50,000'], ['gt50', '50,000 ขึ้นไป', '50,000+']] },
-                  { val: fDur, set: setFDur, th: 'จำนวนวัน', en: 'Days', opts: [['', 'ทั้งหมด', 'All'], ['3-4', '3–4 วัน', '3–4 days'], ['5-6', '5–6 วัน', '5–6 days'], ['7+', '7 วันขึ้นไป', '7+ days']] },
-                ].map((f, idx) => (
-                  <div key={idx}>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--muted)', marginBottom: 4 }}>{lang === 'th' ? f.th : f.en}</label>
-                    <select value={f.val} onChange={e => f.set(e.target.value)}
-                      style={{ width: '100%', padding: '8px 10px', border: `1px solid ${f.val ? 'var(--primary)' : 'var(--line)'}`, borderRadius: 9, background: 'var(--canvas)', fontSize: 14, cursor: 'pointer', color: 'var(--ink)', fontWeight: f.val ? 700 : 400 }}>
-                      {f.opts.map(([v, oth, oen]) => <option key={v} value={v}>{lang === 'th' ? oth : oen}</option>)}
-                    </select>
+              {(() => {
+                const defs = [
+                  { val: fHotel, set: setFHotel, th: 'โรงแรม', en: 'Hotel', count: v => facets.hotel[v], opts: [['', 'ทั้งหมด', 'All'], ['5', '5 ดาว', '5-star'], ['4', '4 ดาวขึ้นไป', '4-star+'], ['3', '3 ดาวขึ้นไป', '3-star+']] },
+                  { val: fAir, set: setFAir, th: 'สายการบิน', en: 'Airline', count: v => facets.air[v], opts: [['', 'ทั้งหมด', 'All'], ['full', 'ฟูลเซอร์วิส', 'Full-service'], ['low', 'โลว์คอสต์', 'Low-cost']] },
+                  { val: fShop, set: setFShop, th: 'ช้อปปิ้ง', en: 'Shopping', count: () => facets.noShop, opts: [['', 'ทั้งหมด', 'All'], ['no', 'ไม่ลงร้าน', 'No shopping']] },
+                  { val: fPrice, set: setFPrice, th: 'ช่วงราคา', en: 'Price', count: v => facets.price[v], opts: [['', 'ทั้งหมด', 'All'], ['lt20', 'ต่ำกว่า 20,000', 'Under 20,000'], ['20-35', '20,000–35,000', '20,000–35,000'], ['35-50', '35,000–50,000', '35,000–50,000'], ['gt50', '50,000 ขึ้นไป', '50,000+']] },
+                  { val: fDur, set: setFDur, th: 'จำนวนวัน', en: 'Days', count: v => facets.dur[v], opts: [['', 'ทั้งหมด', 'All'], ['3-4', '3–4 วัน', '3–4 days'], ['5-6', '5–6 วัน', '5–6 days'], ['7+', '7 วันขึ้นไป', '7+ days']] },
+                ].map(f => ({ ...f, opts: f.opts.filter(([v]) => v === '' || f.count(v) > 0) }))
+                  .filter(f => f.opts.length > 1);   // ซ่อนตัวกรองที่ไม่มีตัวเลือกที่มีทัวร์ (เช่น ประเทศที่ไม่มีข้อมูลดาว)
+                if (!defs.length) return <div style={{ fontSize: 13.5, color: 'var(--muted)' }}>{lang === 'th' ? 'ไม่มีตัวกรองเพิ่มเติมสำหรับรายการนี้' : 'No extra filters for this list.'}</div>;
+                return (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(148px, 1fr))', gap: 10 }}>
+                    {defs.map((f, idx) => (
+                      <div key={idx}>
+                        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--muted)', marginBottom: 4 }}>{lang === 'th' ? f.th : f.en}</label>
+                        <select value={f.val} onChange={e => f.set(e.target.value)}
+                          style={{ width: '100%', padding: '8px 10px', border: `1px solid ${f.val ? 'var(--primary)' : 'var(--line)'}`, borderRadius: 9, background: 'var(--canvas)', fontSize: 14, cursor: 'pointer', color: 'var(--ink)', fontWeight: f.val ? 700 : 400 }}>
+                          {f.opts.map(([v, oth, oen]) => <option key={v} value={v}>{(lang === 'th' ? oth : oen)}{v !== '' ? ` (${f.count(v)})` : ''}</option>)}
+                        </select>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                );
+              })()}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <button onClick={() => setFFreeDay(v => !v)}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 15px', borderRadius: 999, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-                    border: `1px solid ${fFreeDay ? 'var(--primary)' : 'var(--line)'}`, background: fFreeDay ? 'var(--primary-light)' : 'var(--canvas)', color: fFreeDay ? 'var(--primary)' : 'var(--ink-2)' }}>
-                  {fFreeDay ? '✓ ' : ''}🏖️ {lang === 'th' ? 'มีวันอิสระ' : 'Has free day'}
-                </button>
+                {facets.freeDay > 0 && (
+                  <button onClick={() => setFFreeDay(v => !v)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 15px', borderRadius: 999, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                      border: `1px solid ${fFreeDay ? 'var(--primary)' : 'var(--line)'}`, background: fFreeDay ? 'var(--primary-light)' : 'var(--canvas)', color: fFreeDay ? 'var(--primary)' : 'var(--ink-2)' }}>
+                    {fFreeDay ? '✓ ' : ''}🏖️ {lang === 'th' ? 'มีวันอิสระ' : 'Has free day'} <span style={{ opacity: .6, fontWeight: 700 }}>({facets.freeDay})</span>
+                  </button>
+                )}
                 {advCount > 0 && (
                   <button onClick={clearAdv}
                     style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: 13.5, fontWeight: 700, fontFamily: 'inherit' }}>
