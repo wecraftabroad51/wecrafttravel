@@ -475,7 +475,7 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
                 {[
                   { val: fHotel, set: setFHotel, th: 'โรงแรม', en: 'Hotel', opts: [['', 'ทั้งหมด', 'All'], ['5', '5 ดาว', '5-star'], ['4', '4 ดาวขึ้นไป', '4-star+'], ['3', '3 ดาวขึ้นไป', '3-star+']] },
                   { val: fAir, set: setFAir, th: 'สายการบิน', en: 'Airline', opts: [['', 'ทั้งหมด', 'All'], ['full', 'ฟูลเซอร์วิส', 'Full-service'], ['low', 'โลว์คอสต์', 'Low-cost']] },
-                  { val: fShop, set: setFShop, th: 'ช้อปปิ้ง', en: 'Shopping', opts: [['', 'ทั้งหมด', 'All'], ['no', 'ไม่ลงร้าน', 'No shopping'], ['yes', 'ลงร้าน', 'With shopping']] },
+                  { val: fShop, set: setFShop, th: 'ช้อปปิ้ง', en: 'Shopping', opts: [['', 'ทั้งหมด', 'All'], ['no', 'ไม่ลงร้าน', 'No shopping']] },
                   { val: fPrice, set: setFPrice, th: 'ช่วงราคา', en: 'Price', opts: [['', 'ทั้งหมด', 'All'], ['lt20', 'ต่ำกว่า 20,000', 'Under 20,000'], ['20-35', '20,000–35,000', '20,000–35,000'], ['35-50', '35,000–50,000', '35,000–50,000'], ['gt50', '50,000 ขึ้นไป', '50,000+']] },
                   { val: fDur, set: setFDur, th: 'จำนวนวัน', en: 'Days', opts: [['', 'ทั้งหมด', 'All'], ['3-4', '3–4 วัน', '3–4 days'], ['5-6', '5–6 วัน', '5–6 days'], ['7+', '7 วันขึ้นไป', '7+ days']] },
                 ].map((f, idx) => (
