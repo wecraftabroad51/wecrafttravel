@@ -120,6 +120,11 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
   const basePrice   = tour.priceTiers?.[0]?.price || tour.price || 0;
   const tourCode    = tour.code || '-';
 
+  // โปรแกรมแบบวันต่อวัน (บางซัพมีมาให้) · ถ้าไม่มี → ใช้ไฮไลต์ + ฝัง PDF โปรแกรมเต็มแทน
+  const hasItinerary = tour.itinerary?.length > 0;
+  const pbHighlight  = String(pbDetail?.highlight || pbDetail?.highLight || '')
+    .replace(/<script[\s\S]*?<\/script>/gi, '').trim();
+
   // Travel month range from departures
   const MONTHS_TH      = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
   const MONTHS_TH_FULL = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
@@ -239,6 +244,12 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
     <main className="page-enter" style={{ background: '#f0f4f8', minHeight: '80vh' }}>
       <style>{`
         @keyframes tdFadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+        .td-highlight ul { padding-left:22px; margin:0; }
+        .td-highlight ol { padding-left:22px; margin:0; }
+        .td-highlight li { list-style:disc; margin:4px 0; }
+        .td-highlight p { margin:6px 0; }
+        .td-highlight img { max-width:100%; height:auto; border-radius:8px; }
+        .td-highlight strong { color:#0f172a; }
         .td-card { background:#fff; border-radius:16px; border:1px solid #e2e8f0; box-shadow:0 2px 12px rgba(0,0,0,.06); animation:tdFadeIn .4s ease both; }
         .td-back { display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:10px;padding:8px 18px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s; }
         .td-back:hover { background:rgba(255,255,255,.25); }
@@ -573,9 +584,42 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
         {/* ── Accordions ──────────────────────────────────────── */}
         <div style={{ marginBottom: 4 }}>
 
-          {/* Program detail */}
-          {(tour.itinerary?.length > 0 || tour.includes?.length > 0 || tour.excludes?.length > 0) && (
-            <Accordion title={th ? 'รายละเอียดโปรแกรม' : 'Program Details'} icon="📋" badge={tour.itinerary?.length ? `${tour.itinerary.length} วัน` : null}>
+          {/* Program detail — โชว์ทุกโปรแกรม: มี timeline ใช้ timeline · ไม่มีก็ฝาก PDF โปรแกรมเต็ม */}
+          {(tour.itinerary?.length > 0 || tour.includes?.length > 0 || tour.excludes?.length > 0 || pbHighlight || tour.pdfUrl) && (
+            <Accordion title={th ? 'รายละเอียดโปรแกรม' : 'Program Details'} icon="📋" defaultOpen
+              badge={tour.itinerary?.length ? `${tour.itinerary.length} ${th ? 'วัน' : 'days'}` : (tour.duration ? `${tour.duration} ${th ? 'วัน' : 'days'}` : null)}>
+              {/* ไฮไลต์โปรแกรม (เมื่อไม่มี timeline วันต่อวัน) */}
+              {!hasItinerary && pbHighlight && (
+                <div style={{ marginBottom: tour.pdfUrl ? 18 : 0 }}>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: '#0f3460', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    ✨ {th ? 'ไฮไลต์โปรแกรม' : 'Highlights'}
+                  </div>
+                  <div className="td-highlight" style={{ fontSize: 15.5, color: '#374151', lineHeight: 1.7 }}
+                    dangerouslySetInnerHTML={{ __html: pbHighlight }} />
+                </div>
+              )}
+              {/* โปรแกรมฉบับเต็ม (PDF) — ฝังในหน้าเลย เมื่อไม่มี timeline วันต่อวัน */}
+              {!hasItinerary && tour.pdfUrl && (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 10 }}>
+                    <span style={{ fontSize: 16, fontWeight: 800, color: '#0f3460', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      🗓️ {th ? 'โปรแกรมเดินทางฉบับเต็ม' : 'Full day-by-day program'}
+                    </span>
+                    <a href={proxyPdf(tour.pdfUrl)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                      <button className="td-btn" style={{ background: 'linear-gradient(135deg,#0f3460,#1e4a7a)', color: '#fff' }}>
+                        <Icon name="download" size={14} />
+                        {th ? 'เปิด/ดาวน์โหลด PDF' : 'Open / Download PDF'}
+                      </button>
+                    </a>
+                  </div>
+                  <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid #e2e8f0', height: 560 }}>
+                    <iframe src={proxyPdf(tour.pdfUrl)} style={{ width: '100%', height: '100%', border: 'none' }} title="Tour Program" loading="lazy" />
+                  </div>
+                  <div style={{ fontSize: 13.5, color: '#94a3b8', marginTop: 8 }}>
+                    {th ? 'หากดูไม่ได้บนมือถือ กดปุ่มด้านบนเพื่อเปิดไฟล์โปรแกรมเต็ม' : 'On mobile, tap the button above to open the full program.'}
+                  </div>
+                </div>
+              )}
               {/* Timeline */}
               {tour.itinerary?.length > 0 && (
                 <div style={{ position: 'relative', paddingLeft: 40, marginBottom: tour.includes?.length ? 24 : 0 }}>
@@ -650,8 +694,8 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
             </Accordion>
           )}
 
-          {/* PDF */}
-          {tour.pdfUrl && (
+          {/* PDF — โชว์แยกเฉพาะเมื่อมี timeline แล้ว (ถ้าไม่มี timeline PDF ถูกฝังในหัวข้อโปรแกรมแล้ว) */}
+          {hasItinerary && tour.pdfUrl && (
             <Accordion title={th ? 'ไฟล์โปรแกรมทัวร์ (PDF)' : 'Tour Program PDF'} icon="📄">
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
                 <a href={proxyPdf(tour.pdfUrl)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
