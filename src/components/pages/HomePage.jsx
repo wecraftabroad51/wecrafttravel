@@ -167,15 +167,30 @@ function SearchSidebar({ navigate, lang, tours = [] }) {
   const [month, setMonth]       = useState('');   // YYYY-MM (เดือนออกเดินทาง)
   const [codeSearch, setCodeSearch] = useState('');
 
-  // 18 เดือนข้างหน้า · value = YYYY-MM (ค.ศ.) · label = เดือน + ปี พ.ศ.
-  const monthOptions = (() => {
-    const opts = []; const now = new Date();
-    for (let i = 0; i < 18; i++) {
-      const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-      opts.push({ val: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`, label: `${SEARCH_MONTH_NAMES[d.getMonth()]} ${d.getFullYear() + 543}` });
-    }
-    return opts;
-  })();
+  // เดือนที่ "มีรอบเดินทางจริง" เท่านั้น (ตามประเทศ/เมืองที่เลือก) — กันเลือกเดือนที่ไม่มีโปรแกรม
+  // value = YYYY-MM (ค.ศ.) · label = เดือน + ปี พ.ศ.
+  const monthOptions = useMemo(() => {
+    const now = new Date();
+    const cur = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`; // ไม่เอาเดือนที่ผ่านมาแล้ว
+    const set = new Set();
+    (tours || []).forEach(tr => {
+      if (country && tr.country !== country) return;
+      if (city && !((tr.name?.th || '').includes(city) || (tr.destination?.th || '').includes(city))) return;
+      (tr.departures || []).forEach(d => {
+        const ym = String(d.date || '').slice(0, 7);   // "2027-10-15" → "2027-10"
+        if (/^\d{4}-\d{2}$/.test(ym) && ym >= cur) set.add(ym);
+      });
+    });
+    return [...set].sort().map(ym => {
+      const [y, m] = ym.split('-').map(Number);
+      return { val: ym, label: `${SEARCH_MONTH_NAMES[m - 1]} ${y + 543}` };
+    });
+  }, [tours, country, city]);
+
+  // ถ้าเดือนที่เลือกไว้ไม่มีในตัวเลือกแล้ว (เช่นเปลี่ยนประเทศ) → ล้างทิ้ง
+  useEffect(() => {
+    if (month && !monthOptions.some(m => m.val === month)) setMonth('');
+  }, [monthOptions, month]);
 
   // ประเทศจากทัวร์จริง (ISO2 + ชื่อไทย + จำนวน) เรียงตามจำนวนมาก→น้อย
   const countryList = useMemo(() => {

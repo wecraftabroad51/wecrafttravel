@@ -464,6 +464,18 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
               {lang === 'th' ? ' ทัวร์' : ' tours'}
               {activeCountry && <span> · {lang === 'th' ? activeCountry.th : activeCountry.en}</span>}
               {region && <span> · {region}</span>}
+              {month && (() => {
+                const [y, m] = month.split('-').map(Number);
+                const names = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+                const label = lang === 'th' ? `${names[m - 1]} ${y + 543}` : `${month}`;
+                return (
+                  <span style={{ marginLeft: 8, display: 'inline-flex', alignItems: 'center', gap: 5, background: 'var(--primary-light)', color: 'var(--primary)', fontWeight: 700, borderRadius: 20, padding: '2px 10px', fontSize: 12.5 }}>
+                    📅 {label}
+                    <button onClick={() => setMonth('')} title={lang === 'th' ? 'ล้างเดือน' : 'Clear month'}
+                      style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', padding: 0, fontSize: 13, lineHeight: 1, fontFamily: 'inherit' }}>✕</button>
+                  </span>
+                );
+              })()}
               {suppliersLoading > 0 && (
                 <span style={{ marginLeft: 8, display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--primary)', fontWeight: 600 }}>
                   <span className="tp-spin" style={{
@@ -475,8 +487,8 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
                 </span>
               )}
             </div>
-            {(activeCountry || tourType !== 'all' || search) && (
-              <button onClick={() => { setCountry(''); setTourType('all'); setSearch(''); clearGroupFilter(); }}
+            {(activeCountry || tourType !== 'all' || search || region || month) && (
+              <button onClick={() => { setCountry(''); setTourType('all'); setSearch(''); setRegion(''); setMonth(''); clearGroupFilter(); }}
                 style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'inherit' }}>
                 {lang === 'th' ? '✕ ล้างตัวกรอง' : '✕ Clear filters'}
               </button>
@@ -488,9 +500,20 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
               <div style={{ fontSize: 18, fontWeight: 600 }}>
                 {t ? t({ th: 'ไม่พบทัวร์', en: 'No tours match these filters.' }) : 'No tours match.'}
               </div>
-              <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 8 }}>
-                {lang === 'th' ? 'ลองเลือกประเทศหรือหมวดอื่นจากเมนูด้านบน' : 'Try another country or category from the menu.'}
-              </div>
+              {month ? (
+                <>
+                  <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 8 }}>
+                    {lang === 'th' ? 'ยังไม่มีรอบเดินทางในเดือนที่เลือก — ลองเอาตัวกรองเดือนออกเพื่อดูทุกโปรแกรม' : 'No departures in the selected month — clear the month filter to see all programs.'}
+                  </div>
+                  <button onClick={() => setMonth('')} className="btn btn-primary btn-sm" style={{ marginTop: 14 }}>
+                    {lang === 'th' ? '📅 ดูทุกเดือน' : '📅 Show all months'}
+                  </button>
+                </>
+              ) : (
+                <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 8 }}>
+                  {lang === 'th' ? 'ลองเลือกประเทศหรือหมวดอื่นจากเมนูด้านบน' : 'Try another country or category from the menu.'}
+                </div>
+              )}
             </div>
           ) : view === 'grid' ? (
             <div className="tours-grid" style={{ gap: 16 }}>
