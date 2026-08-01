@@ -15,6 +15,9 @@ function Icon({ name, size = 16 }) {
     case 'users':   return <svg {...p}><circle cx="9" cy="9" r="3.5"/><path d="M2 20c.8-3.5 3.8-5.5 7-5.5s6.2 2 7 5.5"/><circle cx="17" cy="7" r="2.5"/><path d="M17 13c3 0 5 1.6 5.5 4"/></svg>;
     case 'plane':   return <svg {...p}><path d="M3 13.5 21 6l-6 16-3-7-7-2z"/></svg>;
     case 'calendar':return <svg {...p}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>;
+    case 'sliders': return <svg {...p}><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>;
+    case 'chevron-up':   return <svg {...p}><path d="m6 15 6-6 6 6"/></svg>;
+    case 'chevron-down': return <svg {...p}><path d="m6 9 6 6 6-6"/></svg>;
     default: return null;
   }
 }
@@ -157,6 +160,52 @@ const REGION_KEYWORDS = {
   KR: ['โซล','ปูซาน','เกาะเชจู','เชจู'],
 };
 
+// ── ตัวช่วยแยกประเภททัวร์จากชื่อ/ฟิลด์ (ชื่อทัวร์ไทยมักระบุครบ) ──────
+const LOWCOST_KW = ['airasia','air asia','แอร์เอเชีย','แอร์เอเซีย','นกแอร์','นกสกู๊ต','scoot','สกู๊ต','ไลอ้อน','ไลออน','lion air','vietjet','เวียตเจ็ท','เวียตเจ็ต','เวียดเจ็ท','เวียดเจ็ต','jetstar','เจ็ทสตาร์','cebu','เซบู','springairlines','spring airlines','batik','บาติก','ไทยไลอ้อน','นกสกูต','peach','ราคาประหยัด','โลว์คอส','low cost'];
+const FULL_KW    = ['thai airways','การบินไทย','bangkok airways','บางกอกแอร์เวย์','อีวีเอ','eva air','china airlines','ไชน่าแอร์ไลน์','japan airlines','การบินญี่ปุ่น','all nippon','cathay','คาเธ่ย์','คาเธย์','singapore airlines','สิงคโปร์แอร์ไลน์','emirates','เอมิเรตส์','qatar airways','กาตาร์','การ์ต้า','turkish','เตอร์กิช','korean air','โคเรียนแอร์','asiana','อาเซียน่า','air china','แอร์ไชน่า','china eastern','china southern','malaysia airlines','มาเลเซียแอร์ไลน์','vietnam airlines','เวียดนามแอร์ไลน์','garuda','oman air','โอมานแอร์',' full service','ฟูลเซอร์วิส','ฟูลเซอร์วิ'];
+const LOWCOST_CODES = ['fd','sl','dd','xw','xj','vz','tr','jw','ak','qz','vj','5j','9c','jt','ip','z2'];
+const FULL_CODES    = ['tg','pg','br','ci','jl','nh','cx','sq','ek','qr','tk','ke','oz','ca','mu','cz','mh','vn','ga','wy','sc','ja'];
+
+const tourNameLC = (tr) => (tr.name?.th || tr.name?.en || '').toLowerCase();
+
+// ระดับโรงแรม (ดาว) — ใช้ฟิลด์ถ้ามี ไม่งั้นอ่านจากชื่อ "พัก 4 ดาว"
+const hotelStarsOf = (tr) => {
+  const f = parseInt(tr._hotelStars, 10);
+  if (f >= 1 && f <= 5) return f;
+  const m = tourNameLC(tr).match(/([3-5])\s*(?:ดาว|star)/);
+  return m ? parseInt(m[1], 10) : null;
+};
+
+// ประเภทสายการบิน: 'full' | 'low' | null (แยกจากฟิลด์ก่อน แล้วค่อยดูชื่อทัวร์)
+const airlineClass = (tr) => {
+  const a = (tr.airline || '').toLowerCase().trim();
+  if (a) {
+    if (LOWCOST_CODES.includes(a) || LOWCOST_KW.some(k => a.includes(k))) return 'low';
+    if (FULL_CODES.includes(a)    || FULL_KW.some(k => a.includes(k)))    return 'full';
+  }
+  const nm = tourNameLC(tr);
+  if (LOWCOST_KW.some(k => k.length >= 4 && nm.includes(k))) return 'low';
+  if (FULL_KW.some(k => k.length >= 6 && nm.includes(k)))    return 'full';
+  return null;
+};
+
+const itinText = (tr) => (tr.itinerary || []).map(d => d.detail || d.desc || '').join(' ').toLowerCase();
+const hasFreeDay = (tr) => /อิสระ|ฟรีเดย์|free\s*day|free\s*&\s*easy/.test(tourNameLC(tr) + ' ' + itinText(tr));
+const isNoShop   = (tr) => /ไม่ลงร้าน|ไม่เข้าร้าน|ไม่มีร้าน|no\s*shop/.test(tourNameLC(tr));
+const isShop     = (tr) => /ลงร้าน|เข้าร้าน/.test(tourNameLC(tr)) && !isNoShop(tr);
+
+const PRICE_BUCKETS = {
+  'lt20':  (p) => p > 0 && p < 20000,
+  '20-35': (p) => p >= 20000 && p < 35000,
+  '35-50': (p) => p >= 35000 && p < 50000,
+  'gt50':  (p) => p >= 50000,
+};
+const DUR_BUCKETS = {
+  '3-4': (d) => d >= 3 && d <= 4,
+  '5-6': (d) => d >= 5 && d <= 6,
+  '7+':  (d) => d >= 7,
+};
+
 export default function ToursPage({ lang, t, navigate, tours, supplierTours = [], suppliersLoading = 0, promotions, faqs, reviews, settings, compareList, toggleCompare, setBookings, setReviews, setMessages, initialFilters }) {
   const [tourType,  setTourType]  = useState(initialFilters?.tourType  || 'all');
   const [continent, setContinent] = useState(initialFilters?.continent || 'All');
@@ -170,6 +219,17 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
   const [priceMax, setPriceMax]   = useState(100000);
   const [region, setRegion]       = useState(initialFilters?.region || '');   // เมืองย่อยที่เลือก
   const [month,  setMonth]        = useState(initialFilters?.month  || '');   // YYYY-MM เดือนออกเดินทาง
+
+  // ── ตัวกรองขั้นสูง (แผงพับได้) ────────────────────────────────
+  const [showFilters, setShowFilters] = useState(false);
+  const [fHotel,   setFHotel]   = useState('');   // '', '3','4','5' (อย่างน้อย n ดาว)
+  const [fAir,     setFAir]     = useState('');   // '', 'full','low'
+  const [fPrice,   setFPrice]   = useState('');   // '', 'lt20','20-35','35-50','gt50'
+  const [fDur,     setFDur]     = useState('');   // '', '3-4','5-6','7+'
+  const [fShop,    setFShop]    = useState('');   // '', 'no','yes'
+  const [fFreeDay, setFFreeDay] = useState(false);
+  const advCount = [fHotel, fAir, fPrice, fDur, fShop].filter(Boolean).length + (fFreeDay ? 1 : 0);
+  const clearAdv = () => { setFHotel(''); setFAir(''); setFPrice(''); setFDur(''); setFShop(''); setFFreeDay(false); };
 
   // เปลี่ยนประเทศ → ล้างเมืองย่อย (ยกเว้นครั้งแรกที่โหลด เพื่อคงเมืองที่มาจาก URL)
   const firstCountryRun = useRef(true);
@@ -267,8 +327,17 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
     }
     // กรองตามเดือนออกเดินทาง (YYYY-MM) — เฉพาะทัวร์ที่มีรอบเดินทางในเดือนนั้น
     if (month) list = list.filter(tr => (tr.departures || []).some(d => String(d.date || '').startsWith(month)));
+
+    // ── ตัวกรองขั้นสูง ──
+    if (fHotel)   { const n = parseInt(fHotel, 10); list = list.filter(tr => { const s = hotelStarsOf(tr); return s !== null && s >= n; }); }
+    if (fAir)     list = list.filter(tr => airlineClass(tr) === fAir);
+    if (fPrice && PRICE_BUCKETS[fPrice]) list = list.filter(tr => PRICE_BUCKETS[fPrice](tr.price || 0));
+    if (fDur && DUR_BUCKETS[fDur])       list = list.filter(tr => DUR_BUCKETS[fDur](tr.duration || 0));
+    if (fShop === 'no')  list = list.filter(isNoShop);
+    if (fShop === 'yes') list = list.filter(isShop);
+    if (fFreeDay)        list = list.filter(hasFreeDay);
     return list;
-  }, [allTours, tourType, continent, country, groupCountries, search, month, lang]);
+  }, [allTours, tourType, continent, country, groupCountries, search, month, lang, fHotel, fAir, fPrice, fDur, fShop, fFreeDay]);
 
   // ── เมืองย่อยของประเทศที่เลือก (เฉพาะที่มีทัวร์จริง) ────────────
   const nameHas = (tr, kw) => (tr.name?.th || '').includes(kw) || (t(tr.destination) || '').includes(kw);
@@ -373,22 +442,67 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
       }}>
         <div className="wrap-wide" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 
-          {/* Row 1: search + sort */}
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, padding: '9px 14px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--card)' }}>
+          {/* Row 1: search + ตัวกรอง + เรียงตาม */}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: '1 1 190px', minWidth: 0, padding: '9px 14px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--card)' }}>
               <Icon name="search" size={16} />
               <input value={search} onChange={e => setSearch(e.target.value)}
                 placeholder={lang === 'th' ? 'ค้นหาประเทศ เมือง หรือรหัสทัวร์…' : 'Search country, city or code…'}
                 style={{ border: 'none', padding: 0, background: 'transparent', fontSize: 15, width: '100%', outline: 'none' }} />
               {search && <button onClick={() => setSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>}
             </div>
-            <select value={sort} onChange={e => setSort(e.target.value)}
-              style={{ width: 'auto', minWidth: 132, flex: '0 0 auto', padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--card)', fontSize: 14.5, cursor: 'pointer' }}>
-              <option value="popular">{lang === 'th' ? 'ยอดนิยม' : 'Popular'}</option>
-              <option value="price-low">{lang === 'th' ? 'ราคาต่ำ→สูง' : 'Price ↑'}</option>
-              <option value="price-high">{lang === 'th' ? 'ราคาสูง→ต่ำ' : 'Price ↓'}</option>
+            <button onClick={() => setShowFilters(v => !v)}
+              style={{ flex: '0 0 auto', display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 14px', borderRadius: 10, fontSize: 14.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                border: `1px solid ${(showFilters || advCount) ? 'var(--primary)' : 'var(--line)'}`, background: (showFilters || advCount) ? 'var(--primary-light)' : 'var(--card)', color: (showFilters || advCount) ? 'var(--primary)' : 'var(--ink-2)' }}>
+              <Icon name="sliders" size={16} />
+              {lang === 'th' ? 'ตัวกรอง' : 'Filters'}
+              {advCount > 0 && <span style={{ background: 'var(--primary)', color: '#fff', borderRadius: 999, fontSize: 12, fontWeight: 800, minWidth: 18, height: 18, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>{advCount}</span>}
+              <Icon name={showFilters ? 'chevron-up' : 'chevron-down'} size={14} />
+            </button>
+            <select value={sort} onChange={e => setSort(e.target.value)} aria-label={lang === 'th' ? 'เรียงตาม' : 'Sort by'}
+              style={{ width: 'auto', minWidth: 140, flex: '0 0 auto', padding: '9px 12px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--card)', fontSize: 14.5, cursor: 'pointer' }}>
+              <option value="popular">{lang === 'th' ? 'เรียง: ยอดนิยม' : 'Sort: Popular'}</option>
+              <option value="price-low">{lang === 'th' ? 'เรียง: ราคาต่ำ→สูง' : 'Sort: Price ↑'}</option>
+              <option value="price-high">{lang === 'th' ? 'เรียง: ราคาสูง→ต่ำ' : 'Sort: Price ↓'}</option>
+              <option value="duration">{lang === 'th' ? 'เรียง: วันมาก→น้อย' : 'Sort: Days ↓'}</option>
             </select>
           </div>
+
+          {/* Row 1.5: แผงตัวกรองขั้นสูง (พับได้) */}
+          {showFilters && (
+            <div style={{ border: '1px solid var(--line)', borderRadius: 12, background: 'var(--card)', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(148px, 1fr))', gap: 10 }}>
+                {[
+                  { val: fHotel, set: setFHotel, th: 'โรงแรม', en: 'Hotel', opts: [['', 'ทั้งหมด', 'All'], ['5', '5 ดาว', '5-star'], ['4', '4 ดาวขึ้นไป', '4-star+'], ['3', '3 ดาวขึ้นไป', '3-star+']] },
+                  { val: fAir, set: setFAir, th: 'สายการบิน', en: 'Airline', opts: [['', 'ทั้งหมด', 'All'], ['full', 'ฟูลเซอร์วิส', 'Full-service'], ['low', 'โลว์คอสต์', 'Low-cost']] },
+                  { val: fShop, set: setFShop, th: 'ช้อปปิ้ง', en: 'Shopping', opts: [['', 'ทั้งหมด', 'All'], ['no', 'ไม่ลงร้าน', 'No shopping'], ['yes', 'ลงร้าน', 'With shopping']] },
+                  { val: fPrice, set: setFPrice, th: 'ช่วงราคา', en: 'Price', opts: [['', 'ทั้งหมด', 'All'], ['lt20', 'ต่ำกว่า 20,000', 'Under 20,000'], ['20-35', '20,000–35,000', '20,000–35,000'], ['35-50', '35,000–50,000', '35,000–50,000'], ['gt50', '50,000 ขึ้นไป', '50,000+']] },
+                  { val: fDur, set: setFDur, th: 'จำนวนวัน', en: 'Days', opts: [['', 'ทั้งหมด', 'All'], ['3-4', '3–4 วัน', '3–4 days'], ['5-6', '5–6 วัน', '5–6 days'], ['7+', '7 วันขึ้นไป', '7+ days']] },
+                ].map((f, idx) => (
+                  <div key={idx}>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--muted)', marginBottom: 4 }}>{lang === 'th' ? f.th : f.en}</label>
+                    <select value={f.val} onChange={e => f.set(e.target.value)}
+                      style={{ width: '100%', padding: '8px 10px', border: `1px solid ${f.val ? 'var(--primary)' : 'var(--line)'}`, borderRadius: 9, background: 'var(--canvas)', fontSize: 14, cursor: 'pointer', color: 'var(--ink)', fontWeight: f.val ? 700 : 400 }}>
+                      {f.opts.map(([v, oth, oen]) => <option key={v} value={v}>{lang === 'th' ? oth : oen}</option>)}
+                    </select>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <button onClick={() => setFFreeDay(v => !v)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 15px', borderRadius: 999, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                    border: `1px solid ${fFreeDay ? 'var(--primary)' : 'var(--line)'}`, background: fFreeDay ? 'var(--primary-light)' : 'var(--canvas)', color: fFreeDay ? 'var(--primary)' : 'var(--ink-2)' }}>
+                  {fFreeDay ? '✓ ' : ''}🏖️ {lang === 'th' ? 'มีวันอิสระ' : 'Has free day'}
+                </button>
+                {advCount > 0 && (
+                  <button onClick={clearAdv}
+                    style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: 13.5, fontWeight: 700, fontFamily: 'inherit' }}>
+                    {lang === 'th' ? '✕ ล้างตัวกรอง' : '✕ Clear filters'}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Row 2: category chips */}
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }} className="no-scrollbar">
@@ -487,8 +601,8 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
                 </span>
               )}
             </div>
-            {(activeCountry || tourType !== 'all' || search || region || month) && (
-              <button onClick={() => { setCountry(''); setTourType('all'); setSearch(''); setRegion(''); setMonth(''); clearGroupFilter(); }}
+            {(activeCountry || tourType !== 'all' || search || region || month || advCount > 0) && (
+              <button onClick={() => { setCountry(''); setTourType('all'); setSearch(''); setRegion(''); setMonth(''); clearAdv(); clearGroupFilter(); }}
                 style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'inherit' }}>
                 {lang === 'th' ? '✕ ล้างตัวกรอง' : '✕ Clear filters'}
               </button>
