@@ -654,7 +654,20 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
             )}
           </div>
 
-          {filtered.length === 0 ? (
+          {filtered.length === 0 && suppliersLoading > 0 ? (
+            // ยังโหลดซัพไม่ครบ → อย่าเพิ่งบอก "ไม่พบ" (โดยเฉพาะค้นหารหัสทัวร์ของซัพที่โหลดช้า)
+            <div style={{ padding: 80, textAlign: 'center', border: '1px dashed var(--line)', borderRadius: 'var(--r-lg)' }}>
+              <span className="tp-spin" style={{ width: 26, height: 26, borderRadius: '50%', border: '3px solid var(--primary)', borderTopColor: 'transparent', display: 'inline-block' }} />
+              <div style={{ fontSize: 17, fontWeight: 700, marginTop: 14, color: 'var(--ink)' }}>
+                {lang === 'th' ? 'กำลังค้นหาโปรแกรมทัวร์จากทุกซัพพลายเออร์…' : 'Searching all suppliers…'}
+              </div>
+              <div style={{ fontSize: 13.5, color: 'var(--muted)', marginTop: 8 }}>
+                {search
+                  ? (lang === 'th' ? `กำลังค้นหา “${search}” — กรุณารอสักครู่` : `Looking for “${search}” — please wait`)
+                  : (lang === 'th' ? 'กรุณารอสักครู่ โปรแกรมกำลังทยอยขึ้น' : 'Please wait, programs are still loading')}
+              </div>
+            </div>
+          ) : filtered.length === 0 ? (
             <div style={{ padding: 80, textAlign: 'center', border: '1px dashed var(--line)', borderRadius: 'var(--r-lg)' }}>
               <div style={{ fontSize: 18, fontWeight: 600 }}>
                 {t ? t({ th: 'ไม่พบทัวร์', en: 'No tours match these filters.' }) : 'No tours match.'}
