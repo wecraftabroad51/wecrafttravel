@@ -75,6 +75,9 @@ export function normalizePbTour(t, source = 'probooking', sourceName = 'ProBooki
     })),
     groupSize: openPeriods[0]?.group || null,
 
+    // สายการบิน/ระดับโรงแรม — บางซัพ (เช่น RareX) ใส่มาใน list เลย · ซัพอื่นจะ undefined → ไม่กระทบ
+    airline: t.vehicle || t.airline || '',
+
     // ── ฟิลด์เสริม ───────────────────────────────────────────
     pdfUrl: t.pdf || null,
 
@@ -83,6 +86,7 @@ export function normalizePbTour(t, source = 'probooking', sourceName = 'ProBooki
     _sourceName: sourceName,  // ชื่อโชว์ใน admin
     _pbId:       t.id,        // id เดิมฝั่งซัพพลายเออร์ (ใช้ fetch detail)
     _night:      t.night || 0,
+    _hotelStars: t.hotelStar || null,
   };
 }
 
