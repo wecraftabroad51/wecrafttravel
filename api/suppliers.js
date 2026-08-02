@@ -18,6 +18,7 @@ const SUPPLIERS = {
   checkingroup:{ host: 'api.checkingroup.co.th',   base: '/v1',   list: '/programtours', detail: id => `/programtours/${id}` },
   realjourney: { host: 'api.realjourney.co.th',    base: '/v1',   list: '/programtours', detail: id => `/programtours/${id}` },
   tourfactory: { host: 'api.tourfactory.co.th',    base: '/v1',   list: '/programtours', detail: id => `/programtours/${id}` },
+  rarex:       { host: 'api.rarex.co.th',          base: '/v1',   list: '/programtours', detail: id => `/programtours/${id}` },
   zego:        { host: 'www.zegoapi.com',          base: '/v1.5', list: '/programtours', detail: id => `/programtours/${id}`,
                  auth: { header: 'auth-token', tokenEnv: 'ZEGO_API_TOKEN' } },
   ttn:         { host: 'online.ttnconnect.com',    base: '/api/agency', list: '/get-allprogram', detail: id => `/program/${id}` },

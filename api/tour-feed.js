@@ -4,7 +4,7 @@
 // ดึงผ่าน proxy /api/suppliers (พิสูจน์แล้วเวิร์ค + cache) กัน auth เพี้ยน
 const SITE = 'https://wecraft-travel.com';
 
-const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', checkingroup: 'pb', realjourney: 'pb', tourfactory: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus', best: 'best', superb: 'superb', flyde: 'flyde', formosa: 'formosa' };
+const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', checkingroup: 'pb', realjourney: 'pb', tourfactory: 'pb', rarex: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus', best: 'best', superb: 'superb', flyde: 'flyde', formosa: 'formosa' };
 
 // FLY de WORLD: period_data = "pid|start(DD-MM-YYYY)|end|..|seat|..|price|..|price|..|note ;;; ..."
 const FLYDE_IMG = 'https://flywholesales.com/backend/';
