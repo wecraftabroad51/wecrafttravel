@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   BrowserRouter, Routes, Route, Navigate,
-  useNavigate, useParams, useSearchParams, useLocation,
+  useNavigate, useParams, useSearchParams, useLocation, useNavigationType,
 } from 'react-router-dom';
 import {
   fetchTours, fetchArticles, fetchPromotions, fetchFaqs,
@@ -332,6 +332,13 @@ function getPageFromPath(pathname) {
 function AppInner() {
   const routerNav  = useNavigate();
   const location   = useLocation();
+  const navType    = useNavigationType();
+
+  // เปลี่ยนหน้า (ไปข้างหน้า) → เด้งขึ้นบนสุดเสมอ · ทำหลังเรนเดอร์ให้ชัวร์ (มือถือ scrollTo ก่อนเรนเดอร์ไม่ติด)
+  // กดย้อนกลับ (POP) ไม่บังคับ เพื่อให้กลับไปตำแหน่งเดิมของลิสต์ได้
+  useEffect(() => {
+    if (navType !== 'POP') window.scrollTo(0, 0);
+  }, [location.pathname, navType]);
 
   const [lang, setLang] = useState('th');
 
