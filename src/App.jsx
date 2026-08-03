@@ -46,6 +46,20 @@ const SETTINGS_DEFAULT = {
   legal: LEGAL_DEFAULTS,
 };
 
+// ── ซ่อนชื่อซัพใน URL: encode id เป็น base64url (prefix 't-') · ถอดกลับตอนอ่าน ──
+// รองรับลิงก์เก่าที่เป็น id ดิบ (ไม่มี prefix 't-') ให้ยังเปิดได้
+export function encTourId(id) {
+  const s = String(id ?? '');
+  if (!s.startsWith('sup_')) return s;   // ทัวร์ของเราเอง (uuid) ไม่มีชื่อซัพ → ปล่อยไว้
+  try { return 't-' + btoa(unescape(encodeURIComponent(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  catch { return s; }
+}
+export function decTourId(slug) {
+  if (!slug || !String(slug).startsWith('t-')) return slug;   // ลิงก์เก่า/id ดิบ
+  try { let s = String(slug).slice(2).replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return decodeURIComponent(escape(atob(s))); }
+  catch { return slug; }
+}
+
 // ── Route wrappers that inject URL params ─────────────────────
 function ToursRoute(props) {
   const [searchParams] = useSearchParams();
@@ -65,7 +79,7 @@ function ToursRoute(props) {
 
 function TourDetailRoute(props) {
   const { id } = useParams();
-  return <TourDetailPage {...props} tourId={id} />;
+  return <TourDetailPage {...props} tourId={decTourId(id)} />;
 }
 
 function ArticleDetailRoute(props) {
@@ -526,7 +540,7 @@ function AppInner() {
     const map = {
       home:             '/',
       tours:            '/tours',
-      'tour-detail':    `/tours/${id}`,
+      'tour-detail':    `/tours/${encTourId(id)}`,
       gallery:          '/gallery',
       articles:         '/articles',
       'article-detail': `/articles/${id}`,
