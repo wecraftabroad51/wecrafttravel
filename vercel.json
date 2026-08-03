@@ -5,7 +5,7 @@
     "api/send-email.js":   { "maxDuration": 30 },
     "api/parse-tour-program.js": { "maxDuration": 300, "memory": 1024 },
     "api/otp.js":          { "maxDuration": 30 },
-    "api/suppliers.js":    { "maxDuration": 15 },
+    "api/suppliers.js":    { "maxDuration": 30 },
     "api/notify-admin.js": { "maxDuration": 20 },
     "api/tour-feed.js":    { "maxDuration": 30 },
     "api/tour-pdf-alt.js": { "maxDuration": 30, "memory": 1024 },

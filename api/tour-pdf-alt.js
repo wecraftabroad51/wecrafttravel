@@ -25,17 +25,22 @@ module.exports = async function handler(req, res) {
     if (m) target = 'https://drive.google.com/uc?export=download&id=' + m[0];
   }
 
+  // ต้นทางบางเจ้า (zego) throttle IP ดาต้าเซนเตอร์ → โหลดช้ามาก
+  // ตั้ง timeout 9 วิ ครอบทั้ง fetch+อ่าน body · ถ้าช้าเกิน → รีไดเรกต์ให้เบราว์เซอร์โหลดตรง (ไม่ค้างจน 504)
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 9000);
+  const toSource = () => { clearTimeout(timer); res.setHeader('Location', target); return res.status(302).end(); };
   try {
-    const up = await fetch(target, { redirect: 'follow', headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122 Safari/537.36' } });
-    if (!up.ok) return res.status(502).send('upstream status ' + up.status);
+    const up = await fetch(target, { redirect: 'follow', signal: ctrl.signal, headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122 Safari/537.36' } });
+    if (!up.ok) return toSource();
     const buf = Buffer.from(await up.arrayBuffer());
+    clearTimeout(timer);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'inline; filename="wecraft-travel-tour.pdf"');
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
+    res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate=604800');
     return res.status(200).send(buf);
   } catch (e) {
-    // ต้นทางบล็อก IP ดาต้าเซนเตอร์ (เช่น connect timeout) → รีไดเรกต์ให้เบราว์เซอร์โหลดตรง
-    res.setHeader('Location', target);
-    return res.status(302).end();
+    // ต้นทางบล็อก/ช้า (connect timeout / abort) → รีไดเรกต์ให้เบราว์เซอร์โหลดตรง
+    return toSource();
   }
 };

@@ -56,7 +56,7 @@ function rawFetch(cfg, path) {
 
 function supFetch(cfg, path) {
   return new Promise((resolve, reject) => {
-    const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0 (compatible; WeCraftTravel)' };
+    const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json', 'Accept-Encoding': 'identity', 'User-Agent': 'Mozilla/5.0 (compatible; WeCraftTravel)' };
     if (cfg.auth) {
       const token = process.env[cfg.auth.tokenEnv];
       if (!token) return reject(new Error(`ยังไม่ได้ตั้งค่า ${cfg.auth.tokenEnv}`));
@@ -68,9 +68,10 @@ function supFetch(cfg, path) {
       method: 'GET',
       headers,
     }, (res) => {
-      let data = '';
-      res.on('data', c => { data += c; });
+      const chunks = [];
+      res.on('data', c => { chunks.push(c); });
       res.on('end', () => {
+        const data = Buffer.concat(chunks).toString('utf8');   // รวมเป็น Buffer กัน string ต่อพลาดตอน body ใหญ่
         if (res.statusCode >= 400) {
           return reject(new Error(`HTTP ${res.statusCode}: ${data.slice(0, 160)}`));
         }
@@ -79,6 +80,7 @@ function supFetch(cfg, path) {
       });
     });
     req.on('error', reject);
+    req.setTimeout(25000, () => req.destroy(new Error('supplier timeout')));   // กันค้าง (โดยเฉพาะ body ใหญ่)
     req.end();
   });
 }
