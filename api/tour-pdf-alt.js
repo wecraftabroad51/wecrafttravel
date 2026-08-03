@@ -82,8 +82,9 @@ module.exports = async function handler(req, res) {
     const emb = await outDoc.embedPages(srcPages);
     for (let i = 0; i < srcPages.length; i++) {
       const { width, height } = srcPages[i].getSize();
-      const hH = hImg ? Math.min(width * (hImg.height / hImg.width), height * 0.05) : 0;
-      const fH = fImg ? Math.min(width * (fImg.height / fImg.width), height * 0.09) : 0;
+      // สัดส่วนจริงของภาพ (ไม่บีบ ไม่ยืด) — เต็มความกว้างหน้า
+      const hH = hImg ? width * (hImg.height / hImg.width) : 0;
+      const fH = fImg ? width * (fImg.height / fImg.width) : 0;
       const page = outDoc.addPage([width, height + hH + fH]);
       page.drawPage(emb[i], { x: 0, y: fH, width, height });          // เนื้อหาเดิม ขนาดจริง
       if (hImg) page.drawImage(hImg, { x: 0, y: height + fH, width, height: hH });
