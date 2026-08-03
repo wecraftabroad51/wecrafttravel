@@ -120,6 +120,23 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
   }, [tourId, pbSource]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [showPdf, setShowPdf]       = useState(false);   // กดแล้วค่อยฝัง PDF (หน้าเปิดเร็ว)
+
+  // แอบเตรียมไฟล์ PDF ไว้ล่วงหน้าเงียบๆ (ความสำคัญต่ำ ไม่แย่งโหลดหน้า)
+  // → พอลูกค้ากดดู/ดาวน์โหลด ไฟล์อยู่ใน cache แล้ว เปิดแทบทันที (จาก 4-12 วิ เหลือ <1 วิ)
+  useEffect(() => {
+    const url = tour?.pdfUrl;
+    if (!url) return;
+    const t = setTimeout(() => {
+      try {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.as = 'document';
+        link.href = proxyPdf(url);
+        document.head.appendChild(link);
+      } catch { /* ไม่รองรับก็ข้ามไป */ }
+    }, 900);   // รอให้หน้าเรนเดอร์เสร็จก่อน
+    return () => clearTimeout(t);
+  }, [tour?.pdfUrl]);   // eslint-disable-line react-hooks/exhaustive-deps
   const [lightbox, setLightbox]     = useState(null);
   const [reviewForm, setReviewForm] = useState({ name: '', email: '', rating: 5, text: '' });
   const [reviewSent, setReviewSent] = useState(false);
