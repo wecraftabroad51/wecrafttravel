@@ -115,8 +115,11 @@ app.addEventListener('input', () => { formTouched = true; });   // ผู้ใ�
   fetch('/api/public-config').then(r=>r.json()).then(c=>{cfg=c;}).catch(()=>{});
 
   // 2) ดึงฟีดเต็ม (อุ่นตลอด · มี deps) มาเสริมรอบเดินทาง/ชื่อ/รูปให้ครบ เบื้องหลัง
+  // มี timeout 12 วิ กันหมุนค้างถาวรถ้าเน็ต/ฟีดมีปัญหา
   try{
-    const list = await fetch('/api/tour-feed').then(r=>r.json()).catch(()=>[]);
+    const ac = new AbortController(); const tt = setTimeout(()=>ac.abort(), 12000);
+    const list = await fetch('/api/tour-feed',{signal:ac.signal}).then(r=>r.json()).catch(()=>[]);
+    clearTimeout(tt);
     const arr = Array.isArray(list)?list:[];
     const found = (P.id && arr.find(t=>t.id===P.id))
         || (P.code && arr.find(t=>normCode(t.code)===normCode(P.code)))

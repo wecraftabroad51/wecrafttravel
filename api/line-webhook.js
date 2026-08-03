@@ -249,9 +249,10 @@ async function tourDetail(iso, id, uid) {
   if (!t) return { type: 'text', text: 'ไม่พบข้อมูลทัวร์นี้ ลองเลือกใหม่นะครับ 🙏' };
   return renderDetail(t, uid);
 }
-// ลิงก์ฟอร์มจอง (เปิดในเบราว์เซอร์ในไลน์) — พก id/iso/uid ไปเติมให้อัตโนมัติ
-function bookUrl(id, iso, uid) {
+// ลิงก์ฟอร์มจอง (เปิดในเบราว์เซอร์ในไลน์) — พก id/iso/uid + ชื่อ/รหัส/ราคา ไปให้หน้าจองเรนเดอร์ทันที (ไม่หมุนรอ)
+function bookUrl(id, iso, uid, t) {
   const q = new URLSearchParams({ id: id || '', iso: iso || '', uid: uid || '' });
+  if (t) { if (t.code) q.set('code', t.code); if (t.name) q.set('name', t.name); if (t.price) q.set('price', String(t.price)); }
   return `${SITE}/book.html?${q.toString()}`;
 }
 // ลิงก์ PDF ผ่านพร็อกซีเรา — ซ่อน URL ต้นทางของซัพพลายเออร์
@@ -322,7 +323,7 @@ function renderDetail(t, uid) {
   }
 
   const footerBtns = [
-    { type: 'button', style: 'primary', color: '#e2231a', height: 'sm', action: { type: 'uri', label: '🎫 จองทัวร์นี้', uri: bookUrl(id, iso, uid) } },
+    { type: 'button', style: 'primary', color: '#e2231a', height: 'sm', action: { type: 'uri', label: '🎫 จองทัวร์นี้', uri: bookUrl(id, iso, uid, t) } },
   ];
   if (t.pdf) footerBtns.push({ type: 'button', style: 'secondary', height: 'sm', action: { type: 'uri', label: 'โปรแกรมเต็ม (PDF)', uri: pdfProxy(t.pdf) } });
   footerBtns.push({ type: 'button', style: 'link', height: 'sm', action: { type: 'postback', label: '← ดูทัวร์อื่น', data: pb({ s: 'tours', iso, city: '' }), displayText: 'ดูทัวร์อื่น' } });
