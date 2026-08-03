@@ -1,15 +1,15 @@
 {
   "rewrites": [{"source": "/((?!api/).*)", "destination": "/index.html"}],
   "functions": {
-    "api/upload-drive.js": { "maxDuration": 30, "memory": 1024 },
+    "api/upload-drive.js": { "maxDuration": 30 },
     "api/send-email.js":   { "maxDuration": 30 },
-    "api/parse-tour-program.js": { "maxDuration": 300, "memory": 1024 },
+    "api/parse-tour-program.js": { "maxDuration": 300 },
     "api/otp.js":          { "maxDuration": 30 },
     "api/suppliers.js":    { "maxDuration": 30 },
     "api/notify-admin.js": { "maxDuration": 20 },
     "api/tour-feed.js":    { "maxDuration": 60 },
-    "api/tour-pdf-alt.js": { "maxDuration": 60, "memory": 1024 },
-    "api/pdf-branded.js":  { "maxDuration": 60, "memory": 1024 },
+    "api/tour-pdf-alt.js": { "maxDuration": 60 },
+    "api/pdf-branded.js":  { "maxDuration": 60 },
     "api/line-webhook.js": { "maxDuration": 30 },
     "api/warm-feed.js":    { "maxDuration": 30 }
   }
