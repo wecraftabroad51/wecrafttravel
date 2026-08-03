@@ -11,8 +11,5 @@
     "api/tour-pdf-alt.js": { "maxDuration": 30, "memory": 1024 },
     "api/line-webhook.js": { "maxDuration": 30 },
     "api/warm-feed.js":    { "maxDuration": 30 }
-  },
-  "crons": [
-    { "path": "/api/warm-feed", "schedule": "*/10 * * * *" }
-  ]
+  }
 }
