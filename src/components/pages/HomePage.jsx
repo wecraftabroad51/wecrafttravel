@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import TourCard from '../TourCard.jsx';
+import { COUNTRIES } from '../../lib/countries.js';
 
 function Icon({ name, size = 18, color }) {
   const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: color || 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' };
@@ -159,6 +160,7 @@ const SEARCH_CITY_KEYWORDS = {
 };
 
 const SEARCH_MONTH_NAMES = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+const SEARCH_MONTH_EN   = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 function SearchSidebar({ navigate, lang, tours = [] }) {
   const [tourType, setTourType] = useState('');
@@ -183,9 +185,9 @@ function SearchSidebar({ navigate, lang, tours = [] }) {
     });
     return [...set].sort().map(ym => {
       const [y, m] = ym.split('-').map(Number);
-      return { val: ym, label: `${SEARCH_MONTH_NAMES[m - 1]} ${y + 543}` };
+      return { val: ym, label: lang === 'th' ? `${SEARCH_MONTH_NAMES[m - 1]} ${y + 543}` : `${SEARCH_MONTH_EN[m - 1]} ${y}` };
     });
-  }, [tours, country, city]);
+  }, [tours, country, city, lang]);
 
   // ถ้าเดือนที่เลือกไว้ไม่มีในตัวเลือกแล้ว (เช่นเปลี่ยนประเทศ) → ล้างทิ้ง
   useEffect(() => {
@@ -197,11 +199,11 @@ function SearchSidebar({ navigate, lang, tours = [] }) {
     const map = {};
     (tours || []).forEach(tr => {
       const c = tr.country; if (!c) return;
-      if (!map[c]) map[c] = { code: c, name: (tr.destination?.th || tr.destination?.en || c), count: 0 };
+      if (!map[c]) map[c] = { code: c, name: (lang === 'th' ? (COUNTRIES[c]?.th || tr.destination?.th) : (COUNTRIES[c]?.en || tr.destination?.en)) || c, count: 0 };
       map[c].count++;
     });
     return Object.values(map).sort((a, b) => b.count - a.count);
-  }, [tours]);
+  }, [tours, lang]);
 
   // เมืองของประเทศที่เลือก (เฉพาะเมืองที่มีทัวร์จริง)
   const cityList = useMemo(() => {
@@ -633,7 +635,7 @@ function StatsStrip({ lang }) {
     { num: '50,000+', label: 'นักท่องเที่ยวที่ไว้ใจเรา', labelEn: 'Happy Travellers' },
     { num: '500+',    label: 'โปรแกรมทัวร์',             labelEn: 'Tour Programs' },
     { num: '60+',     label: 'ประเทศทั่วโลก',             labelEn: 'Countries Worldwide' },
-    { num: '15 ปี',   label: 'ประสบการณ์',               labelEn: 'Years Experience' },
+    { num: th ? '15 ปี' : '15 yrs', label: 'ประสบการณ์',   labelEn: 'Years Experience' },
   ];
   return (
     <div style={{
@@ -663,8 +665,8 @@ function GroupQuoteBanner({ navigate, lang }) {
   const stats = [
     { num: '500+',  label: th ? 'กรุ๊ปที่จัดสำเร็จ'      : 'Groups Arranged' },
     { num: '30+',   label: th ? 'ประเทศทั่วโลก'           : 'Countries' },
-    { num: '10+ ปี', label: th ? 'ประสบการณ์กรุ๊ปเหมา'   : 'Years Experience' },
-    { num: '24 ชม.', label: th ? 'รับใบเสนอราคา'          : 'Quote Turnaround' },
+    { num: th ? '10+ ปี' : '10+ yrs', label: th ? 'ประสบการณ์กรุ๊ปเหมา' : 'Years Experience' },
+    { num: th ? '24 ชม.' : '24 hrs',  label: th ? 'รับใบเสนอราคา'       : 'Quote Turnaround' },
   ];
   const benefits = [
     { icon: '✈️', title: th ? 'ออกแบบเส้นทางได้เอง' : 'Custom Itinerary', desc: th ? 'Tailor-made ทุก route ตามใจคุณ 100%' : '100% tailor-made routes' },

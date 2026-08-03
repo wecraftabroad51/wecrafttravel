@@ -803,7 +803,7 @@ function AppInner() {
         </Routes>
       </main>
       <Footer lang={lang} t={t} navigate={navigate} settings={settings} />
-      <FloatingContact settings={settings} />
+      <FloatingContact settings={settings} lang={lang} />
 
       {/* ── Sticky Group Quote Float Button — เฉพาะหน้าแรก ───── */}
       {location.pathname === '/' && (

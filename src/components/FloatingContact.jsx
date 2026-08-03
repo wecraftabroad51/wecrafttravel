@@ -76,7 +76,8 @@ const LINE_ICON = (
   </svg>
 );
 
-export default function FloatingContact({ settings }) {
+export default function FloatingContact({ settings, lang }) {
+  const th = lang !== 'en';
   const [open, setOpen] = useState(false);
   // เด้งเปิดครั้งแรก (จอใหญ่) · จากนั้นรอ 15 นาทีค่อยเด้งใหม่ · มือถือเริ่มแบบปิด (กันบังเนื้อหา)
   useEffect(() => {
@@ -183,7 +184,7 @@ export default function FloatingContact({ settings }) {
 
       {/* ── Slide drawer (ชิดขอบขวา · ปิดแล้วเลื่อนออกทางขวา) ── */}
       <div className={`fc-drawer ${open ? '' : 'fc-closed'}`} aria-hidden={!open}>
-        <button className="fc-x" onClick={() => setOpen(false)} aria-label="ปิด">✕</button>
+        <button className="fc-x" onClick={() => setOpen(false)} aria-label={th ? 'ปิด' : 'Close'}>✕</button>
 
         {/* Logo */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 4 }}>
@@ -200,10 +201,10 @@ export default function FloatingContact({ settings }) {
             {LINE_ICON}
           </span>
           <div>
-            <div className="fc-title">จองผ่านไลน์</div>
+            <div className="fc-title">{th ? 'จองผ่านไลน์' : 'Book via LINE'}</div>
           </div>
         </div>
-        <div className="fc-sub">รับข่าวสาร โปรโมชั่นทัวร์ก่อนใคร</div>
+        <div className="fc-sub">{th ? 'รับข่าวสาร โปรโมชั่นทัวร์ก่อนใคร' : 'Get tour deals & news first'}</div>
 
         {/* QR */}
         <img src="https://qr-official.line.me/sid/L/wecrafttravel.png" alt="LINE QR Code" className="fc-qr"
@@ -226,8 +227,8 @@ export default function FloatingContact({ settings }) {
           </svg>
           <a href={`tel:${phone.replace(/-/g,'')}`} className="fc-phone">{phone}</a>
         </div>
-        <div className="fc-hours-l">จันทร์ - เสาร์</div>
-        <div className="fc-hours-v">09.00 - 18.00 น.</div>
+        <div className="fc-hours-l">{th ? 'จันทร์ - เสาร์' : 'Mon - Sat'}</div>
+        <div className="fc-hours-v">{th ? '09.00 - 18.00 น.' : '09:00 - 18:00'}</div>
 
         <hr className="fc-divider" />
 
@@ -243,9 +244,9 @@ export default function FloatingContact({ settings }) {
       </div>
 
       {/* ── แท็บเปิดใหม่ (โผล่ตอนปิด) ── */}
-      <button className={`fc-reopen ${open ? 'fc-hidden' : ''}`} onClick={() => setOpen(true)} aria-label="ติดต่อเรา">
+      <button className={`fc-reopen ${open ? 'fc-hidden' : ''}`} onClick={() => setOpen(true)} aria-label={th ? 'ติดต่อเรา' : 'Contact us'}>
         {LINE_ICON}
-        <span>ติดต่อ</span>
+        <span>{th ? 'ติดต่อ' : 'Contact'}</span>
       </button>
     </>
   );
