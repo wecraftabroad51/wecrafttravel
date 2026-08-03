@@ -635,7 +635,7 @@ function StatsStrip({ lang }) {
     { num: '50,000+', label: 'นักท่องเที่ยวที่ไว้ใจเรา', labelEn: 'Happy Travellers' },
     { num: '500+',    label: 'โปรแกรมทัวร์',             labelEn: 'Tour Programs' },
     { num: '60+',     label: 'ประเทศทั่วโลก',             labelEn: 'Countries Worldwide' },
-    { num: th ? '15 ปี' : '15 yrs', label: 'ประสบการณ์',   labelEn: 'Years Experience' },
+    { num: lang === 'th' ? '15 ปี' : '15 yrs', label: 'ประสบการณ์', labelEn: 'Years Experience' },
   ];
   return (
     <div style={{
