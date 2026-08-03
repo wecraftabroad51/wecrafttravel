@@ -12,6 +12,7 @@
     "api/line-webhook.js": { "maxDuration": 30 }
   },
   "crons": [
+    { "path": "/api/tour-feed?light=1", "schedule": "*/10 * * * *" },
     { "path": "/api/tour-feed", "schedule": "*/10 * * * *" }
   ]
 }

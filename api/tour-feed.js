@@ -189,6 +189,11 @@ module.exports = async function handler(req, res) {
       const q = norm(wantedCode);
       if (q.length >= 3) all = all.filter(t => norm(t.code) === q || (q.length >= 4 && norm(t.code).includes(q)));
     }
+    // light=1 → ตัดฟิลด์หนัก (highlight HTML + deps + pdf ≈ 63% ของ payload) ออก
+    // ใช้กับหน้าเลือกประเทศ/เมือง/การ์ดทัวร์ ที่ไม่ต้องใช้ข้อมูลพวกนี้ → โหลดเร็วขึ้นมาก
+    if (req.query?.light) {
+      all = all.map(({ highlight, deps, pdf, ...rest }) => rest);
+    }
     // สด 10 นาที · เสิร์ฟของเก่าได้ทันทีอีกนานถึง 24 ชม.ระหว่าง refresh เบื้องหลัง
     // → LINE ได้ผลเร็ว (~100ms) เกือบตลอด ไม่ค้าง 16 วิ จนเกิน timeout ของ LINE
     res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=86400');

@@ -57,18 +57,21 @@ async function getName(userId) {
 }
 // ดึง "ฟีดเต็ม" ครั้งเดียว (cache entry เดียว → อุ่นตลอด ไม่ค้าง 16 วิ) แล้วกรองประเทศในหน่วยความจำ
 // กันเคสเดิม: ยิง ?c=JP, ?c=CN แยกกัน แต่ละอันเย็นแยก → คนแรกต่อประเทศรอ 16 วิ = เกิน timeout ของ LINE
-const feedCache = { all: null, ts: 0 };
-async function fetchFeedAll() {
-  if (feedCache.all && (Date.now() - feedCache.ts < 60000)) return feedCache.all;   // memo 60 วิ ต่อ instance
+const feedCache = { light: null, light_ts: 0, full: null, full_ts: 0 };
+async function fetchFeedAll(full) {
+  const key = full ? 'full' : 'light';
+  if (feedCache[key] && (Date.now() - feedCache[`${key}_ts`] < 60000)) return feedCache[key];   // memo 60 วิ ต่อ instance
   try {
-    const r = await fetch(`${SITE}/api/tour-feed`);
+    const r = await fetch(`${SITE}/api/tour-feed${full ? '' : '?light=1'}`);
     const a = await r.json();
-    if (Array.isArray(a)) { feedCache.all = a; feedCache.ts = Date.now(); return a; }
+    if (Array.isArray(a)) { feedCache[key] = a; feedCache[`${key}_ts`] = Date.now(); return a; }
   } catch { /* ใช้ของเก่าถ้ามี */ }
-  return feedCache.all || [];
+  return feedCache[key] || [];
 }
-async function fetchFeed(iso) {
-  const all = await fetchFeedAll();
+// full=false (ค่าเริ่มต้น) = ฟีดเบา (ไม่มี highlight/deps/pdf) สำหรับหน้าเลือก/การ์ดทัวร์ → เร็ว
+// full=true = ฟีดเต็ม สำหรับหน้ารายละเอียด + เลือกรอบเดินทาง (ต้องใช้ deps/highlight)
+async function fetchFeed(iso, full = false) {
+  const all = await fetchFeedAll(full);
   const c = (iso || '').toUpperCase();
   return c ? all.filter(t => t.country === c) : all;
 }
@@ -108,7 +111,7 @@ const STEPS = {
 };
 // (4/5) คำถามรอบเดินทาง — ดึงรอบจริงมาเป็นปุ่มให้กด
 async function roundQuestion(st) {
-  const t = (await fetchFeed(st.tour_country)).find(x => x.id === st.tour_id);
+  const t = (await fetchFeed(st.tour_country, true)).find(x => x.id === st.tour_id);
   const dates = [...new Set((t?.deps || []).map(d => fmtDate(d.date)).filter(Boolean))].slice(0, 11);
   const items = dates.map(dt => ({ type: 'action', action: { type: 'message', label: dt.slice(0, 20), text: dt } }));
   items.push({ type: 'action', action: { type: 'message', label: 'เดือนอื่น/สอบถาม', text: 'ยังไม่ระบุ' } });
@@ -242,7 +245,7 @@ function infoRow(label, val) {
     { type: 'text', text: String(val), size: 'sm', color: '#333333', flex: 4, weight: 'bold', wrap: true, align: 'end' } ] };
 }
 async function tourDetail(iso, id, uid) {
-  const t = (await fetchFeed(iso)).find(x => x.id === id);
+  const t = (await fetchFeed(iso, true)).find(x => x.id === id);
   if (!t) return { type: 'text', text: 'ไม่พบข้อมูลทัวร์นี้ ลองเลือกใหม่นะครับ 🙏' };
   return renderDetail(t, uid);
 }
@@ -260,7 +263,7 @@ async function findByCode(q) {
   const norm = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
   const Q = norm(q);
   if (Q.length < 3) return null;
-  const all = await fetchFeed('');
+  const all = await fetchFeed('', true);
   return all.find(t => norm(t.code) === Q)
     || (Q.length >= 4 ? all.find(t => norm(t.code).includes(Q)) : null)
     || (Q.length >= 4 ? all.find(t => norm(t.code) && Q.includes(norm(t.code))) : null);
