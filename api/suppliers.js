@@ -20,7 +20,7 @@ const SUPPLIERS = {
   tourfactory: { host: 'api.tourfactory.co.th',    base: '/v1',   list: '/programtours', detail: id => `/programtours/${id}` },
   rarex:       { host: 'api.rarex.co.th',          base: '/v1',   list: '/programtours', detail: id => `/programtours/${id}` },
   // iTravels Center — auth ผ่าน header 'itravels-secret' · list=โปรแกรม, periods อยู่คนละ endpoint → merge เข้าตาม code
-  itravels:    { host: 'api.itravels.center',       base: '/api/v1', list: '/program', detail: id => `/program?code=${encodeURIComponent(id)}`,
+  itravels:    { host: 'api.itravels.center',       base: '/api/v1', list: '/program/', detail: id => `/program/?code=${encodeURIComponent(id)}`,
                  auth: { header: 'itravels-secret', tokenEnv: 'ITRAVELS_API_TOKEN' },
                  merge: { periodPath: '/program/period/' } },
   zego:        { host: 'www.zegoapi.com',          base: '/v1.5', list: '/programtours', detail: id => `/programtours/${id}`,
