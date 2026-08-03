@@ -10,6 +10,9 @@
     "api/tour-feed.js":    { "maxDuration": 60 },
     "api/tour-pdf-alt.js": { "maxDuration": 60 },
     "api/line-webhook.js": { "maxDuration": 30 },
-    "api/warm-feed.js":    { "maxDuration": 30 }
-  }
+    "api/warm-feed.js":    { "maxDuration": 60 }
+  },
+  "crons": [
+    { "path": "/api/warm-feed", "schedule": "0 * * * *" }
+  ]
 }
