@@ -103,10 +103,8 @@ const pp = { rows:0, files:{} }; // files: { rowId: {name,url} }
 
 (async function init(){
   try{
-    let url='/api/tour-feed';
-    if(P.id && P.iso) url='/api/tour-feed?c='+encodeURIComponent(P.iso);
-    else if(P.code)   url='/api/tour-feed?code='+encodeURIComponent(P.code);
-    const list = await fetch(url).then(r=>r.json()).catch(()=>[]);
+    // ใช้ฟีดเต็มที่ "อุ่นตลอด" (มี deps) แล้วค้นทัวร์ในเครื่อง — เร็วกว่าตัวแปร ?c=/?code= ที่ cache เย็น (เคยค้าง ~16 วิ)
+    const list = await fetch('/api/tour-feed').then(r=>r.json()).catch(()=>[]);
     const arr = Array.isArray(list)?list:[];
     TOUR = (P.id && arr.find(t=>t.id===P.id))
         || (P.code && arr.find(t=>normCode(t.code)===normCode(P.code)))

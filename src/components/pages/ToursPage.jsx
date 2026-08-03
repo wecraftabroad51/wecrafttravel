@@ -266,14 +266,15 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
     return () => { ro.disconnect(); window.removeEventListener('resize', measure); };
   }, []);
 
-  // เลื่อนลงดูโปรแกรม → ซ่อนแถบค้นหา/ตัวกรอง · เลื่อนขึ้นนิดเดียว → โชว์กลับมา
+  // เลื่อนลงดูโปรแกรม → ซ่อนแถบค้นหา/ตัวกรอง · โชว์กลับ "เฉพาะเมื่อเลื่อนขึ้นถึงบนสุด" เท่านั้น
+  // (เลื่อนขึ้นกลางๆ แถบจะไม่รีบลงมาบัง — ดูโปรแกรมได้เต็มจอ ทั้งมือถือและพีซี)
   const [hideBar, setHideBar] = useState(false);
   useEffect(() => {
     let lastY = window.scrollY;
     const onScroll = () => {
       const y = window.scrollY;
-      if (y > lastY + 6 && y > 220)       setHideBar(true);   // เลื่อนลง → ซ่อน
-      else if (y < lastY - 6 || y < 220)  setHideBar(false);  // เลื่อนขึ้น/ใกล้บนสุด → โชว์
+      if (y > lastY + 6 && y > 200)  setHideBar(true);    // เลื่อนลง (พ้นช่วงบน) → ซ่อน
+      else if (y < 120)              setHideBar(false);   // ถึงบนสุดเท่านั้น → โชว์กลับ
       lastY = y;
     };
     window.addEventListener('scroll', onScroll, { passive: true });
