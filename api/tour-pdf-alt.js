@@ -38,7 +38,7 @@ module.exports = async function handler(req, res) {
   }
 
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 25000);
+  const timer = setTimeout(() => ctrl.abort(), 40000);   // ต้นทางบางเจ้า (zego) ช้ามาก
   const toSource = () => { clearTimeout(timer); res.setHeader('Location', target); return res.status(302).end(); };
   const sendPdf = (buf, smaxage) => {
     clearTimeout(timer);
@@ -53,13 +53,18 @@ module.exports = async function handler(req, res) {
   catch { return toSource(); }                       // ต่อไม่ติด/ช้าเกิน → โหลดตรง
   if (!up.ok) return toSource();
   const ct = up.headers.get('content-type') || '';
-  const raw = Buffer.from(await up.arrayBuffer());
+  // อ่าน body ต้องอยู่ใน try ด้วย — ต้นทางช้า (zego) แล้ว abort ระหว่างอ่านจะ throw → 500
+  let raw;
+  try { raw = Buffer.from(await up.arrayBuffer()); }
+  catch { return toSource(); }
   clearTimeout(timer);
   // ไม่ใช่ PDF (เช่น Google Drive คืน HTML) → ส่งกลับเดิม
   if (!/pdf/i.test(ct) && !(raw[0] === 0x25 && raw[1] === 0x50)) return sendPdf(raw, 3600);
 
   // แปะหัว/ท้ายกระดาษ (ถ้ามีรูปแบรนด์) — ถ้าสแตมป์ไม่ได้ ส่ง PDF เดิม
   try {
+    // ไฟล์ใหญ่มาก → ส่งไปเลย ไม่ stamp (กันหน่วยความจำ/เวลาเกิน แล้วเปิดไม่ได้)
+    if (raw.length > 12 * 1024 * 1024) return sendPdf(raw, 86400);
     const { header, footer } = await getBrandImages();
     if (!header && !footer) return sendPdf(raw, 3600);
     const doc = await PDFDocument.load(raw, { ignoreEncryption: true });

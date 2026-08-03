@@ -437,6 +437,14 @@ export function normalizeSuperbTours(payload, source = 'superb', sourceName = 'S
 // ── Unique Inter Wholesale (uniqueinterwholesale.com/apiwebsingle.php) ──
 // proxy คืน { data: [rows] } · แต่ละ row = รอบเดินทาง (โปรแกรมซ้ำ) → จับกลุ่มตาม mainid (คล้าย Superb)
 const uniqNum = v => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isNaN(n) ? 0 : n; };
+// Unique ส่ง path สั้น (เช่น "catalog/xxx.pdf") → เติมโดเมนให้เป็น URL เต็ม (+ encode ช่องว่าง)
+const UNIQ_BASE = 'https://uniqueinterwholesale.com/';
+const uniqAbs = (u) => {
+  const s = String(u || '').trim();
+  if (!s) return '';
+  const full = /^https?:\/\//i.test(s) ? s : UNIQ_BASE + s.replace(/^\/+/, '');
+  return full.replace(/ /g, '%20');
+};
 export function normalizeUniqueTours(payload, source = 'unique', sourceName = 'Unique Inter') {
   const rows = payload?.data || (Array.isArray(payload) ? payload : []);
   const today = new Date().toISOString().slice(0, 10);
@@ -485,7 +493,7 @@ export function normalizeUniqueTours(payload, source = 'unique', sourceName = 'U
       destination: { th: nameTh, en: iso2 },
       continent,
       country:     iso2,
-      image:       p.jpg || '',
+      image:       uniqAbs(p.jpg),
       price:       minPrice,
       duration,
       tourType:    'outbound',
@@ -493,7 +501,7 @@ export function normalizeUniqueTours(payload, source = 'unique', sourceName = 'U
       airline:     (p.Airline && p.Airline !== 'NOLOGO') ? p.Airline : '',
       departures:  deps,
       groupSize:   deps[0]?.totalSeats || null,
-      pdfUrl:      p.pdf || null,
+      pdfUrl:      uniqAbs(p.pdf) || null,
       itinerary:   [],
       _source:     source,
       _sourceName: sourceName,

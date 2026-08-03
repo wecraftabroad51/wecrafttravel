@@ -1,6 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import DateRangePicker from '../DateRangePicker.jsx';
 import { agentCode } from '../../lib/agentCode.js';
+
+// เปิด PDF ผ่านโดเมนเรา (เหมือนฝั่งลูกค้า) — ซัพบางเจ้าเปิด URL ตรงไม่ได้ + ซ่อน url ต้นทาง
+function adminPdfUrl(url) {
+  if (!url) return url;
+  try {
+    const bytes = new TextEncoder().encode(String(url));
+    let bin = ''; for (const b of bytes) bin += String.fromCharCode(b);
+    return `/api/tour-pdf-alt?u=${btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')}`;
+  } catch { return url; }
+}
 import { LogOut, LayoutDashboard, Globe, Tag, Star, FileText, HelpCircle,
   Mail, Settings, Plane, Check, X, Eye, Trash2, Plus, Edit2, MessageSquare, Building2,
   Shield, Users } from 'lucide-react';
@@ -1025,7 +1035,7 @@ function SuppliersSection({ supplierTours }) {
                                   </td>
                                   <td className="px-4 py-2.5 text-center">
                                     {tour.pdfUrl ? (
-                                      <a href={tour.pdfUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                                      <a href={adminPdfUrl(tour.pdfUrl)} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
                                         className="text-blue-600 hover:text-blue-800 text-xs underline">PDF</a>
                                     ) : '-'}
                                   </td>
@@ -1107,7 +1117,7 @@ function SupplierTourModal({ tour, fmt, onClose }) {
             </div>
 
             {tour.pdfUrl && (
-              <a href={tour.pdfUrl} target="_blank" rel="noopener noreferrer"
+              <a href={adminPdfUrl(tour.pdfUrl)} target="_blank" rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 mt-4 bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold px-4 py-2 rounded-lg">
                 ดาวน์โหลดโปรแกรม (PDF)
               </a>

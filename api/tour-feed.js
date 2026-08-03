@@ -237,7 +237,9 @@ function normalize(id, fmt, data) {
       if (!deps.length) continue;
       let days = 0; if (deps[0].date && deps[0].ret) { const diff = Math.round((new Date(deps[0].ret) - new Date(deps[0].date)) / 86400000); if (diff > 0 && diff < 40) days = diff + 1; }
       const price = Math.min(...deps.map(d => d.adult));
-      if (p.jpg && price > 0) out.push({ id: `sup_unique_${k}`, name: p.title, image: p.jpg, price, country: iso, code: p.ProductCode || '', days, night: days > 0 ? days - 1 : 0, airline: (p.Airline && p.Airline !== 'NOLOGO') ? p.Airline : '', hotel: 0, highlight: stripHtml(p.story || ''), pdf: p.pdf || '', deps: deps.slice(0, 60) });
+      // Unique ส่ง path สั้น → เติมโดเมนให้เป็น URL เต็ม
+      const uAbs = (u) => { const s = String(u || '').trim(); if (!s) return ''; return (/^https?:\/\//i.test(s) ? s : 'https://uniqueinterwholesale.com/' + s.replace(/^\/+/, '')).replace(/ /g, '%20'); };
+      if (p.jpg && price > 0) out.push({ id: `sup_unique_${k}`, name: p.title, image: uAbs(p.jpg), price, country: iso, code: p.ProductCode || '', days, night: days > 0 ? days - 1 : 0, airline: (p.Airline && p.Airline !== 'NOLOGO') ? p.Airline : '', hotel: 0, highlight: stripHtml(p.story || ''), pdf: uAbs(p.pdf), deps: deps.slice(0, 60) });
     }
   }
   return out;
