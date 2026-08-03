@@ -332,10 +332,9 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
         const name = (t ? t(tr.name) : (tr.name?.en || tr.name?.th || '')).toLowerCase();
         const dest = (t ? t(tr.destination) : (tr.destination?.en || tr.destination?.th || '')).toLowerCase();
         const desc = (t ? t(tr.description) : (tr.description?.en || tr.description?.th || '')).toLowerCase();
-        const code = (tr.code || '').toLowerCase();
-        const codeStrip = code.replace(/[^a-z0-9]/g, '');
-        // ค้นด้วยรหัสเอเจนท์ WeCraft (ที่ลูกค้าเห็น) หรือรหัสซัพเดิม (สำหรับหลังบ้าน)
-        return (qs && agentCodeMatch(tr, qs)) || code.includes(q) || (qs && codeStrip.includes(qs)) || name.includes(q) || dest.includes(q) || desc.includes(q);
+        // ลูกค้าค้นได้เฉพาะ "รหัสเอเจนท์ WeCraft" เท่านั้น — รหัสเดิมของซัพค้นไม่เจอ (ซ่อนสนิท)
+        // (ทัวร์ของเราเอง agentCode = รหัสเดิม → ยังค้นเจอปกติ)
+        return (qs && agentCodeMatch(tr, qs)) || name.includes(q) || dest.includes(q) || desc.includes(q);
       });
     }
     // กรองตามเดือนออกเดินทาง (YYYY-MM) — เฉพาะทัวร์ที่มีรอบเดินทางในเดือนนั้น

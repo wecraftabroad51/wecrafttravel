@@ -283,11 +283,9 @@ async function findByCode(q) {
   const Q = norm(q);
   if (Q.length < 3) return null;
   const all = await fetchFeed('', true);
-  return all.find(t => norm(agentCode(t)) === Q)          // รหัสเอเจนท์ WeCraft (ที่ลูกค้าเห็น)
-    || all.find(t => norm(t.code) === Q)                   // รหัสซัพเดิม (เผื่อหลังบ้าน)
-    || (Q.length >= 4 ? all.find(t => norm(agentCode(t)).includes(Q)) : null)
-    || (Q.length >= 4 ? all.find(t => norm(t.code).includes(Q)) : null)
-    || (Q.length >= 4 ? all.find(t => norm(t.code) && Q.includes(norm(t.code))) : null);
+  // ค้นได้เฉพาะรหัสเอเจนท์ WeCraft เท่านั้น (รหัสซัพเดิมค้นไม่เจอฝั่งลูกค้า)
+  return all.find(t => norm(agentCode(t)) === Q)
+    || (Q.length >= 4 ? all.find(t => norm(agentCode(t)).includes(Q)) : null);
 }
 function renderDetail(t, uid) {
   const iso = t.country || '';
