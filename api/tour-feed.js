@@ -227,6 +227,27 @@ function normalize(id, fmt, data) {
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   const wanted = (req.query?.c || '').toUpperCase();
+
+  // ── ทัวร์เดียวจาก id (sup_<source>_<code>) — ดึงแค่ซัพเดียว (cache 5 นาที) เร็วมาก ──
+  // ใช้กับหน้ารายละเอียด LINE · ไม่ต้องรวมทั้ง 15 ซัพ (ที่เย็นแล้วนาน ~24 วิ)
+  const oneId = req.query?.one;
+  if (oneId) {
+    try {
+      const m = String(oneId).match(/^sup_([a-z0-9]+)_(.+)$/i);
+      const src = m && m[1];
+      const fmt = src && SUP[src];
+      if (!fmt) return res.status(200).json([]);
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 22000);
+      const data = await fetch(`${SITE}/api/suppliers?supplier=${src}`, { signal: ctrl.signal })
+        .then(r => r.ok ? r.json() : null).catch(() => null);
+      clearTimeout(timer);
+      const t = normalize(src, fmt, data).find(x => x.id === oneId);
+      res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=86400');
+      return res.status(200).json(t ? [t] : []);
+    } catch (e) { return res.status(200).json([]); }
+  }
+
   try {
     // ยิงทุกซัพขนานกัน · จำกัดต่อซัพ 22 วิ — ซัพไหนช้าเกินก็ข้าม ไม่ให้บล็อกทั้งฟีดจน 504
     const results = await Promise.all(Object.entries(SUP).map(async ([id, fmt]) => {

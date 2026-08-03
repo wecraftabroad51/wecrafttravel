@@ -75,6 +75,14 @@ async function fetchFeed(iso, full = false) {
   const c = (iso || '').toUpperCase();
   return c ? all.filter(t => t.country === c) : all;
 }
+// ทัวร์เดียว (หน้ารายละเอียด) — ดึงแค่ซัพเดียว payload เล็ก เร็วกว่ารวมทั้งฟีดมาก
+async function fetchOne(id) {
+  try {
+    const r = await fetch(`${SITE}/api/tour-feed?one=${encodeURIComponent(id)}`);
+    const a = await r.json();
+    return Array.isArray(a) ? (a[0] || null) : null;
+  } catch { return null; }
+}
 const pb = (obj) => 'a=' + encodeURIComponent(JSON.stringify(obj));
 const unpb = (data) => { try { return JSON.parse(decodeURIComponent((data || '').replace(/^a=/, ''))); } catch { return {}; } };
 
@@ -111,7 +119,7 @@ const STEPS = {
 };
 // (4/5) คำถามรอบเดินทาง — ดึงรอบจริงมาเป็นปุ่มให้กด
 async function roundQuestion(st) {
-  const t = (await fetchFeed(st.tour_country, true)).find(x => x.id === st.tour_id);
+  const t = await fetchOne(st.tour_id) || (await fetchFeed(st.tour_country, true)).find(x => x.id === st.tour_id);
   const dates = [...new Set((t?.deps || []).map(d => fmtDate(d.date)).filter(Boolean))].slice(0, 11);
   const items = dates.map(dt => ({ type: 'action', action: { type: 'message', label: dt.slice(0, 20), text: dt } }));
   items.push({ type: 'action', action: { type: 'message', label: 'เดือนอื่น/สอบถาม', text: 'ยังไม่ระบุ' } });
@@ -245,7 +253,7 @@ function infoRow(label, val) {
     { type: 'text', text: String(val), size: 'sm', color: '#333333', flex: 4, weight: 'bold', wrap: true, align: 'end' } ] };
 }
 async function tourDetail(iso, id, uid) {
-  const t = (await fetchFeed(iso, true)).find(x => x.id === id);
+  const t = await fetchOne(id) || (await fetchFeed(iso, true)).find(x => x.id === id);
   if (!t) return { type: 'text', text: 'ไม่พบข้อมูลทัวร์นี้ ลองเลือกใหม่นะครับ 🙏' };
   return renderDetail(t, uid);
 }
