@@ -24,13 +24,6 @@ async function getBrandImages() {
   return result;
 }
 
-let logoCache = { ts: 0, buf: null };
-async function getLogo() {
-  if (logoCache.buf && Date.now() - logoCache.ts < 600000) return logoCache.buf;
-  const b = await fetch(`${SITE}/logo.png`).then(r => r.ok ? r.arrayBuffer() : null).catch(() => null);
-  if (b) logoCache = { ts: Date.now(), buf: b };
-  return b;
-}
 
 module.exports = async function handler(req, res) {
   const enc = (req.query && req.query.u) || '';
@@ -76,27 +69,28 @@ module.exports = async function handler(req, res) {
     const { header, footer } = await getBrandImages();
     if (!header && !footer) return sendPdf(raw, 3600);
 
-    // เนื้อหาเดิม "ไม่แตะเลย" (เต็มหน้า A4 ชัดเท่าเดิม) → เพิ่มหน้าแบรนด์ WeCraft ไว้ท้ายเล่ม
-    const doc = await PDFDocument.load(raw, { ignoreEncryption: true });
-    let hImg = null, fImg = null, logo = null;
-    try { if (header) hImg = await doc.embedPng(header); } catch {}
-    try { if (footer) fImg = await doc.embedPng(footer); } catch {}
-    try { const lg = await getLogo(); if (lg) logo = await doc.embedPng(lg); } catch {}
+    // ── "ต่อขอบ": เนื้อหาเดิมคง 100% (ไม่ย่อ ไม่ทับ แม้ซัพทำชิดขอบ) ─────────
+    // เพิ่มพื้นที่ใหม่บน-ล่างสำหรับแถบแบรนด์ WeCraft → ปลอดภัยกับทุกซัพ
+    const src = await PDFDocument.load(raw, { ignoreEncryption: true });
+    const outDoc = await PDFDocument.create();
+    let hImg = null, fImg = null;
+    try { if (header) hImg = await outDoc.embedPng(header); } catch {}
+    try { if (footer) fImg = await outDoc.embedPng(footer); } catch {}
     if (!hImg && !fImg) return sendPdf(raw, 3600);
 
-    // ใช้ขนาดหน้าเดียวกับเล่มเดิม (ปกติ A4)
-    const first = doc.getPages()[0];
-    const { width, height } = first ? first.getSize() : { width: 595.28, height: 841.89 };
-    const page = doc.addPage([width, height]);
-
-    if (hImg) { const h = width * (hImg.height / hImg.width); page.drawImage(hImg, { x: 0, y: height - h, width, height: h }); }
-    if (fImg) { const f = width * (fImg.height / fImg.width); page.drawImage(fImg, { x: 0, y: 0, width, height: f }); }
-    if (logo) {   // โลโก้ใหญ่กลางหน้า
-      const lw = width * 0.42, lh = lw * (logo.height / logo.width);
-      page.drawImage(logo, { x: (width - lw) / 2, y: (height - lh) / 2, width: lw, height: lh });
+    const srcPages = src.getPages();
+    const emb = await outDoc.embedPages(srcPages);
+    for (let i = 0; i < srcPages.length; i++) {
+      const { width, height } = srcPages[i].getSize();
+      const hH = hImg ? Math.min(width * (hImg.height / hImg.width), height * 0.05) : 0;
+      const fH = fImg ? Math.min(width * (fImg.height / fImg.width), height * 0.09) : 0;
+      const page = outDoc.addPage([width, height + hH + fH]);
+      page.drawPage(emb[i], { x: 0, y: fH, width, height });          // เนื้อหาเดิม ขนาดจริง
+      if (hImg) page.drawImage(hImg, { x: 0, y: height + fH, width, height: hH });
+      if (fImg) page.drawImage(fImg, { x: 0, y: 0, width, height: fH });
     }
 
-    const out = Buffer.from(await doc.save({ useObjectStreams: true }));
+    const out = Buffer.from(await outDoc.save({ useObjectStreams: true }));
     return sendPdf(out, 86400);
   } catch {
     return sendPdf(raw, 3600);
