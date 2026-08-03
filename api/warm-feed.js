@@ -2,8 +2,9 @@
 // จุดประสงค์: ลูกค้าคนแรกไม่ต้องรอ 4-22 วิ (ซัพหน่วง IP ดาต้าเซนเตอร์) — พอ cache อุ่นแล้วเปิด ~0.4 วิ
 const SITE = 'https://wecraft-travel.com';
 const PDF_VER = 'v=3';                 // ต้องตรงกับลิงก์ฝั่งเว็บ/แอดมิน/LINE (ไม่งั้นอุ่นคนละ cache)
-const BATCH = 12;                      // อุ่นกี่ไฟล์ต่อรอบ (กันเกินเวลาฟังก์ชัน)
-const CONCURRENCY = 3;
+const BATCH = 60;                      // อุ่นกี่ไฟล์ต่อรอบ (cron ฟรีได้วันละครั้ง → อุ่นเยอะหน่อย)
+const CONCURRENCY = 8;
+const TIME_BUDGET = 50000;             // หยุดก่อนฟังก์ชันหมดเวลา (60s)
 
 const b64url = (s) => Buffer.from(String(s)).toString('base64url');
 const pdfProxyUrl = (pdf) => `${SITE}/api/tour-pdf-alt?${PDF_VER}&u=${b64url(pdf)}`;
@@ -42,6 +43,7 @@ module.exports = async function handler(req, res) {
     const batch = pickBatch(pdfs, BATCH);
     const t0 = Date.now();
     for (let i = 0; i < batch.length; i += CONCURRENCY) {
+      if (Date.now() - t0 > TIME_BUDGET) { result.pdfs.stoppedEarly = true; break; }
       await Promise.all(batch.slice(i, i + CONCURRENCY).map(async (pdf) => {
         try {
           const ctrl = new AbortController();
