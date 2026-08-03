@@ -13,7 +13,8 @@ function proxyPdf(url) {
     const bytes = new TextEncoder().encode(String(url));
     let bin = ''; for (const b of bytes) bin += String.fromCharCode(b);
     const b64url = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    return `/api/tour-pdf-alt?u=${b64url}`;   // ซ่อน url ต้นทาง + แปะหัว/ท้ายกระดาษ WeCraft
+    // v = เวอร์ชันแบรนด์ (เปลี่ยนเลขนี้เมื่อแก้หัว/ท้าย → บังคับ render ใหม่ ไม่ติด cache เก่า)
+    return `/api/tour-pdf-alt?v=3&u=${b64url}`;   // ซ่อน url ต้นทาง + แปะหัว/ท้ายกระดาษ WeCraft
   } catch { return url; }
 }
 

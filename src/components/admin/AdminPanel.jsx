@@ -8,7 +8,8 @@ function adminPdfUrl(url) {
   try {
     const bytes = new TextEncoder().encode(String(url));
     let bin = ''; for (const b of bytes) bin += String.fromCharCode(b);
-    return `/api/tour-pdf-alt?u=${btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')}`;
+    // v = เวอร์ชันแบรนด์ (เปลี่ยนเลขนี้เมื่อแก้หัว/ท้าย → บังคับ render ใหม่ ไม่ติด cache เก่า)
+    return `/api/tour-pdf-alt?v=3&u=${btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')}`;
   } catch { return url; }
 }
 import { LogOut, LayoutDashboard, Globe, Tag, Star, FileText, HelpCircle,
