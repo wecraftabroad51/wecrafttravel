@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import TourCard from '../TourCard.jsx';
 import { agentCode } from '../../lib/agentCode.js';
+import { normalizeSupplierTours } from '../../lib/supplierUtils.js';
+import { ENABLED_SUPPLIERS } from '../../lib/suppliers.js';
 
 // ── ซ่อน URL ต้นทางของซัพ → เปิด PDF ผ่านโดเมนเราเอง (/api/tour-pdf) ──
 // รองรับ URL ที่มีอักขระไทย (encode เป็น UTF-8 → base64url เหมือน Node Buffer)
@@ -95,7 +97,26 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
   }, [pbId, pbSource]);
 
   const allTours = [...tours, ...supplierTours];
-  const tour = allTours.find(tr => String(tr.id) === String(tourId));
+  // เปิดลิงก์ตรง: ถ้าทัวร์ยังไม่มาในลิสต์ → ดึง "ซัพเจ้านั้นเจ้าเดียว" (cache) มาแสดงทันที
+  // ไม่ต้องรอโหลดครบทั้ง 15 ซัพ → เร็วขึ้นมาก แทบไม่เห็นหมุน
+  const [fetchedTour, setFetchedTour] = useState(null);
+  const tour = allTours.find(tr => String(tr.id) === String(tourId)) || fetchedTour;
+
+  useEffect(() => {
+    if (!isPb || allTours.some(tr => String(tr.id) === String(tourId))) return;
+    const sup = ENABLED_SUPPLIERS.find(s => s.id === pbSource);
+    if (!sup) return;
+    let cancelled = false;
+    fetch(`/api/suppliers?supplier=${pbSource}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (cancelled || !data) return;
+        const found = normalizeSupplierTours(sup.format, data, sup.id, sup.name).find(t => String(t.id) === String(tourId));
+        if (found) setFetchedTour(found);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [tourId, pbSource]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [lightbox, setLightbox]     = useState(null);
   const [reviewForm, setReviewForm] = useState({ name: '', email: '', rating: 5, text: '' });

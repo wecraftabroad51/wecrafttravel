@@ -733,3 +733,18 @@ export function normalizeFormosaTours(payload, source = 'formosa', sourceName = 
     };
   }).filter(t => t.departures.length > 0);
 }
+
+// ── Dispatch: เลือก normalizer ตาม format (ใช้ร่วมกันทั้ง App.jsx และหน้ารายละเอียด) ──
+export function normalizeSupplierTours(format, data, id, name) {
+  if (format === 'ttnplus')  return normalizeTtnPlusTours(data, id, name);
+  if (format === 'best')     return normalizeBestTours(data, id, name);
+  if (format === 'superb')   return normalizeSuperbTours(data, id, name);
+  if (format === 'flyde')    return normalizeFlydeTours(data, id, name);
+  if (format === 'formosa')  return normalizeFormosaTours(data, id, name);
+  if (format === 'itravels') return normalizeItravelsTours(data, id, name);
+  if (format === 'unique')   return normalizeUniqueTours(data, id, name);
+  if (!Array.isArray(data)) return [];
+  if (format === 'zego') return normalizeZegoTours(data, id, name);
+  if (format === 'ttn')  return normalizeTtnTours(data, id, name);
+  return normalizePbTours(data, id, name);
+}
