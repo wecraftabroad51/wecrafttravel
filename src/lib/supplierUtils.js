@@ -487,6 +487,141 @@ export function normalizeFlydeTours(payload, source = 'flyde', sourceName = 'FLY
   }).filter(t => t.departures.length > 0);
 }
 
+// ── iTravels Center (api.itravels.center/api/v1) ──────────────────
+// proxy คืน { data: [program + periods(join แล้ว)] } · ไม่มีฟิลด์ประเทศ → เดาจากชื่อ + หัวข้อไอทินฯ
+// keyword (เมือง/ประเทศ ไทย+อังกฤษ) → ISO2 · ชื่อทัวร์ itravels มักใช้ชื่อเมือง
+const ITRAVELS_KW = [
+  ['CN', ['จีน','ฉงชิ่ง','chongqing','เฉิงตู','chengdu','ปักกิ่ง','beijing','เซี่ยงไฮ้','shanghai','กวางเจา','กวางโจว','guangzhou','คุนหมิง','kunming','จางเจียเจี้ย','zhangjiajie','ซีอาน','xian','กุ้ยหลิน','guilin','ลี่เจียง','lijiang','จิ่วจ้ายโกว','jiuzhaigou','ฮาร์บิน','harbin','อู่หลง','wulong','แชงกรีล่า','shangri','ต้าหลี่','dali','เซินเจิ้น','shenzhen','ชิงเต่า','qingdao','ฉางซา','changsha','หังโจว','hangzhou','ซูโจว','suzhou','เฉิงตู','จูไห่','zhuhai','เขาง้อไบ๊','emei']],
+  ['JP', ['ญี่ปุ่น','japan','โตเกียว','tokyo','โอซาก้า','osaka','เกียวโต','kyoto','ฮอกไกโด','hokkaido','ฟูจิ','fuji','นาโกย่า','nagoya','โอกินาว่า','okinawa','ฟุกุโอกะ','fukuoka','ทาคายาม่า','takayama','ชิราคาวา','shirakawa','นารา','nara','คิวชู','kyushu','เซนได','sendai','ฮาคุบะ','hakuba','คามิโคจิ','คุซัทสึ','โทยามะ','toyama']],
+  ['KR', ['เกาหลี','korea','โซล','seoul','ปูซาน','busan','เชจู','jeju']],
+  ['TW', ['ไต้หวัน','taiwan','ไทเป','taipei','เกาสง','kaohsiung','ไทจง','taichung','อาลีซาน','alishan','จิ่วเฟิ่น','จิ่วเฟิน']],
+  ['VN', ['เวียดนาม','vietnam','ฮานอย','hanoi','ดานัง','danang','โฮจิมินห์','ho chi minh','ซาปา','sapa','บานาฮิลล์','bana hills','ฟูก๊วก','phu quoc','ดาลัด','dalat','ญาจาง','ฮาลอง','halong']],
+  ['HK', ['ฮ่องกง','hong kong','hongkong']],
+  ['MO', ['มาเก๊า','macau','macao']],
+  ['SG', ['สิงคโปร์','singapore']],
+  ['MY', ['มาเลเซีย','malaysia','กัวลาลัมเปอร์','kuala lumpur','ปีนัง','penang']],
+  ['IN', ['อินเดีย','india','เดลี','delhi','แคชเมียร์','kashmir','ลาดักห์','ladakh']],
+  ['NP', ['เนปาล','nepal','กาฐมาณฑุ','kathmandu']],
+  ['BT', ['ภูฏาน','bhutan','พาโร','paro']],
+  ['AE', ['ดูไบ','dubai','อาบูดาบี','abu dhabi']],
+  ['EG', ['อียิปต์','egypt','ไคโร','cairo','ลักซอร์','luxor']],
+  ['JO', ['จอร์แดน','jordan','เพตรา','petra']],
+  ['TR', ['ตุรกี','turkey','turkiye','อิสตันบูล','istanbul','คัปปาโดเกีย','cappadocia']],
+  ['KZ', ['คาซัคสถาน','kazakhstan','อัลมาตี','almaty']],
+  ['UZ', ['อุซเบกิสถาน','uzbekistan','ซามาร์คานด์','samarkand']],
+  ['GE', ['จอร์เจีย','georgia','ทบิลิซี','tbilisi']],
+  ['SCA', ['สแกนดิเนเวีย','scandinavia','สวีเดน','sweden','นอร์เวย์','norway','เดนมาร์ก','denmark','ฟินแลนด์','finland','ไอซ์แลนด์','iceland','stockholm','oslo','copenhagen','helsinki','reykjavik']],
+  ['FR', ['ฝรั่งเศส','france','ปารีส','paris']],
+  ['IT', ['อิตาลี','italy','โรม','rome','เวนิส','venice','มิลาน','milan']],
+  ['CH', ['สวิส','switzerland','ซูริค','zurich','อินเทอร์ลาเคน','interlaken']],
+  ['DE', ['เยอรมัน','germany','เบอร์ลิน','berlin','มิวนิค','munich']],
+  ['AT', ['ออสเตรีย','austria','เวียนนา','vienna']],
+  ['GB', ['อังกฤษ','england','ลอนดอน','london','สหราชอาณาจักร','united kingdom','สกอตแลนด์','scotland']],
+  ['ES', ['สเปน','spain','บาร์เซโลนา','barcelona','มาดริด','madrid']],
+  ['PT', ['โปรตุเกส','portugal','ลิสบอน','lisbon']],
+  ['NL', ['เนเธอร์แลนด์','netherlands','อัมสเตอร์ดัม','amsterdam']],
+  ['GR', ['กรีซ','greece','เอเธนส์','athens','ซานโตรินี','santorini']],
+  ['CZ', ['เช็ก','czech','ปราก','prague']],
+  ['RU', ['รัสเซีย','russia','มอสโก','moscow']],
+  ['US', ['อเมริกา','america','สหรัฐ','usa','นิวยอร์ก','new york','ลอสแอนเจลิส','los angeles','ลาสเวกัส','las vegas']],
+  ['CA', ['แคนาดา','canada','แวนคูเวอร์','vancouver','โตรอนโต','toronto']],
+  ['AU', ['ออสเตรเลีย','australia','ซิดนีย์','sydney','เมลเบิร์น','melbourne']],
+  ['NZ', ['นิวซีแลนด์','new zealand','โอ๊คแลนด์','auckland']],
+  ['EU', ['ยุโรป','europe']],
+];
+function detectItravelsCountry(text) {
+  const s = String(text || '').toLowerCase();
+  for (const [iso, kws] of ITRAVELS_KW) for (const kw of kws) if (s.includes(kw.toLowerCase())) return iso;
+  return codeFromThaiText(text) || '';
+}
+const stripHtml = (h) => String(h || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+// รายการเดือน YYYY-MM ตั้งแต่ start ถึง end (คุมไม่เกิน 12 เดือน)
+function monthsBetween(start, end) {
+  const a = String(start || '').slice(0, 7), b = String(end || start || '').slice(0, 7);
+  if (!/^\d{4}-\d{2}$/.test(a)) return [];
+  const out = []; let [y, m] = a.split('-').map(Number);
+  const [ey, em] = /^\d{4}-\d{2}$/.test(b) ? b.split('-').map(Number) : [y, m];
+  for (let i = 0; i < 12; i++) {
+    out.push(`${y}-${String(m).padStart(2, '0')}`);
+    if (y > ey || (y === ey && m >= em)) break;
+    m++; if (m > 12) { m = 1; y++; }
+  }
+  return out;
+}
+
+export function normalizeItravelsTours(payload, source = 'itravels', sourceName = 'iTravels Center') {
+  const arr = payload?.data || (Array.isArray(payload) ? payload : []);
+  const num = v => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isNaN(n) ? 0 : n; };
+  const firstPrice = (obj, key) => num(obj?.[key]?.[0]?.price);
+  return arr.map(p => {
+    const itinTitles = Array.isArray(p.program_detail) ? p.program_detail.slice(0, 5).map(d => d.title || '').join(' ') : '';
+    const iso2      = detectItravelsCountry(`${p.name || ''} ${itinTitles}`);
+    const continent = CODE_TO_CONTINENT[iso2] || 'Asia-East';
+    const nameTh    = COUNTRY_CODE_NAME_TH[iso2] || iso2 || '';
+    const basePrice = firstPrice(p.price, 'adult');
+
+    const openPeriods = (Array.isArray(p.periods) ? p.periods : []).filter(per => per && per.visible !== false && per.date_start);
+    let deps = openPeriods.map(per => {
+      const seat = Number(per.seat) || 0;
+      const avail = per.available_seat == null ? null : Number(per.available_seat);
+      return {
+        date:             per.date_start,
+        returnDate:       per.date_end || null,
+        price:            firstPrice(per.price, 'adult') || basePrice,
+        childPrice:       firstPrice(per.price, 'child') || null,
+        infantPrice:      firstPrice(per.price, 'infant') || null,
+        singleSupplement: firstPrice(per.price, 'single_person') || null,
+        deposit:          firstPrice(per.price, 'dept') || null,
+        available:        avail,
+        totalSeats:       seat || null,
+        bookedSeats:      (seat && avail != null) ? Math.max(0, seat - avail) : 0,
+        periodId:         per.full_code || per.code || '',
+      };
+    });
+    // ไม่มีรอบจริง → สร้างรอบรายเดือนจากช่วง month_start..month_end ให้ตัวกรองเดือนทำงาน
+    if (!deps.length && p.month_start) {
+      deps = monthsBetween(p.month_start, p.month_end).map(ym => ({
+        date: `${ym}-01`, returnDate: null, price: basePrice, childPrice: null, infantPrice: null,
+        singleSupplement: null, deposit: null, available: null, totalSeats: null, bookedSeats: 0, periodId: ym,
+      }));
+    }
+    const prices = deps.map(d => d.price || 0).filter(n => n > 0);
+    const price = prices.length ? Math.min(...prices) : basePrice;
+
+    const itinerary = (Array.isArray(p.program_detail) ? p.program_detail : []).map(d => ({
+      day:   Number(d.day) || 0,
+      title: d.title || '',
+      description: stripHtml(d.highlight),
+      meals: [d.food?.breakfast && 'เช้า', d.food?.lunch && 'กลางวัน', d.food?.dinner && 'เย็น'].filter(Boolean),
+      hotel: d.hotel || '',
+    }));
+
+    return {
+      id:          `sup_${source}_${p.code}`,
+      code:        p.code || '',
+      name:        { th: p.name, en: p.name },
+      destination: { th: nameTh, en: iso2 },
+      continent,
+      country:     iso2,
+      image:       p.banner || p.banner_square || '',
+      price,
+      duration:    Number(p.day) || 0,
+      tourType:    'outbound',
+      featured:    false,
+      airline:     p.transporter_by || '',
+      departures:  deps,
+      groupSize:   Number(p.seat) || null,
+      pdfUrl:      p.program_detail_file_pdf || null,
+      itinerary,
+      _source:     source,
+      _sourceName: sourceName,
+      _pbId:       p.code,
+      _night:      Number(p.night) || 0,
+      _hotelStars: null,
+    };
+  }).filter(t => t.name?.th && t.price > 0);
+}
+
 // ── Formosa Journey (api-formosa.ht1freshdigital.com/wp-json/bs-api) ──
 // proxy คืน { data: { data: [...] } } · tour_country ชื่ออังกฤษ · tour_period = ช่วงวันที่ · price_start
 export function normalizeFormosaTours(payload, source = 'formosa', sourceName = 'Formosa Journey') {

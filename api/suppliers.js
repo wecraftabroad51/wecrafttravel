@@ -19,6 +19,10 @@ const SUPPLIERS = {
   realjourney: { host: 'api.realjourney.co.th',    base: '/v1',   list: '/programtours', detail: id => `/programtours/${id}` },
   tourfactory: { host: 'api.tourfactory.co.th',    base: '/v1',   list: '/programtours', detail: id => `/programtours/${id}` },
   rarex:       { host: 'api.rarex.co.th',          base: '/v1',   list: '/programtours', detail: id => `/programtours/${id}` },
+  // iTravels Center — auth ผ่าน header 'itravels-secret' · list=โปรแกรม, periods อยู่คนละ endpoint → merge เข้าตาม code
+  itravels:    { host: 'api.itravels.center',       base: '/api/v1', list: '/program', detail: id => `/program?code=${encodeURIComponent(id)}`,
+                 auth: { header: 'itravels-secret', tokenEnv: 'ITRAVELS_API_TOKEN' },
+                 merge: { periodPath: '/program/period/' } },
   zego:        { host: 'www.zegoapi.com',          base: '/v1.5', list: '/programtours', detail: id => `/programtours/${id}`,
                  auth: { header: 'auth-token', tokenEnv: 'ZEGO_API_TOKEN' } },
   ttn:         { host: 'online.ttnconnect.com',    base: '/api/agency', list: '/get-allprogram', detail: id => `/program/${id}` },
@@ -91,6 +95,24 @@ module.exports = async function handler(req, res) {
   if (!cfg) return res.status(400).json({ error: 'ไม่รู้จักซัพพลายเออร์: ' + supplier });
 
   try {
+    // ซัพที่แยก endpoint โปรแกรม + รอบเดินทาง (itravels) → ดึงทั้งคู่แล้ว join periods เข้า program ตาม code
+    if (cfg.merge && !id) {
+      const [pj, qj] = await Promise.all([
+        supFetch(cfg, cfg.list),
+        supFetch(cfg, cfg.merge.periodPath).catch(() => null),
+      ]);
+      const programs = pj?.data || (Array.isArray(pj) ? pj : []);
+      const periods  = qj?.data || (Array.isArray(qj) ? qj : []);
+      const byCode = {};
+      for (const per of (Array.isArray(periods) ? periods : [])) {
+        const c = (per.program && (per.program.code || per.program)) || per.code;
+        if (c) (byCode[c] = byCode[c] || []).push(per);
+      }
+      const merged = (Array.isArray(programs) ? programs : []).map(p => ({ ...p, periods: byCode[p.code] || [] }));
+      res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=86400');
+      return res.status(200).json({ data: merged });
+    }
+
     // ซัพแบบ 1 endpoint/โปรแกรม (superb) → ดึง index หา id แล้วยิงทุกตัวขนาน รวมเป็นก้อนเดียว
     if (cfg.enumerate && !id) {
       const idxHtml = await rawFetch(cfg, cfg.enumerate.index);

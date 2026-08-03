@@ -4,7 +4,36 @@
 // ดึงผ่าน proxy /api/suppliers (พิสูจน์แล้วเวิร์ค + cache) กัน auth เพี้ยน
 const SITE = 'https://wecraft-travel.com';
 
-const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', checkingroup: 'pb', realjourney: 'pb', tourfactory: 'pb', rarex: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus', best: 'best', superb: 'superb', flyde: 'flyde', formosa: 'formosa' };
+const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', checkingroup: 'pb', realjourney: 'pb', tourfactory: 'pb', rarex: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus', best: 'best', superb: 'superb', flyde: 'flyde', formosa: 'formosa', itravels: 'itravels' };
+
+// iTravels — ไม่มีฟิลด์ประเทศ → เดาจากชื่อ+หัวข้อไอทินฯ (เมือง/ประเทศ ไทย+อังกฤษ)
+const ITRAVELS_KW = [
+  ['CN', ['จีน','ฉงชิ่ง','chongqing','เฉิงตู','chengdu','ปักกิ่ง','beijing','เซี่ยงไฮ้','shanghai','กวางเจา','กวางโจว','guangzhou','คุนหมิง','kunming','จางเจียเจี้ย','zhangjiajie','ซีอาน','xian','กุ้ยหลิน','guilin','ลี่เจียง','lijiang','จิ่วจ้ายโกว','harbin','ฮาร์บิน','อู่หลง','wulong','แชงกรีล่า','ต้าหลี่','เซินเจิ้น','shenzhen','ชิงเต่า','ฉางซา','หังโจว','ซูโจว','จูไห่','zhuhai']],
+  ['JP', ['ญี่ปุ่น','japan','โตเกียว','tokyo','โอซาก้า','osaka','เกียวโต','kyoto','ฮอกไกโด','hokkaido','ฟูจิ','fuji','นาโกย่า','nagoya','โอกินาว่า','okinawa','ฟุกุโอกะ','fukuoka','ทาคายาม่า','ชิราคาวา','นารา','คิวชู','เซนได','ฮาคุบะ','hakuba','คามิโคจิ','คุซัทสึ','โทยามะ']],
+  ['KR', ['เกาหลี','korea','โซล','seoul','ปูซาน','busan','เชจู','jeju']],
+  ['TW', ['ไต้หวัน','taiwan','ไทเป','taipei','เกาสง','ไทจง','อาลีซาน','จิ่วเฟิ่น']],
+  ['VN', ['เวียดนาม','vietnam','ฮานอย','hanoi','ดานัง','danang','โฮจิมินห์','ซาปา','sapa','บานาฮิลล์','ฟูก๊วก','ดาลัด','ญาจาง','ฮาลอง','halong']],
+  ['HK', ['ฮ่องกง','hong kong','hongkong']], ['MO', ['มาเก๊า','macau','macao']],
+  ['SG', ['สิงคโปร์','singapore']], ['MY', ['มาเลเซีย','malaysia','กัวลาลัมเปอร์','ปีนัง']],
+  ['IN', ['อินเดีย','india','เดลี','แคชเมียร์','ลาดักห์']], ['NP', ['เนปาล','nepal']], ['BT', ['ภูฏาน','bhutan']],
+  ['AE', ['ดูไบ','dubai','อาบูดาบี']], ['EG', ['อียิปต์','egypt','ไคโร','cairo']], ['JO', ['จอร์แดน','jordan','เพตรา']],
+  ['TR', ['ตุรกี','turkey','turkiye','อิสตันบูล','คัปปาโดเกีย']], ['KZ', ['คาซัคสถาน','อัลมาตี']],
+  ['UZ', ['อุซเบกิสถาน','ซามาร์คานด์']], ['GE', ['จอร์เจีย','georgia','ทบิลิซี']],
+  ['SCA', ['สแกนดิเนเวีย','scandinavia','สวีเดน','sweden','นอร์เวย์','norway','เดนมาร์ก','denmark','ฟินแลนด์','ไอซ์แลนด์','iceland','stockholm','oslo','copenhagen']],
+  ['FR', ['ฝรั่งเศส','france','ปารีส','paris']], ['IT', ['อิตาลี','italy','โรม','เวนิส','มิลาน']],
+  ['CH', ['สวิส','switzerland','ซูริค','อินเทอร์ลาเคน']], ['DE', ['เยอรมัน','germany','เบอร์ลิน','มิวนิค']],
+  ['AT', ['ออสเตรีย','austria','เวียนนา']], ['GB', ['อังกฤษ','england','ลอนดอน','london','สกอตแลนด์']],
+  ['ES', ['สเปน','spain','บาร์เซโลนา','มาดริด']], ['NL', ['เนเธอร์แลนด์','อัมสเตอร์ดัม']],
+  ['GR', ['กรีซ','greece','เอเธนส์','ซานโตรินี']], ['CZ', ['เช็ก','czech','ปราก','prague']], ['RU', ['รัสเซีย','russia','มอสโก']],
+  ['US', ['อเมริกา','america','สหรัฐ','usa','นิวยอร์ก','ลาสเวกัส']], ['CA', ['แคนาดา','canada']],
+  ['AU', ['ออสเตรเลีย','australia','ซิดนีย์']], ['NZ', ['นิวซีแลนด์','new zealand']], ['EU', ['ยุโรป','europe']],
+];
+function itravelsCountry(text) {
+  const s = String(text || '').toLowerCase();
+  for (const [iso, kws] of ITRAVELS_KW) for (const kw of kws) if (s.includes(kw.toLowerCase())) return iso;
+  return isoFromThai(text) || '';
+}
+const stripHtml = (h) => String(h || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 
 // FLY de WORLD: period_data = "pid|start(DD-MM-YYYY)|end|..|seat|..|price|..|price|..|note ;;; ..."
 const FLYDE_IMG = 'https://flywholesales.com/backend/';
@@ -168,6 +197,28 @@ function normalize(id, fmt, data) {
       if (!(price > 0) || !end || end < today) continue;
       const dm = String(p.number_of_days || '').match(/(\d+)\s*D\s*(\d+)\s*N/i);
       out.push({ id: `sup_formosa_${p.id}`, name: p.title, image: p.thumbnail || '', price, country: iso, code: p.tour_id || '', days: dm ? Number(dm[1]) : 0, night: dm ? Number(dm[2]) : 0, airline: (Array.isArray(p.tour_airline) ? p.tour_airline[0]?.name : '') || '', hotel: 0, highlight: '', pdf: p.file_pdf_url || '', deps: [{ date: start || end, ret: end, adult: price, child: 0, single: 0, seat: 0 }] });
+    }
+  } else if (fmt === 'itravels') {
+    const progs = data?.data || (Array.isArray(data) ? data : []);
+    const today = new Date().toISOString().slice(0, 10);
+    const num = v => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isNaN(n) ? 0 : n; };
+    const fp = (o, k) => num(o?.[k]?.[0]?.price);
+    for (const p of progs) {
+      if (!p || !p.code) continue;
+      const titles = Array.isArray(p.program_detail) ? p.program_detail.slice(0, 5).map(d => d.title || '').join(' ') : '';
+      const iso = itravelsCountry(`${p.name || ''} ${titles}`);
+      const base = fp(p.price, 'adult');
+      let deps = (Array.isArray(p.periods) ? p.periods : [])
+        .filter(per => per && per.visible !== false && per.date_start && per.date_start >= today)
+        .map(per => ({ date: per.date_start, ret: per.date_end || '', adult: fp(per.price, 'adult') || base, child: fp(per.price, 'child') || 0, single: fp(per.price, 'single_person') || 0, seat: per.available_seat == null ? null : Number(per.available_seat) }));
+      if (!deps.length && p.month_start) {   // ช่วงเดือน → รอบรายเดือน (ให้เลือกเดือนได้)
+        let [y, m] = String(p.month_start).slice(0, 7).split('-').map(Number);
+        const [ey, em] = String(p.month_end || p.month_start).slice(0, 7).split('-').map(Number);
+        for (let i = 0; i < 12; i++) { const ym = `${y}-${String(m).padStart(2, '0')}`; if (ym >= today.slice(0, 7)) deps.push({ date: `${ym}-01`, ret: '', adult: base, child: 0, single: 0, seat: null }); if (y > ey || (y === ey && m >= em)) break; m++; if (m > 12) { m = 1; y++; } }
+      }
+      const vp = deps.map(d => d.adult).filter(n => n > 0);
+      const price = vp.length ? Math.min(...vp) : base;
+      if (p.banner && price > 0) out.push({ id: `sup_itravels_${p.code}`, name: p.name, image: p.banner, price, country: iso, code: p.code || '', days: Number(p.day) || 0, night: Number(p.night) || 0, airline: p.transporter_by || '', hotel: 0, highlight: stripHtml(p.program_detail?.[0]?.highlight || ''), pdf: p.program_detail_file_pdf || '', deps: deps.slice(0, 60) });
     }
   }
   return out;

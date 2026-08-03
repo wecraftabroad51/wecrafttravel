@@ -20,6 +20,8 @@ const ALLOW = [
   'realjourney.co.th',
   'tourfactory.co.th',
   'rarex.co.th',
+  'itravels.center',
+  'r2.cloudflarestorage.com',
   'supabase.co',
   'ht1freshdigital.com',
   'drive.google.com',
@@ -43,6 +45,11 @@ export default async function handler(req) {
 
   // BEST (dev-bestconsortium.com) บล็อก IP ดาต้าเซนเตอร์ → รีไดเรกต์ให้เบราว์เซอร์ลูกค้าโหลดตรง
   if (host.endsWith('bestconsortium.com')) return Response.redirect(target, 302);
+
+  // zego/gs25 บล็อก Edge → ข้ามไป serverless (Node) ทันที กัน edge fetch ค้าง ~20 วิ
+  if (host.endsWith('zegotravel.com') || host.endsWith('gs25tour.com')) {
+    return Response.redirect(new URL('/api/tour-pdf-alt?u=' + enc, req.url).href, 302);
+  }
 
   // Google Drive: ลิงก์ /view คืนหน้า HTML → แปลงเป็น direct download
   if (host.includes('drive.google.com') || host.includes('drive.usercontent.google.com')) {
