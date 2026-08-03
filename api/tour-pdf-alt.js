@@ -45,7 +45,8 @@ module.exports = async function handler(req, res) {
     clearTimeout(timer);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'inline; filename="wecraft-travel-tour.pdf"');
-    res.setHeader('Cache-Control', `s-maxage=${smaxage}, stale-while-revalidate=604800`);
+    // cache ยาว (ลิงก์มี v= สำหรับล้าง cache เวลาแก้แบรนด์) + ให้เบราว์เซอร์เก็บด้วย
+    res.setHeader('Cache-Control', `public, max-age=86400, s-maxage=${smaxage}, stale-while-revalidate=2592000`);
     return res.status(200).send(buf);
   };
 
@@ -92,7 +93,7 @@ module.exports = async function handler(req, res) {
     }
 
     const out = Buffer.from(await outDoc.save({ useObjectStreams: true }));
-    return sendPdf(out, 86400);
+    return sendPdf(out, 2592000);
   } catch {
     return sendPdf(raw, 3600);
   }

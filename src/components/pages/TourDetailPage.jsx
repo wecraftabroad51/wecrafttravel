@@ -119,6 +119,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
     return () => { cancelled = true; };
   }, [tourId, pbSource]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const [showPdf, setShowPdf]       = useState(false);   // กดแล้วค่อยฝัง PDF (หน้าเปิดเร็ว)
   const [lightbox, setLightbox]     = useState(null);
   const [reviewForm, setReviewForm] = useState({ name: '', email: '', rating: 5, text: '' });
   const [reviewSent, setReviewSent] = useState(false);
@@ -658,8 +659,22 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
                       </button>
                     </a>
                   </div>
-                  <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid #e2e8f0', height: 560 }}>
-                    <iframe src={proxyPdf(tour.pdfUrl)} style={{ width: '100%', height: '100%', border: 'none' }} title="Tour Program" loading="lazy" />
+                  {/* กดแล้วค่อยโหลด — ไม่ดึงไฟล์หลาย MB ตอนเปิดหน้า ทำให้หน้าเปิดเร็ว */}
+                  <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid #e2e8f0', height: showPdf ? 560 : 'auto', background: '#f8fafc' }}>
+                    {showPdf ? (
+                      <iframe src={proxyPdf(tour.pdfUrl)} style={{ width: '100%', height: '100%', border: 'none' }} title="Tour Program" />
+                    ) : (
+                      <button onClick={() => setShowPdf(true)}
+                        style={{ width: '100%', padding: '38px 20px', border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: 40 }}>📄</span>
+                        <span style={{ fontSize: 16, fontWeight: 800, color: '#0f3460' }}>
+                          {th ? 'กดเพื่อดูโปรแกรมเต็มในหน้านี้' : 'Tap to view the full program here'}
+                        </span>
+                        <span style={{ fontSize: 13, color: '#94a3b8' }}>
+                          {th ? 'หรือกดปุ่มด้านบนเพื่อเปิด/ดาวน์โหลดไฟล์' : 'Or use the button above to open / download'}
+                        </span>
+                      </button>
+                    )}
                   </div>
                   <div style={{ fontSize: 13.5, color: '#94a3b8', marginTop: 8 }}>
                     {th ? 'หากดูไม่ได้บนมือถือ กดปุ่มด้านบนเพื่อเปิดไฟล์โปรแกรมเต็ม' : 'On mobile, tap the button above to open the full program.'}
