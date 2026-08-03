@@ -1,6 +1,7 @@
 // ── PDF proxy (serverless/Node) — ซ่อน url ต้นทาง + แปะหัว/ท้ายกระดาษแบรนด์ WeCraft ──
 // รูปแบรนด์: public/pdf-header.png (บน), public/pdf-footer.png (ล่าง) · ล้มเหลว → ส่ง PDF เดิม/redirect ต้นทาง
 const { PDFDocument } = require('pdf-lib');
+const { Readable } = require('stream');
 const SITE = 'https://wecraft-travel.com';
 const ALLOW = [
   'probooking.co.th', 'wondergrouptour.com', 'booking.gs25tour.com',
@@ -55,6 +56,24 @@ module.exports = async function handler(req, res) {
   catch { return toSource(); }                       // ต่อไม่ติด/ช้าเกิน → โหลดตรง
   if (!up.ok) return toSource();
   const ct = up.headers.get('content-type') || '';
+
+  // ── ไฟล์ใหญ่ (เช่นโปรแกรมยุโรป 8-12MB) → "สตรีม" ส่งทันทีระหว่างโหลด ──
+  // เบราว์เซอร์เริ่มแสดงหน้าแรกได้เลย ไม่ต้องรอครบทั้งไฟล์ (เร็วกว่ามาก) · ยังซ่อน url ต้นทาง
+  const size = Number(up.headers.get('content-length') || 0);
+  if (size > 8 * 1024 * 1024 && up.body) {
+    clearTimeout(timer);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="wecraft-travel-tour.pdf"');
+    if (size) res.setHeader('Content-Length', String(size));
+    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=2592000, stale-while-revalidate=2592000');
+    res.status(200);
+    try {
+      const node = Readable.fromWeb(up.body);
+      node.on('error', () => { try { res.end(); } catch {} });
+      return node.pipe(res);
+    } catch { try { return res.end(); } catch { return; } }
+  }
+
   // อ่าน body ต้องอยู่ใน try ด้วย — ต้นทางช้า (zego) แล้ว abort ระหว่างอ่านจะ throw → 500
   let raw;
   try { raw = Buffer.from(await up.arrayBuffer()); }
@@ -65,8 +84,8 @@ module.exports = async function handler(req, res) {
 
   // แปะหัว/ท้ายกระดาษ (ถ้ามีรูปแบรนด์) — ถ้าสแตมป์ไม่ได้ ส่ง PDF เดิม
   try {
-    // ไฟล์ใหญ่มาก → ส่งไปเลย ไม่ stamp (กันหน่วยความจำ/เวลาเกิน แล้วเปิดไม่ได้)
-    if (raw.length > 12 * 1024 * 1024) return sendPdf(raw, 86400);
+    // ไฟล์ใหญ่ (ไม่ได้ประกาศ content-length มาก่อน) → ส่งเลย ไม่ stamp เพื่อความเร็ว
+    if (raw.length > 8 * 1024 * 1024) return sendPdf(raw, 2592000);
     const { header, footer } = await getBrandImages();
     if (!header && !footer) return sendPdf(raw, 3600);
 
