@@ -55,9 +55,22 @@ async function pushAdmin(text) {
 async function getName(userId) {
   try { const p = await (await fetch(`https://api.line.me/v2/bot/profile/${userId}`, { headers: { Authorization: `Bearer ${TOKEN}` } })).json(); return p.displayName || ''; } catch { return ''; }
 }
-const feedCache = {};
+// ดึง "ฟีดเต็ม" ครั้งเดียว (cache entry เดียว → อุ่นตลอด ไม่ค้าง 16 วิ) แล้วกรองประเทศในหน่วยความจำ
+// กันเคสเดิม: ยิง ?c=JP, ?c=CN แยกกัน แต่ละอันเย็นแยก → คนแรกต่อประเทศรอ 16 วิ = เกิน timeout ของ LINE
+const feedCache = { all: null, ts: 0 };
+async function fetchFeedAll() {
+  if (feedCache.all && (Date.now() - feedCache.ts < 60000)) return feedCache.all;   // memo 60 วิ ต่อ instance
+  try {
+    const r = await fetch(`${SITE}/api/tour-feed`);
+    const a = await r.json();
+    if (Array.isArray(a)) { feedCache.all = a; feedCache.ts = Date.now(); return a; }
+  } catch { /* ใช้ของเก่าถ้ามี */ }
+  return feedCache.all || [];
+}
 async function fetchFeed(iso) {
-  try { const r = await fetch(`${SITE}/api/tour-feed${iso ? `?c=${iso}` : ''}`); const a = await r.json(); return Array.isArray(a) ? a : []; } catch { return []; }
+  const all = await fetchFeedAll();
+  const c = (iso || '').toUpperCase();
+  return c ? all.filter(t => t.country === c) : all;
 }
 const pb = (obj) => 'a=' + encodeURIComponent(JSON.stringify(obj));
 const unpb = (data) => { try { return JSON.parse(decodeURIComponent((data || '').replace(/^a=/, ''))); } catch { return {}; } };

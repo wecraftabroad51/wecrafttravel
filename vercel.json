@@ -10,5 +10,8 @@
     "api/tour-feed.js":    { "maxDuration": 30 },
     "api/tour-pdf-alt.js": { "maxDuration": 30, "memory": 1024 },
     "api/line-webhook.js": { "maxDuration": 30 }
-  }
+  },
+  "crons": [
+    { "path": "/api/tour-feed", "schedule": "*/10 * * * *" }
+  ]
 }

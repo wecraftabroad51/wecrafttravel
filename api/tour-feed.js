@@ -189,7 +189,9 @@ module.exports = async function handler(req, res) {
       const q = norm(wantedCode);
       if (q.length >= 3) all = all.filter(t => norm(t.code) === q || (q.length >= 4 && norm(t.code).includes(q)));
     }
-    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=1800');
+    // สด 10 นาที · เสิร์ฟของเก่าได้ทันทีอีกนานถึง 24 ชม.ระหว่าง refresh เบื้องหลัง
+    // → LINE ได้ผลเร็ว (~100ms) เกือบตลอด ไม่ค้าง 16 วิ จนเกิน timeout ของ LINE
+    res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=86400');
     return res.status(200).json(all);
   } catch (e) {
     return res.status(502).json({ error: e.message });
