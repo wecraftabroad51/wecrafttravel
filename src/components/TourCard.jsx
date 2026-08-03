@@ -55,6 +55,14 @@ export default function TourCard({ tour, t, navigate, inCompare, onCompare }) {
           }}>✈</div>
         )}
 
+        {/* โลโก้ WeCraft ทับแบนเนอร์ (รีแบรนด์ · ทับมุมที่ซัพมักใส่รหัส) */}
+        {tour.image && (
+          <div style={{ position: 'absolute', bottom: 8, right: 8, background: 'rgba(255,255,255,.92)', borderRadius: 8, padding: '3px 8px 3px 5px', display: 'flex', alignItems: 'center', gap: 5, boxShadow: '0 1px 5px rgba(0,0,0,.18)', pointerEvents: 'none' }}>
+            <img src="/logo.png" alt="WeCraft Travel" width={18} height={18} style={{ objectFit: 'contain', display: 'block' }} />
+            <span style={{ fontSize: 10.5, fontWeight: 800, color: 'var(--primary, #e65c00)', letterSpacing: '.02em' }}>WeCraft Travel</span>
+          </div>
+        )}
+
         {/* Discount badge */}
         {discountPct > 0 && (
           <div style={{

@@ -13,7 +13,7 @@ function proxyPdf(url) {
     const bytes = new TextEncoder().encode(String(url));
     let bin = ''; for (const b of bytes) bin += String.fromCharCode(b);
     const b64url = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    return `/api/tour-pdf?u=${b64url}`;
+    return `/api/pdf-branded?u=${b64url}`;   // แปะหัว/ท้ายกระดาษ WeCraft (fallback ไป tour-pdf เองถ้าสแตมป์ไม่ได้)
   } catch { return url; }
 }
 
@@ -388,6 +388,13 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
                   <span className="chip-cont" style={{ background: '#fee2e2', color: '#dc2626' }}>-{tour.discount}%</span>
                 )}
               </div>
+              {/* โลโก้ WeCraft ทับแบนเนอร์ (รีแบรนด์ · ทับมุมที่ซัพมักใส่รหัส) */}
+              {tour.image && (
+                <div style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(255,255,255,.93)', borderRadius: 9, padding: '4px 10px 4px 6px', display: 'flex', alignItems: 'center', gap: 6, boxShadow: '0 1px 6px rgba(0,0,0,.2)', pointerEvents: 'none' }}>
+                  <img src="/logo.png" alt="WeCraft Travel" width={22} height={22} style={{ objectFit: 'contain', display: 'block' }} />
+                  <span style={{ fontSize: 12, fontWeight: 800, color: '#e65c00', letterSpacing: '.02em' }}>WeCraft Travel</span>
+                </div>
+              )}
             </div>
 
             {/* Info panel */}
