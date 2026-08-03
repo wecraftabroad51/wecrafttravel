@@ -7,7 +7,7 @@
     "api/otp.js":          { "maxDuration": 30 },
     "api/suppliers.js":    { "maxDuration": 30 },
     "api/notify-admin.js": { "maxDuration": 20 },
-    "api/tour-feed.js":    { "maxDuration": 30 },
+    "api/tour-feed.js":    { "maxDuration": 60 },
     "api/tour-pdf-alt.js": { "maxDuration": 60, "memory": 1024 },
     "api/line-webhook.js": { "maxDuration": 30 },
     "api/warm-feed.js":    { "maxDuration": 30 }

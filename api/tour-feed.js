@@ -228,9 +228,16 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   const wanted = (req.query?.c || '').toUpperCase();
   try {
+    // ยิงทุกซัพขนานกัน · จำกัดต่อซัพ 22 วิ — ซัพไหนช้าเกินก็ข้าม ไม่ให้บล็อกทั้งฟีดจน 504
     const results = await Promise.all(Object.entries(SUP).map(async ([id, fmt]) => {
-      const data = await fetch(`${SITE}/api/suppliers?supplier=${id}`).then(r => r.ok ? r.json() : null).catch(() => null);
-      return normalize(id, fmt, data);
+      try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 22000);
+        const r = await fetch(`${SITE}/api/suppliers?supplier=${id}`, { signal: ctrl.signal });
+        clearTimeout(timer);
+        const data = r.ok ? await r.json() : null;
+        return normalize(id, fmt, data);
+      } catch { return []; }
     }));
     let all = results.flat().filter(t => t.name && t.price > 0);
     if (wanted) all = all.filter(t => t.country === wanted);

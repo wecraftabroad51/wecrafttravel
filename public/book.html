@@ -101,24 +101,35 @@ const otp = { sent:false, token:'', target:'', verified:false, cooldown:0 };
 let cdTimer=null;
 const pp = { rows:0, files:{} }; // files: { rowId: {name,url} }
 
+let formTouched = false;
+app.addEventListener('input', () => { formTouched = true; });   // ผู้ใช้เริ่มกรอก → ห้ามเรนเดอร์ทับ
+
 (async function init(){
+  // 1) แสดงฟอร์มทันทีจากพารามฯ URL (จองผ่านเว็บส่ง code/name/price/date มา) — ไม่ต้องรอฟีด ไม่หมุนค้าง
+  if (P.code || P.name) {
+    TOUR = { name:P.name||'จองจอยทัวร์', code:P.code||'', image:'', price:+P.price||0,
+             deps: P.date ? [{ date:P.date, ret:P.ret, adult:+P.price||0 }] : [] };
+    DEPS = TOUR.deps; selIdx = P.date ? 0 : selIdx;
+    renderForm();
+  }
+  fetch('/api/public-config').then(r=>r.json()).then(c=>{cfg=c;}).catch(()=>{});
+
+  // 2) ดึงฟีดเต็ม (อุ่นตลอด · มี deps) มาเสริมรอบเดินทาง/ชื่อ/รูปให้ครบ เบื้องหลัง
   try{
-    // ใช้ฟีดเต็มที่ "อุ่นตลอด" (มี deps) แล้วค้นทัวร์ในเครื่อง — เร็วกว่าตัวแปร ?c=/?code= ที่ cache เย็น (เคยค้าง ~16 วิ)
     const list = await fetch('/api/tour-feed').then(r=>r.json()).catch(()=>[]);
     const arr = Array.isArray(list)?list:[];
-    TOUR = (P.id && arr.find(t=>t.id===P.id))
+    const found = (P.id && arr.find(t=>t.id===P.id))
         || (P.code && arr.find(t=>normCode(t.code)===normCode(P.code)))
         || (P.code && arr.find(t=>normCode(t.code).includes(normCode(P.code))))
         || null;
-    if(!TOUR && (P.code||P.name)){ // fallback: ใช้ข้อมูลจาก URL (จองผ่านเว็บ)
-      TOUR = { name:P.name||'จองจอยทัวร์', code:P.code||'', image:'', price:+P.price||0,
-               deps: P.date ? [{ date:P.date, ret:P.ret, adult:+P.price||0 }] : [] };
+    if (found) {
+      TOUR = found; DEPS = found.deps||[];
+      if(P.date) selIdx = DEPS.findIndex(d=>sameDate(d.date,P.date));
+      if(!formTouched) renderForm();   // ยังไม่ได้กรอก → เรนเดอร์ใหม่พร้อมรอบครบ (ถ้ากรอกแล้วคงของเดิมไว้)
+    } else if (!TOUR) {
+      app.innerHTML='<div class="err">โหลดข้อมูลทัวร์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</div>';
     }
-    DEPS = (TOUR&&TOUR.deps)?TOUR.deps:[];
-    if(P.date) selIdx = DEPS.findIndex(d=>sameDate(d.date,P.date));
-    fetch('/api/public-config').then(r=>r.json()).then(c=>{cfg=c;}).catch(()=>{});
-    renderForm();
-  }catch(e){ app.innerHTML='<div class="err">โหลดข้อมูลทัวร์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</div>'; }
+  }catch(e){ if(!TOUR) app.innerHTML='<div class="err">โหลดข้อมูลทัวร์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</div>'; }
 })();
 
 function renderForm(){
