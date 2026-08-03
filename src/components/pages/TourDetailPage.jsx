@@ -122,7 +122,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
 
   // โปรแกรมแบบวันต่อวัน (บางซัพมีมาให้) · ถ้าไม่มี → ใช้ไฮไลต์ + ฝัง PDF โปรแกรมเต็มแทน
   const hasItinerary = tour.itinerary?.length > 0;
-  const pbHighlight  = String(pbDetail?.highlight || pbDetail?.highLight || '')
+  const pbHighlight  = String(pbDetail?.highlight || pbDetail?.highLight || tour._highlight || '')
     .replace(/<script[\s\S]*?<\/script>/gi, '').trim();
 
   // Travel month range from departures

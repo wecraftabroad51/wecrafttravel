@@ -434,6 +434,77 @@ export function normalizeSuperbTours(payload, source = 'superb', sourceName = 'S
   }).filter(t => t.departures.length > 0);
 }
 
+// ── Unique Inter Wholesale (uniqueinterwholesale.com/apiwebsingle.php) ──
+// proxy คืน { data: [rows] } · แต่ละ row = รอบเดินทาง (โปรแกรมซ้ำ) → จับกลุ่มตาม mainid (คล้าย Superb)
+const uniqNum = v => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isNaN(n) ? 0 : n; };
+export function normalizeUniqueTours(payload, source = 'unique', sourceName = 'Unique Inter') {
+  const rows = payload?.data || (Array.isArray(payload) ? payload : []);
+  const today = new Date().toISOString().slice(0, 10);
+  const byMain = {};
+  for (const r of rows) { const k = r && (r.mainid ?? r.ProductCode); if (k != null && k !== '') (byMain[k] = byMain[k] || []).push(r); }
+
+  return Object.keys(byMain).map(k => {
+    const rs = byMain[k], p = rs[0];
+    const iso2      = codeFromThaiText(p.Country) || detectItravelsCountry(`${p.Country || ''} ${p.title || ''}`) || '';
+    const continent = CODE_TO_CONTINENT[iso2] || 'Asia-East';
+    const nameTh    = COUNTRY_CODE_NAME_TH[iso2] || (p.Country || iso2);
+
+    const deps = rs.map(r => {
+      const adult = uniqNum(r.Adult);
+      const pro   = uniqNum(r.Pro);
+      const promo = (pro > 0 && pro < adult) ? pro : 0;
+      return {
+        date:             r.Date,
+        returnDate:       r.ENDDate || '',
+        price:            adult,
+        promoPrice:       promo,
+        childPrice:       uniqNum(r['Chd+B']) || null,
+        infantPrice:      uniqNum(r.ChdNB) || null,
+        singleSupplement: uniqNum(r.Single) || null,
+        available:        Number(r.AVBL) || 0,
+        totalSeats:       Number(r.Size) || null,
+        bookedSeats:      0,
+        deposit:          uniqNum(r.Deposit) || null,
+        periodId:         r.pid || '',
+        _booking:         String(r.Booking ?? ''),
+      };
+    }).filter(d => d.date && d.date >= today && d.price > 0 && !['15', '16'].includes(d._booking));
+
+    // ระยะเวลา (วัน) จากวันไป-กลับของรอบแรก
+    let duration = 0;
+    const d0 = deps[0];
+    if (d0?.date && d0?.returnDate) { const diff = Math.round((new Date(d0.returnDate) - new Date(d0.date)) / 86400000); if (diff > 0 && diff < 40) duration = diff + 1; }
+
+    const eff = deps.map(d => d.promoPrice > 0 ? d.promoPrice : d.price).filter(n => n > 0);
+    const minPrice = eff.length ? Math.min(...eff) : (uniqNum(p.startingprice) || 0);
+
+    return {
+      id:          `sup_${source}_${k}`,
+      code:        p.ProductCode || '',
+      name:        { th: p.title, en: p.title },
+      destination: { th: nameTh, en: iso2 },
+      continent,
+      country:     iso2,
+      image:       p.jpg || '',
+      price:       minPrice,
+      duration,
+      tourType:    'outbound',
+      featured:    false,
+      airline:     (p.Airline && p.Airline !== 'NOLOGO') ? p.Airline : '',
+      departures:  deps,
+      groupSize:   deps[0]?.totalSeats || null,
+      pdfUrl:      p.pdf || null,
+      itinerary:   [],
+      _source:     source,
+      _sourceName: sourceName,
+      _pbId:       k,
+      _night:      duration > 0 ? duration - 1 : 0,
+      _hotelStars: null,
+      _highlight:  p.story || '',
+    };
+  }).filter(t => t.departures.length > 0 && t.name?.th);
+}
+
 // ── FLY de WORLD (flywholesales.com/api_datatour_new.php) ─────────
 // DataTables { data:[...] } · period_data = string "pid|start(DD-MM-YYYY)|end|..|seat|..|price|.." คั่น ;;;
 const FLYDE_IMG = 'https://flywholesales.com/backend/';

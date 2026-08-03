@@ -14,6 +14,7 @@ export const SUPPLIERS = [
   { id: 'tourfactory', name: 'Tour Factory',    enabled: true, format: 'probooking' },
   { id: 'rarex',       name: 'RareX',           enabled: true, format: 'probooking' },
   { id: 'itravels',    name: 'iTravels Center', enabled: true, format: 'itravels' },
+  { id: 'unique',      name: 'Unique Inter',    enabled: true, format: 'unique' },
   { id: 'zego',        name: 'Zego',            enabled: true, format: 'zego' },
   { id: 'ttn',         name: 'TTN Tour',        enabled: true, format: 'ttn' },
   { id: 'ttnplus',     name: 'TTN Plus',        enabled: true, format: 'ttnplus' },

@@ -4,7 +4,7 @@
 // ดึงผ่าน proxy /api/suppliers (พิสูจน์แล้วเวิร์ค + cache) กัน auth เพี้ยน
 const SITE = 'https://wecraft-travel.com';
 
-const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', checkingroup: 'pb', realjourney: 'pb', tourfactory: 'pb', rarex: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus', best: 'best', superb: 'superb', flyde: 'flyde', formosa: 'formosa', itravels: 'itravels' };
+const SUP = { probooking: 'pb', wondergroup: 'pb', gs25tour: 'pb', checkingroup: 'pb', realjourney: 'pb', tourfactory: 'pb', rarex: 'pb', zego: 'zego', ttn: 'ttn', ttnplus: 'ttnplus', best: 'best', superb: 'superb', flyde: 'flyde', formosa: 'formosa', itravels: 'itravels', unique: 'unique' };
 
 // iTravels — ไม่มีฟิลด์ประเทศ → เดาจากชื่อ+หัวข้อไอทินฯ (เมือง/ประเทศ ไทย+อังกฤษ)
 const ITRAVELS_KW = [
@@ -219,6 +219,25 @@ function normalize(id, fmt, data) {
       const vp = deps.map(d => d.adult).filter(n => n > 0);
       const price = vp.length ? Math.min(...vp) : base;
       if (p.banner && price > 0) out.push({ id: `sup_itravels_${p.code}`, name: p.name, image: p.banner, price, country: iso, code: p.code || '', days: Number(p.day) || 0, night: Number(p.night) || 0, airline: p.transporter_by || '', hotel: 0, highlight: stripHtml(p.program_detail?.[0]?.highlight || ''), pdf: p.program_detail_file_pdf || '', deps: deps.slice(0, 60) });
+    }
+  } else if (fmt === 'unique') {
+    const rows = data?.data || (Array.isArray(data) ? data : []);
+    const today = new Date().toISOString().slice(0, 10);
+    const num = v => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isNaN(n) ? 0 : n; };
+    const byMain = {};
+    for (const r of rows) { const k = r && (r.mainid ?? r.ProductCode); if (k != null && k !== '') (byMain[k] = byMain[k] || []).push(r); }
+    for (const k in byMain) {
+      const rs = byMain[k], p = rs[0];
+      const iso = itravelsCountry(`${p.Country || ''} ${p.title || ''}`);
+      const deps = rs.map(r => {
+        const adult = num(r.Adult); const pro = num(r.Pro);
+        const price = (pro > 0 && pro < adult) ? pro : adult;
+        return { date: r.Date, ret: r.ENDDate || '', adult: price, child: num(r['Chd+B']) || 0, single: num(r.Single) || 0, seat: Number(r.AVBL) || 0, _b: String(r.Booking ?? '') };
+      }).filter(d => d.date && d.date >= today && d.adult > 0 && !['15', '16'].includes(d._b));
+      if (!deps.length) continue;
+      let days = 0; if (deps[0].date && deps[0].ret) { const diff = Math.round((new Date(deps[0].ret) - new Date(deps[0].date)) / 86400000); if (diff > 0 && diff < 40) days = diff + 1; }
+      const price = Math.min(...deps.map(d => d.adult));
+      if (p.jpg && price > 0) out.push({ id: `sup_unique_${k}`, name: p.title, image: p.jpg, price, country: iso, code: p.ProductCode || '', days, night: days > 0 ? days - 1 : 0, airline: (p.Airline && p.Airline !== 'NOLOGO') ? p.Airline : '', hotel: 0, highlight: stripHtml(p.story || ''), pdf: p.pdf || '', deps: deps.slice(0, 60) });
     }
   }
   return out;

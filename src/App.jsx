@@ -14,7 +14,7 @@ import {
   REVIEWS_DATA, SITE_SETTINGS_DEFAULT, BOOKINGS_DATA, MESSAGES_DATA, CHAT_SESSIONS_DEFAULT,
 } from './data.js';
 import { LEGAL_DEFAULTS } from './lib/legalDefaults.js';
-import { normalizePbTours, normalizeZegoTours, normalizeTtnTours, normalizeTtnPlusTours, normalizeBestTours, normalizeSuperbTours, normalizeFlydeTours, normalizeFormosaTours, normalizeItravelsTours } from './lib/supplierUtils.js';
+import { normalizePbTours, normalizeZegoTours, normalizeTtnTours, normalizeTtnPlusTours, normalizeBestTours, normalizeSuperbTours, normalizeFlydeTours, normalizeFormosaTours, normalizeItravelsTours, normalizeUniqueTours } from './lib/supplierUtils.js';
 import { ENABLED_SUPPLIERS } from './lib/suppliers.js';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
@@ -417,6 +417,7 @@ function AppInner() {
       if (sup.format === 'flyde')   return normalizeFlydeTours(data, sup.id, sup.name);
       if (sup.format === 'formosa') return normalizeFormosaTours(data, sup.id, sup.name);
       if (sup.format === 'itravels') return normalizeItravelsTours(data, sup.id, sup.name);
+      if (sup.format === 'unique')   return normalizeUniqueTours(data, sup.id, sup.name);
       if (!Array.isArray(data)) return [];
       if (sup.format === 'zego') return normalizeZegoTours(data, sup.id, sup.name);
       if (sup.format === 'ttn')  return normalizeTtnTours(data, sup.id, sup.name);

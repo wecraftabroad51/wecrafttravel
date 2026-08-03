@@ -23,6 +23,9 @@ const SUPPLIERS = {
   itravels:    { host: 'api.itravels.center',       base: '/api/v1', list: '/program/', detail: id => `/program/?code=${encodeURIComponent(id)}`,
                  auth: { header: 'itravels-secret', tokenEnv: 'ITRAVELS_API_TOKEN' },
                  merge: { periodPath: '/program/period/' } },
+  // Unique Inter — endpoint เดียวได้ทุกอย่าง · auth ผ่าน ?user=EMAIL (เก็บอีเมลใน env)
+  unique:      { host: 'uniqueinterwholesale.com',   base: '',      list: '/apiwebsingle.php', detail: () => '/apiwebsingle.php',
+                 queryAuth: { param: 'user', env: 'UNIQUE_API_EMAIL' } },
   zego:        { host: 'www.zegoapi.com',          base: '/v1.5', list: '/programtours', detail: id => `/programtours/${id}`,
                  auth: { header: 'auth-token', tokenEnv: 'ZEGO_API_TOKEN' } },
   ttn:         { host: 'online.ttnconnect.com',    base: '/api/agency', list: '/get-allprogram', detail: id => `/program/${id}` },
@@ -62,9 +65,16 @@ function supFetch(cfg, path) {
       if (!token) return reject(new Error(`ยังไม่ได้ตั้งค่า ${cfg.auth.tokenEnv}`));
       headers[cfg.auth.header] = cfg.auth.scheme ? `${cfg.auth.scheme} ${token}` : token;
     }
+    // auth แบบ query param (เช่น Unique: ?user=EMAIL)
+    let fullPath = `${cfg.base}${path}`;
+    if (cfg.queryAuth) {
+      const val = process.env[cfg.queryAuth.env];
+      if (!val) return reject(new Error(`ยังไม่ได้ตั้งค่า ${cfg.queryAuth.env}`));
+      fullPath += (fullPath.includes('?') ? '&' : '?') + cfg.queryAuth.param + '=' + encodeURIComponent(val);
+    }
     const req = https.request({
       hostname: cfg.host,
-      path: `${cfg.base}${path}`,
+      path: fullPath,
       method: 'GET',
       headers,
     }, (res) => {

@@ -22,6 +22,7 @@ const ALLOW = [
   'rarex.co.th',
   'itravels.center',
   'r2.cloudflarestorage.com',
+  'uniqueinterwholesale.com',
   'supabase.co',
   'ht1freshdigital.com',
   'drive.google.com',
