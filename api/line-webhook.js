@@ -275,7 +275,7 @@ function bookUrl(id, iso, uid, t) {
 }
 // ลิงก์ PDF ผ่านพร็อกซีเรา — ซ่อน URL ต้นทางของซัพพลายเออร์
 function pdfProxy(pdf) {
-  return `${SITE}/api/pdf-branded?u=${Buffer.from(String(pdf || '')).toString('base64url')}`;
+  return `${SITE}/api/tour-pdf-alt?u=${Buffer.from(String(pdf || '')).toString('base64url')}`;
 }
 // ค้นทัวร์จากรหัสโปรแกรม (ยืดหยุ่น — ตัดขีด/เว้นวรรคออกเทียบ)
 async function findByCode(q) {

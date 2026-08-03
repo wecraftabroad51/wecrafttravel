@@ -13,7 +13,7 @@ function proxyPdf(url) {
     const bytes = new TextEncoder().encode(String(url));
     let bin = ''; for (const b of bytes) bin += String.fromCharCode(b);
     const b64url = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    return `/api/pdf-branded?u=${b64url}`;   // แปะหัว/ท้ายกระดาษ WeCraft (fallback ไป tour-pdf เองถ้าสแตมป์ไม่ได้)
+    return `/api/tour-pdf-alt?u=${b64url}`;   // ซ่อน url ต้นทาง + แปะหัว/ท้ายกระดาษ WeCraft
   } catch { return url; }
 }
 
