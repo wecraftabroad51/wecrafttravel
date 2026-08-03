@@ -34,6 +34,14 @@ module.exports = async function handler(req, res) {
   try { host = new URL(target).host.toLowerCase(); } catch { return res.status(400).send('bad url'); }
   if (!ALLOW.some(h => host === h || host.endsWith('.' + h))) return res.status(403).send('forbidden');
 
+  // ── โฮสต์ที่หน่วง IP ดาต้าเซนเตอร์หนัก + ไฟล์ใหญ่เกิน cache (>10MB) ──
+  // ผ่านเซิร์ฟเวอร์เรา = 11-12 วิทุกครั้ง (cache ไม่ได้) · ให้เบราว์เซอร์โหลดตรง = ~0.6 วิ
+  if (host.endsWith('bestconsortium.com')) {
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.setHeader('Location', target);
+    return res.status(302).end();
+  }
+
   if (host.includes('drive.google.com') || host.includes('drive.usercontent.google.com')) {
     const m = target.match(/[-\w]{25,}/);
     if (m) target = 'https://drive.google.com/uc?export=download&id=' + m[0];
