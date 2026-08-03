@@ -86,6 +86,16 @@ async function fetchOne(id) {
 const pb = (obj) => 'a=' + encodeURIComponent(JSON.stringify(obj));
 const unpb = (data) => { try { return JSON.parse(decodeURIComponent((data || '').replace(/^a=/, ''))); } catch { return {}; } };
 
+// รหัสเอเจนท์ WeCraft (ซ่อนรหัสซัพ) — สูตรเดียวกับฝั่งเว็บ (src/lib/agentCode.js)
+function agentCode(t) {
+  const id = String((t && t.id) || '');
+  if (!id.startsWith('sup_')) return (t && t.code) || '';
+  let h = 0x811c9dc5;
+  for (let i = 0; i < id.length; i++) { h ^= id.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  const iso = String((t && t.country) || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2);
+  return 'WC' + iso + h.toString(36).toUpperCase().padStart(6, '0').slice(-5);
+}
+
 // ── Supabase session (จำว่าลูกค้ากำลังจองทัวร์ไหน — ไม่เก็บข้อมูลส่วนตัว) ──
 const SB_URL = process.env.VITE_SUPABASE_URL, SB_KEY = process.env.VITE_SUPABASE_ANON_KEY;
 const sbH = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json' };
@@ -260,7 +270,7 @@ async function tourDetail(iso, id, uid) {
 // ลิงก์ฟอร์มจอง (เปิดในเบราว์เซอร์ในไลน์) — พก id/iso/uid + ชื่อ/รหัส/ราคา ไปให้หน้าจองเรนเดอร์ทันที (ไม่หมุนรอ)
 function bookUrl(id, iso, uid, t) {
   const q = new URLSearchParams({ id: id || '', iso: iso || '', uid: uid || '' });
-  if (t) { if (t.code) q.set('code', t.code); if (t.name) q.set('name', t.name); if (t.price) q.set('price', String(t.price)); }
+  if (t) { const wc = agentCode(t); if (wc) q.set('code', wc); if (t.name) q.set('name', t.name); if (t.price) q.set('price', String(t.price)); }
   return `${SITE}/book.html?${q.toString()}`;
 }
 // ลิงก์ PDF ผ่านพร็อกซีเรา — ซ่อน URL ต้นทางของซัพพลายเออร์
@@ -273,7 +283,9 @@ async function findByCode(q) {
   const Q = norm(q);
   if (Q.length < 3) return null;
   const all = await fetchFeed('', true);
-  return all.find(t => norm(t.code) === Q)
+  return all.find(t => norm(agentCode(t)) === Q)          // รหัสเอเจนท์ WeCraft (ที่ลูกค้าเห็น)
+    || all.find(t => norm(t.code) === Q)                   // รหัสซัพเดิม (เผื่อหลังบ้าน)
+    || (Q.length >= 4 ? all.find(t => norm(agentCode(t)).includes(Q)) : null)
     || (Q.length >= 4 ? all.find(t => norm(t.code).includes(Q)) : null)
     || (Q.length >= 4 ? all.find(t => norm(t.code) && Q.includes(norm(t.code))) : null);
 }
@@ -285,7 +297,7 @@ function renderDetail(t, uid) {
   ];
   // แถวรหัส + โรงแรม
   const tags = [];
-  if (t.code) tags.push({ type: 'text', text: t.code, size: 'xs', color: '#0f9d8f', flex: 0 });
+  if (t.code) tags.push({ type: 'text', text: agentCode(t), size: 'xs', color: '#0f9d8f', flex: 0 });
   if (t.hotel) tags.push({ type: 'text', text: `${'⭐'.repeat(Math.min(5, t.hotel))} ${t.hotel} ดาว`, size: 'xs', color: '#f5a623', align: 'end' });
   if (tags.length) body.push({ type: 'box', layout: 'baseline', spacing: 'sm', margin: 'sm', contents: tags });
 

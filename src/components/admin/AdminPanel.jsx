@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import DateRangePicker from '../DateRangePicker.jsx';
+import { agentCode } from '../../lib/agentCode.js';
 import { LogOut, LayoutDashboard, Globe, Tag, Star, FileText, HelpCircle,
   Mail, Settings, Plane, Check, X, Eye, Trash2, Plus, Edit2, MessageSquare, Building2,
   Shield, Users } from 'lucide-react';
@@ -898,7 +899,9 @@ function SuppliersSection({ supplierTours }) {
     if (supFilter !== 'all' && t._source !== supFilter) return false;
     if (!search) return true;
     const q = search.toLowerCase();
+    const qs = q.replace(/[^a-z0-9]/g, '');
     return t.code?.toLowerCase().includes(q) ||
+      (qs && agentCode(t).toLowerCase().replace(/[^a-z0-9]/g, '').includes(qs)) ||   // ค้นด้วยรหัสเอเจนท์ WeCraft
       t.name?.th?.toLowerCase().includes(q) ||
       t.country?.toLowerCase().includes(q);
   });
@@ -918,7 +921,7 @@ function SuppliersSection({ supplierTours }) {
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-bold text-slate-800">ทัวร์ซัพพลายเออร์</h2>
-          <p className="text-sm text-slate-500 mt-1">ดึงข้อมูล Live จาก API ผู้ผลิตทัวร์ · อ่านอย่างเดียว · ลูกค้าเห็นรวมกับทัวร์ของเรา</p>
+          <p className="text-sm text-slate-500 mt-1">ดึงข้อมูล Live จาก API ผู้ผลิตทัวร์ · ลูกค้าเห็น <b>รหัสเอเจนท์ (WC…)</b> · หลังบ้านนี้เท่านั้นที่เห็นว่าแมตช์กับ <b>ซัพเจ้าไหน + รหัสเดิม</b> (ใช้ค้นด้วยรหัส WC ได้)</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="bg-teal-50 border border-teal-200 text-teal-800 text-sm font-semibold px-3 py-1.5 rounded-lg">
@@ -982,7 +985,7 @@ function SuppliersSection({ supplierTours }) {
                           <thead>
                             <tr className="bg-slate-50 border-b border-slate-200">
                               <th className="text-left px-4 py-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wide">ภาพ</th>
-                              <th className="text-left px-4 py-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wide">รหัส</th>
+                              <th className="text-left px-4 py-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wide">รหัสเอเจนท์ / รหัสซัพ</th>
                               <th className="text-left px-4 py-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wide">ชื่อโปรแกรม</th>
                               <th className="text-center px-4 py-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wide">วัน/คืน</th>
                               <th className="text-right px-4 py-2.5 font-semibold text-slate-600 text-xs uppercase tracking-wide">ราคาเริ่มต้น</th>
@@ -1003,8 +1006,9 @@ function SuppliersSection({ supplierTours }) {
                                       ? <img src={tour.image} alt="" className="w-14 h-10 rounded object-cover bg-slate-100 border border-slate-200" loading="lazy" />
                                       : <div className="w-14 h-10 rounded bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-300 text-lg">🖼️</div>}
                                   </td>
-                                  <td className="px-4 py-2.5">
-                                    <span className="font-mono text-xs bg-slate-100 px-2 py-1 rounded text-slate-600">{tour.code}</span>
+                                  <td className="px-4 py-2.5 whitespace-nowrap">
+                                    <div className="font-mono text-xs font-bold bg-teal-50 border border-teal-200 text-teal-700 px-2 py-1 rounded inline-block" title="รหัสที่ลูกค้าเห็น">{agentCode(tour)}</div>
+                                    <div className="font-mono text-[11px] text-slate-400 mt-1" title="รหัสเดิมของซัพ (ใช้จองกับซัพ)">ซัพ: {tour.code || '-'}</div>
                                   </td>
                                   <td className="px-4 py-2.5">
                                     <div className="font-medium text-slate-800 text-xs leading-snug max-w-xs">{tour.name?.th || tour.name?.en}</div>

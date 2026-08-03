@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import TourCard from '../TourCard.jsx';
+import { agentCode } from '../../lib/agentCode.js';
 
 // ── ซ่อน URL ต้นทางของซัพ → เปิด PDF ผ่านโดเมนเราเอง (/api/tour-pdf) ──
 // รองรับ URL ที่มีอักขระไทย (encode เป็น UTF-8 → base64url เหมือน Node Buffer)
@@ -118,7 +119,7 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
   const tourName    = tv(tour.name);
   const airline     = tour.flight?.outbound?.airline || tour.airline || pbDetail?.vehicle || '';
   const basePrice   = tour.priceTiers?.[0]?.price || tour.price || 0;
-  const tourCode    = tour.code || '-';
+  const tourCode    = agentCode(tour) || '-';   // รหัสเอเจนท์ WeCraft (ซ่อนรหัสซัพ)
 
   // โปรแกรมแบบวันต่อวัน (บางซัพมีมาให้) · ถ้าไม่มี → ใช้ไฮไลต์ + ฝัง PDF โปรแกรมเต็มแทน
   const hasItinerary = tour.itinerary?.length > 0;
@@ -140,7 +141,8 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
   const goBook = (tour, dep) => {
     const nm = th ? (tour.name?.th || tour.name?.en || '') : (tour.name?.en || tour.name?.th || '');
     const p = new URLSearchParams();
-    if (tour.code)        p.set('code', tour.code);
+    const wc = agentCode(tour);
+    if (wc)               p.set('code', wc);            // รหัสเอเจนท์ (ลูกค้าเห็น · หลังบ้านแมตช์ซัพจากรหัสนี้)
     if (nm)               p.set('name', nm);
     if (dep.date)         p.set('date', dep.date);
     if (dep.returnDate)   p.set('returnDate', dep.returnDate);

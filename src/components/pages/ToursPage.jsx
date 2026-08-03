@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import TourCard from '../TourCard.jsx';
 import { resolveCountryCode, COUNTRIES, flagUrl } from '../../lib/countries.js';
+import { agentCodeMatch } from '../../lib/agentCode.js';
 
 function Icon({ name, size = 16 }) {
   const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round' };
@@ -333,7 +334,8 @@ export default function ToursPage({ lang, t, navigate, tours, supplierTours = []
         const desc = (t ? t(tr.description) : (tr.description?.en || tr.description?.th || '')).toLowerCase();
         const code = (tr.code || '').toLowerCase();
         const codeStrip = code.replace(/[^a-z0-9]/g, '');
-        return code.includes(q) || (qs && codeStrip.includes(qs)) || name.includes(q) || dest.includes(q) || desc.includes(q);
+        // ค้นด้วยรหัสเอเจนท์ WeCraft (ที่ลูกค้าเห็น) หรือรหัสซัพเดิม (สำหรับหลังบ้าน)
+        return (qs && agentCodeMatch(tr, qs)) || code.includes(q) || (qs && codeStrip.includes(qs)) || name.includes(q) || dest.includes(q) || desc.includes(q);
       });
     }
     // กรองตามเดือนออกเดินทาง (YYYY-MM) — เฉพาะทัวร์ที่มีรอบเดินทางในเดือนนั้น
