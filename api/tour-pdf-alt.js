@@ -34,6 +34,14 @@ module.exports = async function handler(req, res) {
   try { host = new URL(target).host.toLowerCase(); } catch { return res.status(400).send('bad url'); }
   if (!ALLOW.some(h => host === h || host.endsWith('.' + h))) return res.status(403).send('forbidden');
 
+  // BEST (bestconsortium) บล็อก/หน่วง IP ดาต้าเซนเตอร์ — ดึงผ่านเราใช้ 11 วิแล้วมักล้มเหลว
+  // → ให้เบราว์เซอร์ลูกค้าโหลดตรง (~0.6 วิ) เป็นซัพเดียวที่ยอมโชว์ url เพื่อแลกความเร็ว
+  if (host.endsWith('bestconsortium.com')) {
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.setHeader('Location', target);
+    return res.status(302).end();
+  }
+
   if (host.includes('drive.google.com') || host.includes('drive.usercontent.google.com')) {
     const m = target.match(/[-\w]{25,}/);
     if (m) target = 'https://drive.google.com/uc?export=download&id=' + m[0];
