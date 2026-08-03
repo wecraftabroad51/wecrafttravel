@@ -77,7 +77,7 @@ function Accordion({ title, icon, badge, defaultOpen = false, children }) {
   );
 }
 
-export default function TourDetailPage({ lang, t, navigate, tours, supplierTours = [], reviews, setBookings, setReviews, tourId, compareList, toggleCompare }) {
+export default function TourDetailPage({ lang, t, navigate, tours, supplierTours = [], suppliersLoading = 0, reviews, setBookings, setReviews, tourId, compareList, toggleCompare }) {
   // supplier tour id = "sup_<source>_<code>" (code อาจมี '_' ได้ → rejoin)
   const isPb = String(tourId).startsWith('sup_');
   const _parts  = isPb ? String(tourId).split('_') : [];
@@ -108,6 +108,21 @@ export default function TourDetailPage({ lang, t, navigate, tours, supplierTours
   };
 
   if (!tour) {
+    // ทัวร์ของซัพยังโหลดไม่ถึง (โดยเฉพาะตอนเปิดลิงก์ตรง) → โชว์ "กำลังโหลด" ไม่ใช่ "ไม่พบทัวร์"
+    const stillLoading = isPb && (suppliersLoading > 0 || supplierTours.length === 0);
+    if (stillLoading) {
+      return (
+        <div style={{ padding: '90px 32px', textAlign: 'center' }}>
+          <span className="tp-spin" style={{ width: 30, height: 30, borderRadius: '50%', border: '3px solid var(--primary, #e65c00)', borderTopColor: 'transparent', display: 'inline-block' }} />
+          <div style={{ fontSize: 16, fontWeight: 700, marginTop: 16, color: 'var(--ink, #0f172a)' }}>
+            {lang === 'th' ? 'กำลังโหลดโปรแกรมทัวร์…' : 'Loading tour…'}
+          </div>
+          <div style={{ fontSize: 13.5, color: '#94a3b8', marginTop: 6 }}>
+            {lang === 'th' ? 'กรุณารอสักครู่' : 'Please wait a moment'}
+          </div>
+        </div>
+      );
+    }
     return (
       <div style={{ padding: '80px 32px', textAlign: 'center', color: '#94a3b8' }}>
         {lang === 'th' ? 'ไม่พบทัวร์' : 'Tour not found'}
