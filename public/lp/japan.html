@@ -156,6 +156,27 @@ h2 b{font-weight:700;color:var(--navy)}
   border-radius:99px;padding:13px 26px;margin-bottom:38px;box-shadow:0 8px 24px rgba(16,59,115,.08);flex-wrap:wrap;justify-content:center}
 .score .n{font-size:31px;font-weight:700;color:var(--navy)}
 
+/* REAL TEAM */
+.team{display:grid;grid-template-columns:.86fr 1.14fr;gap:40px;align-items:center;
+  background:#fff;border:1px solid var(--line);border-radius:28px;padding:34px;
+  box-shadow:0 16px 44px rgba(16,59,115,.09)}
+.tphoto{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:4/4.6;background:var(--gray)}
+.tphoto img{width:100%;height:100%;object-fit:cover}
+.tbadge{position:absolute;left:14px;bottom:14px;background:var(--gold);color:#3A2A00;
+  font-weight:600;font-size:15px;padding:7px 16px;border-radius:99px;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+.quote{font-size:clamp(19px,2.6vw,25px);font-weight:400;line-height:1.6;color:var(--navy);
+  border-left:4px solid var(--gold);padding-left:18px;margin-bottom:12px}
+.quote b{color:var(--red);font-weight:600}
+.tname{color:var(--ink2);font-size:16.5px;margin-bottom:22px}
+.tfacts{display:grid;gap:13px;margin-bottom:22px}
+.tfacts>div{display:flex;gap:13px;align-items:flex-start}
+.tfacts i{font-style:normal;font-size:23px;flex:none;line-height:1.3}
+.tfacts b{display:block;font-size:17.5px;font-weight:600;line-height:1.5}
+.tfacts span{color:var(--ink2);font-size:15.5px}
+.licbtn{display:inline-flex;align-items:center;gap:9px;background:var(--gray);border:1px solid var(--line);
+  color:var(--navy);font-weight:500;font-size:17px;padding:14px 26px;border-radius:99px}
+.licbtn:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+
 /* TIMELINE */
 .tl{max-width:600px;margin:0 auto;position:relative}
 .tl::before{content:'';position:absolute;left:21px;top:14px;bottom:14px;width:2px;
@@ -264,6 +285,11 @@ h2 b{font-weight:700;color:var(--navy)}
   .step .no{width:46px;height:46px;font-size:20px;margin-bottom:11px}
   .step h3{font-size:17px} .step p{font-size:15px}
   .tl div span{font-size:17px}
+  .team{grid-template-columns:1fr;gap:24px;padding:22px;border-radius:22px}
+  .tphoto{aspect-ratio:4/3.4;border-radius:18px}
+  .quote{font-size:19px;padding-left:14px}
+  .tfacts b{font-size:16.5px} .tfacts span{font-size:15px}
+  .licbtn{width:100%;justify-content:center}
   .cgrid{grid-template-columns:repeat(2,1fr);gap:12px}
   .cgrid a{padding:20px 12px;border-radius:16px}
   .cgrid .v{font-size:16px} .cgrid .k{font-size:13.5px}
@@ -419,6 +445,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="dots" id="dots"></div>
 </div></section>
 
+<!-- 6b. REAL TEAM (กันภาพจำเพจปลอม) -->
+<section class="gray" id="realSec"><div class="wrap">
+  <div class="mid"><div class="kicker rv">ตัวจริง ไม่ใช่เพจปลอม</div>
+  <h2 class="rv">คุยกับ<b>คนจริง</b> ที่มีตัวตนจริง</h2>
+  <p class="sub rv">บริษัทจดทะเบียนถูกต้อง มีใบอนุญาตนำเที่ยว มีออฟฟิศจริง โอนเงินแล้วไม่หาย</p></div>
+
+  <div class="team rv">
+    <div class="tphoto" id="ownerWrap">
+      <img id="ownerImg" src="/lp/owner.jpg" alt="ผู้ก่อตั้ง WeCraft Travel">
+      <span class="tbadge">ผู้ก่อตั้ง</span>
+    </div>
+    <div class="tinfo">
+      <div class="quote">“ผมเดินทางเองมาแล้วทั่วโลก เลยรู้ว่าทริปที่ดีต้องเป็นยังไง<br>
+        เราเลยไม่จัดทัวร์ที่เรา<b>ไม่อยากไปเอง</b>”</div>
+      <div class="tname">คุณเจ · ผู้ก่อตั้ง WeCraft Travel</div>
+      <div class="tfacts">
+        <div><i>🪪</i><div><b>ใบอนุญาตนำเที่ยว 11/11550</b><span>ออกโดยกรมการท่องเที่ยว ตรวจสอบได้</span></div></div>
+        <div><i>🏢</i><div><b>มีออฟฟิศจริง</b><span>รัชดาภิเษก (ท่าพระ-ตากสิน) กรุงเทพฯ</span></div></div>
+        <div><i>📅</i><div><b>เปิดมาตั้งแต่ปี 2017</b><span>ดูแลนักท่องเที่ยวไทยมากว่า 8 ปี</span></div></div>
+        <div><i>🧾</i><div><b>ออกใบเสร็จ/ใบกำกับภาษีได้</b><span>มีเอกสารยืนยันการจองทุกครั้ง</span></div></div>
+      </div>
+      <a class="licbtn" href="/license.jpg" target="_blank" rel="noopener" data-cta="view-license">🔍 ดูใบอนุญาตตัวจริง</a>
+    </div>
+  </div>
+</div></section>
+
 <!-- 7. WHAT YOU GET -->
 <section class="gray"><div class="wrap">
   <div class="mid"><div class="kicker rv">จ่ายแล้วได้อะไรบ้าง</div>
@@ -569,6 +621,16 @@ if (cEl) {
     if (bg) bg.style.backgroundImage = `url('${jp[0].image}')`;
     document.querySelectorAll('#hgrid .hcell img').forEach((im,i) => { if (jp[i]) im.src = jp[i].image; });
   } catch {}
+})();
+
+/* ยังไม่ได้อัปรูปผู้ก่อตั้ง → ซ่อนช่องรูปไว้ก่อน (หน้าไม่พัง) */
+(function(){
+  const img = document.getElementById('ownerImg'), wrap = document.getElementById('ownerWrap');
+  if (!img) return;
+  img.addEventListener('error', () => {
+    if (wrap) wrap.style.display = 'none';
+    const t = document.querySelector('.team'); if (t) t.style.gridTemplateColumns = '1fr';
+  });
 })();
 
 document.addEventListener('click', e => {
