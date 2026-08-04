@@ -348,6 +348,18 @@ function AppInner() {
   const location   = useLocation();
   const navType    = useNavigationType();
 
+  // ── Google Tag Manager: เว็บเป็น SPA เปลี่ยนหน้าไม่ได้โหลดใหม่ ──
+  // ต้องส่ง virtual pageview เองทุกครั้งที่เปลี่ยนหน้า ไม่งั้น GTM/GA นับได้แค่หน้าแรก
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.dataLayer) return;
+    window.dataLayer.push({
+      event: 'page_view',
+      page_path: location.pathname + location.search,
+      page_title: document.title,
+      page_location: window.location.href,
+    });
+  }, [location.pathname, location.search]);
+
   // เปลี่ยนหน้า (ไปข้างหน้า) → เด้งขึ้นบนสุดเสมอ · ทำหลังเรนเดอร์ให้ชัวร์ (มือถือ scrollTo ก่อนเรนเดอร์ไม่ติด)
   // กดย้อนกลับ (POP) ไม่บังคับ เพื่อให้กลับไปตำแหน่งเดิมของลิสต์ได้
   useEffect(() => {
