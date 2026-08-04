@@ -93,7 +93,15 @@ h2 b{font-weight:700;color:var(--navy)}
 .sub{color:var(--ink2);font-size:18.5px;margin-bottom:50px;max-width:33em}
 .mid .sub{margin-left:auto;margin-right:auto}
 
-/* PAIN (ขยี้) */
+/* PAIN (ขยี้) — รูปผู้ก่อตั้งเป็นพื้นหลังมุมขวาบน ไม่มีกรอบ กลืนกับพื้น */
+.painsec{position:relative;overflow:hidden}
+.painsec>.wrap{position:relative;z-index:2}
+.ownerbg{position:absolute;right:0;top:0;height:78%;width:auto;max-width:44%;object-fit:cover;
+  object-position:center top;z-index:0;pointer-events:none;user-select:none;
+  -webkit-mask-image:linear-gradient(to left,#000 34%,transparent 96%),linear-gradient(to top,transparent 2%,#000 34%);
+  -webkit-mask-composite:source-in;mask-image:linear-gradient(to left,#000 34%,transparent 96%),linear-gradient(to top,transparent 2%,#000 34%);
+  mask-composite:intersect}
+.painhead{max-width:60%}
 .pains{display:grid;grid-template-columns:repeat(auto-fit,minmax(288px,1fr));gap:18px}
 .pn{background:#fff;border:1px solid var(--line);border-left:5px solid var(--red);border-radius:18px;
   padding:24px 22px;display:flex;gap:15px;align-items:flex-start}
@@ -157,10 +165,11 @@ h2 b{font-weight:700;color:var(--navy)}
 .score .n{font-size:31px;font-weight:700;color:var(--navy)}
 
 /* REAL TEAM */
-.team{display:grid;grid-template-columns:.86fr 1.14fr;gap:40px;align-items:center;
+.team{display:grid;grid-template-columns:1.02fr .98fr;gap:38px;align-items:center;
   background:#fff;border:1px solid var(--line);border-radius:28px;padding:34px;
   box-shadow:0 16px 44px rgba(16,59,115,.09)}
-.tphoto{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:4/4.6;background:var(--gray)}
+.tphotos{display:grid;grid-template-columns:1fr;gap:12px}
+.tphoto{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:3/4;background:var(--gray)}
 .tphoto img{width:100%;height:100%;object-fit:cover}
 .tbadge{position:absolute;left:14px;bottom:14px;background:var(--gold);color:#3A2A00;
   font-weight:600;font-size:15px;padding:7px 16px;border-radius:99px;box-shadow:0 6px 18px rgba(0,0,0,.2)}
@@ -269,6 +278,8 @@ h2 b{font-weight:700;color:var(--navy)}
   .hd .tel{padding:10px 16px;font-size:15.5px}
   .hd img{width:38px;height:38px}
 
+  .ownerbg{height:auto;width:66%;max-width:none;opacity:.2;top:-8px}
+  .painhead{max-width:100%}
   .pains{gap:13px}
   .pn{padding:20px 18px;gap:13px;border-radius:16px}
   .pn .e{font-size:27px}
@@ -285,8 +296,10 @@ h2 b{font-weight:700;color:var(--navy)}
   .step .no{width:46px;height:46px;font-size:20px;margin-bottom:11px}
   .step h3{font-size:17px} .step p{font-size:15px}
   .tl div span{font-size:17px}
-  .team{grid-template-columns:1fr;gap:24px;padding:22px;border-radius:22px}
-  .tphoto{aspect-ratio:4/3.4;border-radius:18px}
+  .team{grid-template-columns:1fr;gap:22px;padding:20px;border-radius:22px}
+  .tphotos{gap:9px}
+  .tphoto{aspect-ratio:3/4;border-radius:16px}
+  .tbadge{font-size:13.5px;padding:6px 13px;left:10px;bottom:10px}
   .quote{font-size:19px;padding-left:14px}
   .tfacts b{font-size:16.5px} .tfacts span{font-size:15px}
   .licbtn{width:100%;justify-content:center}
@@ -356,8 +369,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <!-- 2. PAIN (ขยี้) -->
-<section><div class="wrap">
-  <div class="mid">
+<section class="painsec">
+  <img class="ownerbg" src="/lp/owner.jpg" alt="" aria-hidden="true">
+  <div class="wrap">
+  <div class="painhead">
     <div class="kicker rv">เคยเป็นแบบนี้ไหม?</div>
     <h2 class="rv">ไปญี่ปุ่นมาแล้ว…<br>แต่<b>รู้สึกยังไม่ได้เที่ยวจริงๆ</b></h2>
     <p class="sub rv">ถ้าอ่านแล้วพยักหน้าตาม แปลว่าคุณมาถูกที่แล้ว</p>
@@ -452,9 +467,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <p class="sub rv">บริษัทจดทะเบียนถูกต้อง มีใบอนุญาตนำเที่ยว มีออฟฟิศจริง โอนเงินแล้วไม่หาย</p></div>
 
   <div class="team rv">
-    <div class="tphoto" id="ownerWrap">
-      <img id="ownerImg" src="/lp/owner.jpg" alt="ผู้ก่อตั้ง WeCraft Travel">
-      <span class="tbadge">ผู้ก่อตั้ง</span>
+    <div class="tphotos">
+      <div class="tphoto" id="teamWrap">
+        <img id="teamImg" src="/lp/team.jpg" alt="ทีมงาน WeCraft Travel">
+        <span class="tbadge">ทีมงานของเรา</span>
+      </div>
     </div>
     <div class="tinfo">
       <div class="quote">“ผมเดินทางเองมาแล้วทั่วโลก เลยรู้ว่าทริปที่ดีต้องเป็นยังไง<br>
@@ -623,15 +640,18 @@ if (cEl) {
   } catch {}
 })();
 
-/* ยังไม่ได้อัปรูปผู้ก่อตั้ง → ซ่อนช่องรูปไว้ก่อน (หน้าไม่พัง) */
-(function(){
-  const img = document.getElementById('ownerImg'), wrap = document.getElementById('ownerWrap');
-  if (!img) return;
-  img.addEventListener('error', () => {
+/* รูปไหนโหลดไม่ได้ → ซ่อนเฉพาะรูปนั้น (หน้าไม่พัง) */
+[['teamImg','teamWrap']].forEach(([i,w]) => {
+  const img = document.getElementById(i), wrap = document.getElementById(w);
+  img?.addEventListener('error', () => {
     if (wrap) wrap.style.display = 'none';
-    const t = document.querySelector('.team'); if (t) t.style.gridTemplateColumns = '1fr';
+    const ps = document.querySelector('.tphotos');
+    if (ps && !ps.querySelector('.tphoto:not([style*="none"])')) {
+      ps.style.display = 'none';
+      const t = document.querySelector('.team'); if (t) t.style.gridTemplateColumns = '1fr';
+    } else if (ps) ps.style.gridTemplateColumns = '1fr';
   });
-})();
+});
 
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-cta]'); if (!el) return;
