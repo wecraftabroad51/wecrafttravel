@@ -17,170 +17,141 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <link rel="icon" href="/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --cream:#FFFBF7; --white:#FFFFFF;
-  --peach:#FFE8DE; --mint:#DFF6EF; --sky:#E3F0FF; --lav:#EEE9FF; --lemon:#FFF6D9;
-  --coral:#FF6B4A; --coral-d:#F04E28;
-  --ink:#2E3244; --ink-2:#5C6478; --line:#F0E6DE;
-  --green:#06C755;
+  --bg:#FFFFFF; --soft:#FBF7F3; --peach:#FFEFE6; --mint:#E7F6F1; --sky:#EAF3FF; --lemon:#FFF7E0;
+  --ink:#1E2333; --ink2:#6B7385; --line:#EFEAE4;
+  --coral:#FF6B4A; --coral-d:#EF4B22; --green:#06C755;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
-body{background:var(--cream);color:var(--ink);font-family:'Prompt',-apple-system,sans-serif;
-  font-weight:300;font-size:17px;line-height:1.75;overflow-x:hidden;-webkit-font-smoothing:antialiased}
-h1,h2,h3{font-weight:500;line-height:1.3;letter-spacing:-.005em}
-strong,b{font-weight:600}
+body{background:var(--bg);color:var(--ink);font-family:'Prompt',-apple-system,sans-serif;
+  font-weight:300;font-size:19px;line-height:1.8;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-weight:500;line-height:1.25;letter-spacing:-.015em}
+b,strong{font-weight:600}
 img{max-width:100%;display:block}
 a{text-decoration:none;color:inherit}
-.wrap{max-width:1060px;margin:0 auto;padding:0 22px}
+.wrap{max-width:1140px;margin:0 auto;padding:0 24px}
 
-/* ═══ HEADER ═══ */
-.hd{position:sticky;top:0;z-index:60;background:rgba(255,251,247,.92);backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--line)}
-.hd .in{display:flex;align-items:center;gap:11px;padding:11px 22px;max-width:1060px;margin:0 auto}
-.hd img{width:40px;height:40px;object-fit:contain}
-.hd .nm{font-weight:600;font-size:15.5px;line-height:1.3}
-.hd .lic{font-size:11.5px;color:var(--ink-2);font-weight:300}
-.hd .tel{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--coral);color:#fff;
-  padding:11px 22px;border-radius:99px;font-weight:600;font-size:16px;
-  box-shadow:0 6px 18px rgba(255,107,74,.36)}
+/* ── HEADER ── */
+.hd{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.9);backdrop-filter:blur(14px)}
+.hd .in{display:flex;align-items:center;gap:12px;padding:14px 24px;max-width:1140px;margin:0 auto}
+.hd img{width:42px;height:42px;object-fit:contain}
+.hd .nm{font-weight:500;font-size:17px;line-height:1.25}
+.hd .lic{font-size:12.5px;color:var(--ink2)}
+.hd .tel{margin-left:auto;display:flex;align-items:center;gap:9px;background:var(--ink);color:#fff;
+  padding:12px 24px;border-radius:99px;font-weight:500;font-size:17px}
 
-/* ═══ HERO ═══ */
-.hero{padding:46px 0 54px;background:
-  radial-gradient(900px 460px at 88% -8%,var(--peach),transparent 62%),
-  radial-gradient(760px 420px at 6% 8%,var(--sky),transparent 60%),
-  radial-gradient(700px 400px at 50% 108%,var(--mint),transparent 62%);}
-.hero .in{display:grid;grid-template-columns:1.08fr .92fr;gap:44px;align-items:center}
-.eyebrow{display:inline-flex;align-items:center;gap:7px;background:var(--white);border:1px solid var(--line);
-  color:var(--coral-d);padding:7px 17px;border-radius:99px;font-size:14.5px;font-weight:500;
-  margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-h1{font-size:clamp(31px,4.9vw,50px);font-weight:500;margin-bottom:18px;max-width:12.5em}
-h1 em{font-style:normal;font-weight:700;color:var(--coral-d);
-  background:linear-gradient(180deg,transparent 62%,var(--lemon) 62%);padding:0 4px}
-.lead{font-size:18.5px;color:var(--ink-2);margin-bottom:26px;max-width:29em}
-.ticks{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:30px}
-.tick{background:var(--white);border:1px solid var(--line);padding:9px 16px;border-radius:99px;
-  font-size:15px;box-shadow:0 2px 7px rgba(0,0,0,.035)}
-.tick b{color:var(--coral-d)}
-
-/* ═══ BUTTONS ═══ */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:none;cursor:pointer;
-  font-family:inherit;font-weight:600;border-radius:16px;padding:18px 34px;font-size:19.5px;transition:.2s}
-.btn-call{background:var(--coral);color:#fff;box-shadow:0 12px 30px rgba(255,107,74,.4);position:relative}
-.btn-call::after{content:'';position:absolute;inset:-4px;border-radius:20px;border:2px solid var(--coral);
-  opacity:.55;animation:ring 2s ease-out infinite}
-@keyframes ring{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.13);opacity:0}}
+/* ── HERO ── */
+.hero{padding:60px 0 84px}
+.hero .in{display:grid;grid-template-columns:1.02fr .98fr;gap:60px;align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;background:var(--peach);color:var(--coral-d);
+  padding:9px 20px;border-radius:99px;font-size:16px;font-weight:500;margin-bottom:26px}
+h1{font-size:clamp(38px,5.6vw,66px);font-weight:500;margin-bottom:24px}
+h1 em{font-style:normal;font-weight:600;color:var(--coral-d)}
+.lead{font-size:21px;color:var(--ink2);margin-bottom:38px;max-width:24em}
+.ctas{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:11px;border:none;cursor:pointer;
+  font-family:inherit;font-weight:500;border-radius:99px;padding:20px 40px;font-size:21px;transition:.2s}
+.btn-call{background:var(--coral);color:#fff;box-shadow:0 16px 38px rgba(255,107,74,.36)}
 .btn-call:hover{background:var(--coral-d);transform:translateY(-2px)}
-.btn-line{background:var(--green);color:#fff;box-shadow:0 12px 30px rgba(6,199,85,.3)}
-.btn-line:hover{transform:translateY(-2px)}
-.ctas{display:flex;gap:13px;flex-wrap:wrap;align-items:center}
-.note{font-size:14.5px;color:var(--ink-2);margin-top:13px}
+.btn-line{background:#fff;color:var(--ink);border:1.5px solid var(--line);font-weight:500}
+.btn-line:hover{border-color:var(--green);color:var(--green)}
+.note{font-size:16px;color:var(--ink2);margin-top:20px}
 
-/* ═══ PRICE CARD ═══ */
-.pcard{background:var(--white);border:1px solid var(--line);border-radius:26px;padding:30px 28px;
-  text-align:center;box-shadow:0 18px 46px rgba(120,90,70,.13)}
-.pcard .cap{font-size:15px;color:var(--ink-2)}
-.pcard .p{font-size:clamp(46px,8.5vw,58px);font-weight:700;color:var(--coral-d);line-height:1.1;margin:4px 0 2px}
-.pcard .u{font-size:15.5px;color:var(--ink-2);margin-bottom:20px}
-.pcard .r{display:flex;justify-content:space-between;align-items:center;font-size:15.5px;
-  padding:11px 0;border-top:1px solid var(--line)}
-.pcard .r b{font-weight:600;color:var(--ink)}
-.pcard .hint{margin-top:18px;font-size:14px;color:var(--ink-2);background:var(--lemon);
-  border-radius:11px;padding:9px 12px}
+/* hero photo */
+.shot{position:relative}
+.shot .main{border-radius:34px;overflow:hidden;aspect-ratio:4/4.4;background:var(--soft);
+  box-shadow:0 30px 70px rgba(60,40,30,.16)}
+.shot .main img{width:100%;height:100%;object-fit:cover}
+.float{position:absolute;background:#fff;border-radius:22px;padding:16px 20px;
+  box-shadow:0 18px 44px rgba(60,40,30,.17);display:flex;align-items:center;gap:13px}
+.float.a{left:-26px;top:38px}
+.float.b{right:-22px;bottom:44px;flex-direction:column;align-items:flex-start;gap:2px}
+.float .ic{width:46px;height:46px;border-radius:14px;background:var(--mint);display:flex;
+  align-items:center;justify-content:center;font-size:22px}
+.float .k{font-size:14.5px;color:var(--ink2);line-height:1.4}
+.float .v{font-size:19px;font-weight:600;line-height:1.3}
+.float.b .v{font-size:30px;color:var(--coral-d)}
 
-/* ═══ SECTIONS ═══ */
-section{padding:62px 0}
-.tone-a{background:var(--white)}
-.tone-b{background:linear-gradient(180deg,var(--sky),var(--cream))}
-.tone-c{background:linear-gradient(180deg,var(--mint),var(--cream))}
-.kicker{font-size:15px;font-weight:600;color:var(--coral-d);margin-bottom:8px}
-h2{font-size:clamp(26px,4vw,38px);font-weight:500;margin-bottom:14px}
-h2 b{font-weight:700}
-.sub{color:var(--ink-2);font-size:18px;margin-bottom:36px;max-width:34em}
-.center{text-align:center}
-.center .sub{margin-left:auto;margin-right:auto}
+/* ── SECTIONS ── */
+section{padding:88px 0}
+.tone{background:var(--soft)}
+.kicker{font-size:17px;font-weight:500;color:var(--coral-d);margin-bottom:12px}
+h2{font-size:clamp(30px,4.4vw,48px);font-weight:500;margin-bottom:18px}
+h2 b{font-weight:600}
+.sub{color:var(--ink2);font-size:20px;margin-bottom:52px;max-width:32em}
+.mid{text-align:center}
+.mid .sub{margin-left:auto;margin-right:auto}
 
-.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
-.pain{background:var(--white);border:1px solid var(--line);border-left:4px solid #FFB4A2;
-  border-radius:16px;padding:22px 20px}
-.pain .e{font-size:30px;margin-bottom:7px}
-.pain b{display:block;font-size:18.5px;font-weight:600;margin-bottom:4px}
-.pain span{color:var(--ink-2);font-size:16px}
-.sol{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:28px 24px;transition:.2s}
-.sol:hover{transform:translateY(-5px);box-shadow:0 16px 38px rgba(120,90,70,.14)}
-.sol .e{width:58px;height:58px;border-radius:17px;display:flex;align-items:center;justify-content:center;
-  font-size:29px;margin-bottom:13px}
-.sol:nth-child(1) .e{background:var(--peach)} .sol:nth-child(2) .e{background:var(--mint)}
-.sol:nth-child(3) .e{background:var(--sky)}   .sol:nth-child(4) .e{background:var(--lav)}
-.sol b{display:block;font-size:19.5px;font-weight:600;margin-bottom:6px}
-.sol span{color:var(--ink-2);font-size:16px}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:26px}
+.item .ic{width:66px;height:66px;border-radius:20px;display:flex;align-items:center;
+  justify-content:center;font-size:30px;margin-bottom:18px}
+.item:nth-child(1) .ic{background:var(--peach)} .item:nth-child(2) .ic{background:var(--mint)}
+.item:nth-child(3) .ic{background:var(--sky)}   .item:nth-child(4) .ic{background:var(--lemon)}
+.item h3{font-size:22px;margin-bottom:8px}
+.item p{color:var(--ink2);font-size:18px}
 
-/* ═══ TOURS ═══ */
-.tours{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:20px}
-.tcard{background:var(--white);border:1px solid var(--line);border-radius:20px;overflow:hidden;
-  display:flex;flex-direction:column;transition:.2s;box-shadow:0 4px 16px rgba(120,90,70,.07)}
-.tcard:hover{transform:translateY(-6px);box-shadow:0 20px 44px rgba(120,90,70,.17)}
-.tcard .ph{aspect-ratio:16/10;background:var(--peach);position:relative;overflow:hidden}
-.tcard .ph img{width:100%;height:100%;object-fit:cover}
-.tcard .tag{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.94);color:var(--ink);
-  font-size:13.5px;font-weight:600;padding:5px 13px;border-radius:99px}
-.tcard .bd{padding:18px 19px 20px;display:flex;flex-direction:column;gap:10px;flex:1}
-.tcard h3{font-size:17.5px;font-weight:500;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;
-  -webkit-box-orient:vertical;overflow:hidden}
-.tcard .pr{font-size:26px;font-weight:700;color:var(--coral-d);margin-top:auto}
-.tcard .pr small{font-size:14.5px;color:var(--ink-2);font-weight:300}
-.tcard .go{background:var(--peach);color:var(--coral-d);text-align:center;padding:12px;
-  border-radius:13px;font-weight:600;font-size:16.5px}
-.skel{background:var(--white);border:1px solid var(--line);border-radius:20px;height:340px;
-  animation:sk 1.3s ease-in-out infinite}
-@keyframes sk{0%,100%{opacity:.55}50%{opacity:.9}}
+/* ── TOURS ── */
+.tours{display:grid;grid-template-columns:repeat(auto-fit,minmax(305px,1fr));gap:28px}
+.tcard{border-radius:26px;overflow:hidden;background:#fff;transition:.22s;display:flex;flex-direction:column}
+.tcard:hover{transform:translateY(-7px)}
+.tcard .ph{aspect-ratio:16/11;background:var(--soft);position:relative;border-radius:26px;overflow:hidden}
+.tcard .ph img{width:100%;height:100%;object-fit:cover;transition:.4s}
+.tcard:hover .ph img{transform:scale(1.06)}
+.tcard .tag{position:absolute;top:14px;left:14px;background:rgba(255,255,255,.95);
+  font-size:14.5px;font-weight:500;padding:7px 15px;border-radius:99px}
+.tcard .bd{padding:20px 4px 0}
+.tcard h3{font-size:20px;font-weight:400;line-height:1.55;margin-bottom:10px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tcard .pr{font-size:27px;font-weight:600;color:var(--coral-d)}
+.tcard .pr small{font-size:15.5px;color:var(--ink2);font-weight:300}
+.skel{border-radius:26px;background:var(--soft);height:360px;animation:sk 1.3s ease-in-out infinite}
+@keyframes sk{0%,100%{opacity:.6}50%{opacity:1}}
 
-/* ═══ TRUST / REVIEWS / FAQ ═══ */
-.trust{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:15px;text-align:center}
-.trust>div{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:24px 14px}
-.trust .n{font-size:27px;font-weight:700;color:var(--coral-d)}
-.trust .l{font-size:14.5px;color:var(--ink-2);margin-top:2px}
-.revs{display:grid;grid-template-columns:repeat(auto-fit,minmax(262px,1fr));gap:16px}
-.rev{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:23px}
-.rev .st{color:#FFB300;font-size:17px;letter-spacing:2px}
-.rev p{margin:10px 0;font-size:16.5px;color:var(--ink-2)}
-.rev .who{font-size:14.5px;font-weight:500}
-.faq{max-width:740px;margin:0 auto}
-.faq details{background:var(--white);border:1px solid var(--line);border-radius:16px;
-  padding:18px 22px;margin-bottom:12px}
-.faq summary{font-weight:500;font-size:18px;cursor:pointer;list-style:none;display:flex;
-  justify-content:space-between;gap:14px;align-items:center}
+/* ── STATS / REVIEWS / FAQ ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:34px;text-align:center}
+.stats .n{font-size:42px;font-weight:600;color:var(--coral-d);line-height:1.1}
+.stats .l{font-size:17px;color:var(--ink2);margin-top:6px}
+.revs{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:26px}
+.rev{background:#fff;border-radius:24px;padding:30px;box-shadow:0 10px 34px rgba(60,40,30,.07)}
+.rev .st{color:#FFB300;font-size:19px;letter-spacing:3px}
+.rev p{margin:14px 0;font-size:18.5px;color:var(--ink2)}
+.rev .who{font-size:16px;font-weight:500}
+.faq{max-width:800px;margin:0 auto}
+.faq details{border-bottom:1px solid var(--line);padding:26px 4px}
+.faq summary{font-weight:400;font-size:21px;cursor:pointer;list-style:none;display:flex;
+  justify-content:space-between;gap:18px;align-items:center}
 .faq summary::-webkit-details-marker{display:none}
-.faq summary::after{content:'+';color:var(--coral);font-size:26px;font-weight:300;line-height:1}
+.faq summary::after{content:'+';color:var(--coral);font-size:30px;font-weight:300;line-height:1}
 .faq details[open] summary::after{content:'−'}
-.faq p{color:var(--ink-2);margin-top:12px;font-size:16.5px}
+.faq p{color:var(--ink2);margin-top:14px;font-size:18.5px}
 
-/* ═══ FINAL ═══ */
-.final{background:linear-gradient(135deg,var(--peach),var(--lemon) 55%,var(--mint));
-  border-radius:30px;padding:54px 28px;text-align:center;box-shadow:0 20px 54px rgba(120,90,70,.15)}
-.final h2{margin-bottom:10px}
-.final p{color:var(--ink-2);font-size:18px;margin-bottom:28px}
-.foot{text-align:center;color:var(--ink-2);font-size:14.5px;padding:34px 22px 118px;line-height:1.95}
+/* ── FINAL ── */
+.final{background:var(--peach);border-radius:40px;padding:76px 32px;text-align:center}
+.final h2{margin-bottom:14px}
+.final p{color:var(--ink2);font-size:20px;margin-bottom:38px}
+.foot{text-align:center;color:var(--ink2);font-size:16px;padding:50px 24px 130px;line-height:2}
 
-/* ═══ STICKY CALL BAR ═══ */
-.bar{position:fixed;left:0;right:0;bottom:0;z-index:70;display:flex;gap:11px;padding:12px 15px;
-  background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-top:1px solid var(--line);
-  box-shadow:0 -6px 24px rgba(120,90,70,.13)}
-.bar a{display:flex;align-items:center;justify-content:center;gap:9px;padding:16px;border-radius:15px;
-  font-weight:600;font-size:18.5px}
-.bar .c{flex:1.5;background:var(--coral);color:#fff;box-shadow:0 6px 18px rgba(255,107,74,.4)}
-.bar .l{flex:1;background:var(--green);color:#fff}
+/* ── STICKY BAR ── */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:70;display:flex;gap:12px;padding:13px 16px;
+  background:rgba(255,255,255,.97);backdrop-filter:blur(14px);box-shadow:0 -8px 30px rgba(60,40,30,.1)}
+.bar a{display:flex;align-items:center;justify-content:center;gap:10px;padding:18px;border-radius:99px;
+  font-weight:500;font-size:20px}
+.bar .c{flex:1.6;background:var(--coral);color:#fff;box-shadow:0 8px 22px rgba(255,107,74,.38)}
+.bar .l{flex:1;background:var(--soft);color:var(--ink)}
 
-@media(max-width:880px){
-  .hero .in{grid-template-columns:1fr;gap:30px}
-  .pcard{order:-1}
-  .hd .lic{display:none}
-  .hd .tel{padding:10px 16px;font-size:15px}
-  section{padding:46px 0}
-  h1{max-width:100%}
-  body{font-size:16.5px}
+@media(max-width:900px){
+  .hero .in{grid-template-columns:1fr;gap:50px}
+  .hero{padding:40px 0 60px}
+  .shot{max-width:460px;margin:0 auto;width:100%}
+  .shot .main{aspect-ratio:4/3.6}
+  .float.a{left:-8px} .float.b{right:-8px}
+  .hd .lic{display:none} .hd .tel{padding:11px 18px;font-size:16px}
+  section{padding:60px 0}
+  body{font-size:18px}
+  .sub{margin-bottom:38px}
 }
 </style>
 </head>
@@ -194,18 +165,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <a class="tel" href="tel:0618686889" data-cta="top-call">📞 061-868-6889</a>
 </div></header>
 
-<!-- ═══ HERO ═══ -->
+<!-- HERO -->
 <div class="hero"><div class="wrap in">
   <div>
     <span class="eyebrow">🇯🇵 ทัวร์ญี่ปุ่นยอดนิยม</span>
-    <h1>เที่ยวญี่ปุ่นครบ แถม<em>มีวันเป็นของตัวเอง</em></h1>
-    <p class="lead">ไกด์คนไทยพาเที่ยววันหลัก · เหลืออีกวันให้คุณไปช้อป ไปคาเฟ่ ไปตามรอยอนิเมะ ได้ตามใจ</p>
-    <div class="ticks">
-      <span class="tick">✓ ไกด์คนไทย <b>ตลอดทริป</b></span>
-      <span class="tick">✓ <b>วันอิสระ</b> เต็มวัน</span>
-      <span class="tick">✓ ที่พัก <b>ใกล้สถานี</b></span>
-      <span class="tick">✓ <b>ผ่อน 0%</b></span>
-    </div>
+    <h1>เที่ยวญี่ปุ่นครบ<br>แถม<em>มีวันของตัวเอง</em></h1>
+    <p class="lead">ไกด์คนไทยพาเที่ยววันหลัก เหลืออีกวันให้คุณไปช้อป ไปคาเฟ่ ตามใจ</p>
     <div class="ctas">
       <a class="btn btn-call" href="tel:0618686889" data-cta="hero-call">📞 โทรปรึกษาฟรี</a>
       <a class="btn btn-line" href="https://line.me/R/ti/p/@wecrafttravel" target="_blank" rel="noopener" data-cta="hero-line">💬 ทักไลน์</a>
@@ -213,73 +178,73 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="note">โทรฟรี ไม่มีค่าใช้จ่าย · จันทร์–เสาร์ 09:00–18:00 น.</div>
   </div>
 
-  <div class="pcard">
-    <div class="cap">ราคาเริ่มต้นเพียง</div>
-    <div class="p" id="fromPrice">16,990</div>
-    <div class="u">บาท / ท่าน</div>
-    <div class="r"><span>โปรแกรมให้เลือก</span><b id="cntTours">100+</b></div>
-    <div class="r"><span>รวมตั๋ว + ที่พัก + อาหาร</span><b>ครบ ✓</b></div>
-    <div class="r"><span>มัดจำเริ่มต้น</span><b>5,000 ฿</b></div>
-    <div class="hint">💡 ราคารวมครบ ไม่มีบวกเพิ่มหน้างาน</div>
+  <div class="shot">
+    <div class="main"><img id="heroImg" src="/hero-banner-1.jpg" alt="ทัวร์ญี่ปุ่น"></div>
+    <div class="float a">
+      <div class="ic">🗓️</div>
+      <div><div class="k">มีวันอิสระ</div><div class="v">เต็มวัน</div></div>
+    </div>
+    <div class="float b">
+      <div class="k">เริ่มต้นเพียง</div>
+      <div class="v" id="fromPrice">16,990฿</div>
+    </div>
   </div>
 </div></div>
 
-<!-- ═══ PAIN ═══ -->
-<section class="tone-a"><div class="wrap">
+<!-- PAIN -->
+<section class="tone"><div class="wrap">
   <div class="kicker">ปัญหาที่เจอบ่อย</div>
-  <h2>ไปญี่ปุ่นทั้งที… แต่<b>ไม่ได้ไปที่อยากไป</b></h2>
+  <h2>ไปญี่ปุ่นทั้งที<br>แต่<b>ไม่ได้ไปที่อยากไป</b></h2>
   <p class="sub">หลายคนกลับมาแล้วเสียดาย เพราะตารางแน่นจนไม่มีเวลาเป็นของตัวเองเลยสักวัน</p>
-  <div class="g3">
-    <div class="pain"><div class="e">⏱️</div><b>ตารางแน่นทั้งทริป</b><span>ต้องขึ้นรถตามกรุ๊ปตลอด ไม่มีเวลาเดินเล่น</span></div>
-    <div class="pain"><div class="e">🛍️</div><b>ช้อปไม่ทันใจ</b><span>เพิ่งเจอของถูกใจ ก็ถึงเวลาต้องไปต่อ</span></div>
-    <div class="pain"><div class="e">🚉</div><b>เที่ยวเองก็กลัวหลง</b><span>อ่านป้ายรถไฟไม่ออก พูดญี่ปุ่นไม่ได้</span></div>
-    <div class="pain"><div class="e">💸</div><b>กลัวโดนบวกเพิ่ม</b><span>ราคาโฆษณาถูก แต่จ่ายจริงบานปลาย</span></div>
+  <div class="g">
+    <div class="item"><div class="ic">⏱️</div><h3>ตารางแน่นทั้งทริป</h3><p>ต้องขึ้นรถตามกรุ๊ปตลอด ไม่มีเวลาเดินเล่น</p></div>
+    <div class="item"><div class="ic">🛍️</div><h3>ช้อปไม่ทันใจ</h3><p>เพิ่งเจอของถูกใจ ก็ถึงเวลาต้องไปต่อ</p></div>
+    <div class="item"><div class="ic">🚉</div><h3>เที่ยวเองกลัวหลง</h3><p>อ่านป้ายรถไฟไม่ออก พูดญี่ปุ่นไม่ได้</p></div>
+    <div class="item"><div class="ic">💸</div><h3>กลัวโดนบวกเพิ่ม</h3><p>ราคาโฆษณาถูก แต่จ่ายจริงบานปลาย</p></div>
   </div>
 </div></section>
 
-<!-- ═══ SOLUTION ═══ -->
-<section class="tone-b"><div class="wrap">
+<!-- SOLUTION -->
+<section><div class="wrap">
   <div class="kicker">ทางออกของเรา</div>
-  <h2>ได้ทั้ง<b>ความสะดวก</b> และ<b>อิสระ</b> ในทริปเดียว</h2>
-  <div class="g3">
-    <div class="sol"><div class="e">🗼</div><b>วันหลักมีไกด์พา</b><span>เที่ยวจุดไฮไลต์ครบ ไม่ต้องวางแผนเอง ไม่พลาดที่สำคัญ</span></div>
-    <div class="sol"><div class="e">🎌</div><b>วันอิสระเต็มวัน</b><span>ชิบูย่า อากิฮาบาระ ดิสนีย์ ยูนิเวอร์แซล ไปได้ตามใจ</span></div>
-    <div class="sol"><div class="e">🚄</div><b>สอนใช้รถไฟให้</b><span>ไกด์แนะนำเส้นทางและแอป ไปเองได้อย่างมั่นใจ</span></div>
-    <div class="sol"><div class="e">💯</div><b>ราคาบอกครบ</b><span>ตั๋ว ที่พัก อาหาร รถ ไกด์ ครบในราคาเดียว</span></div>
+  <h2>ได้ทั้ง<b>ความสะดวก</b> และ<b>อิสระ</b><br>ในทริปเดียว</h2>
+  <div class="g" style="margin-top:14px">
+    <div class="item"><div class="ic">🗼</div><h3>วันหลักมีไกด์พา</h3><p>เที่ยวจุดไฮไลต์ครบ ไม่ต้องวางแผนเอง</p></div>
+    <div class="item"><div class="ic">🎌</div><h3>วันอิสระเต็มวัน</h3><p>ชิบูย่า ดิสนีย์ ยูนิเวอร์แซล ไปได้ตามใจ</p></div>
+    <div class="item"><div class="ic">🚄</div><h3>สอนใช้รถไฟให้</h3><p>ไกด์แนะนำเส้นทางและแอป ไปเองมั่นใจ</p></div>
+    <div class="item"><div class="ic">💯</div><h3>ราคาบอกครบ</h3><p>ตั๋ว ที่พัก อาหาร รถ ไกด์ ในราคาเดียว</p></div>
   </div>
 </div></section>
 
-<!-- ═══ TOURS ═══ -->
-<section class="tone-a"><div class="wrap">
+<!-- TOURS -->
+<section class="tone"><div class="wrap">
   <div class="kicker">โปรแกรมแนะนำ</div>
   <h2>เลือกทริปที่<b>ใช่</b>สำหรับคุณ</h2>
   <p class="sub">ราคาอัปเดตล่าสุดวันนี้ · ที่นั่งมีจำกัดในแต่ละรอบ</p>
   <div class="tours" id="tours"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
-  <div class="center" style="margin-top:32px">
+  <div class="mid" style="margin-top:52px">
     <a class="btn btn-call" href="tel:0618686889" data-cta="mid-call">📞 โทรถามโปรแกรมที่ใช่</a>
   </div>
 </div></section>
 
-<!-- ═══ TRUST ═══ -->
-<section class="tone-c"><div class="wrap">
-  <div class="kicker">ทำไมต้องเรา</div>
-  <h2>บริษัททัวร์ที่มี<b>ใบอนุญาตถูกต้อง</b></h2>
-  <div class="trust">
+<!-- STATS + REVIEWS -->
+<section><div class="wrap">
+  <div class="stats">
     <div><div class="n">11/11550</div><div class="l">ใบอนุญาต ททท.</div></div>
-    <div><div class="n">est. 2017</div><div class="l">ประสบการณ์ 8 ปี</div></div>
+    <div><div class="n">8 ปี</div><div class="l">ประสบการณ์</div></div>
     <div><div class="n">50,000+</div><div class="l">ลูกค้าไว้วางใจ</div></div>
-    <div><div class="n">4.9 ★</div><div class="l">คะแนนรีวิว</div></div>
+    <div><div class="n">4.9★</div><div class="l">คะแนนรีวิว</div></div>
   </div>
-  <div class="revs" style="margin-top:24px">
-    <div class="rev"><div class="st">★★★★★</div><p>“วันอิสระคุ้มมาก ได้ไปดิสนีย์เต็มวัน ไกด์ใจดีสอนขึ้นรถไฟให้ด้วย”</p><div class="who">— คุณนภัสสร</div></div>
-    <div class="rev"><div class="st">★★★★★</div><p>“พาพ่อแม่ไป ท่านชอบมาก ไม่ต้องเดินเยอะ ไม่โดนพาเข้าร้าน”</p><div class="who">— คุณธนพล</div></div>
-    <div class="rev"><div class="st">★★★★★</div><p>“ราคาตรงตามที่แจ้ง ไม่มีบวกเพิ่มเลย ประทับใจครับ”</p><div class="who">— คุณวิทวัส</div></div>
+  <div class="revs" style="margin-top:64px">
+    <div class="rev"><div class="st">★★★★★</div><p>“วันอิสระคุ้มมาก ได้ไปดิสนีย์เต็มวัน ไกด์ใจดีสอนขึ้นรถไฟให้ด้วย”</p><div class="who">คุณนภัสสร</div></div>
+    <div class="rev"><div class="st">★★★★★</div><p>“พาพ่อแม่ไป ท่านชอบมาก ไม่ต้องเดินเยอะ ไม่โดนพาเข้าร้าน”</p><div class="who">คุณธนพล</div></div>
+    <div class="rev"><div class="st">★★★★★</div><p>“ราคาตรงตามที่แจ้ง ไม่มีบวกเพิ่มเลย ประทับใจครับ”</p><div class="who">คุณวิทวัส</div></div>
   </div>
 </div></section>
 
-<!-- ═══ FAQ ═══ -->
-<section class="tone-a"><div class="wrap faq">
-  <div class="center"><div class="kicker">คำถามที่พบบ่อย</div><h2 style="margin-bottom:30px">อยากรู้อะไร <b>ถามได้เลย</b></h2></div>
+<!-- FAQ -->
+<section class="tone"><div class="wrap faq">
+  <div class="mid"><div class="kicker">คำถามที่พบบ่อย</div><h2 style="margin-bottom:44px">อยากรู้อะไร <b>ถามได้เลย</b></h2></div>
   <details open><summary>วันอิสระต้องเที่ยวเองคนเดียวไหม?</summary><p>ไม่ต้องกังวลครับ ไกด์จะแนะนำเส้นทาง แผนที่ และแอปที่ใช้ให้ก่อนวันอิสระ พร้อมให้เบอร์ติดต่อไว้ตลอด มีปัญหาโทรหาได้ทันที</p></details>
   <details><summary>ราคานี้รวมอะไรบ้าง?</summary><p>รวมตั๋วเครื่องบินไป-กลับ ที่พัก อาหารตามรายการ รถนำเที่ยว ไกด์คนไทย และประกันการเดินทาง — บอกครบตั้งแต่แรก ไม่มีบวกเพิ่มหน้างาน</p></details>
   <details><summary>ต้องขอวีซ่าไหม?</summary><p>คนไทยเข้าญี่ปุ่นเพื่อการท่องเที่ยว <b>ไม่ต้องขอวีซ่า</b> พำนักได้ไม่เกิน 15 วัน ใช้เพียงพาสปอร์ตที่มีอายุเหลือมากกว่า 6 เดือน</p></details>
@@ -287,9 +252,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <details><summary>ไปเป็นครอบครัว/ผู้สูงอายุ ไหวไหม?</summary><p>มีโปรแกรมที่เดินน้อยและไม่เร่งให้เลือกครับ แจ้งเราได้เลยว่าไปกี่ท่าน มีผู้สูงอายุหรือเด็กเล็กไหม เดี๋ยวแนะนำทริปที่เหมาะที่สุดให้</p></details>
 </div></section>
 
-<!-- ═══ FINAL ═══ -->
+<!-- FINAL -->
 <section style="padding-top:0"><div class="wrap"><div class="final">
-  <h2>ยังไม่แน่ใจว่าทริปไหนเหมาะ? <b>โทรถามเราได้</b></h2>
+  <h2>ยังไม่แน่ใจว่าทริปไหนเหมาะ?</h2>
   <p>ทีมงานช่วยเลือกโปรแกรมที่ใช่ให้ฟรี ไม่มีค่าใช้จ่าย ไม่กดดัน</p>
   <div class="ctas" style="justify-content:center">
     <a class="btn btn-call" href="tel:0618686889" data-cta="final-call">📞 โทร 061-868-6889</a>
@@ -308,7 +273,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <script>
-const baht = n => '฿' + (Number(n)||0).toLocaleString('en-US');
+const baht = n => (Number(n)||0).toLocaleString('en-US');
 const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
 const FREE = /อิสระ|ฟรี\s*เดย?|free\s*day|free\s*&?\s*easy/i;
 (async () => {
@@ -320,8 +285,10 @@ const FREE = /อิสระ|ฟรี\s*เดย?|free\s*day|free\s*&?\s*easy
     if (free.length >= 3) list = free;
     list.sort((a,b)=>a.price-b.price);
     if (list.length) {
-      document.getElementById('fromPrice').textContent = Number(list[0].price).toLocaleString('en-US');
-      document.getElementById('cntTours').textContent = list.length + '+';
+      document.getElementById('fromPrice').textContent = baht(list[0].price) + '฿';
+      const hero = document.getElementById('heroImg');
+      const big = list.find(t => t.image);
+      if (big) hero.src = big.image;
     }
     box.innerHTML = list.slice(0,6).map(t => `
       <a class="tcard" href="/tours?country=JP" data-cta="tour-card">
@@ -329,11 +296,10 @@ const FREE = /อิสระ|ฟรี\s*เดย?|free\s*day|free\s*&?\s*easy
           ${t.days?`<span class="tag">${t.days} วัน</span>`:''}</div>
         <div class="bd">
           <h3>${esc(t.name)}</h3>
-          <div class="pr">${baht(t.price)} <small>/ ท่าน</small></div>
-          <div class="go">ดูรายละเอียด →</div>
+          <div class="pr">฿${baht(t.price)} <small>/ ท่าน</small></div>
         </div>
-      </a>`).join('') || '<div style="color:#5C6478">โทรสอบถามโปรแกรมล่าสุดได้เลยครับ</div>';
-  } catch { box.innerHTML = '<div style="color:#5C6478">โทรสอบถามโปรแกรมล่าสุด 061-868-6889</div>'; }
+      </a>`).join('') || '<div style="color:#6B7385">โทรสอบถามโปรแกรมล่าสุดได้เลยครับ</div>';
+  } catch { box.innerHTML = '<div style="color:#6B7385">โทรสอบถามโปรแกรมล่าสุด 061-868-6889</div>'; }
 })();
 
 document.addEventListener('click', e => {
