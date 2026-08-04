@@ -23,6 +23,7 @@ import CompareBar from './components/CompareBar.jsx';
 import HomePage from './components/pages/HomePage.jsx';
 import ToursPage from './components/pages/ToursPage.jsx';
 import TourDetailPage from './components/pages/TourDetailPage.jsx';
+import LandingPage from './components/pages/LandingPage.jsx';
 import GalleryPage from './components/pages/GalleryPage.jsx';
 import ArticlesPage from './components/pages/ArticlesPage.jsx';
 import ArticleDetailPage from './components/pages/ArticleDetailPage.jsx';
@@ -80,6 +81,11 @@ function ToursRoute(props) {
 function TourDetailRoute(props) {
   const { id } = useParams();
   return <TourDetailPage {...props} tourId={decTourId(id)} />;
+}
+
+function LandingRoute(props) {
+  const { slug } = useParams();
+  return <LandingPage {...props} slug={slug} />;
 }
 
 function ArticleDetailRoute(props) {
@@ -401,7 +407,7 @@ function AppInner() {
     const p = window.location.pathname;
     const inLine = /Line\//i.test(navigator.userAgent) || window.location.search.includes('liff');
     // เปิดตรงได้ทุกหน้าเนื้อหา + หน้าจอง (รวม sub-path เช่น /tours/:id, /articles/:id)
-    const DIRECT_OK = ['/tours', '/gallery', '/articles', '/promotions', '/faq', '/contact',
+    const DIRECT_OK = ['/lp', '/tours', '/gallery', '/articles', '/promotions', '/faq', '/contact',
       '/group-quote', '/about', '/visa', '/ticket-booking', '/car-rental', '/hotel-booking',
       '/cards', '/privacy', '/terms', '/booking-terms'];
     const okDirect = DIRECT_OK.some(base => p === base || p.startsWith(base + '/'));
@@ -820,6 +826,7 @@ function AppInner() {
           <Route path="/"            element={<HomePage {...pageProps} />} />
           <Route path="/tours"       element={<ToursRoute {...pageProps} />} />
           <Route path="/tours/:id"   element={<TourDetailRoute {...pageProps} />} />
+          <Route path="/lp/:slug"    element={<LandingRoute {...pageProps} />} />
           <Route path="/gallery"     element={<GalleryPage {...pageProps} />} />
           <Route path="/articles"    element={<ArticlesPage {...pageProps} />} />
           <Route path="/articles/:id" element={<ArticleDetailRoute {...pageProps} />} />
