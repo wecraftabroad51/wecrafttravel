@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   BrowserRouter, Routes, Route, Navigate,
   useNavigate, useParams, useSearchParams, useLocation, useNavigationType,
@@ -350,7 +350,10 @@ function AppInner() {
 
   // ── Google Tag Manager: เว็บเป็น SPA เปลี่ยนหน้าไม่ได้โหลดใหม่ ──
   // ต้องส่ง virtual pageview เองทุกครั้งที่เปลี่ยนหน้า ไม่งั้น GTM/GA นับได้แค่หน้าแรก
+  // ข้ามครั้งแรก — หน้าแรกถูกนับโดย Google Tag อยู่แล้ว (กันนับซ้ำ)
+  const firstPageView = useRef(true);
   useEffect(() => {
+    if (firstPageView.current) { firstPageView.current = false; return; }
     if (typeof window === 'undefined' || !window.dataLayer) return;
     window.dataLayer.push({
       event: 'page_view',
