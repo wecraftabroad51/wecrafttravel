@@ -423,7 +423,7 @@ export function normalizeSuperbTours(payload, source = 'superb', sourceName = 'S
       airline:     (p.Airline && p.Airline !== 'NOLOGO') ? p.Airline : (p.aeycode || ''),
       departures:  deps,
       groupSize:   deps[0]?.totalSeats || null,
-      pdfUrl:      p.pdf || null,
+      pdfUrl:      /\.pdf(\?|$)/i.test(String(p.pdf || '')) ? p.pdf : null,   // บางแถวส่ง url โฟลเดอร์มา ไม่ใช่ไฟล์
       itinerary:   [],
       _source:     source,
       _sourceName: sourceName,
