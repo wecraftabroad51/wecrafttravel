@@ -21,7 +21,9 @@ export const SUPPLIERS = [
   { id: 'best',        name: 'BEST International', enabled: true, format: 'best' },
   { id: 'superb',      name: 'Superb Holidayz', enabled: true, format: 'superb' },
   { id: 'flyde',       name: 'FLY de WORLD',    enabled: true, format: 'flyde' },
-  { id: 'formosa',     name: 'Formosa Journey', enabled: true, format: 'formosa' },
+  // ปิดชั่วคราว: ซัพยกเลิกโดเมน API (api-formosa.ht1freshdigital.com → ENOTFOUND)
+  // ถ้าได้ URL ใหม่จากซัพ แก้ host ใน api/suppliers.js แล้วเปลี่ยนเป็น enabled: true ได้เลย
+  { id: 'formosa',     name: 'Formosa Journey', enabled: false, format: 'formosa' },
 ];
 
 export const ENABLED_SUPPLIERS = SUPPLIERS.filter(s => s.enabled);
